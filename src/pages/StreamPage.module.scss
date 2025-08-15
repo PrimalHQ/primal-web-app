@@ -5,7 +5,7 @@
 }
 
 .streamingMain {
-  width: calc(100% - 376px);
+  width: calc(100% - 344px);
 
   border-right: 1px solid var(--subtile-devider);
   border-left: 1px solid var(--subtile-devider);
@@ -21,7 +21,7 @@
   align-items: center;
   margin-left: auto;
   width: 100%;
-  padding: 20px 16px 20px 24px;
+  padding: 10px 20px;
   border-bottom: 1px solid var(--subtile-devider);
 
   .branding {
@@ -47,13 +47,15 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
+      justify-content: center;
+      height: 44px;
     }
 
     .userName {
       color: var(--text-primary);
-      font-size: 16px;
+      font-size: 20px;
       font-weight: 700;
-      line-height: 16px;
+      line-height: 24px;
     }
 
     .userStats {
@@ -70,7 +72,7 @@
 
     .chatButton {
       display: flex;
-      height: 28px;
+      height: 36px;
       padding-inline: 18px;
       justify-content: center;
       align-items: center;
@@ -89,10 +91,15 @@
   }
 }
 
+.streamContent {
+  position: relative;
+}
+
 .streamInfo {
   display: flex;
   flex-direction: column;
   padding-top: 16px;
+  min-height: 228px;
 
   .title {
     overflow: hidden;
@@ -107,6 +114,7 @@
     -webkit-line-clamp: 2;
 
     padding-inline: 20px;
+    min-height: 28px;
   }
 
   .statsRibbon {
@@ -121,6 +129,8 @@
     margin-top: 5px;
     margin-bottom: 16px;
     padding-inline: 20px;
+
+    min-height: 14px;
 
     .status {
       display: flex;
@@ -140,7 +150,7 @@
 }
 
 .liveSidebar {
-  width: 376px;
+  width: 344px;
   /* height: 100dvh; */
   border-right: 1px solid var(--subtile-devider);
 
@@ -297,8 +307,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
-  height: 73px;
+  padding: 15px 16px;
   border-bottom: 1px solid var(--subtile-devider);
 
   .chatInfo {
@@ -381,6 +390,7 @@
   display: flex;
   justify-content: space-between;
   width: 100%;
+  min-height: 118px;
   padding: 16px 20px;
   border-block: 1px solid var(--subtile-devider);
 
@@ -415,7 +425,7 @@
 
     .statsLine {
       display: flex;
-      min-width: 180px;
+      /* min-width: 180px; */
       align-items: center;
       gap: 8px;
       padding-inline: 8px;
@@ -463,7 +473,7 @@
 
   .firstZapAmount {
     color: var(--text-primary);
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
     line-height: 18px;
   }
@@ -471,7 +481,7 @@
   .zapAmount {
     color: var(--text-secondary);
     font-size: 16px;
-    font-weight: 400;
+    font-weight: 600;
     line-height: 18px;
   }
 

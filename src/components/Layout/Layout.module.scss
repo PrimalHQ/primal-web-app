@@ -24,7 +24,7 @@
   margin: 0px auto;
 
   display: grid;
-  grid-template-columns: 824px var(--right-col-w);
+  grid-template-columns: 68px 756px var(--right-col-w);
 }
 
 .leftColumn {
@@ -71,9 +71,17 @@
   }
 }
 
-.noLeftCenter {
+.liveStreamLeft {
+  width: 68px;
+  height: 100vh;
+  >div {
+    border-right: none;
+  }
+}
+
+.liveStreamCenter {
   position: relative;
-  width: var(--full-site-w);
+  width: calc(var(--full-site-w) - 68px);
   min-height: 100vh;
 
   .headerFloater {

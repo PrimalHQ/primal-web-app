@@ -17,11 +17,6 @@ const LiveVideo: Component<{
   const app = useAppContext();
 
   let videoElement: HTMLVideoElement | undefined;
-  let playButton: HTMLButtonElement | undefined;
-  let progressPassed: HTMLDivElement | undefined;
-  let progressHandle: HTMLDivElement | undefined;
-  let progressFuture: HTMLDivElement | undefined;
-  let timeProgress: HTMLDivElement | undefined;
 
   createEffect(() => {
     if (videoElement?.canPlayType('application/vnd.apple.mpegurl')) {
@@ -53,13 +48,19 @@ const LiveVideo: Component<{
     );
   }
 
+  const [isMediaLoaded, setIsMediaLoaded] = createSignal(false);
+
   return (
     <div class={styles.liveVideo} >
-      <Show when={props.src}>
+      <Show when={props.src} fallback={<div class={styles.videoPlaceholder}></div>}>
+        <Show when={!isMediaLoaded()}>
+          <div class={styles.videoPlaceholder}></div>
+        </Show>
         <media-controller
           autohide="2"
           autohideovercontrols
           ref={mediaController}
+          style={!isMediaLoaded() ? 'display: none;' : ''}
         >
           <hls-video
             src={props.src}
@@ -67,6 +68,14 @@ const LiveVideo: Component<{
             crossorigin
             autoplay
             ref={hlsVideo}
+            onloadedmetadata={() => {
+              console.log('METADATA PARSED')
+                setIsMediaLoaded(true);
+              setTimeout(() => {
+
+              }, 100)
+
+            }}
             onloadstart={() => {
               const hls = hlsVideo?.api as Hls;
 

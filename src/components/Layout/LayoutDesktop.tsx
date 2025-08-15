@@ -11,6 +11,7 @@ import { SendNoteResult } from '../../types/primal';
 import Branding from '../Branding/Branding';
 import { useAppContext } from '../../contexts/AppContext';
 import NoteContextMenu from '../Note/NoteContextMenu';
+import LiveNavMenu from '../NavMenu/LiveNavMenu';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -54,33 +55,55 @@ const LayoutDesktop: Component<{
     >
       <>
         <div id="container" ref={container} class={containerClass()}>
-          <Show when={!location.pathname.includes('/live/')}>
-            <div class={styles.leftColumn}>
-              <div>
-                <div id="branding_holder" class={styles.leftHeader}>
-                  <Branding isHome={isHome()} />
-                </div>
+          <Switch>
+            <Match when={location.pathname.includes('/live/')}>
+              <div class={`${styles.leftColumn} ${styles.liveStreamLeft}`}>
+                <div>
+                  <div id="branding_holder" class={styles.leftHeader}>
+                    <Branding isHome={isHome()} small={true} />
+                  </div>
 
-                <div class={styles.leftContent}>
-                  <NavMenu />
-                  <Show when={location.pathname === '/new'}>
-                    <div class={styles.overlay}></div>
-                  </Show>
-                </div>
+                  <div class={styles.leftContent}>
+                    <LiveNavMenu />
+                  </div>
 
-                <div class={styles.leftFooter}>
-                  <Show when={location.pathname !== '/new'}>
-                    <ProfileWidget />
-                  </Show>
+                  <div class={styles.leftFooter}>
+                    <Show when={location.pathname !== '/new'}>
+                      <ProfileWidget hideName={true} />
+                    </Show>
+                  </div>
                 </div>
               </div>
-            </div>
-          </Show>
+            </Match>
+
+            <Match when={true}>
+              <div class={styles.leftColumn}>
+                <div>
+                  <div id="branding_holder" class={styles.leftHeader}>
+                    <Branding isHome={isHome()} />
+                  </div>
+
+                  <div class={styles.leftContent}>
+                    <NavMenu />
+                    <Show when={location.pathname === '/new'}>
+                      <div class={styles.overlay}></div>
+                    </Show>
+                  </div>
+
+                  <div class={styles.leftFooter}>
+                    <Show when={location.pathname !== '/new'}>
+                      <ProfileWidget />
+                    </Show>
+                  </div>
+                </div>
+              </div>
+            </Match>
+          </Switch>
 
             <Show when={account?.isKeyLookupDone}>
               <Switch>
                 <Match when={location.pathname.includes('/live')}>
-                  <div class={styles.noLeftCenter}>
+                  <div class={styles.liveStreamCenter}>
                     <div id="new_note_input" class={styles.headerFloater}>
                       <NewNote onSuccess={props.onNewNotePosted}/>
                     </div>

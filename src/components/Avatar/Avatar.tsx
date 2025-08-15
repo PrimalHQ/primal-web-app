@@ -14,7 +14,7 @@ import { useSearchParams } from '@solidjs/router';
 
 const Avatar: Component<{
   src?: string | undefined,
-  size?: "nano" | "micro" | "xxs" | "xss" | "xs" | "vvs" | "vs2" | "vs" | "sm" | "md" | "ml" | "mll" | "lg" | "xl" | "xxl" | "xxxl",
+  size?: "nano" | "micro" | "xxs" | "xss" | "xs" | "vvs" | "vs2" | "vs" | "sm" | "md" | "ml" | "mll" | "lg" | "xl" | "xxl" | "xxxl" | "s38" | "s30" | "s50",
   user?: PrimalUser,
   highlightBorder?: boolean,
   id?: string,
@@ -49,6 +49,9 @@ const Avatar: Component<{
     xl: styles.extraLargeAvatar,
     xxl: styles.xxlAvatar,
     xxxl: styles.xxxlAvatar,
+    s30: styles.s30Avatar,
+    s38: styles.s38Avatar,
+    s50: styles.s50Avatar,
   };
 
   const missingClass = {
@@ -68,6 +71,9 @@ const Avatar: Component<{
     xl: styles.extraLargeMissing,
     xxl: styles.xxlMissing,
     xxxl: styles.xxxlMissing,
+    s30: styles.s38Missing,
+    s38: styles.s38Missing,
+    s50: styles.s38Missing,
   };
 
   const imgError = (event: any) => {

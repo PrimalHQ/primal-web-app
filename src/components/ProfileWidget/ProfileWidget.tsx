@@ -10,7 +10,7 @@ import { hookForDev } from '../../lib/devTools';
 import { userName } from '../../stores/profile';
 import { useAppContext } from '../../contexts/AppContext';
 
-const ProfileWidget: Component<{ id?: string }> = (props) => {
+const ProfileWidget: Component<{ id?: string, hideName?: boolean }> = (props) => {
 
   const account = useAccountContext();
   const app = useAppContext();
@@ -20,7 +20,10 @@ const ProfileWidget: Component<{ id?: string }> = (props) => {
   return (
     <div id={props.id}>
       <Show when={account?.hasPublicKey()}>
-        <A href={app?.actions.profileLink(account?.publicKey) || ''} class={styles.userProfile}>
+        <A
+          href={app?.actions.profileLink(account?.publicKey) || ''}
+          class={`${styles.userProfile} ${props.hideName ? styles.hiddenName : ''}`}
+        >
           <div class={styles.avatar}>
             <Avatar
               size="vvs"
@@ -28,12 +31,14 @@ const ProfileWidget: Component<{ id?: string }> = (props) => {
               showCheck={false}
             />
           </div>
-          <div class={styles.userInfo}>
-            <div class={styles.userName}>{userName(activeUser())}</div>
-            <div class={styles.userVerification}>
-              {trimVerification(activeUser()?.nip05)[1]}
+          <Show when={!props.hideName}>
+            <div class={styles.userInfo}>
+              <div class={styles.userName}>{userName(activeUser())}</div>
+              <div class={styles.userVerification}>
+                {trimVerification(activeUser()?.nip05)[1]}
+              </div>
             </div>
-          </div>
+          </Show>
         </A>
       </Show>
     </div>

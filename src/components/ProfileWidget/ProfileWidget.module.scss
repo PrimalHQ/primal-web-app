@@ -11,6 +11,10 @@
   background-color: var(--background-sheet);
   border: none;
 
+  &.hiddenName {
+    width: 48px;
+  }
+
   &:hover {
     background-color: var(--background-input);
   }

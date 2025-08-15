@@ -415,7 +415,7 @@ const StreamPage: Component = () => {
         fallback={<TopZapSkeleton />}
       >
         <div class={styles.topZap}>
-          <Avatar user={author(zap?.sender as string)} size="vvs" />
+          <Avatar user={author(zap?.sender as string)} size="s38" />
           <div class={styles.amount}>
             <div class={styles.zapIcon}></div>
             <div class={styles.firstZapAmount}>{humanizeNumber(zap?.amount, false)}</div>
@@ -439,7 +439,7 @@ const StreamPage: Component = () => {
             fallback={<TopZapSkeleton />}
           >
             <div class={styles.topZap}>
-              <Avatar user={author(zap?.sender as string)} size="micro" />
+              <Avatar user={author(zap?.sender as string)} size="s30" />
               <div class={styles.zapAmount}>{humanizeNumber(zap?.amount, false)}</div>
             </div>
           </Show>
@@ -665,7 +665,7 @@ const StreamPage: Component = () => {
         <div class={styles.streamingHeader}>
           <div class={styles.streamerInfo}>
             <a href={app?.actions.profileLink(profile?.profileKey)}>
-              <Avatar user={profile?.userProfile} size="xs" />
+              <Avatar user={profile?.userProfile} size="s50" />
             </a>
             <div class={styles.userInfo}>
               <div class={styles.userName}>
@@ -678,7 +678,7 @@ const StreamPage: Component = () => {
           </div>
 
           <div class={styles.headerActions}>
-            <FollowButton person={profile?.userProfile} />
+            <FollowButton person={profile?.userProfile} thick={true} />
 
             <Show when={!showLiveChat()}>
               <button class={styles.chatButton} onClick={() => setShowLiveChat(true)}>
@@ -689,15 +689,12 @@ const StreamPage: Component = () => {
           </div>
         </div>
 
-        <div ref={streamingContent}>
+        <div ref={streamingContent} class={styles.streamContent}>
           <LiveVideo
             src={streamData.url || ''}
             stream={streamData}
             streamAuthor={profile?.userProfile}
           />
-          {/* <video controls autoplay ref={videoElement} width={videoWidth()}>
-            <source src={streamData.url || ''} type="application/x-mpegURL" />
-          </video> */}
         </div>
 
         <div class={styles.streamInfo}>

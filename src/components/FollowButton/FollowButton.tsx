@@ -16,6 +16,7 @@ const FollowButton: Component<{
   flexible?: boolean,
   id?: string,
   light?: boolean,
+  thick?: boolean,
   postAction?: (remove: boolean, pubkey: string) => void,
 }> = (props) => {
 
@@ -49,6 +50,7 @@ const FollowButton: Component<{
   const klass = () => {
     if (props.large) return styles.large;
     if (props.flexible) return styles.flexible;
+    if (props.thick) return styles.thick;
     return styles.small;
   }
 
