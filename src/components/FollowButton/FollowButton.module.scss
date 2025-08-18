@@ -5,6 +5,20 @@
   }
 }
 
+.followChat {
+  height: 32px;
+
+  button {
+    max-width: 100%;
+    height: 32px;
+    padding-block: 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 16px;
+    text-transform: lowercase;
+  }
+}
+
 .small {
   max-width: 72px;
 

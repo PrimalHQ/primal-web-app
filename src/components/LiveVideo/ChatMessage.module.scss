@@ -220,6 +220,46 @@
   mask: url(../../assets/icons/send.svg) no-repeat 0 0 / 16px 16px;
 }
 
+.iconQr {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/qr_code.svg) no-repeat 0 0 / 16px 16px;
+  mask: url(../../assets/icons/qr_code.svg) no-repeat 0 0 / 16px 16px;
+}
+
+.iconMessages {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/messages.svg) no-repeat 0 0 / 16px 16px;
+  mask: url(../../assets/icons/messages.svg) no-repeat 0 0 / 16px 16px;
+}
+
+.iconZap {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/feed_zap_2.svg) no-repeat 0 0 / 16px 16px;
+  mask: url(../../assets/icons/feed_zap_2.svg) no-repeat 0 0 / 16px 16px;
+}
+
+.iconMute {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/mute_user.svg) no-repeat 0 0 / 16px 16px;
+  mask: url(../../assets/icons/mute_user.svg) no-repeat 0 0 / 16px 16px;
+}
+
 .searchSuggestions {
   width: 300px;
   background-color: var(--background-input);
@@ -269,4 +309,306 @@
       border: none;
     }
   }
+}
+
+.chatMessageDetails {
+  position: absolute;
+  z-index: 10;
+  width: 328px;
+  height: 328px;
+  border-radius: 8px;
+  border: 1px solid var(--subtile-devider);
+  background: var(--background-sheet);
+
+  .header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px 16px 20px 16px;
+    border-bottom: 1px solid var(--subtile-devider);
+
+    .author {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+
+      .userInfo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .nameAndNip {
+          display: flex;
+          flex-direction: column;
+
+          .nameAndVer {
+            display: flex;
+
+            .name {
+              color: var(--text-primary);
+              font-size: 16px;
+              font-weight: 700;
+              line-height: 16px;
+            }
+          }
+
+          .nip05 {
+            color: var(--text-tertiary-2);
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 14px;
+          }
+        }
+      }
+
+      .followers {
+        display: flex;
+        flex-direction: column;
+
+        .number {
+          color: var(--text-primary);
+          text-align: right;
+          font-size: 14px;
+          font-weight: 700;
+          line-height: 16px;
+        }
+
+        .label {
+          color: var(--text-tertiary-2);
+          text-align: right;
+          font-size: 14px;
+          font-weight: 400;
+          line-height: 14px;
+        }
+      }
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+
+      .controlMuteButton {
+        width: fit-content;
+        height: 32px;
+        border: none;
+        outline: none;
+        margin: 0;
+        padding-inline: 16px;
+        border-radius: 36px;
+        background: var(--subtile-devider);
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+
+        color: var(--text-primary);
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 20px;
+      }
+
+      .controlButton {
+        width: 32px;
+        height: 32px;
+        border: none;
+        outline: none;
+        margin: 0;
+        padding: 0;
+        border-radius: 36px;
+        background: var(--subtile-devider);
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        color: var(--text-primary);
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 20px;
+      }
+    }
+
+  }
+
+  .messageReport {
+    padding: 16px;
+    border-bottom: 1px solid var(--subtile-devider);
+    background: var(--background-input);
+    height: 145px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .caption {
+      color: var(--text-tertiary);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 16px;
+    }
+
+
+    .liveMessage {
+      display: flex;
+      gap: 8px;
+      padding-left: 9px;
+
+      .leftSide {
+        width: 24px;
+      }
+
+      .rightSide {
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        line-clamp: 4;
+        -webkit-box-orient: vertical;
+        line-height: 20px;
+
+        .authorName {
+          color: var(--text-primary);
+          font-size: 16px;
+          font-weight: 700;
+          line-height: 16px;
+          width: fit-content;
+          margin-right: 4px;
+          /* display: flex; */
+          gap: 4px;
+
+          >span {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            max-width: 160px;
+
+            &.zapped {
+              color: var(--brand-text);
+              font-size: 16px;
+              font-weight: 400;
+              line-height: 16px;
+            }
+
+            &.zapStats {
+              color: var(--text-primary);
+              font-size: 16px;
+              font-weight: 700;
+              line-height: 16px;
+            }
+          }
+
+        }
+      }
+
+      .messageContent {
+        color: var(--text-secondary);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 20px;
+        overflow-wrap: anywhere;
+      }
+
+      &.zapMessage {
+        width: 100%;
+        padding-block: 8px;
+        padding-inline: 8px;
+        border-radius: 8px;
+        border: 1px solid #E47C00;
+        background: rgba(228, 124, 0, 0.20);
+
+        .rightSide {
+          width: 100%;
+          line-height: 20px;
+
+          .zapInfo {
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+          }
+
+          .authorName {
+            color: var(--active-zap);
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 20px;
+            width: fit-content;
+            display: flex;
+            gap: 4px;
+
+            >span {
+              display: -webkit-box;
+              -webkit-box-orient: vertical;
+              -webkit-line-clamp: 1;
+              text-overflow: ellipsis;
+              overflow: hidden;
+              max-width: 160px;
+
+              &.zapped {
+                color: var(--active-zap);
+                font-size: 16px;
+                font-weight: 400;
+                line-height: 20px;
+              }
+            }
+          }
+
+          .zapStats {
+            display: flex;
+            height: 24px;
+            padding-inline: 8px;
+            align-items: center;
+            gap: 2px;
+            width: fit-content;
+            border-radius: 24px;
+            background: var(--active-zap);
+
+            color: var(--background-site);
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 16px;
+
+            .zapIcon {
+              background-color: var(--background-site);
+            }
+          }
+        }
+
+        .messageContent {
+          color: var(--text-primary);
+        }
+      }
+
+    }
+  }
+
+  .footer {
+    padding: 12px 16px;
+    display: flex;
+    justify-content: flex-end;
+
+    .closeButton {
+      width: fit-content;
+      border: none;
+      outline: none;
+      margin: 0;
+      padding: 9px 26px 9px 25px;
+      border-radius: 36px;
+      background: var(--subtile-devider);
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 16px;
+    }
+  }
+
 }

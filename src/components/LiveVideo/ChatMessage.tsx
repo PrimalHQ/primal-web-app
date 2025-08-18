@@ -986,11 +986,11 @@ const ChatMessage: Component<{
   };
 
   return (
-    <div class={styles.parsedMessage}>
+    <span class={styles.parsedMessage}>
       <For each={content}>
         {(item, index) => renderContent(item, index())}
       </For>
-    </div>
+    </span>
   )
 }
 

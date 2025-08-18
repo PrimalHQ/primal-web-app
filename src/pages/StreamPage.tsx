@@ -55,6 +55,7 @@ import DirectMessageParsedContent from '../components/DirectMessages/DirectMessa
 import ChatMessage from '../components/LiveVideo/ChatMessage';
 import DirectMessagesComposer from '../components/DirectMessages/DirectMessagesComposer';
 import ChatMessageComposer from '../components/LiveVideo/ChatMessageComposer';
+import ChatMessageDetails, { ChatMessageConfig } from '../components/LiveVideo/ChatMessageDetails';
 
 const StreamPage: Component = () => {
   const profile = useProfileContext();
@@ -352,7 +353,21 @@ const StreamPage: Component = () => {
 
   const renderChatMessage = (event: NostrLiveChat) => {
     return (
-      <div class={styles.liveMessage}>
+      <div
+        class={styles.liveMessage}
+        onClick={(e: MouseEvent) => {
+          const target = e.target as HTMLElement | null;
+
+          setSelectedChatMessage(() => undefined);
+
+          setSelectedChatMessage(() => ({
+            author: author(event.pubkey),
+            message: event,
+            target,
+            people,
+          }));
+        }}
+      >
         <Show when={author(event.pubkey)}>
           <div class={styles.leftSide}>
             <Avatar user={author(event.pubkey)} size="xss" />
@@ -684,6 +699,8 @@ const StreamPage: Component = () => {
     }, topZapList.totalSats);
   }
 
+  const [selectedChatMesage, setSelectedChatMessage] = createSignal<ChatMessageConfig>()
+
   return (
     <div class={styles.streamingPage}>
       <div class={`${styles.streamingMain} ${!showLiveChat() ? styles.fullWidth : ''}`}>
@@ -802,6 +819,13 @@ const StreamPage: Component = () => {
           <For each={events}>
             {event => renderEvent(event)}
           </For>
+
+          <Show when={selectedChatMesage()}>
+            <ChatMessageDetails
+              config={selectedChatMesage()}
+              onClose={() => setSelectedChatMessage(undefined)}
+            />
+          </Show>
         </div>
         <div class={styles.chatInput}>
           <ChatMessageComposer
@@ -813,8 +837,6 @@ const StreamPage: Component = () => {
           />*/}
         </div>
       </div>
-
-
     </div>
   );
 }
