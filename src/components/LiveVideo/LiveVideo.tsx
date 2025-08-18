@@ -69,7 +69,6 @@ const LiveVideo: Component<{
             autoplay
             ref={hlsVideo}
             onloadedmetadata={() => {
-              console.log('METADATA PARSED')
                 setIsMediaLoaded(true);
               setTimeout(() => {
 

@@ -540,6 +540,15 @@ export type NostrLiveChat = {
   tags?: string[][],
 };
 
+export type NostrLiveEventStats = {
+  kind: Kind.LiveEventStats,
+  content?: string,
+  created_at?: number,
+  pubkey: string,
+  id: string,
+  tags?: string[][],
+};
+
 export type NostrEventContent =
   NostrNoteContent |
   NostrUserContent |
@@ -598,6 +607,7 @@ export type NostrEventContent =
   NostrLiveEvent |
   ArticleStatsEvent |
   NostrLiveChat |
+  NostrLiveEventStats |
   PrimalLeaderboard;
 
 export type NostrEvent = [

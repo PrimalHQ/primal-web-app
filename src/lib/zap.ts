@@ -13,19 +13,18 @@ import { StreamingData } from "./streaming";
 export let lastZapError: string = "";
 
 export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string) => {
-  const nwc = await decrypt(pubkey, nwcEnc);
-
-  const nwcConfig = decodeNWCUri(nwc);
-
-  const request = await nip47.makeNwcRequestEvent(nwcConfig.pubkey, hexToBytes(nwcConfig.secret), invoice)
-
-  if (nwcConfig.relays.length === 0) return false;
-
   let promises: Promise<boolean>[] = [];
   let relays: Relay[] = [];
   let result: boolean = false;
-
   try {
+    const nwc = await decrypt(pubkey, nwcEnc);
+
+    const nwcConfig = decodeNWCUri(nwc);
+
+    const request = await nip47.makeNwcRequestEvent(nwcConfig.pubkey, hexToBytes(nwcConfig.secret), invoice)
+
+    if (nwcConfig.relays.length === 0) return false;
+
     for (let i = 0; i < nwcConfig.relays.length; i++) {
       const relay = relayInit(nwcConfig.relays[i]);
 
@@ -74,6 +73,7 @@ export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string
         );
       }));
     }
+
     result = await Promise.any(promises);
   }
   catch (e: any) {
@@ -449,7 +449,8 @@ export const zapStream = async (
     const pr = r2.pr;
 
     if (nwc && nwc[1] && nwc[1].length > 0) {
-      zapOverNWC(sender, nwc[1], pr);
+      const success = await zapOverNWC(sender, nwc[1], pr);
+
       return { success: true, event: signedEvent }
     }
 

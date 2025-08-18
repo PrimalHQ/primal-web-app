@@ -264,7 +264,25 @@ const StreamPage: Component = () => {
     }
   }, 1_000);
 
+  const [topZapList, setTopZapList] = createStore({
+    totalZaps: 0,
+    totalSats: 0,
+    lastCounted: 0,
+  })
+
   const handleLiveEventMessage = (content: NostrEventContent) => {
+
+    if (content.kind === Kind.LiveEventStats) {
+      const stats = JSON.parse(content.content || '{}');
+
+      setTopZapList(() => ({
+        totalZaps: stats.total_zaps || 0,
+        totalSats: stats.total_satszapped || 0,
+        lastCounted: content.created_at || 0,
+      }));
+      return;
+    }
+
     if (content.kind === Kind.LiveEvent) {
       const identifier = (content.tags?.find(t => t[0] === 'd') || ['d', ''])[1];
 
@@ -642,21 +660,28 @@ const StreamPage: Component = () => {
   const [showLiveChat, setShowLiveChat] = createSignal(true);
 
   const totalZaps = () => {
+    const lastCounted = topZapList.lastCounted;
+
     return events.reduce<number>((acc, e) => {
       if (e.kind !== Kind.Zap) return acc;
 
-      return acc + 1;
-    }, 0);
+      return (e.created_at || 0) > lastCounted ? acc + 1 : acc;
+    }, topZapList.totalZaps);
   }
 
   const totalSats = () => {
+    const lastCounted = topZapList.lastCounted;
+
     return events.reduce<number>((acc, e) => {
-      if (e.kind !== Kind.Zap) return acc;
+      if (
+        e.kind !== Kind.Zap ||
+        (e.created_at || 0) <= lastCounted
+      ) return acc;
 
       const z = convertToZap(e);
 
       return acc + z.amount;
-    }, 0);
+    }, topZapList.totalSats);
   }
 
   return (
@@ -726,10 +751,10 @@ const StreamPage: Component = () => {
             </div>
             <div class={styles.zapStats}>
               <div class={styles.statsLine}>
-                <div class={styles.totalZaps}>Total {totalZaps() || 0} zaps:</div>
+                <div class={styles.totalZaps}>Total {totalZaps()} zaps:</div>
                 <div class={styles.totalSats}>
                   <div class={styles.zapIcon}></div>
-                  {humanizeNumber(totalSats() || 0, false)}
+                  {humanizeNumber(totalSats(), false)}
                 </div>
               </div>
               <button
