@@ -160,6 +160,12 @@ const ChatMessageDetails: Component<{
         <div class={styles.chat}>
           {renderChatMessage()}
         </div>
+        <div class={styles.report}>
+          <button>
+            <div class={styles.iconReport}>b</div>
+            <div>Report message</div>
+          </button>
+        </div>
       </div>
 
       <div class={styles.footer}>
