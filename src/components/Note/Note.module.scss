@@ -224,7 +224,7 @@
 
       .replyingTo {
         display: flex;
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 400;
         line-height: 20px;
         margin-top: 6px;
@@ -232,7 +232,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         .label {
-          color: var(--text-primary);
+          color: var(--text-tertiary);
         }
         a {
           max-width: 440px;
