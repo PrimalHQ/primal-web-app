@@ -30,6 +30,7 @@ import { isPhone } from '../../utils';
 import ArticleOverviewContextMenu from '../Note/ArticleOverviewContextMenu';
 import ArticleDraftContextMenu from '../Note/ArticleDraftContextMenu';
 import LiveStreamContextMenu from '../Note/LiveStreamContextMenu';
+import ProfileQrCodeModal from '../ProfileQrCodeModal/ProfileQrCodeModal';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -277,6 +278,12 @@ const Layout: Component<any> = (props) => {
           open={app?.showArticleDraftContextMenu}
           onClose={app?.actions.closeArticleDraftContextMenu}
           data={app?.articleDraftContextMenuInfo}
+        />
+
+        <ProfileQrCodeModal
+          open={app?.showProfileQr !== undefined}
+          onClose={app?.actions.closeProfileQr}
+          profile={app?.showProfileQr}
         />
       </>
     </Show>

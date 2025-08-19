@@ -108,6 +108,7 @@ export type AppContextStore = {
   verifiedUsers: Record<string, string>,
   legendCustomization: Record<string, LegendCustomizationConfig>,
   memberCohortInfo: Record<string, CohortInfo>,
+  showProfileQr: PrimalUser | undefined,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
@@ -159,6 +160,8 @@ export type AppContextStore = {
     profileLink: (pubkey: string | undefined, noP?: boolean) => string,
     setLegendCustomization: (pubkey: string, config: LegendCustomizationConfig) => void,
     getUserBlossomUrls: (pubkey: string) => string[],
+    openProfileQr: (user: PrimalUser) => void,
+    closeProfileQr: () => void,
   },
 }
 
@@ -197,6 +200,7 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   legendCustomization: {},
   memberCohortInfo: {},
   subscribeToTier: () => {},
+  showProfileQr: undefined,
 };
 
 export const AppContext = createContext<AppContextStore>();
@@ -435,6 +439,14 @@ export const AppProvider = (props: { children: JSXElement }) => {
     }, []);
   }
 
+  const openProfileQr = (user: PrimalUser) => {
+    updateStore('showProfileQr', () => ({ ...user }));
+  }
+
+  const closeProfileQr = () => {
+    updateStore('showProfileQr', () => undefined);
+  }
+
 
 // SOCKET HANDLERS ------------------------------
 
@@ -604,6 +616,8 @@ const onSocketClose = (closeEvent: CloseEvent) => {
       profileLink,
       setLegendCustomization,
       getUserBlossomUrls,
+      openProfileQr,
+      closeProfileQr,
     }
   });
 

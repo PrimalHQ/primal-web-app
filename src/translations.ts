@@ -307,6 +307,11 @@ export const actions = {
     defaultMessage: 'Send ?',
     description: 'Label for report user confirmation',
   },
+  muteUserConfirmTitle: {
+    id: 'actions.muteUserConfirmTitle',
+    defaultMessage: 'Mute {name}',
+    description: 'Title for mute user confirmation dialog',
+  },
   muteUserConfirm: {
     id: 'actions.muteUserConfirm',
     defaultMessage: 'Add {name} to your mute list?',
@@ -315,7 +320,7 @@ export const actions = {
   muteThreadConfirm: {
     id: 'actions.muteUserConfirm',
     defaultMessage: 'Mute this thread?',
-    description: 'Label for mute user confirmation',
+    description: 'Label for mute thread confirmation',
   },
   unmute: {
     id: 'actions.unmute',

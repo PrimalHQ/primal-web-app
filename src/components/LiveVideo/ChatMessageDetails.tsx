@@ -34,6 +34,9 @@ import ButtonSecondary from '../Buttons/ButtonSecondary';
 import FollowButton from '../FollowButton/FollowButton';
 import ChatMessage from './ChatMessage';
 import FollowButtonChat from '../FollowButton/FollowButtonChat';
+import { actions as tActions } from '../../translations';
+import { useIntl } from '@cookbook/solid-intl';
+
 
 export type ChatMessageConfig = {
   author: PrimalUser | undefined,
@@ -51,6 +54,7 @@ const ChatMessageDetails: Component<{
   const app = useAppContext();
   const media = useMediaContext();
   const dms = useDMContext();
+  const intl = useIntl();
 
   let chatMessageDetails: HTMLDivElement | undefined;
 
@@ -65,8 +69,6 @@ const ChatMessageDetails: Component<{
 
     const rect = target.getBoundingClientRect();
 
-    console.log('RECT: ', window.innerHeight, rect);
-
     const popHeight = 328;
 
     if (window.innerHeight - rect.top - rect.height > popHeight) {
@@ -80,7 +82,11 @@ const ChatMessageDetails: Component<{
     }
 
     setPosition(200);
-  })
+  });
+
+  const reportMessage = () => {
+
+  }
 
   const renderChatMessage = () => {
     return (
@@ -138,17 +144,46 @@ const ChatMessageDetails: Component<{
         </div>
 
         <div class={styles.controls}>
-          <button class={styles.controlMuteButton}>
+          <button
+            class={styles.controlMuteButton}
+            onClick={() => {
+              if (account?.muted.includes(props.config?.message.pubkey || '')) {
+                account.actions.removeFromMuteList(props.config?.message.pubkey || '');
+                return;
+              }
+
+              app?.actions.openConfirmModal({
+                title: intl.formatMessage(tActions.muteUserConfirmTitle, { name: userName(props.config?.author) }),
+                description: intl.formatMessage(tActions.muteUserConfirm, { name: userName(props.config?.author) }),
+                onConfirm: async () => {
+                  account?.actions.addToMuteList(props.config?.message.pubkey || '');
+                  app.actions.closeConfirmModal();
+                },
+                onAbort: app.actions.closeConfirmModal,
+              })
+            }}
+          >
             <div class={styles.iconMute}></div>
-            Mute
+            { account?.muted.includes(props.config?.message.pubkey || '') ? 'Unmute' : 'Mute'}
           </button>
-          <button class={styles.controlButton}>
+          <button
+            class={styles.controlButton}
+            onClick={() => {
+              props.config?.author && app?.actions.openProfileQr(props.config?.author)
+            }}
+          >
             <div class={styles.iconQr}></div>
           </button>
-          <button class={styles.controlButton}>
+          <button
+            class={styles.controlButton}
+            onClick={() => {}}
+          >
             <div class={styles.iconZap}></div>
           </button>
-          <button class={styles.controlButton}>
+          <button
+            class={styles.controlButton}
+            onClick={() => {}}
+          >
             <div class={styles.iconMessages}></div>
           </button>
           <FollowButtonChat person={props.config?.author} />
@@ -161,7 +196,7 @@ const ChatMessageDetails: Component<{
           {renderChatMessage()}
         </div>
         <div class={styles.report}>
-          <button>
+          <button onClick={reportMessage}>
             <div class={styles.iconReport}>b</div>
             <div>Report message</div>
           </button>
