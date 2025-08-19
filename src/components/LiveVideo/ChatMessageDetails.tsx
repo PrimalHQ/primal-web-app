@@ -7,11 +7,11 @@ import Avatar from '../Avatar/Avatar';
 import { nip05Verification, truncateNpub, userName } from '../../stores/profile';
 import { DMContact } from '../../megaFeeds';
 import { date } from '../../lib/dates';
-import { DirectMessage, NostrLiveChat, PrimalArticle, PrimalUser } from '../../types/primal';
+import { DirectMessage, NostrLiveChat, PrimalArticle, PrimalUser, ZapOption } from '../../types/primal';
 import { useDMContext } from '../../contexts/DMContext';
 import { useAccountContext } from '../../contexts/AccountContext';
-import { A } from '@solidjs/router';
-import { useAppContext } from '../../contexts/AppContext';
+import { A, useNavigate } from '@solidjs/router';
+import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { decodeIdentifier, hexToNpub } from '../../lib/keys';
 import { isDev, urlEncode } from '../../utils';
 import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, specialCharsRegex, urlExtractRegex } from '../../constants';
@@ -34,8 +34,9 @@ import ButtonSecondary from '../Buttons/ButtonSecondary';
 import FollowButton from '../FollowButton/FollowButton';
 import ChatMessage from './ChatMessage';
 import FollowButtonChat from '../FollowButton/FollowButtonChat';
-import { actions as tActions } from '../../translations';
+import { actions as tActions, toastZapProfile } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
+import { useToastContext } from '../Toaster/Toaster';
 
 
 export type ChatMessageConfig = {
@@ -52,9 +53,9 @@ const ChatMessageDetails: Component<{
 }> = (props) => {
   const account = useAccountContext();
   const app = useAppContext();
-  const media = useMediaContext();
-  const dms = useDMContext();
+  const navigate = useNavigate()
   const intl = useIntl();
+  const toaster = useToastContext();
 
   let chatMessageDetails: HTMLDivElement | undefined;
 
@@ -85,8 +86,30 @@ const ChatMessageDetails: Component<{
   });
 
   const reportMessage = () => {
-
+    props.config?.message && app?.actions.openReportContent(props.config?.message)
   }
+
+  const customZapInfo: () => CustomZapInfo = () => ({
+    profile: props.config?.author,
+    onConfirm: (zapOption: ZapOption) => {
+      app?.actions.closeCustomZapModal();
+    },
+    onSuccess: (zapOption: ZapOption) => {
+      app?.actions.closeCustomZapModal();
+      app?.actions.resetCustomZap();
+      toaster?.sendSuccess(intl.formatMessage(toastZapProfile, {
+        name: userName(props.config?.author)
+      }))
+    },
+    onFail: (zapOption: ZapOption) => {
+      app?.actions.closeCustomZapModal();
+      app?.actions.resetCustomZap();
+    },
+    onCancel: (zapOption: ZapOption) => {
+      app?.actions.closeCustomZapModal();
+      app?.actions.resetCustomZap();
+    },
+  });
 
   const renderChatMessage = () => {
     return (
@@ -176,13 +199,15 @@ const ChatMessageDetails: Component<{
           </button>
           <button
             class={styles.controlButton}
-            onClick={() => {}}
+            onClick={() => {
+              app?.actions.openCustomZapModal(customZapInfo())
+            }}
           >
             <div class={styles.iconZap}></div>
           </button>
           <button
             class={styles.controlButton}
-            onClick={() => {}}
+            onClick={() => navigate(`/dms/${props.config?.author?.npub || props.config?.message.pubkey || ''}`)}
           >
             <div class={styles.iconMessages}></div>
           </button>

@@ -7,7 +7,7 @@ import {
   onMount,
   useContext
 } from "solid-js";
-import { MediaEvent, MediaVariant, NostrBlossom, NostrEOSE, NostrEvent, NostrEventContent, NostrEvents, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
+import { MediaEvent, MediaVariant, NostrBlossom, NostrEOSE, NostrEvent, NostrEventContent, NostrEvents, NostrLiveChat, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
 import { CashuMint } from "@cashu/cashu-ts";
 import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
 import { connect, disconnect, isConnected, isNotConnected, readData, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
@@ -109,6 +109,7 @@ export type AppContextStore = {
   legendCustomization: Record<string, LegendCustomizationConfig>,
   memberCohortInfo: Record<string, CohortInfo>,
   showProfileQr: PrimalUser | undefined,
+  reportContent: PrimalNote | PrimalArticle | NostrLiveChat | undefined,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
@@ -162,6 +163,8 @@ export type AppContextStore = {
     getUserBlossomUrls: (pubkey: string) => string[],
     openProfileQr: (user: PrimalUser) => void,
     closeProfileQr: () => void,
+    openReportContent: (content: PrimalNote | PrimalArticle | NostrLiveChat) => void,
+    closeReportContent: () => void,
   },
 }
 
@@ -201,6 +204,7 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   memberCohortInfo: {},
   subscribeToTier: () => {},
   showProfileQr: undefined,
+  reportContent: undefined,
 };
 
 export const AppContext = createContext<AppContextStore>();
@@ -447,6 +451,14 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('showProfileQr', () => undefined);
   }
 
+  const openReportContent = (user: PrimalNote | PrimalArticle | NostrLiveChat) => {
+    updateStore('reportContent', () => ({ ...user }));
+  }
+
+  const closeReportContent = () => {
+    updateStore('reportContent', () => undefined);
+  }
+
 
 // SOCKET HANDLERS ------------------------------
 
@@ -618,6 +630,8 @@ const onSocketClose = (closeEvent: CloseEvent) => {
       getUserBlossomUrls,
       openProfileQr,
       closeProfileQr,
+      openReportContent,
+      closeReportContent,
     }
   });
 

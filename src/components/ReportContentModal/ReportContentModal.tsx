@@ -4,7 +4,7 @@ import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Kind } from '../../constants';
 import { hookForDev } from '../../lib/devTools';
-import { NostrTier, PrimalArticle, PrimalNote, PrimalUser } from '../../types/primal';
+import { NostrLiveChat, NostrTier, PrimalArticle, PrimalNote, PrimalUser } from '../../types/primal';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import Modal from '../Modal/Modal';
 
@@ -34,7 +34,7 @@ const reportReasons = ['nudity', 'profanity', 'illegal', 'spam', 'impersonation'
 
 const ReportContentModal: Component<{
   id?: string,
-  note: PrimalNote | PrimalArticle,
+  note: PrimalNote | PrimalArticle | NostrLiveChat,
   onClose: () => void,
   onReport?: () => void,
 }> = (props) => {

@@ -31,6 +31,7 @@ import ArticleOverviewContextMenu from '../Note/ArticleOverviewContextMenu';
 import ArticleDraftContextMenu from '../Note/ArticleDraftContextMenu';
 import LiveStreamContextMenu from '../Note/LiveStreamContextMenu';
 import ProfileQrCodeModal from '../ProfileQrCodeModal/ProfileQrCodeModal';
+import ReportContentModal from '../ReportContentModal/ReportContentModal';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -284,6 +285,11 @@ const Layout: Component<any> = (props) => {
           open={app?.showProfileQr !== undefined}
           onClose={app?.actions.closeProfileQr}
           profile={app?.showProfileQr}
+        />
+
+        <ReportContentModal
+          note={app?.reportContent}
+          onClose={() => app?.actions.closeReportContent()}
         />
       </>
     </Show>
