@@ -69,10 +69,13 @@ const ChatMessageDetails: Component<{
   }
 
   const doMute = () => {
+    if (!props.config?.message.pubkey) return;
+    const pubkey = props.config?.message.pubkey;
+
     // Unmute if already muted
-    if (account?.muted.includes(props.config?.message.pubkey || '')) {
-      account.actions.removeFromMuteList(props.config?.message.pubkey || '');
-      props.onMute(props.config?.message.pubkey || '', true);
+    if (account?.muted.includes(pubkey)) {
+      account.actions.removeFromMuteList(pubkey);
+      props.onMute(pubkey, true);
       return;
     }
 
@@ -80,8 +83,8 @@ const ChatMessageDetails: Component<{
       title: intl.formatMessage(tActions.muteUserConfirmTitle, { name: userName(props.config?.author) }),
       description: intl.formatMessage(tActions.muteUserConfirm, { name: userName(props.config?.author) }),
       onConfirm: async () => {
-        account?.actions.addToMuteList(props.config?.message.pubkey || '');
-        props.onMute(props.config?.message.pubkey || '');
+        account?.actions.addToMuteList(pubkey);
+        props.onMute(pubkey);
         app.actions.closeConfirmModal();
       },
       onAbort: app.actions.closeConfirmModal,

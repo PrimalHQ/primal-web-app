@@ -387,10 +387,8 @@ const StreamPage: Component = () => {
     const details = document.querySelector(`[data-chat-message="${selectedChatMesage()?.message.id}"]`);
 
     if (
-      selectedChatMesage() !== undefined && (
-        target?.getAttribute('data-chat-message') === null ||
+      selectedChatMesage() !== undefined &&
         !details?.contains(target)
-      )
     ) {
       setSelectedChatMessage(() => undefined);
 
