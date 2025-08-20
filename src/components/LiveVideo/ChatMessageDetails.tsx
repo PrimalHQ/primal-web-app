@@ -143,6 +143,7 @@ const ChatMessageDetails: Component<{
     <div
       class={styles.chatMessageDetails}
       ref={chatMessageDetails}
+      data-chat-message={props.config?.message.id}
       style={`top:${position() || 0}px;`}
     >
       <div class={styles.header}>

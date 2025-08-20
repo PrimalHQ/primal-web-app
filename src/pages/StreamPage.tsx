@@ -382,6 +382,23 @@ const StreamPage: Component = () => {
     );
   }
 
+  const onCloseChatMessageDetails = (e: MouseEvent) => {
+    const target = e.target as HTMLElement | null;
+    const details = document.querySelector(`[data-chat-message="${selectedChatMesage()?.message.id}"]`);
+
+    if (
+      selectedChatMesage() !== undefined && (
+        target?.getAttribute('data-chat-message') === null ||
+        !details?.contains(target)
+      )
+    ) {
+      setSelectedChatMessage(() => undefined);
+
+      document.removeEventListener('click', onCloseChatMessageDetails);
+    }
+
+  }
+
   const renderChatMessage = (event: NostrLiveChat) => {
     return (
       <div
@@ -397,6 +414,9 @@ const StreamPage: Component = () => {
             target,
             people,
           }));
+
+          document.removeEventListener('click', onCloseChatMessageDetails);
+          document.addEventListener('click', onCloseChatMessageDetails);
         }}
       >
         <Show when={author(event.pubkey)}>
