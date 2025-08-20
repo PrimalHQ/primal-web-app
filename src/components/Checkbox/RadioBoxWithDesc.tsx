@@ -24,7 +24,7 @@ const RadioBoxWithDescription: Component<{
       <Show when={props.label}>
         <RadioGroup.Label class={styles.radioGroupLabel}>{props.label}</RadioGroup.Label>
       </Show>
-      <div class={styles.radioItems} role="presentation">
+      <div class={styles.radioItemsWithDesc} role="presentation">
         <For each={props.options}>
             {(opt) => (
             <RadioGroup.Item

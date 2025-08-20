@@ -213,9 +213,10 @@ const StreamPage: Component = () => {
     }
   };
 
-  const [newEvents, setNewEvents] = createStore<NostrEventContent[]>([]);
   const [events, setEvents] = createStore<NostrEventContent[]>([]);
   const [people, setPeople] = createStore<PrimalUser[]>([]);
+
+  let mutedEvents: NostrEventContent[]= [];
 
   const fetchMissingUsers = async (pubkeys: string[]) => {
     const subId = `fetch_missing_people_${APP_ID}`;
@@ -882,6 +883,75 @@ const StreamPage: Component = () => {
             <ChatMessageDetails
               config={selectedChatMesage()}
               onClose={() => setSelectedChatMessage(undefined)}
+              onMute={(pubkey: string, unmute?: boolean) => {
+
+                if (unmute) {
+                  const unmuteEvents = mutedEvents.filter(e => {
+                    let pk = e.pubkey;
+
+                    if (e.kind === Kind.Zap) {
+                      const zap = convertToZap(e);
+                      if (zap.sender) {
+                        pk = typeof zap.sender === 'string' ? zap.sender : zap.sender.pubkey;
+                      }
+                    }
+
+                    return pk === pubkey && !events.find(ev => ev.id === e.id);
+                  });
+
+                  mutedEvents = mutedEvents.filter(e => {
+                    let pk = e.pubkey;
+
+                    if (e.kind === Kind.Zap) {
+                      const zap = convertToZap(e);
+                      if (zap.sender) {
+                        pk = typeof zap.sender === 'string' ? zap.sender : zap.sender.pubkey;
+                      }
+                    }
+
+                    return pk !== pubkey;
+                  });
+
+                  setEvents((old) => {
+                    let evs = [...old, ...unmuteEvents].sort((a, b) => {
+                      return (b.created_at || 0) - (a.created_at || 0);
+                    });
+
+                    return [...evs]
+                  });
+                  return;
+                }
+
+                const eventsToMute = events.filter(e => {
+                  let pk = e.pubkey;
+
+                  if (e.kind === Kind.Zap) {
+                    const zap = convertToZap(e);
+                    if (zap.sender) {
+                      pk = typeof zap.sender === 'string' ? zap.sender : zap.sender.pubkey;
+                    }
+                  }
+
+                  return pk === pubkey;
+                });
+
+                let mutedEventIds = mutedEvents.map(e => e.id);
+
+                for (let i = 0; i < eventsToMute.length;i++) {
+                  const e = eventsToMute[i];
+
+                  if (e.kind === Kind.Zap) {
+                    const zap = convertToZap(e);
+                  }
+
+                  if (!mutedEventIds.includes(e.id)) {
+                    mutedEvents.push(e);
+                    mutedEventIds.push(e.id);
+                  }
+                }
+
+                setEvents(es => es.filter(e => !mutedEventIds.includes(e.id)));
+              }}
             />
           </Show>
         </div>
@@ -889,10 +959,6 @@ const StreamPage: Component = () => {
           <ChatMessageComposer
             sendMessage={sendMessage}
           />
-          {/*<input
-            onChange={(e) => sendMessage(e)}
-            placeholder='Send a comment...'
-          />*/}
         </div>
       </div>
     </div>

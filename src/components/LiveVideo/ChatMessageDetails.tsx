@@ -1,37 +1,15 @@
-import { Component, createEffect, createSignal, For, JSXElement, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 
 import styles from './ChatMessage.module.scss';
-import { nip19 } from '../../lib/nTools';
 import Avatar from '../Avatar/Avatar';
-import { nip05Verification, truncateNpub, userName } from '../../stores/profile';
-import { DMContact } from '../../megaFeeds';
-import { date } from '../../lib/dates';
-import { DirectMessage, NostrLiveChat, PrimalArticle, PrimalUser, ZapOption } from '../../types/primal';
-import { useDMContext } from '../../contexts/DMContext';
+import { nip05Verification, userName } from '../../stores/profile';
+import { NostrLiveChat, PrimalUser, ZapOption } from '../../types/primal';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { A, useNavigate } from '@solidjs/router';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
-import { decodeIdentifier, hexToNpub } from '../../lib/keys';
-import { isDev, urlEncode } from '../../utils';
-import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, specialCharsRegex, urlExtractRegex } from '../../constants';
-import { createStore } from 'solid-js/store';
-import { NoteContent } from '../ParsedNote/ParsedNote';
-import { isInterpunction, isUrl, isImage, isMp4Video, isOggVideo, isWebmVideo, isYouTube, isSpotify, isTwitch, isMixCloud, isSoundCloud, isAppleMusic, isWavelake, getLinkPreview, isNoteMention, isUserMention, isAddrMention, isTagMention, isHashtag, isCustomEmoji, isUnitifedLnAddress, isLnbc, is3gppVideo } from '../../lib/notes';
-import { generatePrivateKey } from '../../lib/nTools';
-import { useMediaContext } from '../../contexts/MediaContext';
-import NoteImage from '../NoteImage/NoteImage';
-import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
-import LinkPreview from '../LinkPreview/LinkPreview';
-import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
-import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
-import { logError } from '../../lib/logger';
-import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
-import Lnbc from '../Lnbc/Lnbc';
 import { humanizeNumber } from '../../lib/stats';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
-import ButtonSecondary from '../Buttons/ButtonSecondary';
-import FollowButton from '../FollowButton/FollowButton';
 import ChatMessage from './ChatMessage';
 import FollowButtonChat from '../FollowButton/FollowButtonChat';
 import { actions as tActions, toastZapProfile } from '../../translations';
@@ -50,6 +28,7 @@ const ChatMessageDetails: Component<{
   id?: string,
   config: ChatMessageConfig | undefined,
   onClose: () => void,
+  onMute: (pubkey: string, unmute?: boolean) => void,
 }> = (props) => {
   const account = useAccountContext();
   const app = useAppContext();
@@ -87,6 +66,26 @@ const ChatMessageDetails: Component<{
 
   const reportMessage = () => {
     props.config?.message && app?.actions.openReportContent(props.config?.message)
+  }
+
+  const doMute = () => {
+    // Unmute if already muted
+    if (account?.muted.includes(props.config?.message.pubkey || '')) {
+      account.actions.removeFromMuteList(props.config?.message.pubkey || '');
+      props.onMute(props.config?.message.pubkey || '', true);
+      return;
+    }
+
+    app?.actions.openConfirmModal({
+      title: intl.formatMessage(tActions.muteUserConfirmTitle, { name: userName(props.config?.author) }),
+      description: intl.formatMessage(tActions.muteUserConfirm, { name: userName(props.config?.author) }),
+      onConfirm: async () => {
+        account?.actions.addToMuteList(props.config?.message.pubkey || '');
+        props.onMute(props.config?.message.pubkey || '');
+        app.actions.closeConfirmModal();
+      },
+      onAbort: app.actions.closeConfirmModal,
+    })
   }
 
   const customZapInfo: () => CustomZapInfo = () => ({
@@ -169,22 +168,7 @@ const ChatMessageDetails: Component<{
         <div class={styles.controls}>
           <button
             class={styles.controlMuteButton}
-            onClick={() => {
-              if (account?.muted.includes(props.config?.message.pubkey || '')) {
-                account.actions.removeFromMuteList(props.config?.message.pubkey || '');
-                return;
-              }
-
-              app?.actions.openConfirmModal({
-                title: intl.formatMessage(tActions.muteUserConfirmTitle, { name: userName(props.config?.author) }),
-                description: intl.formatMessage(tActions.muteUserConfirm, { name: userName(props.config?.author) }),
-                onConfirm: async () => {
-                  account?.actions.addToMuteList(props.config?.message.pubkey || '');
-                  app.actions.closeConfirmModal();
-                },
-                onAbort: app.actions.closeConfirmModal,
-              })
-            }}
+            onClick={doMute}
           >
             <div class={styles.iconMute}></div>
             { account?.muted.includes(props.config?.message.pubkey || '') ? 'Unmute' : 'Mute'}

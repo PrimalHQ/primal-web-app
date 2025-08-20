@@ -72,6 +72,13 @@
     flex-direction: column;
     gap: 16px;
   }
+
+  .radioItemsWithDesc {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 4px;
+  }
+
   .radioItem {
     display: flex;
     align-items: center;
@@ -111,9 +118,13 @@
   .radioItemWithDesc {
     display: flex;
     align-items: flex-start;
-    gap: 16px;
     cursor: pointer;
     padding: 12px 16px;
+    border-bottom: 1px solid var(--subtile-devider);
+
+    &:last-child {
+      border-bottom: none;
+    }
 
     .radioLabel {
       display: flex;
