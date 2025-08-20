@@ -56,6 +56,9 @@ import ChatMessage from '../components/LiveVideo/ChatMessage';
 import DirectMessagesComposer from '../components/DirectMessages/DirectMessagesComposer';
 import ChatMessageComposer from '../components/LiveVideo/ChatMessageComposer';
 import ChatMessageDetails, { ChatMessageConfig } from '../components/LiveVideo/ChatMessageDetails';
+import { Popover } from '@kobalte/core/popover';
+import RadioBox from '../components/Checkbox/RadioBox';
+import RadioBoxWithDesc from '../components/Checkbox/RadioBoxWithDesc';
 
 const StreamPage: Component = () => {
   const profile = useProfileContext();
@@ -70,6 +73,9 @@ const StreamPage: Component = () => {
   const streamId = () => params.streamId;
 
   const [getHex, setHex] = createSignal<string>();
+
+  const [openChatModeMenu, setOpenChatModeMenu] = createSignal(false);
+  const [chatMode, setChatMode] = createSignal<string>('moderated');
 
   let subId = '';
 
@@ -131,6 +137,19 @@ const StreamPage: Component = () => {
     resolveHex(params.vanityName)
   })
 
+  createEffect(on(chatMode, (mode, prev) => {
+    if (mode === prev) return;
+
+    refreshFeed();
+  }))
+
+  const refreshFeed = () => {
+    const id = streamData.id;
+    const pubkey = streamData.pubkey;
+
+    id && pubkey && startListeningForChat(id, pubkey, true);
+  }
+
   let streamingContent: HTMLDivElement | undefined;
 
   const [streamData, setStreamData] = createStore<StreamingData>({});
@@ -141,13 +160,22 @@ const StreamPage: Component = () => {
     setStreamData(() => data || {});
   }
 
-  const startListeningForChat = (id: string | undefined, pubkey: string | undefined) => {
+  const startListeningForChat = (
+    id: string | undefined,
+    pubkey: string | undefined,
+    clearOld?: boolean,
+  ) => {
     stopLiveChat(subId);
 
     setTimeout(() => {
-      subId = `get_live_feed_${id}_${APP_ID}`;
+      const time = (new Date()).getTime();
+      subId = `get_live_feed_${id}_${time}_${APP_ID}`;
 
-      startLiveChat(id, pubkey, account?.publicKey, subId);
+      if (clearOld) {
+        setEvents(() => []);
+      }
+
+      startLiveChat(id, pubkey, account?.publicKey, subId, chatMode());
 
       refreshSocketListeners(
         socket(),
@@ -307,11 +335,13 @@ const StreamPage: Component = () => {
 
     if (events.find(e => e.id === content.id)) return;
 
-    let evs = [ ...events, { ...content}].sort((a, b) => {
-      return (b.created_at || 0) - (a.created_at || 0);
-    })
+    setEvents((old) => {
+      let evs = [...old, { ...content }].sort((a, b) => {
+        return (b.created_at || 0) - (a.created_at || 0);
+      });
 
-    setEvents(() => [...evs]);
+      return [...evs]
+    });
   }
 
   createEffect(on(getHex, (pubkey) => {
@@ -806,9 +836,37 @@ const StreamPage: Component = () => {
             </div>
           </div>
           <div class={styles.chatActions}>
-            <button>
-              <div class={styles.settingsIcon}></div>
-            </button>
+            <Popover
+              open={openChatModeMenu()}
+              onOpenChange={setOpenChatModeMenu}
+              gutter={2}
+              placement='bottom-end'
+            >
+             	<Popover.Trigger class={openChatModeMenu() ? styles.active : ''}>
+                <div class={styles.settingsIcon}></div>
+              </Popover.Trigger>
+         			<Popover.Portal>
+            		<Popover.Content>
+                  <div class={styles.chatModeMenu}>
+                    <div class={styles.title}>
+                      Chat Filter
+                    </div>
+                    <div class={styles.options}>
+                      <RadioBoxWithDesc
+                        options={[
+                          { value: 'moderated', label: 'High Signal Messages', description: 'Exclude accounts muted by the stream host, and potential spam'},
+                          { value: 'all', label: 'All Messages', description: 'Show every message, including from accounts muted by the host'},
+                        ]}
+                        value={chatMode()}
+                        onChange={(option) => {
+                          setChatMode(() => option.value)
+                        }}
+                      />
+                    </div>
+                  </div>
+                </Popover.Content>
+         			</Popover.Portal>
+            </Popover>
             <button onClick={() => setShowLiveChat(false)}>
               <div class={styles.closeIcon}></div>
             </button>

@@ -83,25 +83,55 @@
     align-items: center;
     justify-content: center;
     height: 20px;
-    width: 20px;
+    min-width: 20px;
     border-radius: 10px;
     border: 2px solid var(--text-primary);
     background: none;
+    flex-grow: 1;
 
     &[data-checked][data-invalid] {
       border: 2px solid var(--warning-bright);
     }
   }
+
   .radioIndicator {
     height: 10px;
     width: 10px;
     border-radius: 5px;
     background-color: var(--text-primary);
   }
+
   .radioLabel {
     margin-left: 6px;
     color: var(--text-primary);
     font-size: 14px;
     user-select: none;
+  }
+
+  .radioItemWithDesc {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    cursor: pointer;
+    padding: 12px 16px;
+
+    .radioLabel {
+      display: flex;
+      flex-direction: column;
+
+      .label {
+        color: var(--text-primary);
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 20px;
+      }
+
+      .description {
+        color: var(--text-tertiary);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 18px;
+      }
+    }
   }
 }

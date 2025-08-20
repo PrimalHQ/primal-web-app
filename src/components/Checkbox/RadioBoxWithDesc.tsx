@@ -4,32 +4,22 @@ import { hookForDev } from '../../lib/devTools';
 
 import styles from './Checkbox.module.scss';
 import { RadioGroup } from '@kobalte/core/radio-group';
+import { RadioBoxOption } from './RadioBox';
 
-export type RadioBoxOption = { value: string, label: string, description?: string }
-
-const RadioBox: Component<{
+const RadioBoxWithDescription: Component<{
   id?: string,
   onChange: (option: RadioBoxOption) => void,
   label?: string,
   disabled?: boolean,
+  value?: string,
   options: RadioBoxOption[],
 }> = (props) => {
-
-  const [value, setValue] = createSignal<string>();
-
-  createEffect(on(value, (v, pv) => {
-    if (!v || v === pv) return;
-
-    const option = props.options.find(o => o.value === v);
-
-    option && props.onChange(option)
-  }));
 
   return (
     <RadioGroup
       class={styles.radioGroup}
-      value={value()}
-      onChange={setValue}
+      value={props.value}
+      onChange={(v) => props.onChange(props.options.find(o => o.value === v))}
     >
       <Show when={props.label}>
         <RadioGroup.Label class={styles.radioGroupLabel}>{props.label}</RadioGroup.Label>
@@ -39,13 +29,18 @@ const RadioBox: Component<{
             {(opt) => (
             <RadioGroup.Item
               value={opt.value}
-              class={styles.radioItem}
+              class={styles.radioItemWithDesc}
             >
               <RadioGroup.ItemInput class={styles.radioInput} />
               <RadioGroup.ItemControl class={styles.radioControl}>
                 <RadioGroup.ItemIndicator class={styles.radioIndicator} />
               </RadioGroup.ItemControl>
-              <RadioGroup.ItemLabel class={styles.radioLabel}>{opt.label}</RadioGroup.ItemLabel>
+              <RadioGroup.ItemLabel class={styles.radioLabel}>
+                <div class={styles.radioOption}>
+                  <div class={styles.label}>{opt.label}</div>
+                  <div class={styles.description}>{opt.description}</div>
+                </div>
+              </RadioGroup.ItemLabel>
             </RadioGroup.Item>
           )}
         </For>
@@ -55,4 +50,4 @@ const RadioBox: Component<{
 
 }
 
-export default hookForDev(RadioBox);
+export default hookForDev(RadioBoxWithDescription);

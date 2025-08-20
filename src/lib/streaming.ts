@@ -25,6 +25,7 @@ export const startLiveChat = (
   pubkey: string | undefined,
   user_pubkey: string | undefined,
   subId: string,
+  content_moderation_mode?: string,
 ) => {
   let page: MegaFeedPage = {...emptyMegaFeedPage()};
 
@@ -37,6 +38,7 @@ export const startLiveChat = (
       pubkey,
       identifier: id,
       user_pubkey,
+      content_moderation_mode,
     };
 
     sendMessage(JSON.stringify([
