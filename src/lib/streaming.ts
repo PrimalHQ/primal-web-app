@@ -18,6 +18,8 @@ export type StreamingData = {
   pubkey?: string,
   currentParticipants?: number,
   event?: NostrEventContent,
+  hosts?: string[],
+  participants?: string[],
 }
 
 export const startLiveChat = (
@@ -86,6 +88,8 @@ export const getStreamingEvent = (id: string, pubkey: string | undefined) => {
             currentParticipants: parseInt((data.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
             pubkey: data.pubkey,
             event: {...content},
+            hosts: (data.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
+            participants: (data.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
           }
 
         }

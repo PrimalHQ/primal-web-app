@@ -206,10 +206,21 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
             currentParticipants: parseInt((event.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
             pubkey: event.pubkey,
             event: { ...event },
+            hosts: (event.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
+            participants: (event.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
           };
 
-          if (!liveAuthorPubkeys.includes(streamData.pubkey)) {
-            setLiveAuthorPubkeys(pks => [...pks, streamData.pubkey]);
+          const host = streamData.hosts?.[0] || streamData.pubkey;
+
+          if (!liveAuthorPubkeys.includes(host)) {
+            let newPubkeys = [streamData.pubkey];
+            newPubkeys = [...newPubkeys, ...streamData.hosts, ...streamData.participants].reduce<string[]>((acc, p) => {
+              if (acc.includes(p)) return acc;
+
+              return [...acc, p];
+            }, []);
+
+            setLiveAuthorPubkeys(pks => [...pks, ...newPubkeys]);
           }
 
           const index = liveEvents.findIndex(e => e.id === streamData.id && e.pubkey === streamData.pubkey);
@@ -243,6 +254,16 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
   }
 
+  const liveAuthor = (data: StreamingData) => {
+    const pubkey = data.hosts?.[0]
+
+    if (pubkey) {
+      return liveAuthors.find(a => a.pubkey === pubkey) || liveAuthors.find(a => a.pubkey === data.pubkey);
+    }
+
+    return liveAuthors.find(a => a.pubkey === data.pubkey);
+  }
+
   return (
     <div id={props.id}>
       <Show when={searchParams.live === '1' && liveEvents.length > 0}>
@@ -256,14 +277,14 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
           <For each={liveEvents}>
             {liveEvent => (
               <Show
-                when={liveAuthors.find(a => a.pubkey === liveEvent.pubkey)}
+                when={liveAuthor(liveEvent)}
                 fallback={<LiveEventSidebarSkeleton />}
               >
                 <a class={styles.liveItem} href={liveHref(liveEvent)}>
                   <div class={styles.leftSide}>
-                    <Avatar user={liveAuthors.find(a => a.pubkey === liveEvent.pubkey)} size="xxs" />
+                    <Avatar user={liveAuthor(liveEvent)} size="xxs" />
                     <div class={styles.eventInfo}>
-                      <div class={styles.authorName}>{userName(liveAuthors.find(a => a.pubkey === liveEvent.pubkey))}</div>
+                      <div class={styles.authorName}>{userName(liveAuthor(liveEvent))}</div>
                       <div class={styles.ribbon}>
                         <div class={styles.time}>Started {date(liveEvent.starts || 0).label} ago</div>
 

@@ -32,7 +32,7 @@ import { nip19 } from '../lib/nTools';
 import { ProfilePointer } from 'nostr-tools/lib/types/nip19';
 import { useAccountContext } from '../contexts/AccountContext';
 import Avatar from '../components/Avatar/Avatar';
-import { userName } from '../stores/profile';
+import { emptyUser, userName } from '../stores/profile';
 import { humanizeNumber } from '../lib/stats';
 import FollowButton from '../components/FollowButton/FollowButton';
 import { createStore } from 'solid-js/store';
@@ -57,7 +57,7 @@ import DirectMessagesComposer from '../components/DirectMessages/DirectMessagesC
 import ChatMessageComposer from '../components/LiveVideo/ChatMessageComposer';
 import ChatMessageDetails, { ChatMessageConfig } from '../components/LiveVideo/ChatMessageDetails';
 import { Popover } from '@kobalte/core/popover';
-import RadioBox from '../components/Checkbox/RadioBox';
+import RadioBox, { RadioBoxOption } from '../components/Checkbox/RadioBox';
 import RadioBoxWithDesc from '../components/Checkbox/RadioBoxWithDesc';
 
 const StreamPage: Component = () => {
@@ -131,6 +131,19 @@ const StreamPage: Component = () => {
     profile?.profileKey !== hex && setProfile(hex);
 
     return;
+  }
+
+  const host = () => {
+    const hostPubkey = streamData.hosts?.[0];
+
+    if (hostPubkey) {
+      const host = people.find(p => p.pubkey == hostPubkey) || emptyUser(hostPubkey);
+
+      if (host) return host;
+
+    }
+
+    return profile?.userProfile;
   }
 
   createEffect(() => {
@@ -215,6 +228,7 @@ const StreamPage: Component = () => {
 
   const [events, setEvents] = createStore<NostrEventContent[]>([]);
   const [people, setPeople] = createStore<PrimalUser[]>([]);
+  const [fetchingPeople, setFetchingPeople] = createSignal(false);
 
   let mutedEvents: NostrEventContent[]= [];
 
@@ -225,39 +239,60 @@ const StreamPage: Component = () => {
       return acc.includes(pk) ? acc : [...acc, pk]
     }, [])
 
+    setFetchingPeople(true);
     const { users } = await fetchPeople(pks, subId);
+
     setPeople((peps) => [ ...peps, ...users]);
+
+    setFetchingPeople(false);
   }
 
   let fetchedPubkeys: string[] = [];
 
   let userFetcher = setInterval(() => {
+    if (fetchingPeople()) return;
+
+    let parts = [ ...(streamData.participants || []) ];
+
     let pks = events.reduce<string[]>((acc, e) => {
       let newPks: string[] = [];
 
       if (e.kind === Kind.Zap) {
-        const zapEvent = JSON.parse((e.tags?.find((t: string[]) => t[0] === 'description') || [])[1] || '{}');
+        let zapEvent = { tags: [] };
+
+        try {
+          zapEvent = JSON.parse((e.tags?.find((t: string[]) => t[0] === 'description') || [])[1] || '{}');
+        }
+        catch (err) {
+          zapEvent = { tags: [] };
+        }
 
         const tagPks = zapEvent.tags.reduce(
-          (acc: string[], t: string[]) => {
-            if (t[0] === 'p' && !acc.includes(t[1])) {
-              return [...acc, t[1]];
+          (acc1: string[], t: string[]) => {
+            if (t[0] === 'p' && !acc1.includes(t[1])) {
+              return [...acc1, t[1]];
             }
-            return acc;
+            return acc1;
           },
           []
         );
 
 
-        newPks = [...newPks, (zapEvent.pubkey || '') as string, ...tagPks];
+        newPks = [...newPks, ...tagPks];
+
+        // @ts-ignore
+        if (zapEvent.pubkey) {
+          // @ts-ignore
+          newPks.push(zapEvent.pubkey);
+        }
       }
 
       const tagPks = (e.tags || []).reduce(
-        (acc: string[], t: string[]) => {
-          if (t[0] === 'p' && !acc.includes(t[1])) {
-            return [...acc, t[1]];
+        (acc1: string[], t: string[]) => {
+          if (t[0] === 'p' && !acc1.includes(t[1])) {
+            return [...acc1, t[1]];
           }
-          return acc;
+          return acc1;
         },
         []
       );
@@ -286,7 +321,7 @@ const StreamPage: Component = () => {
       return [...acc, ...newPks];
     }, []);
 
-    pks = pks.filter(pk => !fetchedPubkeys.includes(pk) && pk .length > 0);
+    pks = [...pks, ...parts].filter(pk => !fetchedPubkeys.includes(pk) && pk .length > 0);
 
     if (pks.length > 0) {
       fetchMissingUsers(pks);
@@ -438,34 +473,39 @@ const StreamPage: Component = () => {
 
   const renderChatZap = (event: NostrUserZaps) => {
 
-    const zap = convertToZap(event);
+    try {
+      const zap = convertToZap(event);
 
-    return (
-      <div class={`${styles.liveMessage} ${styles.zapMessage}`}>
-        <div class={styles.leftSide}>
-          <Avatar user={author(zap.sender as string)} size="xss" />
-        </div>
-        <div class={styles.rightSide}>
-          <span class={styles.zapInfo}>
-            <span class={styles.authorName}>
-              <span>
-                {userName(author(zap.sender as string), zap.sender as string)}
+      return (
+        <div class={`${styles.liveMessage} ${styles.zapMessage}`}>
+          <div class={styles.leftSide}>
+            <Avatar user={author(zap.sender as string)} size="xss" />
+          </div>
+          <div class={styles.rightSide}>
+            <span class={styles.zapInfo}>
+              <span class={styles.authorName}>
+                <span>
+                  {userName(author(zap.sender as string), zap.sender as string)}
+                </span>
+                <span class={styles.zapped}>
+                  zapped
+                </span>
               </span>
-              <span class={styles.zapped}>
-                zapped
-              </span>
+              <div class={styles.zapStats}>
+                <div class={styles.zapIcon}></div>
+                {humanizeNumber(zap?.amount || 0, false)}
+              </div>
             </span>
-            <div class={styles.zapStats}>
-              <div class={styles.zapIcon}></div>
-              {humanizeNumber(zap?.amount || 0, false)}
-            </div>
-          </span>
-          <span class={styles.messageContent}>
-            {zap?.message}
-          </span>
+            <span class={styles.messageContent}>
+              {zap?.message}
+            </span>
+          </div>
         </div>
-      </div>
-    );
+      );
+    }
+    catch (e) {
+      return <></>;
+    }
   }
   const renderEvent = (event: NostrEventContent) => {
     switch (event.kind) {
@@ -479,10 +519,13 @@ const StreamPage: Component = () => {
   const topZaps = () => {
     const zaps = events.reduce<PrimalZap[]>((acc, e) => {
       if (e.kind !== Kind.Zap) return acc;
+      try {
+        const z = convertToZap(e);
 
-      const z = convertToZap(e);
-
-      return [...acc, { ...z }];
+        return [...acc, { ...z }];
+      } catch (e) {
+        return acc;
+      }
     }, []);
 
     return zaps.sort((a, b) => b.amount - a.amount);
@@ -742,9 +785,13 @@ const StreamPage: Component = () => {
         (e.created_at || 0) <= lastCounted
       ) return acc;
 
-      const z = convertToZap(e);
+      try {
+        const z = convertToZap(e);
 
-      return acc + z.amount;
+        return acc + z.amount;
+      } catch (e) {
+        return acc;
+      }
     }, topZapList.totalSats);
   }
 
@@ -788,21 +835,21 @@ const StreamPage: Component = () => {
       <div class={`${styles.streamingMain} ${!showLiveChat() ? styles.fullWidth : ''}`}>
         <div class={styles.streamingHeader}>
           <div class={styles.streamerInfo}>
-            <a href={app?.actions.profileLink(profile?.profileKey)}>
-              <Avatar user={profile?.userProfile} size="s50" />
+            <a href={app?.actions.profileLink(host()?.pubkey)}>
+              <Avatar user={host()} size="s50" />
             </a>
             <div class={styles.userInfo}>
               <div class={styles.userName}>
-                {userName(profile?.userProfile)}
+                {userName(host())}
               </div>
               <div class={styles.userStats}>
-                {humanizeNumber(profile?.userStats.followers_count || 0)} followers
+                {humanizeNumber(host()?.userStats?.followers_count || 0)} followers
               </div>
             </div>
           </div>
 
           <div class={styles.headerActions}>
-            <FollowButton person={profile?.userProfile} thick={true} />
+            <FollowButton person={host()} thick={true} />
 
             <Show when={!showLiveChat()}>
               <button class={styles.chatButton} onClick={() => setShowLiveChat(true)}>
@@ -868,7 +915,7 @@ const StreamPage: Component = () => {
           </div>
 
           <div class={styles.summary}>
-            {parseSummary(streamData.summary)}
+            {parseSummary(streamData.summary || '')}
           </div>
         </div>
       </div>
@@ -910,7 +957,7 @@ const StreamPage: Component = () => {
                           { value: 'all', label: 'All Messages', description: 'Show every message, including from accounts muted by the host'},
                         ]}
                         value={chatMode()}
-                        onChange={(option) => {
+                        onChange={(option: RadioBoxOption) => {
                           setChatMode(() => option.value)
                         }}
                       />
@@ -941,10 +988,13 @@ const StreamPage: Component = () => {
                     let pk = e.pubkey;
 
                     if (e.kind === Kind.Zap) {
-                      const zap = convertToZap(e);
-                      if (zap.sender) {
-                        pk = typeof zap.sender === 'string' ? zap.sender : zap.sender.pubkey;
+                      try {
+                        const zap = convertToZap(e);
+                        if (zap.sender) {
+                          pk = typeof zap.sender === 'string' ? zap.sender : zap.sender.pubkey;
+                        }
                       }
+                      catch (err) {}
                     }
 
                     return pk === pubkey && !events.find(ev => ev.id === e.id);
@@ -954,10 +1004,14 @@ const StreamPage: Component = () => {
                     let pk = e.pubkey;
 
                     if (e.kind === Kind.Zap) {
-                      const zap = convertToZap(e);
-                      if (zap.sender) {
-                        pk = typeof zap.sender === 'string' ? zap.sender : zap.sender.pubkey;
+                      try {
+                        const zap = convertToZap(e);
+                        if (zap.sender) {
+                          pk = typeof zap.sender === 'string' ? zap.sender : zap.sender.pubkey;
+                        }
+
                       }
+                      catch(err) {}
                     }
 
                     return pk !== pubkey;
@@ -977,10 +1031,14 @@ const StreamPage: Component = () => {
                   let pk = e.pubkey;
 
                   if (e.kind === Kind.Zap) {
-                    const zap = convertToZap(e);
-                    if (zap.sender) {
-                      pk = typeof zap.sender === 'string' ? zap.sender : zap.sender.pubkey;
+                    try {
+                      const zap = convertToZap(e);
+                      if (zap.sender) {
+                        pk = typeof zap.sender === 'string' ? zap.sender : zap.sender.pubkey;
+                      }
+
                     }
+                    catch (err) {}
                   }
 
                   return pk === pubkey;
@@ -990,10 +1048,6 @@ const StreamPage: Component = () => {
 
                 for (let i = 0; i < eventsToMute.length;i++) {
                   const e = eventsToMute[i];
-
-                  if (e.kind === Kind.Zap) {
-                    const zap = convertToZap(e);
-                  }
 
                   if (!mutedEventIds.includes(e.id)) {
                     mutedEvents.push(e);
