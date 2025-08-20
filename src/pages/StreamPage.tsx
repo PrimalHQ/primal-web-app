@@ -16,7 +16,7 @@ import styles from './StreamPage.module.scss';
 import { toast as t } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { appStoreLink, playstoreLink, apkLink, Kind } from '../constants';
+import { appStoreLink, playstoreLink, apkLink, Kind, urlRegex, hashtagRegex, hashtagCharsRegex } from '../constants';
 import ExternalLink from '../components/ExternalLink/ExternalLink';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
@@ -44,7 +44,7 @@ import { updateFeedPage, pageResolve, fetchPeople } from '../megaFeeds';
 import { NostrEvent, NostrEOSE, NostrEvents, NostrEventContent, NostrLiveEvent, NostrLiveChat, PrimalUser, NostrUserZaps, PrimalZap, ZapOption } from '../types/primal';
 import VerificationCheck from '../components/VerificationCheck/VerificationCheck';
 import { CustomZapInfo, useAppContext } from '../contexts/AppContext';
-import { sendEvent, triggerImportEvents } from '../lib/notes';
+import { isHashtag, isUrl, sendEvent, triggerImportEvents } from '../lib/notes';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import { canUserReceiveZaps, convertToZap, zapStream } from '../lib/zap';
 import { readSecFromStorage } from '../lib/localStore';
@@ -750,6 +750,39 @@ const StreamPage: Component = () => {
 
   const [selectedChatMesage, setSelectedChatMessage] = createSignal<ChatMessageConfig>()
 
+  const parseSummary = (text: string) => {
+    const tokens = (text || '').split(' ');
+
+    return (
+      <For each={tokens}>
+        {token => {
+          if (isUrl(token)) {
+            return <a href={token} target='_blank'>{token} </a>;
+          }
+
+          if (isHashtag(token)) {
+            let [_, term] = token.split('#');
+            let end = '';
+
+            let match = hashtagCharsRegex.exec(term);
+
+            if (match) {
+              const i = match.index;
+              end = term.slice(i);
+              term = term.slice(0, i);
+            }
+
+            const embeded = <a href={`/search/%23${term}`}>#{term}</a>;
+
+            return <span class="whole"> {embeded}{end}</span>;
+          }
+
+          return <span>{token} </span>
+        }}
+      </For>
+    );
+  }
+
   return (
     <div class={styles.streamingPage}>
       <div class={`${styles.streamingMain} ${!showLiveChat() ? styles.fullWidth : ''}`}>
@@ -835,7 +868,7 @@ const StreamPage: Component = () => {
           </div>
 
           <div class={styles.summary}>
-            {streamData.summary}
+            {parseSummary(streamData.summary)}
           </div>
         </div>
       </div>
