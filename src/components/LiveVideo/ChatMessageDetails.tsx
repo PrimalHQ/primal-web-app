@@ -150,7 +150,11 @@ const ChatMessageDetails: Component<{
       style={`top:${position() || 0}px;`}
     >
       <div class={styles.header}>
-        <div class={styles.author}>
+        <a
+          class={styles.author}
+          href={app?.actions.profileLink(props.config?.message.pubkey)}
+          target='_blank'
+        >
           <div class={styles.userInfo}>
             <Avatar user={props.config?.author} size="s38" />
             <div class={styles.nameAndNip}>
@@ -167,7 +171,7 @@ const ChatMessageDetails: Component<{
             </div>
             <div class={styles.label}>followers</div>
           </div>
-        </div>
+        </a>
 
         <div class={styles.controls}>
           <button

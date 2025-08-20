@@ -1250,7 +1250,7 @@ export function AccountProvider(props: { children: JSXElement }) {
             thread: 'e',
           }
 
-          const tags = unwrap(store.mutedTags).filter(t => t[0] !== flags[muteKind] || t[1] !== pubkey);
+          const tags = unwrap(store.mutedTags).filter(t => t[0] !== flags[muteKind] || t[1] !== pubkey).filter(t => t[1] !== "");
 
           const { success, note } = await sendMuteList(tags, date, store.mutedPrivate, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
 
