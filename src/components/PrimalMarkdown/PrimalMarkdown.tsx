@@ -34,6 +34,7 @@ import { useMediaContext } from '../../contexts/MediaContext';
 import { useAppContext } from '../../contexts/AppContext';
 import { isAndroid } from '@kobalte/utils';
 import { logError } from '../../lib/logger';
+import LiveEventPreview from '../LiveVideo/LiveEventPreview';
 
 export type Coord = {
   x: number;
@@ -449,10 +450,24 @@ const PrimalMarkdown: Component<{
 
       if (noteId.startsWith('naddr')) {
 
-        const mention = props.article?.mentionedArticles && props.article.mentionedArticles[noteId];
+        let mention = props.article?.mentionedArticles && props.article.mentionedArticles[noteId];
 
         if (!mention) {
-          return <>nostr:{noteId}</>;
+
+          let mention = props.article?.mentionedLiveEvents && props.article.mentionedLiveEvents[noteId];
+
+          if (!mention) {
+            return <>nostr:{noteId}</>;
+          }
+
+
+          return (
+            <div class={styles.articlePreview}>
+              <LiveEventPreview
+                stream={mention}
+              />
+            </div>
+          );
         };
 
         return (

@@ -62,10 +62,18 @@ const LiveEventPreview: Component<{
     }
 
     fetchMissingUsers(pks);
-  })
+  });
+
+  const liveHref = () => {
+    const event = props.stream;
+
+    if (!event) return '';
+
+    return `${app?.actions.profileLink(event.pubkey, true)}/live/${event.id}`;
+  }
 
   return (
-    <div class={styles.liveEventPreview} >
+    <a class={styles.liveEventPreview} href={liveHref()} >
       <Avatar size="vs2" user={firstHost()} />
       <div class={styles.streamInfo}>
         <div class={styles.header}>
@@ -91,7 +99,7 @@ const LiveEventPreview: Component<{
           Live
         </Show>
       </div>
-    </div>
+    </a>
   );
 }
 

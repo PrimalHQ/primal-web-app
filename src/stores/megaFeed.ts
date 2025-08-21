@@ -614,6 +614,7 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
       mentionedUsers,
       mentionedHighlights,
       mentionedZaps,
+      mentionedLiveEvents,
     } = extractMentions(page, read);
 
     const published = read.tags.reduce<number>((acc, t) => {
@@ -647,6 +648,7 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
       mentionedHighlights,
       mentionedArticles,
       mentionedZaps,
+      mentionedLiveEvents,
       wordCount,
       noteActions: (page.noteActions && page.noteActions[read.id]) ?? noActions(read.id),
       bookmarks: stat?.bookmarks || 0,
