@@ -11,10 +11,10 @@ import { getEvents } from "../../../lib/feed";
 import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents, getParametrizedEvent } from "../../../lib/notes";
 import { getUserProfiles, getUsersRelayInfo } from "../../../lib/profile";
 import { subsTo } from "../../../sockets";
-import { convertToArticles, convertToNotes, referencesToTags } from "../../../stores/note";
-import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
+import { convertToArticles, convertToLiveEvents, convertToNotes, referencesToTags } from "../../../stores/note";
+import { convertToUser, emptyUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
 import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalArticle, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
-import { debounce, getScreenCordinates, isVisibleInContainer, uuidv4 } from "../../../utils";
+import { debounce, getScreenCordinates, isVisibleInContainer, replaceAsync, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
 import MentionedUserLink from "../../Note/MentionedUserLink/MentionedUserLink";
@@ -52,6 +52,9 @@ import DOMPurify from "dompurify";
 import { useAppContext } from "../../../contexts/AppContext";
 import UploaderBlossom from "../../Uploader/UploaderBlossom";
 import ParsedNote from "../../ParsedNote/ParsedNote";
+import LiveEventPreview from "../../LiveVideo/LiveEventPreview";
+import { StreamingData } from "../../../lib/streaming";
+import { fetchUserProfile } from "../../../handleFeeds";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -104,6 +107,7 @@ const EditBox: Component<{
   const [noteRefs, setNoteRefs] = createStore<Record<string, PrimalNote>>({});
   const [articleRefs, setArticleRefs] = createStore<Record<string, PrimalArticle>>({});
   const [highlightRefs, setHighlightRefs] = createStore<Record<string, any>>({});
+  const [liveEventRefs, setLiveEventRefs] = createStore<Record<string, StreamingData>>({});
 
   const [highlightedUser, setHighlightedUser] = createSignal<number>(0);
   const [highlightedEmoji, setHighlightedEmoji] = createSignal<number>(0);
@@ -1101,7 +1105,7 @@ const EditBox: Component<{
             return;
           }
 
-          if ([Kind.LongForm, Kind.LongFormShell].includes(content.kind)) {
+          if ([Kind.LongForm, Kind.LongFormShell, Kind.LiveEvent].includes(content.kind)) {
             const message = content as NostrNoteContent;
 
             setReferencedArticles(id, 'messages',
@@ -1137,7 +1141,27 @@ const EditBox: Component<{
           }
         },
         onEose: () => {
-          const newNote = convertToArticles(referencedArticles[id])[0];
+          let ref = referencedArticles[id];
+
+          const m = ref.messages[0];
+
+          if (m.kind === Kind.LiveEvent) {
+            const liveEvent = convertToLiveEvents(ref)[0];
+
+            setLiveEventRefs((refs) => ({
+              ...refs,
+              [id]: liveEvent,
+            }))
+
+            subNaddrRef(id);
+
+            unsub();
+
+            return;
+          }
+
+
+          const newNote = convertToArticles(ref)[0];
 
           setArticleRefs((refs) => ({
             ...refs,
@@ -1157,9 +1181,8 @@ const EditBox: Component<{
 
   };
 
-  const subNaddrRef = (noteId: string) => {
-    const parsed = parsedMessage().replace(eventRegexG, (url) => {
-
+  const subNaddrRef = async (noteId: string) => {
+    const parsed = await replaceAsync(parsedMessage(), eventRegexG, async (url) => {
       let id = url;
 
       const idStart = url.search(addrRegex);
@@ -1183,7 +1206,25 @@ const EditBox: Component<{
       ) return url;
 
       try {
-        const article = articleRefs[noteId];
+        let article = articleRefs[noteId];
+
+        if (!article) {
+          let stream = liveEventRefs[noteId];
+
+          if (!stream) return url;
+
+          const hostPubkey = stream.hosts?.[0] || stream.pubkey;
+
+          const user = await fetchUserProfile(account?.publicKey, hostPubkey, `missing_user_${APP_ID}`);
+
+          const link = stream ?
+            <div>
+              <LiveEventPreview stream={stream} user={user} />
+            </div> : <span class="linkish">{url}</span>;
+
+          // @ts-ignore
+          return link.outerHTML || url;
+        }
 
         const link = <div class={styles.highlight}>
           <SimpleArticlePreview article={article} noLink={true} />
@@ -1297,6 +1338,27 @@ const EditBox: Component<{
 
           if (content.kind === Kind.Highlight) {
             setHighlightRefs(id, () => ({ ...content }));
+            return;
+          }
+
+          if (content.kind === Kind.LiveEvent) {
+
+            const streamData = {
+              id: (content.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
+              url: (content.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
+              image: (content.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
+              status: (content.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
+              starts: parseInt((content.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
+              summary: (content.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
+              title: (content.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
+              client: (content.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
+              currentParticipants: parseInt((content.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+              pubkey: content.pubkey,
+              hosts: (content.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
+              participants: (content.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
+            };
+
+            setLiveEventRefs(id, () => ({ ...streamData }));
             return;
           }
 

@@ -6,6 +6,7 @@ import { Kind } from "../constants";
 import { CohortInfo } from "../contexts/AppContext";
 import { LegendCustomizationConfig } from "../lib/premium";
 import { LeaderboardInfo } from "../megaFeeds";
+import { StreamingData } from "../lib/streaming";
 
 export type TopZap = {
   id: string,
@@ -918,6 +919,7 @@ export type PrimalNote = {
   mentionedArticles?: Record<string, PrimalArticle>,
   mentionedZaps?: Record<string, PrimalZap>,
   mentionedHighlights?: Record<string, any>,
+  mentionedLiveEvents?: Record<string, StreamingData>,
   replyTo?: string,
   id: string,
   pubkey: string,
@@ -944,6 +946,7 @@ export type PrimalArticle = {
   mentionedUsers?: Record<string, PrimalUser>,
   mentionedZaps?: Record<string, PrimalZap>,
   mentionedHighlights?: Record<string, any>,
+  mentionedLiveEvents?: Record<string, StreamingData>,
   replyTo?: string,
   id: string,
   pubkey: string,

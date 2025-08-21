@@ -364,6 +364,8 @@ const StreamPage: Component = () => {
         client: (content.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
         currentParticipants: parseInt((content.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
         pubkey: content.pubkey,
+        hosts: (content.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
+        participants: (content.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
       });
 
       return;

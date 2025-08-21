@@ -73,6 +73,8 @@ import ProfileNoteZap from '../ProfileNoteZap/ProfileNoteZap';
 import { parseBolt11 } from '../../utils';
 import SimpleArticlePreview from '../ArticlePreview/SimpleArticlePreview';
 import NostrImage from '../NostrImage/NostrImage';
+import { StreamingData } from '../../lib/streaming';
+import LiveEventPreview from '../LiveVideo/LiveEventPreview';
 
 const groupGridLimit = 5;
 
@@ -1236,9 +1238,45 @@ const ParsedNote: Component<{
           return renderLongFormMention(mention, index);
         }
 
+        if (data.kind === Kind.LiveEvent) {
+
+          const mentionedLiveEvents = rn.mentionedLiveEvents;
+
+
+          const decodedKeys = Object.entries(mentionedLiveEvents || {}).map(entry => ({ decoded: decodeIdentifier(entry[0]), mention: entry[1] }));
+
+          if (!mentionedLiveEvents || (props.embedLevel || 0) > 1) {
+            return unknownMention(reEncoded, token);
+          }
+
+          // const mention = mentionedArticles[id];
+          const mention = decodedKeys.reduce<StreamingData | undefined>((acc, d) => {
+            const dta = d.decoded.data;
+
+            // @ts-ignore
+            if (data.identifier === dta.identifier && data.kind === dta.kind && data.pubkey === dta.pubkey) {
+              return d.mention;
+            }
+
+            return acc;
+          }, undefined);
+
+          if (!mention) {
+            return unknownMention(id, token);
+          }
+
+          return renderLiveEvent(mention, index);
+        }
+
         return unknownMention(id, token);
       }}
     </For>
+  }
+
+  const renderLiveEvent = (mention: StreamingData, index?: number) => {
+    return <LiveEventPreview
+      stream={mention}
+    />;
   }
 
   const renderLongFormMention = (mention: PrimalArticle | undefined, index?: number) => {
@@ -1327,6 +1365,11 @@ const ParsedNote: Component<{
           const mentionedZaps = {
             ...(rn.mentionedZaps || {}),
             ...(props.note.mentionedZaps || {}),
+          }
+
+          const mentionedLiveEvents = {
+            ...(rn.mentionedLiveEvents || {}),
+            ...(props.note.mentionedLiveEvents || {}),
           }
 
           if (kind === undefined) {
@@ -1500,8 +1543,30 @@ const ParsedNote: Component<{
               }
 
             }
+          }
 
+          if (kind === Kind.LiveEvent) {
+            if (!props.noLinks) {
+              const reEncoded = nip19.naddrEncode({
+                // @ts-ignore
+                kind,
+                // @ts-ignore
+                pubkey: eventId.pubkey || '',
+                // @ts-ignore
+                identifier: eventId.identifier || '',
+              });
 
+              const ment = mentionedLiveEvents && mentionedLiveEvents[reEncoded];
+
+              link = unknownMention(id, token);
+
+              if (ment) {
+                setWordsDisplayed(w => w + shortMentionInWords);
+
+                // @ts-ignore
+                link = renderLiveEvent(ment, index);
+              }
+            }
           }
 
         } catch (e) {

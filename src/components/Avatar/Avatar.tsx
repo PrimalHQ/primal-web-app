@@ -26,7 +26,9 @@ const Avatar: Component<{
 
   const media = useMediaContext();
   const app = useAppContext();
-  const [searchParams, setSearchParams] = useSearchParams();
+
+  let queryString = window.location.search;
+  let searchParams = new URLSearchParams(queryString);
 
   const [isCached, setIsCached] = createSignal(false);
 
@@ -251,7 +253,7 @@ const Avatar: Component<{
         </div>
       </Show>
 
-      <Show when={searchParams.live === '1' && media?.actions.isStreaming(props.user?.pubkey || 'n/a')}>
+      <Show when={searchParams.get('live') === '1' && media?.actions.isStreaming(props.user?.pubkey || 'n/a')}>
         <div class={styles.centerBottom}>
           <a
             id={props.id}
