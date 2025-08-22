@@ -251,7 +251,6 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
     if (!event) return '';
 
     return `${app?.actions.profileLink(event.pubkey, true)}/live/${event.id}`;
-
   }
 
   const liveAuthor = (data: StreamingData) => {
@@ -284,7 +283,7 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
                   <div class={styles.leftSide}>
                     <Avatar user={liveAuthor(liveEvent)} size="xxs" />
                     <div class={styles.eventInfo}>
-                      <div class={styles.authorName}>{userName(liveAuthor(liveEvent))}</div>
+                      <div class={styles.authorName}>{liveEvent.title || userName(liveAuthor(liveEvent))}</div>
                       <div class={styles.ribbon}>
                         <div class={styles.time}>Started {date(liveEvent.starts || 0).label} ago</div>
 
