@@ -135,15 +135,18 @@ const StreamPage: Component = () => {
 
   const host = () => {
     const hostPubkey = streamData.hosts?.[0];
-
-    if (hostPubkey) {
+    if (hostPubkey && people.length > 0) {
       const host = people.find(p => p.pubkey == hostPubkey) || emptyUser(hostPubkey);
-
       if (host) return host;
-
     }
 
-    return profile?.userProfile;
+    const eventPubkey = streamData.pubkey;
+    if (eventPubkey && people.length > 0) {
+      const host = people.find(p => p.pubkey == streamData.pubkey) || emptyUser(eventPubkey);
+      if (host) return host;
+    }
+
+    return undefined;
   }
 
   createEffect(() => {
@@ -836,30 +839,32 @@ const StreamPage: Component = () => {
     <div class={styles.streamingPage}>
       <div class={`${styles.streamingMain} ${!showLiveChat() ? styles.fullWidth : ''}`}>
         <div class={styles.streamingHeader}>
-          <div class={styles.streamerInfo}>
-            <a href={app?.actions.profileLink(host()?.pubkey)}>
-              <Avatar user={host()} size="s50" />
-            </a>
-            <div class={styles.userInfo}>
-              <div class={styles.userName}>
-                {userName(host())}
-              </div>
-              <div class={styles.userStats}>
-                {humanizeNumber(host()?.userStats?.followers_count || 0)} followers
+          <Show when={host()}>
+            <div class={styles.streamerInfo}>
+              <a href={app?.actions.profileLink(host()?.pubkey)}>
+                <Avatar user={host()} size="s50" />
+              </a>
+              <div class={styles.userInfo}>
+                <div class={styles.userName}>
+                  {userName(host())}
+                </div>
+                <div class={styles.userStats}>
+                  {humanizeNumber(host()?.userStats?.followers_count || 0)} followers
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class={styles.headerActions}>
-            <FollowButton person={host()} thick={true} />
+            <div class={styles.headerActions}>
+              <FollowButton person={host()} thick={true} />
 
-            <Show when={!showLiveChat()}>
-              <button class={styles.chatButton} onClick={() => setShowLiveChat(true)}>
-                <div class={styles.chatIcon}></div>
-              </button>
-            </Show>
+              <Show when={!showLiveChat()}>
+                <button class={styles.chatButton} onClick={() => setShowLiveChat(true)}>
+                  <div class={styles.chatIcon}></div>
+                </button>
+              </Show>
 
-          </div>
+            </div>
+          </Show>
         </div>
 
         <div ref={streamingContent} class={styles.streamContent}>
