@@ -533,6 +533,7 @@
         .rightSide {
           width: 100%;
           line-height: 20px;
+          overflow: hidden;
 
           .zapInfo {
             display: flex;
@@ -540,6 +541,32 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 4px;
+
+            span, div {
+              /* Common styling for all items */
+              flex-basis: 0; /* Ensures growth is based on available space, not initial size */
+            }
+
+            .zapStats {
+              display: flex;
+              height: 24px;
+              padding-inline: 8px;
+              align-items: center;
+              gap: 2px;
+              width: fit-content;
+              border-radius: 24px;
+              background: var(--active-zap);
+
+              color: var(--background-site);
+              font-size: 16px;
+              font-weight: 700;
+              line-height: 16px;
+              fex-grow: 1;
+
+              .zapIcon {
+                background-color: var(--background-site);
+              }
+            }
           }
 
           .authorName {
@@ -557,7 +584,7 @@
               -webkit-line-clamp: 1;
               text-overflow: ellipsis;
               overflow: hidden;
-              max-width: 160px;
+              /* max-width: 160px; */
 
               &.zapped {
                 color: var(--active-zap);
@@ -568,25 +595,6 @@
             }
           }
 
-          .zapStats {
-            display: flex;
-            height: 24px;
-            padding-inline: 8px;
-            align-items: center;
-            gap: 2px;
-            width: fit-content;
-            border-radius: 24px;
-            background: var(--active-zap);
-
-            color: var(--background-site);
-            font-size: 16px;
-            font-weight: 700;
-            line-height: 16px;
-
-            .zapIcon {
-              background-color: var(--background-site);
-            }
-          }
         }
 
         .messageContent {

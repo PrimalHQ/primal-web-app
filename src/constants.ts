@@ -181,6 +181,8 @@ export enum Kind  {
   OrderHistory = 10_000_605,
 
   LongFormShell = 10_030_023,
+
+  LiveChatReload = 11_000_001,
 }
 
 export const relayConnectingTimeout = 1000;

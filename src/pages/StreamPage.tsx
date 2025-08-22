@@ -339,6 +339,11 @@ const StreamPage: Component = () => {
   })
 
   const handleLiveEventMessage = (content: NostrEventContent) => {
+    // @ts-ignore
+    if (content.kind === Kind.LiveChatReload) {
+      refreshFeed();
+      return;
+    }
 
     if (content.kind === Kind.LiveEventStats) {
       const stats = JSON.parse(content.content || '{}');
