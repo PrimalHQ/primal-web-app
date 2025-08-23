@@ -309,11 +309,16 @@ const StreamPage: Component = () => {
         const refs = matches ? matches.map(match => match.replace(/^nostr:/, '')) : [];
 
         return refs.reduce<string[]>((acc, r) => {
-          const decoded = nip19.decode(r);
+          try {
+            const decoded = nip19.decode(r);
 
-          if (decoded.type === 'npub') return [...acc, decoded.data];
-          if (decoded.type === 'nprofile') return [...acc, decoded.data.pubkey];
-          return acc;
+            if (decoded.type === 'npub') return [...acc, decoded.data];
+            if (decoded.type === 'nprofile') return [...acc, decoded.data.pubkey];
+            return acc;
+          }
+          catch (e) {
+            return acc;
+          }
         }, []);
       }
 
@@ -526,7 +531,11 @@ const StreamPage: Component = () => {
     }
   }
 
+  const [topZapLimit, setTopZapLimit] = createSignal(5);
+
   const topZaps = () => {
+    if (topZapLimit() === 0) return [];
+
     const zaps = events.reduce<PrimalZap[]>((acc, e) => {
       if (e.kind !== Kind.Zap) return acc;
       try {
@@ -564,7 +573,8 @@ const StreamPage: Component = () => {
   }
 
   const renderRestZaps = () => {
-    const zaps = topZaps().slice(1, 5);
+    if (topZapLimit() === 0) return <></>;
+    const zaps = topZaps().slice(1, topZapLimit());
 
     return <div class={styles.restZaps}>
       <For each={zaps}>
@@ -928,6 +938,17 @@ const StreamPage: Component = () => {
 
           <div class={styles.summary}>
             {parseSummary(streamData.summary || '')}
+          </div>
+
+          <div class={styles.testButtons}>
+            <button onClick={() => {
+              setTopZapLimit(() => 0);
+            }}>Hide All</button>
+            <Show when={topZapLimit() < 5}>
+              <button onClick={() =>{
+                setTopZapLimit((l) => l + 1)
+              }}>Add One</button>
+            </Show>
           </div>
         </div>
       </div>

@@ -187,6 +187,7 @@
 
   .rightSide {
     line-height: 20px;
+    overflow: hidden;
     .authorName {
       color: var(--text-primary);
       font-size: 16px;
@@ -609,5 +610,24 @@
   .options {
     display: flex;
     flex-direction: column;
+  }
+}
+
+.testButtons {
+  display: flex;
+  gap: 12px;
+  padding-inline: 24px;
+
+  button {
+    background-color: var(--background-input);
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 20px;
+
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    margin: 0;
   }
 }
