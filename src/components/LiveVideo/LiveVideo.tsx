@@ -50,9 +50,21 @@ const LiveVideo: Component<{
 
   const [isMediaLoaded, setIsMediaLoaded] = createSignal(false);
 
+  const streamUrl = () => {
+    console.log('RET: ');
+
+    if (props.stream.status === 'live') return props.stream.url;
+
+    const ret = (props.stream.event?.tags || []).find(t => t[0] === 'recording')?.[1];
+
+    console.log('RET: ', ret);
+
+    return ret;
+  }
+
   return (
     <div class={styles.liveVideo} >
-      <Show when={props.src} fallback={<div class={styles.videoPlaceholder}></div>}>
+      <Show when={streamUrl()} fallback={<div class={styles.videoPlaceholder}></div>}>
         <Show when={!isMediaLoaded()}>
           <div class={styles.videoPlaceholder}></div>
         </Show>
@@ -63,17 +75,13 @@ const LiveVideo: Component<{
           style={!isMediaLoaded() ? 'display: none;' : ''}
         >
           <hls-video
-            src={props.src}
+            src={streamUrl()}
             slot="media"
             crossorigin
             autoplay
             ref={hlsVideo}
             onloadedmetadata={() => {
                 setIsMediaLoaded(true);
-              setTimeout(() => {
-
-              }, 100)
-
             }}
             onloadstart={() => {
               const hls = hlsVideo?.api as Hls;
