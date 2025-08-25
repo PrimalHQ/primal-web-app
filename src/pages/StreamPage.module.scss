@@ -1,3 +1,50 @@
+@keyframes fadeIn {
+  from {
+    opacity: 0; /* Starting state: fully transparent */
+  }
+  to {
+    opacity: 1; /* Ending state: fully opaque */
+  }
+}
+@keyframes fadeOut {
+  from {
+    opacity: 1; /* Starting state: fully transparent */
+  }
+  to {
+    opacity: 0; /* Ending state: fully opaque */
+  }
+}
+
+@keyframes fadeInZaps {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 0; /* Starting state: fully transparent */
+  }
+  100% {
+    opacity: 1; /* Ending state: fully opaque */
+  }
+}
+
+@keyframes fadeOutZaps {
+  from {
+    opacity: 1; /* Starting state: fully transparent */
+  }
+  to {
+    opacity: 0; /* Ending state: fully opaque */
+  }
+}
+
+@keyframes fadeInZap {
+  from {
+    background-color: var(--active-zap);
+  }
+  to {
+    background-color: var(--background-input);
+  }
+}
+
 .streamingPage {
   width: 100%;
   position: relative;
@@ -399,11 +446,12 @@
 }
 
 .topZaps {
-  display: flex;
-  justify-content: space-between;
+  /* display: flex;
+  justify-content: space-between; */
+  position: relative;
   width: 100%;
-  min-height: 118px;
-  padding: 16px 20px;
+  height: 118px;
+  /* padding: 16px 20px; */
   border-block: 1px solid var(--subtile-devider);
 
   &.centered {
@@ -415,6 +463,18 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+
+    position: absolute;
+    top: 16px;
+    left: 20px;
+    transition: left 0.5s ease-out;
+    animation: fadeInZaps 1s ease-out forwards;
+
+    &.emptyZaps {
+      left: 200px;
+      transition: left 0.5s ease-in-out;
+      animation: fadeOutZaps 0.5s ease-out forwards;
+    }
 
     .other {
       display: flex;
@@ -435,6 +495,16 @@
     justify-content: flex-end;
     gap: 8px;
 
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    transition: top 0.5s ease-in-out, right 0.5s ease-in-out;
+
+    &.centeredZaps {
+      top: 0px;
+      right: 260px;
+    }
+
     .zapButton {
       width: 100%;
       height: 32px;
@@ -448,11 +518,14 @@
       padding-inline: 8px;
       padding-block: 11px;
 
-      opacity: 1;
+      /* opacity: 1; */
+      animation: fadeIn 1s ease-in-out forwards;
 
       &.noStatsLine {
-        display: none;
-        opacity: 0;
+        visibility: hidden;
+        /* display: none; */
+        /* opacity: 0; */
+        animation: fadeOut 1s ease-in-out forwards;
       }
 
       .totalZaps {
@@ -489,8 +562,10 @@
   align-items: center;
   gap: 8px;
   border-radius: 99px;
-  background: var(--background-input);
+  /* background: var(--background-input); */
   width: fit-content;
+
+  animation: fadeInZap 1s ease-out forwards;
 
   .amount {
     display: flex;

@@ -909,7 +909,7 @@ const StreamPage: Component = () => {
           </div>
 
           <div class={`${styles.topZaps} ${topZaps().length === 0 ? styles.centered : ''}`}>
-            <div class={styles.zapList}>
+            <div class={`${styles.zapList} ${topZaps().length === 0 ? styles.emptyZaps : ''}`}>
               <div class={styles.firstZap}>
                 {renderFirstZap()}
               </div>
@@ -919,7 +919,7 @@ const StreamPage: Component = () => {
                 </div>
               </Show>
             </div>
-            <div class={styles.zapStats}>
+            <div class={`${styles.zapStats} ${topZaps().length === 0 ? styles.centeredZaps : ''}`}>
             <div class={`${styles.statsLine} ${topZaps().length === 0 ? styles.noStatsLine : ''}`}>
                 <div class={styles.totalZaps}>Total {totalZaps()} zaps:</div>
                 <div class={styles.totalSats}>
