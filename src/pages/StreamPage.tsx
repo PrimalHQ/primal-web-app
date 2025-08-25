@@ -556,7 +556,7 @@ const StreamPage: Component = () => {
     return (
       <Show
         when={zap}
-        fallback={<TopZapSkeleton />}
+        fallback={<></>}
       >
         <div class={styles.topZap}>
           <Avatar user={author(zap?.sender as string)} size="s38" />
@@ -908,17 +908,19 @@ const StreamPage: Component = () => {
             </div>
           </div>
 
-          <div class={styles.topZaps}>
+          <div class={`${styles.topZaps} ${topZaps().length === 0 ? styles.centered : ''}`}>
             <div class={styles.zapList}>
               <div class={styles.firstZap}>
                 {renderFirstZap()}
               </div>
-              <div class={styles.other}>
-                {renderRestZaps()}
-              </div>
+              <Show when={topZaps().length > 0}>
+                <div class={styles.other}>
+                  {renderRestZaps()}
+                </div>
+              </Show>
             </div>
             <div class={styles.zapStats}>
-              <div class={styles.statsLine}>
+            <div class={`${styles.statsLine} ${topZaps().length === 0 ? styles.noStatsLine : ''}`}>
                 <div class={styles.totalZaps}>Total {totalZaps()} zaps:</div>
                 <div class={styles.totalSats}>
                   <div class={styles.zapIcon}></div>
@@ -931,7 +933,7 @@ const StreamPage: Component = () => {
                 onMouseUp={commitZap}
               >
                 <div class={styles.zapIcon}></div>
-                Zap Now
+                {topZaps().length > 0 ? 'Zap Now' : 'Be the first to zap this stream!'}
               </button>
             </div>
           </div>

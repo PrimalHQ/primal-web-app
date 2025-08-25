@@ -406,6 +406,11 @@
   padding: 16px 20px;
   border-block: 1px solid var(--subtile-devider);
 
+  &.centered {
+    justify-content: center;
+    align-items: center;
+  }
+
   .zapList {
     display: flex;
     flex-direction: column;
@@ -443,6 +448,13 @@
       padding-inline: 8px;
       padding-block: 11px;
 
+      opacity: 1;
+
+      &.noStatsLine {
+        display: none;
+        opacity: 0;
+      }
+
       .totalZaps {
         color: var(--text-secondary);
         font-size: 16px;
@@ -465,6 +477,8 @@
         }
       }
     }
+
+
   }
 
 }
