@@ -310,6 +310,12 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
         <div class={styles.iconInfo} title={props.iconTooltip}>
           {props.iconInfo}
         </div>
+
+        <Show when={[NotificationType.LIVE_EVENT_STARTED].includes(props.notification.type)}>
+          <div class={styles.iconLiveInfo}>
+            LIVE
+          </div>
+        </Show>
       </div>
 
       <div class={styles.notifContent}>
