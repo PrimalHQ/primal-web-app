@@ -207,6 +207,10 @@
   gap: 12px;
   margin-right: auto;
 
+  &:hover {
+    text-decoration: none !important;
+  }
+
   .streamInfo {
     display: flex;
     flex-direction: column;

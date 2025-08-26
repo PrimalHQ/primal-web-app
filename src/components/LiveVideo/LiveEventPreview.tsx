@@ -84,7 +84,12 @@ const LiveEventPreview: Component<{
         <div class={styles.title}>{props.stream.title}</div>
         <div class={styles.stats}>
           <div class={styles.time}>
-            Started {date(props.stream.starts || 0).label} ago
+            <Show
+              when={props.stream.status === 'live'}
+              fallback={<>Stream ended {date(props.stream.starts || 0).label} ago</>}
+            >
+              Started {date(props.stream.starts || 0).label} ago
+            </Show>
           </div>
           <div class={styles.participants}>
             <div class={styles.participantsIcon}></div>
