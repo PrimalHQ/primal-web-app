@@ -618,6 +618,16 @@ export const sendMuteList = async (muteList: string[][], date: number, content: 
   return await sendEvent(event, relays, relaySettings, shouldProxy);
 };
 
+export const sendStreamMuteList = async (muteList: string[][], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+  const event = {
+    content,
+    kind: Kind.StreamMuteList,
+    tags: muteList,
+    created_at: date,
+  };
+
+  return await sendEvent(event, relays, relaySettings, shouldProxy);
+};
 export const broadcastEvent = async (event: NostrRelaySignedEvent, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
 
   if (shouldProxy) {
@@ -965,7 +975,7 @@ export const getParametrizedEvents = (events: EventCoordinate[], subid: string) 
 };
 
 
-export const getReplacableEvent = (pubkey: string, kind: number, subid: string) => {
+export const getReplacableEvent = (pubkey: string | undefined, kind: number, subid: string) => {
   sendMessage(JSON.stringify([
     "REQ",
     subid,

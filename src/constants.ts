@@ -116,6 +116,7 @@ export enum Kind  {
   Bookmarks = 10_003,
   Blossom = 10_063,
   TierList = 17_000,
+  StreamMuteList = 10_555,
 
   CategorizedPeople = 30_000,
   LongForm = 30_023,

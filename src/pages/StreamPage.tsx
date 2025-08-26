@@ -60,6 +60,7 @@ import { Popover } from '@kobalte/core/popover';
 import RadioBox, { RadioBoxOption } from '../components/Checkbox/RadioBox';
 import RadioBoxWithDesc from '../components/Checkbox/RadioBoxWithDesc';
 import { TransitionGroup } from 'solid-transition-group';
+import CheckBox2 from '../components/Checkbox/CheckBox2';
 
 const StreamPage: Component = () => {
   const profile = useProfileContext();
@@ -1020,8 +1021,28 @@ const StreamPage: Component = () => {
             		<Popover.Content>
                   <div class={styles.chatModeMenu}>
                     <div class={styles.title}>
-                      Chat Filter
+                      Stream Notifications
                     </div>
+                    <div class={styles.checkOptions}>
+                      <CheckBox2
+                        onChange={(checked: boolean) => {
+                          const pk = host()?.pubkey;
+                          if (!pk) return;
+
+                          if (!checked) {
+                            account?.actions.addToStreamMuteList(pk);
+                            return;
+                          }
+
+                          account?.actions.removeFromStreamMuteList(pk);
+                        }}
+                        checked={!account?.streamMuted.includes(host()?.pubkey || '')}
+                        label="Notify me about live streams from this account"
+                      />
+                    </div>
+                    <div class={styles.title}>
+                      Chat Filter
+                    /</div>
                     <div class={styles.options}>
                       <RadioBoxWithDesc
                         options={[

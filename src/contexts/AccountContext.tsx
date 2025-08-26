@@ -29,11 +29,11 @@ import {
 } from '../types/primal';
 import { Kind, pinEncodePrefix, primalBlossom, relayConnectingTimeout, sevenDays, supportedBookmarkTypes } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, reset, subTo, readData, subsTo } from "../sockets";
-import { getReplacableEvent, sendBlossomEvent, sendContacts, sendEvent, sendLike, sendMuteList, triggerImportEvents } from "../lib/notes";
+import { getReplacableEvent, sendBlossomEvent, sendContacts, sendEvent, sendLike, sendMuteList, sendStreamMuteList, triggerImportEvents } from "../lib/notes";
 import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19, utils, relayInit } from "../lib/nTools";
 import { APP_ID } from "../App";
 import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList, getRelays, sendRelays, extractRelayConfigFromTags, getBookmarks } from "../lib/profile";
-import { clearSec, getStorage, getStoredProfile, readBookmarks, readEmojiHistory, readPremiumReminder, readPrimalRelaySettings, readSecFromStorage, saveBookmarks, saveEmojiHistory, saveFollowing, saveLikes, saveMuted, saveMuteList, savePremiumReminder, savePrimalRelaySettings, saveRelaySettings, setStoredProfile, storeSec } from "../lib/localStore";
+import { clearSec, getStorage, getStoredProfile, readBookmarks, readEmojiHistory, readPremiumReminder, readPrimalRelaySettings, readSecFromStorage, saveBookmarks, saveEmojiHistory, saveFollowing, saveLikes, saveMuted, saveMuteList, savePremiumReminder, savePrimalRelaySettings, saveRelaySettings, saveStreamMuted, setStoredProfile, storeSec } from "../lib/localStore";
 import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { getPublicKey } from "../lib/nostrAPI";
 import EnterPinModal from "../components/EnterPinModal/EnterPinModal";
@@ -72,6 +72,10 @@ export type AccountContextStore = {
   mutedTags: string[][],
   mutedPrivate: string,
   mutedSince: number,
+  streamMuted: string[],
+  streamMutedTags: string[][],
+  streamMutedPrivate: string,
+  streamMutedSince: number,
   hasPublicKey: () => boolean,
   isKeyLookupDone: boolean,
   quotedNote: string | undefined,
@@ -111,6 +115,8 @@ export type AccountContextStore = {
     quoteNote: (noteId: string | undefined) => void,
     addToMuteList: (pubkey: string, muteKind?: 'user' | 'word' | 'hashtag' | 'thread', then?: (success?: boolean) => void) => void,
     removeFromMuteList: (pubkey: string, muteKind?: 'user' | 'word' | 'hashtag' | 'thread', then?: (success?: boolean) => void) => void,
+    addToStreamMuteList: (pubkey: string, then?: (success?: boolean) => void) => void,
+    removeFromStreamMuteList: (pubkey: string, then?: (success?: boolean) => void) => void,
     addRelay: (url: string) => void,
     removeRelay: (url: string) => void,
     setConnectToPrimaryRelays: (flag: boolean) => void,
@@ -180,6 +186,10 @@ const initialData = {
   mutedTags: [],
   mutedPrivate: '',
   mutedSince: 0,
+  streamMuted: [],
+  streamMutedTags: [],
+  streamMutedPrivate: '',
+  streamMutedSince: 0,
   isKeyLookupDone: false,
   quotedNote: undefined,
   connectToPrimaryRelays: true,
@@ -917,6 +927,33 @@ export function AccountProvider(props: { children: JSXElement }) {
     saveMuteList(store.publicKey, muted, content.content, mutedSince || 0);
   };
 
+  const updateStreamMuted = (content: NostrMutedContent) => {
+
+    const mutedSince = content.created_at;
+    const tags = content.tags;
+
+    const muted = tags.reduce((acc, t) => {
+      if (t[0] !== 'p') {
+        return acc;
+      }
+
+      const pubkey = t[1];
+
+      if (store.muted.includes(pubkey)) {
+        return acc;
+      }
+
+      return [ ...acc, pubkey ];
+    }, []);
+
+    updateStore('streamMutedTags', () => [...tags]);
+    updateStore('streamMuted', (ml) => [ ...ml, ...muted]);
+    updateStore('streamMutedPrivate', () => content.content);
+    updateStore('streamMutedSince', () => mutedSince || 0);
+
+    saveMuteList(store.publicKey, muted, content.content, mutedSince || 0);
+  };
+
   const resolveContacts = async (
     pubkey: string,
     following: string[],
@@ -1268,6 +1305,111 @@ export function AccountProvider(props: { children: JSXElement }) {
     getProfileMuteList(store.publicKey, `before_unmute_${APP_ID}`);
   };
 
+
+  const addToStreamMuteList = (pubkey: string, then?: (success: boolean) => void) => {
+
+    if (!store.publicKey /*|| !store.muted || store.muted.includes(pubkey) */) {
+      return;
+    }
+
+    if (!store.sec || store.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        setShowPin(sec);
+        return;
+      }
+    }
+
+    const subId = `before_stream_mute_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content &&
+          [Kind.StreamMuteList].includes(content.kind) &&
+          content.created_at &&
+          content.created_at > store.streamMutedSince
+        ) {
+          updateStreamMuted(content as NostrMutedContent);
+        }
+      },
+      onEose: async () => {
+        unsub();
+
+        if (store.streamMuted.includes(pubkey)) return;
+
+        const date = Math.floor((new Date()).getTime() / 1000);
+        const muted = [...unwrap(store.streamMuted), pubkey];
+
+        const tags = [ ...unwrap(store.streamMutedTags), ['p', pubkey]];
+
+        const { success, note } = await sendStreamMuteList(tags, date, store.streamMutedPrivate, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
+
+        if (success) {
+          updateStore('streamMuted', () => muted);
+          updateStore('streamMutedTags', () => tags);
+          updateStore('streamMutedSince', () => date);
+          saveStreamMuted(store.publicKey, muted, date);
+          note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`);
+        }
+
+        then && then(success);
+      },
+    });
+
+    getReplacableEvent(store.publicKey, Kind.StreamMuteList, subId);
+  };
+
+  const removeFromStreamMuteList = (pubkey: string, then?: (success?: boolean) => void) => {
+    if (!store.publicKey /* || !store.muted || !store.muted.includes(pubkey)*/ ) {
+      return;
+    }
+
+    if (!store.sec || store.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        setShowPin(sec);
+        return;
+      }
+    }
+
+    const subId = `before_stream_unmute_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content &&
+          ([Kind.StreamMuteList].includes(content.kind)) &&
+          content.created_at &&
+          content.created_at > store.followingSince
+        ) {
+          updateMuted(content as NostrMutedContent);
+        }
+      },
+      onEose: async () => {
+        unsub();
+
+        if (!store.streamMuted.includes(pubkey)) return;
+
+        const date = Math.floor((new Date()).getTime() / 1000);
+        const muted = unwrap(store.streamMuted).filter(m => m !== pubkey);
+
+        const tags = unwrap(store.streamMutedTags).filter(t => t[0] !== 'p' || t[1] !== pubkey);
+
+        const { success, note } = await sendStreamMuteList(tags, date, store.streamMutedPrivate, store.proxyThroughPrimal, store.activeRelays, store.relaySettings);
+
+        if (success) {
+          updateStore('streamMuted', () => muted);
+          updateStore('streamMutedTags', () => tags);
+          updateStore('streamMutedSince', () => date);
+          saveMuted(store.publicKey, muted, date);
+          note && triggerImportEvents([note], `import_mute_list_remove_${APP_ID}`);
+        }
+
+        then && then(success);
+      }
+    });
+
+    getReplacableEvent(store.publicKey, Kind.StreamMuteList, subId);
+  };
 
   const changeCachingService = (url?: string) => {
     if (!url) {
@@ -1754,6 +1896,20 @@ export function AccountProvider(props: { children: JSXElement }) {
         handleMuteListEvent,
       );
 
+      if (store.mutedSince < storage.mutedSince) {
+        updateStore('streamMuted', () => ({ ...storage.streamMuted }));
+        updateStore('streamMutedSince', () => storage.streamMutedSince);
+        updateStore('streamMutedPrivate', () => storage.streamMutedPrivate);
+      }
+
+      const streamMuteListid = `streammutelist_${APP_ID}`;
+
+      handleSubscription(
+        streamMuteListid,
+        () => getReplacableEvent(store.publicKey, Kind.StreamMuteList, streamMuteListid),
+        handleStreamMuteListEvent,
+      );
+
       getFilterLists(store.publicKey);
       getAllowList(store.publicKey);
     }
@@ -1851,6 +2007,17 @@ export function AccountProvider(props: { children: JSXElement }) {
       }
 
       updateMuted(content as NostrMutedContent);
+    }
+  }
+
+  const handleStreamMuteListEvent = (content: NostrEventContent) => {
+    if (content && [Kind.StreamMuteList].includes(content.kind)) {
+
+      if (!content.created_at || content.created_at < store.streamMutedSince) {
+        return;
+      }
+
+      updateStreamMuted(content as NostrMutedContent);
     }
   }
 
@@ -2014,6 +2181,8 @@ const [store, updateStore] = createStore<AccountContextStore>({
     quoteNote,
     addToMuteList,
     removeFromMuteList,
+    addToStreamMuteList,
+    removeFromStreamMuteList,
     addRelay,
     removeRelay,
     setConnectToPrimaryRelays,

@@ -8,6 +8,9 @@ export type LocalStore = {
   muted: string[],
   mutedPrivate: string,
   mutedSince: number,
+  streamMuted: string[],
+  streamMutedPrivate: string,
+  streamMutedSince: number,
   relaySettings: NostrRelays,
   likes: string[],
   feeds: PrimalFeed[];
@@ -70,6 +73,9 @@ export const emptyStorage: LocalStore = {
   muted: [],
   mutedPrivate: '',
   mutedSince: 0,
+  streamMuted: [],
+  streamMutedPrivate: '',
+  streamMutedSince: 0,
   relaySettings: {},
   likes: [],
   feeds: [],
@@ -169,6 +175,34 @@ export const saveMuted = (pubkey: string | undefined, muted: string[], since: nu
 
   store.muted = [...muted];
   store.mutedSince = since;
+
+  setStorage(pubkey, store);
+}
+
+
+export const saveStreamMuteList = (pubkey: string | undefined, muted: string[], mutedPrivate: string, since: number) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.streamMuted = [...muted];
+  store.streamMutedPrivate = mutedPrivate;
+  store.streamMutedSince = since;
+
+  setStorage(pubkey, store);
+}
+
+export const saveStreamMuted = (pubkey: string | undefined, muted: string[], since: number) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.streamMuted = [...muted];
+  store.streamMutedSince = since;
 
   setStorage(pubkey, store);
 }
