@@ -299,7 +299,8 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
   }
 
   const stream = () => {
-    return props.streams.find(s => props.notification.live_event_id === s.event?.id)
+    const identifier = (props.notification.coordinate || '').split(':')[2];
+    return props.streams.find(s => identifier === s.id);
   }
 
 

@@ -1113,6 +1113,7 @@ export type PrimalNotification = {
   satszapped?: number,
   host?: string,
   live_event_id?: string,
+  coordinate?: string,
 };
 
 export type SortedNotifications = Record<number, PrimalNotification[]>;
