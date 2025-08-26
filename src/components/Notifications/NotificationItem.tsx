@@ -49,6 +49,8 @@ import postHighlightedLight from '../../assets/icons/notifications/light/post_hi
 import postBookmarkedLight from '../../assets/icons/notifications/light/post_bookmarked.svg';
 import postReactedLight from '../../assets/icons/notifications/light/post_reacted.svg';
 
+import liveEventStarted from '../../assets/icons/notifications/live.svg';
+
 import NotificationNote from '../Note/NotificationNote/NotificationNote';
 import NotificationAvatar from '../NotificationAvatar/NotificationAvatar';
 import { notificationsNew as t } from '../../translations';
@@ -63,6 +65,7 @@ import { date } from '../../lib/dates';
 import { truncateNumber } from '../../lib/notifications';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import { useSettingsContext } from '../../contexts/SettingsContext';
+import { StreamingData } from '../../lib/streaming';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -89,6 +92,8 @@ const typeIcons: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: postHighlighted,
   [NotificationType.YOUR_POST_WAS_BOOKMARKED]: postBookmarked,
   [NotificationType.YOUR_POST_HAD_REACTION]: postReacted,
+
+  [NotificationType.LIVE_EVENT_STARTED]: liveEventStarted,
 }
 
 const typeIconsLight: Record<string, string> = {
@@ -116,6 +121,8 @@ const typeIconsLight: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: postHighlightedLight,
   [NotificationType.YOUR_POST_WAS_BOOKMARKED]: postBookmarkedLight,
   [NotificationType.YOUR_POST_HAD_REACTION]: postReactedLight,
+
+  [NotificationType.LIVE_EVENT_STARTED]: liveEventStarted,
 }
 
 type NotificationItemProps = {
@@ -125,6 +132,7 @@ type NotificationItemProps = {
   note?: PrimalNote,
   read?: PrimalArticle,
   highlight?: any,
+  streams?: StreamingData[],
   iconInfo?: string,
   iconTooltip?: string,
   notification?: PrimalNotification,
@@ -270,6 +278,10 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
 
   });
 
+  const stream = () => {
+    return props.streams?.find(s => props.notification?.live_event_id === s.event?.id)
+  }
+
   return (
     <div id={props.id} class={styles.notifItem}>
       <div class={styles.newBubble}></div>
@@ -337,6 +349,33 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
 
 
         <Switch>
+          <Match
+            when={[NotificationType.LIVE_EVENT_STARTED].includes(props.type)}
+          >
+            <div class={styles.liveEventNotif}>
+              <div class={styles.liveTitle}>
+                {stream()?.title}
+              </div>
+              <div class={styles.liveStatus}>
+                <Show when={stream()?.status === 'live'}>
+                  <div class={styles.liveDotStatus}>
+                    <div class={styles.liveDotIcon}></div>
+                    <div class={styles.liveDotCaption}>LIVE</div>
+                  </div>
+                </Show>
+                <div class={styles.info}>
+                  <Show
+                    when={stream()?.status === 'live'}
+                    fallback={<>Stream ended {date(stream()?.starts || 0).label} ago</>}
+                  >
+                    Started {date(stream()?.starts || 0).label} ago
+                  </Show>
+                  <div class={styles.participantsIcon}></div>
+                  <div>{stream()?.currentParticipants || 0}</div>
+                </div>
+              </div>
+            </div>
+          </Match>
           <Match
             when={[NotificationType.YOUR_POST_WAS_HIGHLIGHTED].includes(props.type)}
           >

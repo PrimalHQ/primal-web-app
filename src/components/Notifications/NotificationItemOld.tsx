@@ -49,6 +49,8 @@ import postHighlightedLight from '../../assets/icons/notifications/light/post_hi
 import postBookmarkedLight from '../../assets/icons/notifications/light/post_bookmarked.svg';
 import postReactedLight from '../../assets/icons/notifications/light/post_reacted.svg';
 
+import liveEventStarted from '../../assets/icons/notifications/live.svg';
+
 import NotificationNote from '../Note/NotificationNote/NotificationNote';
 import { truncateNumber } from '../../lib/notifications';
 import { notificationsOld as t } from '../../translations';
@@ -61,6 +63,7 @@ import ArticleHighlight from '../ArticleHighlight/ArticleHighlight';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import { date } from '../../lib/dates';
 import { useSettingsContext } from '../../contexts/SettingsContext';
+import { StreamingData } from '../../lib/streaming';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -87,6 +90,8 @@ const typeIcons: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: postHighlighted,
   [NotificationType.YOUR_POST_WAS_BOOKMARKED]: postBookmarked,
   [NotificationType.YOUR_POST_HAD_REACTION]: postReacted,
+
+  [NotificationType.LIVE_EVENT_STARTED]: liveEventStarted,
 }
 
 
@@ -115,6 +120,8 @@ const typeIconsLight: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: postHighlightedLight,
   [NotificationType.YOUR_POST_WAS_BOOKMARKED]: postBookmarkedLight,
   [NotificationType.YOUR_POST_HAD_REACTION]: postReactedLight,
+
+  [NotificationType.LIVE_EVENT_STARTED]: liveEventStarted,
 }
 
 
@@ -124,6 +131,7 @@ type NotificationItemProps = {
   reads: PrimalArticle[],
   highlights: any[],
   users: Record<string, PrimalUser>,
+  streams: StreamingData[],
   userStats: Record<string, { followers_count: number }>,
   notification: PrimalNotification,
 };
@@ -290,6 +298,10 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
 
   }
 
+  const stream = () => {
+    return props.streams.find(s => props.notification.live_event_id === s.event?.id)
+  }
+
 
   return (
     <div id={props.id} class={styles.notifItem} data-notif={props.notification.id}>
@@ -316,8 +328,14 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
         </Switch>
 
         <Show when={isZapType()}>
-          <div class={styles.iconInfo} title={`${props.notification.satszapped} sats`}>
+          <div class={styles.iconZapInfo} title={`${props.notification.satszapped} sats`}>
             {truncateNumber(props.notification.satszapped || 0)}
+          </div>
+        </Show>
+
+        <Show when={[NotificationType.LIVE_EVENT_STARTED].includes(props.notification.type)}>
+          <div class={styles.iconLiveInfo}>
+            LIVE
           </div>
         </Show>
       </div>
@@ -331,7 +349,8 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
           >
             <div class={styles.avatars}>
               <A
-                href={app?.actions.profileLink(user()?.npub) || ''} class={styles.avatar}
+                class={styles.avatar}
+                href={app?.actions.profileLink(user()?.npub) || ''}
                 title={userName(user())}
               >
                 <Avatar user={user()} size="vvs" />
@@ -350,6 +369,31 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
           </div>
         </div>
         <Switch>
+          <Match when={[NotificationType.LIVE_EVENT_STARTED].includes(type())}>
+            <div class={styles.liveEventNotif}>
+              <div class={styles.liveTitle}>
+                {stream()?.title}
+              </div>
+              <div class={styles.liveStatus}>
+                <Show when={stream()?.status === 'live'}>
+                  <div class={styles.liveDotStatus}>
+                    <div class={styles.liveDotIcon}></div>
+                    <div class={styles.liveDotCaption}>LIVE</div>
+                  </div>
+                </Show>
+                <div class={styles.info}>
+                  <Show
+                    when={stream()?.status === 'live'}
+                    fallback={<>Stream ended {date(stream()?.starts || 0).label} ago</>}
+                  >
+                    Started {date(stream()?.starts || 0).label} ago
+                  </Show>
+                  <div class={styles.participantsIcon}></div>
+                  <div>{stream()?.currentParticipants || 0}</div>
+                </div>
+              </div>
+            </div>
+          </Match>
           <Match
             when={[NotificationType.YOUR_POST_WAS_HIGHLIGHTED].includes(type())}
           >

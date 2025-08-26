@@ -61,6 +61,8 @@ import RadioBox, { RadioBoxOption } from '../components/Checkbox/RadioBox';
 import RadioBoxWithDesc from '../components/Checkbox/RadioBoxWithDesc';
 import { TransitionGroup } from 'solid-transition-group';
 import CheckBox2 from '../components/Checkbox/CheckBox2';
+import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
+import TopZapModal from '../components/TopZapsModal/TopZapModal';
 
 const StreamPage: Component = () => {
   const profile = useProfileContext();
@@ -594,7 +596,7 @@ const StreamPage: Component = () => {
         when={zap}
         fallback={<></>}
       >
-        <div class={styles.topZap}>
+        <div class={styles.topZap} onClick={() => setOpenZaps(true)}>
           <Avatar user={author(zap?.sender as string)} size="s38" />
           <div class={styles.amount}>
             <div class={styles.zapIcon}></div>
@@ -621,7 +623,7 @@ const StreamPage: Component = () => {
     >
       <For each={zaps}>
         {zap => (
-          <div class={styles.topZap}>
+          <div class={styles.topZap} onClick={() => setOpenZaps(true)}>
             <Avatar user={author(zap?.sender as string)} size="s30" />
             <div class={styles.zapAmount}>{humanizeNumber(zap?.amount, false)}</div>
           </div>
@@ -854,6 +856,8 @@ const StreamPage: Component = () => {
   }
 
   const [selectedChatMesage, setSelectedChatMessage] = createSignal<ChatMessageConfig>()
+
+  const [openZaps, setOpenZaps] = createSignal();
 
   const parseSummary = (text: string) => {
     const tokens = (text || '').split(' ');
@@ -1159,6 +1163,11 @@ const StreamPage: Component = () => {
           />
         </div>
       </div>
+
+      <TopZapModal
+        open={openZaps()}
+        setOpen={setOpenZaps}
+      />
     </div>
   );
 }

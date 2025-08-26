@@ -1111,6 +1111,8 @@ export type PrimalNotification = {
   who_bookmarked_it?: string,
   who_reacted?: string,
   satszapped?: number,
+  host?: string,
+  live_event_id?: string,
 };
 
 export type SortedNotifications = Record<number, PrimalNotification[]>;

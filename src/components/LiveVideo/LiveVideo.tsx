@@ -51,13 +51,10 @@ const LiveVideo: Component<{
   const [isMediaLoaded, setIsMediaLoaded] = createSignal(false);
 
   const streamUrl = () => {
-    console.log('RET: ');
 
     if (props.stream.status === 'live') return props.stream.url;
 
     const ret = (props.stream.event?.tags || []).find(t => t[0] === 'recording')?.[1];
-
-    console.log('RET: ', ret);
 
     return ret;
   }

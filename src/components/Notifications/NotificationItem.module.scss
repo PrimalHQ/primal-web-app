@@ -13,18 +13,26 @@
     align-items: center;
     justify-content: flex-start;
     padding-block: 6px;
+    gap: 4px;
 
     &.replyAvatar {
       padding-top: 0;
     }
   }
 
-  .iconInfo {
+  .iconZapInfo {
     color: #FFA02F;
     font-size: 14px;
     line-height: 16px;
     font-weight: 700;
     margin-top: 6px;
+  }
+
+  .iconLiveInfo {
+    color: var(--text-primary);
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 11px;
   }
 
   .notifContent {
@@ -143,4 +151,71 @@
 
 .avatarPlaceholder {
   height: 32px;
+}
+
+.liveEventNotif {
+  display: flex;
+  padding: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  align-self: stretch;
+  border-radius: 8px;
+  background: var(--background-header-input);
+
+  .liveTitle {
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 18px;
+  }
+
+  .liveStatus {
+    display: flex;
+    gap: 8px;
+
+    .liveDotStatus {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .liveDotCaption {
+        color: var(--text-primary);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 12px;
+      }
+    }
+
+    .info {
+      color: var(--text-tertiary);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+}
+
+.participantsIcon {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-tertiary);
+  -webkit-mask: url(../../assets/icons/profile.svg) no-repeat center;
+  mask: url(../../assets/icons/profile.svg) no-repeat center;
+}
+
+.liveDotIcon {
+  width: 6px;
+  height: 6px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: #E00;
+  -webkit-mask: url(../../assets/icons/dot.svg) no-repeat center;
+  mask: url(../../assets/icons/dot.svg) no-repeat center;
 }

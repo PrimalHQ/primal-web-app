@@ -28,6 +28,7 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { isPhone, timeNow } from '../utils';
 import { logError } from '../lib/logger';
+import { StreamingData } from '../lib/streaming';
 
 
 
@@ -69,8 +70,9 @@ const Notifications: Component = () => {
     reads: PrimalArticle[],
     highlights: any[],
     users: PrimalUser[],
-    page: FeedPage & { highlights: any[]},
+    page: FeedPage & { highlights: any[], streams: StreamingData[]},
     reposts: Record<string, string> | undefined,
+    streams: StreamingData[],
   }
 
   type OldNotificationStore = {
@@ -79,9 +81,10 @@ const Notifications: Component = () => {
     highlights: any[],
     users: Record<string, PrimalUser>,
     userStats: Record<string, { followers_count: number }>,
-    page: FeedPage & { notifications: PrimalNotification[], highlights: any[]},
+    page: FeedPage & { notifications: PrimalNotification[], highlights: any[], streams: StreamingData[]},
     reposts: Record<string, string> | undefined,
     notifications: PrimalNotification[],
+    streams: StreamingData[],
   }
 
   const [relatedNotes, setRelatedNotes] = createStore<NotificationStore>({
@@ -97,8 +100,10 @@ const Notifications: Component = () => {
       noteActions: {},
       topZaps: {},
       highlights: [],
+      streams: [],
     },
     reposts: {},
+    streams: [],
   })
 
   const [oldNotifications, setOldNotifications] = createStore<OldNotificationStore>({
@@ -116,9 +121,11 @@ const Notifications: Component = () => {
       noteActions: {},
       topZaps: {},
       highlights: [],
+      streams: [],
     },
     reposts: {},
     notifications: [],
+    streams: []
   })
 
   const hasNewNotifications = createMemo(() => {
@@ -171,6 +178,28 @@ const Notifications: Component = () => {
 
     const unsub = subsTo(subid, {
       onEvent: (_, content) => {
+        if (content.kind === Kind.LiveEvent) {
+          const stream: StreamingData = {
+            id: (content.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
+            url: (content.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
+            image: (content.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
+            status: (content.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
+            starts: parseInt((content.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
+            summary: (content.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
+            title: (content.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
+            client: (content.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
+            currentParticipants: parseInt((content.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+            pubkey: content.pubkey,
+            hosts: (content.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
+            participants: (content.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
+            event: {...content },
+          }
+
+          setRelatedNotes('page',  'streams',
+            (streams) => [...streams, { ...stream }]
+          );
+          return;
+        }
         if (!content) return;
 
         if (content.kind === Kind.Notification) {
@@ -277,6 +306,8 @@ const Notifications: Component = () => {
         // Convert related articles
         setRelatedNotes('reads', () => [...convertToArticles(relatedNotes.page)])
 
+        setRelatedNotes('streams', (streams) => [...streams, ...relatedNotes.page.streams])
+
         setAllSet(true);
         setNotifSince(timeNow());
         unsub();
@@ -334,6 +365,29 @@ const Notifications: Component = () => {
 
     const unsub = subsTo(subid, {
       onEvent: (_, content) => {
+        if (content.kind === Kind.LiveEvent) {
+          const stream: StreamingData = {
+            id: (content.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
+            url: (content.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
+            image: (content.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
+            status: (content.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
+            starts: parseInt((content.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
+            summary: (content.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
+            title: (content.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
+            client: (content.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
+            currentParticipants: parseInt((content.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+            pubkey: content.pubkey,
+            hosts: (content.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
+            participants: (content.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
+            event: {...content },
+          }
+
+          setOldNotifications('page',  'streams',
+            (streams) => [...streams, { ...stream }]
+          );
+          return;
+        }
+
         if (!content?.content) {
           return;
         }
@@ -447,6 +501,8 @@ const Notifications: Component = () => {
         // Convert related articles
         setOldNotifications('reads', (reads) => [...reads, ...convertToArticles(oldNotifications.page)])
 
+        setOldNotifications('streams', (streams) => [...streams, ...oldNotifications.page.streams])
+
         const pageUsers = oldNotifications.page.users;
 
         const newUsers = Object.keys(pageUsers).reduce((acc, key) => {
@@ -520,6 +576,28 @@ const Notifications: Component = () => {
       },
       {},
     );
+  };
+
+  const liveEventStarted = () => {
+    const type = NotificationType.LIVE_EVENT_STARTED;
+    const notifs = sortedNotifications[type];
+
+    if (!notifs) {
+      return;
+    }
+
+    return (<For each={notifs}>
+      {notif => (
+        <NotificationItem
+          type={type}
+          notification={notif}
+          users={getUsers(notifs, type)}
+          streams={relatedNotes.streams}
+        />
+
+      )}
+    </For>
+    )
   };
 
   const newUserFollowedYou = () => {
@@ -1333,6 +1411,7 @@ const Notifications: Component = () => {
               </div>
             }
           >
+            {liveEventStarted()}
 
             {newUserFollowedYou()}
             {userUnfollowedYou()}
@@ -1377,6 +1456,7 @@ const Notifications: Component = () => {
                       notes={oldNotifications.notes}
                       reads={oldNotifications.reads}
                       highlights={oldNotifications.highlights}
+                      streams={oldNotifications.streams}
                     />
                   )}
                 </For>

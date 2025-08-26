@@ -994,6 +994,8 @@ export const notificationTypeTranslations: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: 'highlighted your',
   [NotificationType.YOUR_POST_WAS_BOOKMARKED]: 'bookmarked your',
   [NotificationType.YOUR_POST_HAD_REACTION]: 'reacted to your',
+
+  [NotificationType.LIVE_EVENT_STARTED]: 'is live',
 }
 
 export const notificationsNew: Record<number, MessageDescriptor> = Object.values(NotificationType).reduce((acc, type) => ({
