@@ -45,6 +45,16 @@
   }
 }
 
+
+@keyframes slideInZap {
+  0% {
+    margin-left: 100px; /* Starting state: fully transparent */
+  }
+  100% {
+    margin-left: 0; /* Ending state: fully opaque */
+  }
+}
+
 .streamingPage {
   width: 100%;
   position: relative;
@@ -564,8 +574,10 @@
   border-radius: 99px;
   /* background: var(--background-input); */
   width: fit-content;
+  /* margin-left: 100px; */
+  /* transition: margin-left 0.5s ease-out; */
 
-  animation: fadeInZap 1s ease-out forwards;
+  animation: slideInZap 1s ease-out forwards;
 
   .amount {
     display: flex;
@@ -719,4 +731,14 @@
     outline: none;
     margin: 0;
   }
+}
+
+.topZapEnterTransition {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+.topZapExitTransition {
+  opacity: 0;
+  transform: translateY(3px);
 }

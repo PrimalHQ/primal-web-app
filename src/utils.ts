@@ -563,3 +563,15 @@ export const replaceAsync = async(str: string, regex: RegExp, asyncReplacer: (m:
   // Wait for all promises to resolve and then join the parts
   return (await Promise.all(parts)).join('');
 }
+
+export const findFirstDifference = (arr1: string[], arr2: string[]) => {
+  const maxLength = Math.max(arr1.length, arr2.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return i;
+    }
+  }
+
+  return -1;
+}

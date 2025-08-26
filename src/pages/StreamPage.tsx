@@ -22,7 +22,7 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { isAndroid } from '@kobalte/utils';
-import { isIOS, isPhone, uuidv4 } from '../utils';
+import { findFirstDifference, isIOS, isPhone, uuidv4 } from '../utils';
 import { useNavigate, useParams } from '@solidjs/router';
 import { getStreamingEvent, startLiveChat, stopLiveChat, StreamingData } from '../lib/streaming';
 
@@ -59,6 +59,7 @@ import ChatMessageDetails, { ChatMessageConfig } from '../components/LiveVideo/C
 import { Popover } from '@kobalte/core/popover';
 import RadioBox, { RadioBoxOption } from '../components/Checkbox/RadioBox';
 import RadioBoxWithDesc from '../components/Checkbox/RadioBoxWithDesc';
+import { TransitionGroup } from 'solid-transition-group';
 
 const StreamPage: Component = () => {
   const profile = useProfileContext();
@@ -533,8 +534,13 @@ const StreamPage: Component = () => {
 
   const [topZapLimit, setTopZapLimit] = createSignal(5);
 
-  const topZaps = () => {
-    if (topZapLimit() === 0) return [];
+  const [topZaps, setTopZaps] = createStore<PrimalZap[]>([]);
+
+  createEffect(() => {
+    if (topZapLimit() === 0) {
+      setTopZaps(() => [])
+      return;
+    }
 
     const zaps = events.reduce<PrimalZap[]>((acc, e) => {
       if (e.kind !== Kind.Zap) return acc;
@@ -547,11 +553,40 @@ const StreamPage: Component = () => {
       }
     }, []);
 
-    return zaps.sort((a, b) => b.amount - a.amount);
-  }
+    const tz = zaps.sort((a, b) => b.amount - a.amount);
+
+    if (tz.length === 0) {
+      setTopZaps(() => []);
+      return;
+    }
+
+    const firstNewIndex = findFirstDifference(topZaps.slice(0, 5).map(t => t.id), tz.slice(0, 5).map(t => t.id));
+
+    if (firstNewIndex > -1) {
+      setTopZaps(firstNewIndex, () => ({ ...tz[firstNewIndex] }));
+    }
+
+  })
+
+  // const topZaps = () => {
+  //   if (topZapLimit() === 0) return [];
+
+  //   const zaps = events.reduce<PrimalZap[]>((acc, e) => {
+  //     if (e.kind !== Kind.Zap) return acc;
+  //     try {
+  //       const z = convertToZap(e);
+
+  //       return [...acc, { ...z }];
+  //     } catch (e) {
+  //       return acc;
+  //     }
+  //   }, []);
+
+  //   return zaps.sort((a, b) => b.amount - a.amount);
+  // }
 
   const renderFirstZap = () => {
-    const zap = topZaps()[0];
+    const zap = topZaps[0];
 
     return (
       <Show
@@ -574,22 +609,24 @@ const StreamPage: Component = () => {
 
   const renderRestZaps = () => {
     if (topZapLimit() === 0) return <></>;
-    const zaps = topZaps().slice(1, topZapLimit());
+    const zaps = topZaps.slice(1, topZapLimit());
 
     return <div class={styles.restZaps}>
+
+    <TransitionGroup
+      name="top-zaps"
+      enterClass={styles.topZapEnterTransition}
+      exitClass={styles.topZapExitTransition}
+    >
       <For each={zaps}>
         {zap => (
-          <Show
-            when={zap}
-            fallback={<TopZapSkeleton />}
-          >
-            <div class={styles.topZap}>
-              <Avatar user={author(zap?.sender as string)} size="s30" />
-              <div class={styles.zapAmount}>{humanizeNumber(zap?.amount, false)}</div>
-            </div>
-          </Show>
+          <div class={styles.topZap}>
+            <Avatar user={author(zap?.sender as string)} size="s30" />
+            <div class={styles.zapAmount}>{humanizeNumber(zap?.amount, false)}</div>
+          </div>
         )}
       </For>
+    </TransitionGroup>
     </div>
   }
 
@@ -908,19 +945,19 @@ const StreamPage: Component = () => {
             </div>
           </div>
 
-          <div class={`${styles.topZaps} ${topZaps().length === 0 ? styles.centered : ''}`}>
-            <div class={`${styles.zapList} ${topZaps().length === 0 ? styles.emptyZaps : ''}`}>
+          <div class={`${styles.topZaps} ${topZaps.length === 0 ? styles.centered : ''}`}>
+            <div class={`${styles.zapList} ${topZaps.length === 0 ? styles.emptyZaps : ''}`}>
               <div class={styles.firstZap}>
                 {renderFirstZap()}
               </div>
-              <Show when={topZaps().length > 0}>
+              <Show when={topZaps.length > 0}>
                 <div class={styles.other}>
                   {renderRestZaps()}
                 </div>
               </Show>
             </div>
-            <div class={`${styles.zapStats} ${topZaps().length === 0 ? styles.centeredZaps : ''}`}>
-            <div class={`${styles.statsLine} ${topZaps().length === 0 ? styles.noStatsLine : ''}`}>
+            <div class={`${styles.zapStats} ${topZaps.length === 0 ? styles.centeredZaps : ''}`}>
+            <div class={`${styles.statsLine} ${topZaps.length === 0 ? styles.noStatsLine : ''}`}>
                 <div class={styles.totalZaps}>Total {totalZaps()} zaps:</div>
                 <div class={styles.totalSats}>
                   <div class={styles.zapIcon}></div>
@@ -933,7 +970,7 @@ const StreamPage: Component = () => {
                 onMouseUp={commitZap}
               >
                 <div class={styles.zapIcon}></div>
-                {topZaps().length > 0 ? 'Zap Now' : 'Be the first to zap this stream!'}
+                {topZaps.length > 0 ? 'Zap Now' : 'Be the first to zap this stream!'}
               </button>
             </div>
           </div>
