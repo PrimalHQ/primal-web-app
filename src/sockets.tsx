@@ -4,6 +4,8 @@ import { NostrEvent, NostrEOSE, NostrEventType, NostrEventContent, PrimalWindow,
 import pako from 'pako';
 import { APP_ID } from "./App";
 
+export const version = import.meta.env.PRIMAL_VERSION;
+
 export const [reconnect, setReconnect] = createSignal(true);
 
 export const [socket, setSocket] = createSignal<WebSocket>();
@@ -12,7 +14,7 @@ export const [isConnected, setConnected] = createSignal<Boolean>(false);
 
 export const isNotConnected = () => !isConnected();
 
-export const setPrimalProtocol = (compression: 'zlib', then: () => void) => {
+export const setPrimalProtocol = (compression: 'zlib' | 'off', then: () => void) => {
 
   const subId = `set_protocol_${APP_ID}`;
 
@@ -23,10 +25,26 @@ export const setPrimalProtocol = (compression: 'zlib', then: () => void) => {
     }
   });
 
+  let payload = {
+    compression,
+    client: {
+      name: 'primal',
+      platform: 'web',
+      version: `${version}`,
+      git_commit: 'local',
+    },
+  }
+
+  const metaDescription = document.querySelector('meta[property="primal:git-commit-id"]');
+  if (metaDescription) {
+    // @ts-ignore
+    payload.client.git_commit = metaDescription.content || 'local';
+  }
+
   sendMessage(JSON.stringify([
     "REQ",
     subId,
-    {cache: ["set_primal_protocol", { compression }]},
+    {cache: ["set_primal_protocol", { ...payload }]},
   ]), true);
 }
 
@@ -34,7 +52,9 @@ const onOpen = () => {
   const disableBinary = localStorage.getItem('noBinary');
 
   if (disableBinary === 'true') {
-    setConnected(true);
+    setPrimalProtocol('off', () => {
+      setConnected(true);
+    });
   }
   else {
     setPrimalProtocol('zlib', () => {
