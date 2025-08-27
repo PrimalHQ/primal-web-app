@@ -156,6 +156,7 @@ const Avatar: Component<{
       case 'ml':
       case 'mll':
       case 'lg':
+      case 's30':
         size = 's';
         break;
       default:

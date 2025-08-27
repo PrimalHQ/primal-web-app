@@ -224,13 +224,14 @@
     display: none;
   }
 
-  // &.legend {
-  //   padding: 2px;
-  //   .missingBack {
-  //     width: 24px;
-  //     height: 24px;
-  //   }
-  // }
+  &.legend {
+    padding: 1px;
+    .missingBack {
+      border: 0.5px solid var(--background-site);
+      width: 26px;
+      height: 26px;
+    }
+  }
 }
 
 .xssAvatar {
@@ -255,24 +256,25 @@
     display: none;
   }
 
-  // &.legend {
-  //   padding: 2px;
-  //   .missingBack {
-  //     width: 22px;
-  //     height: 22px;
-  //   }
-  // }
+  &.legend {
+    padding: 1px;
+    .missingBack {
+      border: 0.5px solid var(--background-site);
+      width: 24px;
+      height: 24px;
+    }
+  }
 }
 
 .xsAvatar {
   @include avatar;
   width: 32px;
   height: 32px;
-  padding: 2px;
+  padding: 1px;
 
   .missingBack {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
   }
 
   .iconBackground {
@@ -282,10 +284,11 @@
   }
 
   &.legend {
+    padding: 1px;
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 28px;
-      // height: 28px;
+      border: 0.5px solid var(--background-site);
+      width: 30px;
+      height: 30px;
     }
   }
 
@@ -309,11 +312,11 @@
   @include avatar;
   width: 30px;
   height: 30px;
-  padding: 2px;
+  padding: 1px;
 
   .missingBack {
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
   }
 
   .iconBackground {
@@ -323,10 +326,11 @@
   }
 
   &.legend {
+    padding: 1px;
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 28px;
-      // height: 28px;
+      border: 0.5px solid var(--background-site);
+      width: 28px;
+      height: 28px;
     }
   }
 
@@ -364,10 +368,11 @@
   }
 
   &.legend {
+    padding: 1px;
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 32px;
-      // height: 32px;
+      border: 0.5px solid var(--background-site);
+      width: 34px;
+      height: 34px;
     }
   }
 
@@ -405,12 +410,14 @@
   }
 
   &.legend {
+    padding: 1px;
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 32px;
-      // height: 32px;
+      border: 0.5px solid var(--background-site);
+      width: 36px;
+      height: 36px;
     }
   }
+
 
   .liveBadge {
     height: 12px;
@@ -444,12 +451,14 @@
   }
 
   &.legend {
+    padding: 1px;
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 36px;
-      // height: 36px;
+      border: 0.5px solid var(--background-site);
+      width: 38px;
+      height: 38px;
     }
   }
+
 
   .liveBadge {
     height: 12px;
@@ -483,10 +492,11 @@
   }
 
   &.legend {
+    padding: 1px;
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 38px;
-      // height: 38px;
+      border: 0.5px solid var(--background-site);
+      width: 40px;
+      height: 40px;
     }
   }
 
@@ -522,10 +532,11 @@
   }
 
   &.legend {
+    padding: 1px;
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 40px;
-      // height: 40px;
+      border: 0.5px solid var(--background-site);
+      width: 42px;
+      height: 42px;
     }
   }
 
@@ -562,10 +573,11 @@
   }
 
   &.legend {
+    padding: 3px;
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 48px;
-      // height: 48px;
+      border: 0.5px solid var(--background-site);
+      width: 44px;
+      height: 44px;
     }
   }
 
@@ -601,10 +613,11 @@
   }
 
   &.legend {
+    padding: 3px;
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 48px;
-      // height: 48px;
+      border: 0.5px solid var(--background-site);
+      width: 46px;
+      height: 46px;
     }
   }
 
@@ -640,10 +653,11 @@
   }
 
   &.legend {
+    padding: 3px;
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 54px;
-      // height: 54px;
+      border: 0.5px solid var(--background-site);
+      width: 54px;
+      height: 54px;
     }
   }
 
@@ -678,10 +692,11 @@
   }
 
   &.legend {
+    padding: 3px;
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 58px;
-      // height: 58px;
+      border: 0.5px solid var(--background-site);
+      width: 58px;
+      height: 58px;
     }
   }
 
@@ -718,10 +733,11 @@
   }
 
   &.legend {
+    padding: 4px;
     .missingBack {
       border: 1px solid var(--background-site);
-      // width: 66px;
-      // height: 66px;
+      width: 66px;
+      height: 66px;
     }
   }
 
@@ -758,10 +774,11 @@
   }
 
   &.legend {
+    padding: 4px;
     .missingBack {
       border: 1px solid var(--background-site);
-      // width: 74px;
-      // height: 74px;
+      width: 72px;
+      height: 72px;
     }
   }
 
@@ -790,10 +807,11 @@
   }
 
   &.legend {
+    padding: 3px;
     .missingBack {
       border: 1px solid var(--background-site);
-      // width: 112px;
-      // height: 112px;
+      width: 114px;
+      height: 114px;
     }
   }
 
@@ -822,11 +840,11 @@
   }
 
   &.legend {
+    padding: 4px;
     .missingBack {
-      background: none;
-      /* border: 1px solid var(--background-site); */
-      // width: 112px;
-      // height: 112px;
+      border: 1px solid var(--background-site);
+      width: 120px;
+      height: 120px;
     }
   }
 
