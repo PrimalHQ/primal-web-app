@@ -63,6 +63,9 @@ import { TransitionGroup } from 'solid-transition-group';
 import CheckBox2 from '../components/Checkbox/CheckBox2';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import TopZapModal from '../components/TopZapsModal/TopZapModal';
+import Paginator from '../components/Paginator/Paginator';
+
+const CHAT_PAGE_SIZE = 25;
 
 const StreamPage: Component = () => {
   const profile = useProfileContext();
@@ -256,6 +259,8 @@ const StreamPage: Component = () => {
 
   let fetchedPubkeys: string[] = [];
 
+  let newEvents: any[] = [];
+
   let userFetcher = setInterval(() => {
     if (fetchingPeople()) return;
 
@@ -339,13 +344,18 @@ const StreamPage: Component = () => {
       fetchMissingUsers(pks);
       fetchedPubkeys = [...fetchedPubkeys, ...pks];
     }
-  }, 1_000);
+  }, 300);
 
   const [topZapList, setTopZapList] = createStore({
     totalZaps: 0,
     totalSats: 0,
     lastCounted: 0,
   })
+
+
+  let to = 0;
+
+  const [chatMessageLimit, setChatMessageLimit] = createSignal(CHAT_PAGE_SIZE);
 
   const handleLiveEventMessage = (content: NostrEventContent) => {
     // @ts-ignore
@@ -390,13 +400,21 @@ const StreamPage: Component = () => {
 
     if (events.find(e => e.id === content.id)) return;
 
-    setEvents((old) => {
-      let evs = [...old, { ...content }].sort((a, b) => {
-        return (b.created_at || 0) - (a.created_at || 0);
-      });
+    if (newEvents.find(e => content.id === e.id) || events.find(e => content.id === e.id)) return;
 
-      return [...evs]
-    });
+    newEvents.push({ ...content });
+
+    clearTimeout(to)
+
+    to = setTimeout(() => {
+      setEvents((old) => {
+        let evs = [...old,  ...newEvents ].sort((a, b) => {
+          return (b.created_at || 0) - (a.created_at || 0);
+        });
+
+        return [...evs]
+      });
+    }, 300)
   }
 
   createEffect(on(getHex, (pubkey) => {
@@ -1087,9 +1105,16 @@ const StreamPage: Component = () => {
         </div>
 
         <div class={styles.chatMessages}>
-          <For each={events}>
+          <For each={events.slice(0, chatMessageLimit())}>
             {event => renderEvent(event)}
           </For>
+
+          <Paginator
+            loadNextPage={() => {
+              setChatMessageLimit(l => l + CHAT_PAGE_SIZE)
+            }}
+            isSmall={true}
+          />
 
           <Show when={selectedChatMesage()}>
             <ChatMessageDetails
