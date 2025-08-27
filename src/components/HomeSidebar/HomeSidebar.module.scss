@@ -118,7 +118,6 @@
       font-size: 14px;
       font-weight: 700;
       line-height: 16px;
-      text-transform: uppercase;
 
       overflow: hidden;
       display: -webkit-box;
@@ -142,6 +141,7 @@
     display: flex;
     align-items: center;
     margin-right: 8px;
+    gap: 4px;
 
     color: var(--text-tertiary);
     font-size: 14px;
