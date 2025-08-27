@@ -436,6 +436,8 @@ const StreamPage: Component = () => {
 
     await userFetcher();
 
+    newEvents = [];
+
     setInitialLoadDone(true)
   }
 
