@@ -234,6 +234,10 @@ const StreamPage: Component = () => {
     if (type === 'EVENT') {
       handleLiveEventMessage(content);
     }
+
+    if (type === 'EOSE') {
+      handleLiveEOSEMessage();
+    }
   };
 
   const [events, setEvents] = createStore<NostrEventContent[]>([]);
@@ -255,14 +259,14 @@ const StreamPage: Component = () => {
     setPeople((peps) => [ ...peps, ...users]);
 
     setFetchingPeople(false);
+
+    return true;
   }
 
   let fetchedPubkeys: string[] = [];
 
-  let newEvents: any[] = [];
-
-  let userFetcher = setInterval(() => {
-    if (fetchingPeople()) return;
+  const userFetcher = async () => {
+    if (fetchingPeople()) return false;
 
     let parts = [ ...(streamData.participants || []) ];
 
@@ -341,10 +345,12 @@ const StreamPage: Component = () => {
     pks = [...pks, ...parts].filter(pk => !fetchedPubkeys.includes(pk) && pk .length > 0);
 
     if (pks.length > 0) {
-      fetchMissingUsers(pks);
+      await fetchMissingUsers(pks);
       fetchedPubkeys = [...fetchedPubkeys, ...pks];
     }
-  }, 300);
+
+    return true;
+  };
 
   const [topZapList, setTopZapList] = createStore({
     totalZaps: 0,
@@ -352,8 +358,8 @@ const StreamPage: Component = () => {
     lastCounted: 0,
   })
 
-
   let to = 0;
+  let newEvents: any[] = [];
 
   const [chatMessageLimit, setChatMessageLimit] = createSignal(CHAT_PAGE_SIZE);
 
@@ -404,17 +410,33 @@ const StreamPage: Component = () => {
 
     newEvents.push({ ...content });
 
-    clearTimeout(to)
+    // clearTimeout(to)
 
-    to = setTimeout(() => {
-      setEvents((old) => {
-        let evs = [...old,  ...newEvents ].sort((a, b) => {
-          return (b.created_at || 0) - (a.created_at || 0);
-        });
+    // to = setTimeout(() => {
+    //   setEvents((old) => {
+    //     let evs = [...old,  ...newEvents ].sort((a, b) => {
+    //       return (b.created_at || 0) - (a.created_at || 0);
+    //     });
 
-        return [...evs]
+    //     return [...evs]
+    //   });
+    // }, 300)
+  }
+
+  const [initialLoadDone, setInitialLoadDone] = createSignal(false);
+
+  const handleLiveEOSEMessage = async () => {
+    setEvents((old) => {
+      let evs = [...old,  ...newEvents ].sort((a, b) => {
+        return (b.created_at || 0) - (a.created_at || 0);
       });
-    }, 300)
+
+      return [...evs]
+    });
+
+    await userFetcher();
+
+    setInitialLoadDone(true)
   }
 
   createEffect(on(getHex, (pubkey) => {
@@ -432,7 +454,7 @@ const StreamPage: Component = () => {
 
   onCleanup(() => {
     stopLiveChat(subId);
-    clearInterval(userFetcher);
+    // clearInterval(userFetcher);
   })
 
   const author = (pubkey: string) => {
@@ -1105,16 +1127,18 @@ const StreamPage: Component = () => {
         </div>
 
         <div class={styles.chatMessages}>
-          <For each={events.slice(0, chatMessageLimit())}>
-            {event => renderEvent(event)}
-          </For>
+          <Show when={initialLoadDone()}>
+            <For each={events.slice(0, chatMessageLimit())}>
+              {event => renderEvent(event)}
+            </For>
 
-          <Paginator
-            loadNextPage={() => {
-              setChatMessageLimit(l => l + CHAT_PAGE_SIZE)
-            }}
-            isSmall={true}
-          />
+            <Paginator
+              loadNextPage={() => {
+                setChatMessageLimit(l => l + CHAT_PAGE_SIZE)
+              }}
+              isSmall={true}
+            />
+          </Show>
 
           <Show when={selectedChatMesage()}>
             <ChatMessageDetails
