@@ -571,6 +571,23 @@ const StreamPage: Component = () => {
 
   })
 
+  const allZaps = () => {
+      if (topZapLimit() === 0) return [];
+
+      const zaps = events.reduce<PrimalZap[]>((acc, e) => {
+        if (e.kind !== Kind.Zap) return acc;
+        try {
+          const z = convertToZap(e);
+
+          return [...acc, { ...z }];
+        } catch (e) {
+          return acc;
+        }
+      }, []);
+
+      return zaps.sort((a, b) => b.amount - a.amount);
+  }
+
   // const topZaps = () => {
   //   if (topZapLimit() === 0) return [];
 
@@ -962,7 +979,7 @@ const StreamPage: Component = () => {
               </Show>
             </div>
             <div class={`${styles.zapStats} ${topZaps.length === 0 ? styles.centeredZaps : ''}`}>
-            <div class={`${styles.statsLine} ${topZaps.length === 0 ? styles.noStatsLine : ''}`}>
+              <div class={`${styles.statsLine} ${topZaps.length === 0 ? styles.noStatsLine : ''}`}>
                 <div class={styles.totalZaps}>Total {totalZaps()} zaps:</div>
                 <div class={styles.totalSats}>
                   <div class={styles.zapIcon}></div>
@@ -1167,6 +1184,10 @@ const StreamPage: Component = () => {
       <TopZapModal
         open={openZaps()}
         setOpen={setOpenZaps}
+        totalZaps={totalZaps()}
+        totalSats={totalSats()}
+        zaps={allZaps()}
+        people={people}
       />
     </div>
   );
