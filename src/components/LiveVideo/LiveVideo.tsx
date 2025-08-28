@@ -51,12 +51,15 @@ const LiveVideo: Component<{
   const [isMediaLoaded, setIsMediaLoaded] = createSignal(false);
 
   const streamUrl = () => {
-
     if (props.stream.status === 'live') return props.stream.url;
 
     const ret = (props.stream.event?.tags || []).find(t => t[0] === 'recording')?.[1];
 
     return ret;
+  }
+
+  const isHls = () => {
+    return streamUrl()?.endsWith(".m3u8");
   }
 
   return (
@@ -71,37 +74,51 @@ const LiveVideo: Component<{
           ref={mediaController}
           style={!isMediaLoaded() ? 'display: none;' : ''}
         >
-          <hls-video
-            src={streamUrl()}
-            slot="media"
-            crossorigin
-            autoplay
-            ref={hlsVideo}
-            onloadedmetadata={() => {
-                setIsMediaLoaded(true);
-            }}
-            onloadstart={() => {
-              const hls = hlsVideo?.api as Hls;
+          <Show when={isHls()}
+            fallback={
+              <video
+                slot="media"
+                src={streamUrl()}
+                crossorigin
+                autoplay
+                onloadeddata={() => {
+                  setIsMediaLoaded(true);
+                }}
+              ></video>
+            }
+          >
+            <hls-video
+              src={streamUrl()}
+              slot="media"
+              crossorigin
+              autoplay
+              ref={hlsVideo}
+              onloadedmetadata={() => {
+                  setIsMediaLoaded(true);
+              }}
+              onloadstart={() => {
+                const hls = hlsVideo?.api as Hls;
 
-              if (hls) {
+                if (hls) {
 
-                hls.on(Hls.Events.FRAG_CHANGED, (event, data) => {
+                  hls.on(Hls.Events.FRAG_CHANGED, (event, data) => {
 
-                  const seekable = mediaController?.media.seekable;
+                    const seekable = mediaController?.media.seekable;
 
-                  if (!seekable || seekable.length === 0) return;
+                    if (!seekable || seekable.length === 0) return;
 
-                  const seekableEnd = seekable.end(seekable.length - 1);
-                  const currentTime = mediaController?.media.currentTime || seekableEnd;
+                    const seekableEnd = seekable.end(seekable.length - 1);
+                    const currentTime = mediaController?.media.currentTime || seekableEnd;
 
-                  const liveEdgeMargin = 14; // seconds
-                  const live = (currentTime >= (seekableEnd - liveEdgeMargin));
+                    const liveEdgeMargin = 14; // seconds
+                    const live = (currentTime >= (seekableEnd - liveEdgeMargin));
 
-                  setIsLive(() => live);
-                });
-              }
-            }}
-          ></hls-video>
+                    setIsLive(() => live);
+                  });
+                }
+              }}
+            ></hls-video>
+          </Show>
           <media-loading-indicator slot="centered-chrome" noautohide></media-loading-indicator>
           <media-control-bar class={styles.controllBar}>
             <div>
@@ -128,23 +145,6 @@ const LiveVideo: Component<{
                     const seekableStart = seekable.start(seekable.length - 1);
                     const seekableEnd = seekable.end(seekable.length - 1);
                     const ratio = parseFloat(e.target.value) || 1.0;
-
-                    const calcTimeFromRangeValue = (
-                    ): number => {
-                      if (!mediaController?.media) return 0;
-
-                      const el = mediaController?.media;
-                      const value = parseFloat(e.target?.value || '1.0');
-                      const startTime = Number.isFinite(el.mediaSeekableStart)
-                        ? el.mediaSeekableStart
-                        : 0;
-                      // Prefer `mediaDuration` when available and finite.
-                      const endTime = Number.isFinite(el.duration)
-                        ? el.duration
-                        : el.seekable.end(seekable.length - 1);
-                      if (Number.isNaN(endTime)) return 0;
-                      return value * (endTime - startTime) + startTime;
-                    };
 
                     const time = (seekableEnd - seekableStart) * ratio + seekableStart;
 
