@@ -93,11 +93,14 @@ const LiveVideo: Component<{
               crossorigin
               autoplay
               ref={hlsVideo}
+              class={styles.hlsVideoPlayer}
               onloadedmetadata={() => {
-                  setIsMediaLoaded(true);
+                setIsMediaLoaded(true);
               }}
               onloadstart={() => {
                 const hls = hlsVideo?.api as Hls;
+
+                console.log('HLS: ', hls.loadLevel)
 
                 if (hls) {
 
@@ -116,6 +119,9 @@ const LiveVideo: Component<{
                     setIsLive(() => live);
                   });
                 }
+              }}
+              onloadeddata={() => {
+                console.log('HLS data loaded')
               }}
             ></hls-video>
           </Show>

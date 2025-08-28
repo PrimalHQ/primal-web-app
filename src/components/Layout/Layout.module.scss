@@ -24,7 +24,7 @@
   margin: 0px auto;
 
   display: grid;
-  grid-template-columns: 68px 756px var(--right-col-w);
+  grid-template-columns: 54px 756px var(--right-col-w);
 }
 
 .leftColumn {
@@ -72,7 +72,7 @@
 }
 
 .liveStreamLeft {
-  width: 68px;
+  width: 54px;
   height: 100vh;
   >div {
     border-right: none;
@@ -81,7 +81,7 @@
 
 .liveStreamCenter {
   position: relative;
-  width: calc(var(--full-site-w) - 68px);
+  width: calc(var(--full-site-w) - 54px);
   min-height: 100vh;
 
   .headerFloater {
@@ -363,7 +363,6 @@
       /* height: calc(100dvh - 54px - 48px); */
     }
   }
-
 
   .phoneFooter {
     height: 48px;
