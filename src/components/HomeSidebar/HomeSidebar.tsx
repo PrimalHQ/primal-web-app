@@ -225,14 +225,20 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
           const index = liveEvents.findIndex(e => e.id === streamData.id && e.pubkey === streamData.pubkey);
 
+          if (index >= 0 && streamData.status !== 'live') {
+            setLiveEvents((le) => le.filter(e => e.id !== streamData.id && e.pubkey !== streamData.pubkey));
+            return;
+          }
+
           if (index < 0 && streamData.status === 'live') {
             setLiveEvents(liveEvents.length, () => ({ ...streamData }));
             return;
           }
 
-          if (streamData.status)
+          if (streamData.status === 'live') {
+            setLiveEvents(index, () => ({ ...streamData }));
+          }
 
-          setLiveEvents(index, () => ({ ...streamData }));
           return;
         }
       }
