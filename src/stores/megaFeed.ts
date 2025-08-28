@@ -593,7 +593,7 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
     const naddrShort = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
     const author = convertToUser(page.users[read.pubkey], read.pubkey);
     const stat = page.noteStats[read.id];
-    const topZaps = page.topZaps[naddr] || page.topZaps[read.id] || [];
+    const topZaps = page.topZaps[naddrShort] || page.topZaps[read.id] || [];
     const wordCount = (page.wordCount || {})[read.id] || 0;
 
     const repost = read.kind === Kind.Repost ? extractRepostInfo(page, read) : undefined;
