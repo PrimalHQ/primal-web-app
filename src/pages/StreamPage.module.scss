@@ -178,6 +178,7 @@
   .statsRibbon {
     display: flex;
     gap: 12px;
+    min-height: 14px;
 
     color: var(--text-tertiary);
     font-size: 14px;

@@ -1000,13 +1000,17 @@ const StreamPage: Component = () => {
                 Live
               </Show>
             </div>
-            <div class={styles.time}>
-              Started {date(streamData.starts || 0).label} ago
-            </div>
-            <div class={styles.participants}>
-              <div class={styles.participantsIcon}></div>
-              {streamData.currentParticipants || 0}
-            </div>
+            <Show when={streamData.starts}>
+              <div class={styles.time}>
+                Started {date(streamData.starts || 0).label} ago
+              </div>
+            </Show>
+            <Show when={streamData.participants}>
+              <div class={styles.participants}>
+                <div class={styles.participantsIcon}></div>
+                {streamData.currentParticipants || 0}
+              </div>
+            </Show>
           </div>
 
           <div class={`${styles.topZaps} ${topZaps.length === 0 ? styles.centered : ''}`}>
