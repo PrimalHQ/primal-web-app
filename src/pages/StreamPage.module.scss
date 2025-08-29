@@ -478,7 +478,7 @@
     position: absolute;
     top: 16px;
     left: 20px;
-    transition: left 0.5s ease-out;
+    /* transition: left 0.5s ease-out; */
     animation: fadeInZaps 1s ease-out forwards;
 
     &.emptyZaps {
@@ -578,7 +578,7 @@
   /* margin-left: 100px; */
   /* transition: margin-left 0.5s ease-out; */
 
-  animation: slideInZap 1s ease-out forwards;
+  /* animation: slideInZap 1s ease-out forwards; */
 
   .amount {
     display: flex;

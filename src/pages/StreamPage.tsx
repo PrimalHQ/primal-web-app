@@ -23,7 +23,7 @@ import PageTitle from '../components/PageTitle/PageTitle';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { isAndroid } from '@kobalte/utils';
 import { findFirstDifference, isIOS, isPhone, uuidv4 } from '../utils';
-import { useNavigate, useParams } from '@solidjs/router';
+import { useNavigate, useParams, useSearchParams } from '@solidjs/router';
 import { getStreamingEvent, startLiveChat, stopLiveChat, StreamingData } from '../lib/streaming';
 
 import { useProfileContext } from '../contexts/ProfileContext';
@@ -76,6 +76,8 @@ const StreamPage: Component = () => {
   const intl = useIntl();
   const app = useAppContext();
   const settings = useSettingsContext();
+
+  const [queryParams, setQueryParams] = useSearchParams();
 
   const streamId = () => params.streamId;
 
@@ -605,11 +607,13 @@ const StreamPage: Component = () => {
       return;
     }
 
-    const firstNewIndex = findFirstDifference(topZaps.slice(0, 5).map(t => t.id), tz.slice(0, 5).map(t => t.id));
+    setTopZaps(() => [...tz]);
 
-    if (firstNewIndex > -1) {
-      setTopZaps(firstNewIndex, () => ({ ...tz[firstNewIndex] }));
-    }
+    // const firstNewIndex = findFirstDifference(topZaps.slice(0, 5).map(t => t.id), tz.slice(0, 5).map(t => t.id));
+
+    // if (firstNewIndex > -1) {
+    //   setTopZaps(firstNewIndex, () => ({ ...tz[firstNewIndex] }));
+    // }
 
   })
 
@@ -1047,16 +1051,48 @@ const StreamPage: Component = () => {
             {parseSummary(streamData.summary || '')}
           </div>
 
-          <div class={styles.testButtons}>
-            <button onClick={() => {
-              setTopZapLimit(() => 0);
-            }}>Hide All</button>
-            <Show when={topZapLimit() < 5}>
-              <button onClick={() =>{
-                setTopZapLimit((l) => l + 1)
-              }}>Add One</button>
-            </Show>
-          </div>
+          <Show when={queryParams.test === 'zaps'}>
+            <div class={styles.testButtons}>
+              <button onClick={() => {
+                setTopZapLimit(() => 0);
+              }}>Hide All</button>
+              <Show when={topZapLimit() > 0}>
+                <button onClick={() => {
+                  const fz = { ...topZaps[0] };
+
+                  fz.id = `random_${Math.floor(Math.random() * 1_000)}`;
+                  fz.amount = fz.amount + 10;
+
+                  setTopZaps((tzs) => [{ ...fz }, ...tzs]);
+                }}>Add top</button>
+              </Show>
+              <Show when={topZapLimit() > 1}>
+                <button onClick={() => {
+                  const fz = { ...topZaps[1] };
+
+                  fz.id = `random_${Math.floor(Math.random() * 1_000)}`;
+                  fz.amount = fz.amount + 10;
+
+                  setTopZaps((tzs) => [{...tzs[0]},{ ...fz }, ...tzs.slice(1)]);
+                }}>Add second</button>
+              </Show>
+              <Show when={topZapLimit() > 2}>
+                <button onClick={() => {
+                  const fz = { ...topZaps[2] };
+
+                  fz.id = `random_${Math.floor(Math.random() * 1_000)}`;
+                  fz.amount = fz.amount + 10;
+
+                  setTopZaps((tzs) => [...tzs.slice(0,2),{ ...fz }, ...tzs.slice(2)]);
+                }}>Add third</button>
+              </Show>
+              <Show when={topZapLimit() < 5}>
+                <button onClick={() =>{
+                  setTopZapLimit((l) => l + 1)
+                }}>Add One</button>
+              </Show>
+            </div>
+          </Show>
         </div>
       </div>
 
