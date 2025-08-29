@@ -271,7 +271,7 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
   return (
     <div id={props.id}>
-      <Show when={searchParams.live === '1' && liveEvents.length > 0}>
+      <Show when={liveEvents.length > 0}>
         <div class={styles.headingLive}>
           <div>
             Live on Nostr

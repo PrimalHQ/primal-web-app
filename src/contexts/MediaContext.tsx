@@ -111,11 +111,11 @@ export const MediaProvider = (props: { children: JSXElement }) => {
   }
 
   const getStream = (pubkey: string) => {
-    return store.liveEvents.find(s => s.pubkey === pubkey);
+    return store.liveEvents.find((s: StreamingData) => s.pubkey === pubkey);
   }
 
   const isStreaming = (pubkey: string) => {
-    return store.liveEvents.findIndex(s => s.pubkey === pubkey) >= 0;
+    return store.liveEvents.findIndex((s: StreamingData) => s.hosts?.find(h => h === pubkey) !== undefined || s.pubkey === pubkey) >= 0;
   }
 
 // SOCKET HANDLERS ------------------------------
@@ -161,6 +161,8 @@ export const MediaProvider = (props: { children: JSXElement }) => {
         currentParticipants: parseInt((content.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
         pubkey: content.pubkey,
         event: { ...content },
+        hosts: (content.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
+        participants: (content.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
       };
 
       const index = store.liveEvents.findIndex(e => e.id === streamData.id && e.pubkey === streamData.pubkey);

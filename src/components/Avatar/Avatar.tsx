@@ -254,7 +254,7 @@ const Avatar: Component<{
         </div>
       </Show>
 
-      <Show when={searchParams.get('live') === '1' && media?.actions.isStreaming(props.user?.pubkey || 'n/a')}>
+      <Show when={media?.actions.isStreaming(props.user?.pubkey || 'n/a')}>
         <div class={styles.centerBottom}>
           <a
             id={props.id}
