@@ -19,6 +19,7 @@ import { DMProvider } from './contexts/DMContext';
 import 'media-chrome';
 import "media-chrome/media-theme-element";
 import 'hls-video-element';
+import 'videojs-video-element';
 
 
 

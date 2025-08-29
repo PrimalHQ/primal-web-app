@@ -51,7 +51,7 @@ const LiveVideo: Component<{
   const [isMediaLoaded, setIsMediaLoaded] = createSignal(false);
 
   const streamUrl = () => {
-    if (props.stream.status === 'live') return props.stream.url;
+    if (props.stream.status === 'live') return props.src || props.stream.url;
 
     const ret = (props.stream.event?.tags || []).find(t => t[0] === 'recording')?.[1];
 
@@ -76,15 +76,15 @@ const LiveVideo: Component<{
         >
           <Show when={isHls()}
             fallback={
-              <video
-                slot="media"
+              <videojs-video
                 src={streamUrl()}
+                slot="media"
                 crossorigin
                 autoplay
                 onloadeddata={() => {
                   setIsMediaLoaded(true);
                 }}
-              ></video>
+              ></videojs-video>
             }
           >
             <hls-video

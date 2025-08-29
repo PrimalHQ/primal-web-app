@@ -1,8 +1,13 @@
 .liveVideo {
   position: relative;
+  max-height: 435.38px;
 
-  .hlsVideoPlayer {
-    min-height: 435.375px;;
+  media-controller {
+    height: 435.38px;
+    video {
+      height: 100%;
+      object-fit: contain;
+    }
   }
 
   .shroud {
@@ -31,7 +36,7 @@
 
   .controllBar {
     width: 100%;
-    height: 435.375px;
+    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;

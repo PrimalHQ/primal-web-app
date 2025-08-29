@@ -96,6 +96,7 @@
     "solid-transition-group": "0.2.3",
     "tippy.js": "^6.3.7",
     "tiptap-markdown": "^0.8.10",
-    "unist-util-visit": "5.0.0"
+    "unist-util-visit": "5.0.0",
+    "videojs-video-element": "^1.4.4"
   }
 }
