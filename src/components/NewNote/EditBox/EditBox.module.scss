@@ -357,7 +357,7 @@ textarea::-webkit-scrollbar{
 }
 
 .uploader {
-  width: 484px;
+  width: calc(100% - 14px);
 }
 
 .toggle {
