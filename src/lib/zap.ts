@@ -401,29 +401,29 @@ export const zapDVM = async (
 
 export const zapStream = async (
   stream: StreamingData,
-  author: PrimalUser | undefined,
+  host: PrimalUser | undefined,
   sender: string | undefined,
   amount: number,
   comment = '',
   relays: Relay[],
   nwc?: string[],
 ) => {
-  if (!sender || !author) {
+  if (!sender || !host) {
     return { success: false };
   }
 
-  const callback = await getZapEndpoint(author);
+  const callback = await getZapEndpoint(host);
 
   if (!callback) {
     return { success: false };
   }
 
-  const a = `${Kind.LiveEvent}:${author.pubkey}:${stream.id}`;
+  const a = `${Kind.LiveEvent}:${stream.pubkey}:${stream.id}`;
 
   const sats = Math.round(amount * 1000);
 
   let payload = {
-    profile: author.pubkey,
+    profile: host.pubkey,
     event: stream.event?.id || null,
     amount: sats,
     relays: relays.map(r => r.url),

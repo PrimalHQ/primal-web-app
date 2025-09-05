@@ -726,7 +726,7 @@ const StreamPage: Component = () => {
 
   const customZapInfo: () => CustomZapInfo = () => ({
     stream: streamData,
-    streamAuthor: profile?.userProfile,
+    streamAuthor: host() || profile?.userProfile,
     onConfirm: onConfirmZap,
     onSuccess: onSuccessZap,
     onFail: onFailZap,
@@ -750,7 +750,7 @@ const StreamPage: Component = () => {
         return;
       }
     }
-    if (!canUserReceiveZaps(profile?.userProfile)) {
+    if (!canUserReceiveZaps(host() || profile?.userProfile)) {
       toast?.sendWarning(
         intl.formatMessage(t.zapUnavailable),
       );
@@ -786,7 +786,7 @@ const StreamPage: Component = () => {
     // if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
     //   return;
     // }
-    if (!canUserReceiveZaps(profile?.userProfile)) {
+    if (!canUserReceiveZaps(host() || profile?.userProfile)) {
       return;
     }
 
@@ -812,7 +812,7 @@ const StreamPage: Component = () => {
     setTimeout(async () => {
       const { success, event } = await zapStream(
         streamData,
-        profile?.userProfile,
+        host() || profile?.userProfile,
         account.publicKey,
         amount,
         message,
@@ -991,7 +991,7 @@ const StreamPage: Component = () => {
           <LiveVideo
             src={streamData.url || ''}
             stream={streamData}
-            streamAuthor={profile?.userProfile}
+            streamAuthor={host() || profile?.userProfile}
           />
         </div>
 
