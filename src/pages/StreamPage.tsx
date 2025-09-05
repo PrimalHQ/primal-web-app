@@ -412,17 +412,20 @@ const StreamPage: Component = () => {
 
     newEvents.push({ ...content });
 
-    // clearTimeout(to)
+    clearTimeout(to)
 
-    // to = setTimeout(() => {
-    //   setEvents((old) => {
-    //     let evs = [...old,  ...newEvents ].sort((a, b) => {
-    //       return (b.created_at || 0) - (a.created_at || 0);
-    //     });
+    to = setTimeout(() => {
+      const eventsToAdd = [...newEvents];
+      newEvents = [];
+      
+      setEvents((old) => {
+        let evs = [...old, ...eventsToAdd].sort((a, b) => {
+          return (b.created_at || 0) - (a.created_at || 0);
+        });
 
-    //     return [...evs]
-    //   });
-    // }, 300)
+        return [...evs]
+      });
+    }, 300)
   }
 
   const [initialLoadDone, setInitialLoadDone] = createSignal(false);
