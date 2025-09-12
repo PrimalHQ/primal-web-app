@@ -643,7 +643,7 @@ const EditBox: Component<{
   const onEscape = (e: KeyboardEvent) => {
     if (justClosedModal()) {
       setJustClosedModal(false);
-    return;
+      return;
     }
 
     if (isConfirmEditorClose()) return;
