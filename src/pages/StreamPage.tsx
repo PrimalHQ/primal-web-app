@@ -41,7 +41,7 @@ import { APP_ID } from '../App';
 import { readData, refreshSocketListeners, removeSocketListeners, socket, subsTo } from '../sockets';
 
 import { updateFeedPage, pageResolve, fetchPeople } from '../megaFeeds';
-import { NostrEvent, NostrEOSE, NostrEvents, NostrEventContent, NostrLiveEvent, NostrLiveChat, PrimalUser, NostrUserZaps, PrimalZap, ZapOption } from '../types/primal';
+import { NostrEvent, NostrEOSE, NostrEvents, NostrEventContent, NostrLiveEvent, NostrLiveChat, PrimalUser, NostrUserZaps, PrimalZap, ZapOption, NostrRelaySignedEvent } from '../types/primal';
 import VerificationCheck from '../components/VerificationCheck/VerificationCheck';
 import { CustomZapInfo, useAppContext } from '../contexts/AppContext';
 import { isHashtag, isUrl, sendEvent, triggerImportEvents } from '../lib/notes';
@@ -365,7 +365,7 @@ const StreamPage: Component = () => {
 
   const [chatMessageLimit, setChatMessageLimit] = createSignal(CHAT_PAGE_SIZE);
 
-  const handleLiveEventMessage = (content: NostrEventContent) => {
+  const handleLiveEventMessage = async (content: NostrEventContent) => {
     // @ts-ignore
     if (content.kind === Kind.LiveChatReload) {
       refreshFeed();
@@ -410,25 +410,61 @@ const StreamPage: Component = () => {
 
     if (newEvents.find(e => content.id === e.id) || events.find(e => content.id === e.id)) return;
 
-    newEvents.push({ ...content });
+    if (content.kind === Kind.Zap && isUsersZap(content)) {
+      return;
+    }
 
-    clearTimeout(to)
-
-    to = setTimeout(() => {
-      const eventsToAdd = [...newEvents];
-      newEvents = [];
-      
+    if (initialLoadDone()) {
       setEvents((old) => {
-        let evs = [...old, ...eventsToAdd].sort((a, b) => {
+        let evs = [...old,  { ...content } ].sort((a, b) => {
           return (b.created_at || 0) - (a.created_at || 0);
         });
 
         return [...evs]
       });
-    }, 300)
+
+      await userFetcher();
+
+      return;
+    }
+
+    newEvents.push({ ...content });
+
+    // clearTimeout(to)
+
+    // to = setTimeout(() => {
+    //   const eventsToAdd = [...newEvents];
+    //   newEvents = [];
+
+    //   setEvents((old) => {
+    //     let evs = [...old, ...eventsToAdd].sort((a, b) => {
+    //       return (b.created_at || 0) - (a.created_at || 0);
+    //     });
+
+    //     return [...evs]
+    //   });
+    // }, 300)
   }
 
   const [initialLoadDone, setInitialLoadDone] = createSignal(false);
+
+  const isUsersZap = (event: NostrUserZaps) => {
+    try {
+      const zap = convertToZap(event);
+
+      const r = events.find(e => {
+        return e.kind === -1 &&
+          e.message === zap.message &&
+          e.sender === zap.sender &&
+          Math.abs(e.created_at - (zap.created_at || 0)) < 10_000;
+      });
+
+      return r != undefined;
+    }
+    catch (e) {
+      return false;
+    }
+  }
 
   const handleLiveEOSEMessage = async () => {
     setEvents((old) => {
@@ -573,8 +609,40 @@ const StreamPage: Component = () => {
       return <></>;
     }
   }
+
+  const renderNewUserZap = (zap: any) => {
+    return (
+      <div class={`${styles.liveMessage} ${styles.zapMessage}`}>
+        <div class={styles.leftSide}>
+          <Avatar user={author(zap.sender as string)} size="xss" />
+        </div>
+        <div class={styles.rightSide}>
+          <span class={styles.zapInfo}>
+            <span class={styles.authorName}>
+              <span>
+                {userName(author(zap.sender as string), zap.sender as string)}
+              </span>
+              <span class={styles.zapped}>
+                zapped
+              </span>
+            </span>
+            <div class={styles.zapStats}>
+              <div class={styles.zapIcon}></div>
+              {humanizeNumber(zap?.amount || 0, false)}
+            </div>
+          </span>
+          <span class={styles.messageContent}>
+            {zap?.message}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   const renderEvent = (event: NostrEventContent) => {
     switch (event.kind) {
+      case -1:
+        return renderNewUserZap(event);
       case Kind.LiveChatMessage:
         return renderChatMessage(event);
       case Kind.Zap:
@@ -736,6 +804,7 @@ const StreamPage: Component = () => {
     onCancel: onCancelZap,
   });
 
+
   const startZap = (e: MouseEvent | TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -773,29 +842,34 @@ const StreamPage: Component = () => {
 
     clearTimeout(quickZapDelay);
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
-      return;
-    }
+    customZapInfo() && app?.actions.openCustomZapModal(customZapInfo());
+    setIsZapping(() => true);
 
-    if (!account.sec || account.sec.length === 0) {
-      const sec = readSecFromStorage();
-      if (sec) {
-        account.actions.setShowPin(sec);
-        return;
-      }
-    }
+    return;
+
+    // if (!account?.hasPublicKey()) {
+    //   account?.actions.showGetStarted();
+    //   return;
+    // }
+
+    // if (!account.sec || account.sec.length === 0) {
+    //   const sec = readSecFromStorage();
+    //   if (sec) {
+    //     account.actions.setShowPin(sec);
+    //     return;
+    //   }
+    // }
 
     // if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
     //   return;
     // }
-    if (!canUserReceiveZaps(host() || profile?.userProfile)) {
-      return;
-    }
+    // if (!canUserReceiveZaps(host() || profile?.userProfile)) {
+    //   return;
+    // }
 
-    if (app?.customZap === undefined) {
-      doQuickZap();
-    }
+    // if (app?.customZap === undefined) {
+    //   doQuickZap();
+    // }
   };
 
   const doQuickZap = async () => {
@@ -856,6 +930,23 @@ const StreamPage: Component = () => {
     app?.actions.closeCustomZapModal();
     batch(() => {
       setZappedAmount(() => zapOption.amount || 0);
+
+      const zap = {
+        kind: -1,
+        sender: account?.publicKey,
+        amount: zapOption.amount || 0,
+        message: zapOption.message,
+        created_at: Math.ceil((new Date()).getTime() / 1_000),
+        id: 'newZap',
+      }
+
+      setEvents((old) => {
+        let evs = [...old,  { ...zap } ].sort((a, b) => {
+          return (b.created_at || 0) - (a.created_at || 0);
+        });
+
+        return [...evs]
+      });
     });
   };
 

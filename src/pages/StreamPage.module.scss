@@ -457,12 +457,12 @@
 }
 
 .topZaps {
-  /* display: flex;
-  justify-content: space-between; */
+  display: flex;
+  justify-content: space-between;
   position: relative;
   width: 100%;
   height: 118px;
-  /* padding: 16px 20px; */
+  padding: 16px 20px;
   border-block: 1px solid var(--subtile-devider);
 
   &.centered {
@@ -475,9 +475,9 @@
     flex-direction: column;
     gap: 12px;
 
-    position: absolute;
+    /* position: absolute;
     top: 16px;
-    left: 20px;
+    left: 20px; */
     /* transition: left 0.5s ease-out; */
     animation: fadeInZaps 1s ease-out forwards;
 
@@ -506,10 +506,11 @@
     justify-content: flex-end;
     gap: 8px;
 
-    position: absolute;
+    /* position: absolute;
     top: 16px;
-    right: 20px;
+    right: 20px; */
     transition: top 0.5s ease-in-out, right 0.5s ease-in-out;
+    min-width: fit-content;
 
     &.centeredZaps {
       top: 0px;
@@ -575,6 +576,7 @@
   border-radius: 99px;
   background: var(--background-input);
   width: fit-content;
+  max-width: 100%;
   cursor: pointer;
   /* margin-left: 100px; */
   /* transition: margin-left 0.5s ease-out; */
@@ -605,6 +607,12 @@
     font-size: 16px;
     font-weight: 400;
     line-height: 18px;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
 

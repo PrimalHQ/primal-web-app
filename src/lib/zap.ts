@@ -463,6 +463,7 @@ export const zapStream = async (
     return { sucess: false };
   }
 }
+
 export const getZapEndpoint = async (user: PrimalUser): Promise<string | null>  => {
   try {
     let lnurl: string = ''
