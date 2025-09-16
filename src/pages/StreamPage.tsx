@@ -661,7 +661,23 @@ const StreamPage: Component = () => {
     }
 
     const zaps = events.reduce<PrimalZap[]>((acc, e) => {
+      if (e.kind === -1) {
+        const zap = {
+          id: 'NEW_USER_ZAP',
+          message: e.message || '',
+          amount: e.amount || 0,
+          sender: e.sender,
+          reciver: e.receiver,
+          created_at: e.created_at,
+          zappedId: '',
+          zappedKind: 0,
+        };
+
+        return [...acc, { ...zap }];
+      }
+
       if (e.kind !== Kind.Zap) return acc;
+
       try {
         const z = convertToZap(e);
 
@@ -934,6 +950,7 @@ const StreamPage: Component = () => {
       const zap = {
         kind: -1,
         sender: account?.publicKey,
+        receiver: host()?.pubkey || profile?.profileKey || '',
         amount: zapOption.amount || 0,
         message: zapOption.message,
         created_at: Math.ceil((new Date()).getTime() / 1_000),
