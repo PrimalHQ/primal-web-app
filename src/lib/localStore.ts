@@ -1,6 +1,7 @@
 import { TopicStat } from "../megaFeeds";
 import { convertToUser, userName } from "../stores/profile";
 import { EmojiOption, NostrRelays, NostrStats, PrimalArticleFeed, PrimalDVM, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
+import { StreamingData } from "./streaming";
 
 export type LocalStore = {
   following: string[],
@@ -49,6 +50,7 @@ export type LocalStore = {
   nwc: string[][] | undefined,
   nwcActive: string[] | undefined,
   useSystemDarkMode: boolean | undefined,
+  liveStreams: StreamingData[] | undefined,
 };
 
 export type UploadTime = {
@@ -105,6 +107,7 @@ export const emptyStorage: LocalStore = {
   nwc: [],
   nwcActive: undefined,
   useSystemDarkMode: false,
+  liveStreams: undefined,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -178,7 +181,6 @@ export const saveMuted = (pubkey: string | undefined, muted: string[], since: nu
 
   setStorage(pubkey, store);
 }
-
 
 export const saveStreamMuteList = (pubkey: string | undefined, muted: string[], mutedPrivate: string, since: number) => {
   if (!pubkey) {
@@ -793,4 +795,27 @@ export const saveNWCActive = (pubkey: string, name?: string, uri?: string) => {
   }
 
   setStorage(pubkey, store);
+};
+
+
+export const saveLiveStreams = (pubkey: string | undefined, streams: StreamingData[]) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.liveStreams = [...streams];
+
+  setStorage(pubkey, store);
+}
+
+
+export const loadLiveStreams = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return [];
+  }
+  const store = getStorage(pubkey);
+
+  return store.liveStreams || [];
 };

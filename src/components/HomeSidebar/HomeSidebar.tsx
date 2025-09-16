@@ -1,4 +1,4 @@
-import { Component, createEffect, For, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 
 import {
   PrimalUser,
@@ -11,7 +11,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
 import SelectionBox from '../SelectionBox/SelectionBox';
 import Loader from '../Loader/Loader';
-import { readHomeSidebarSelection, saveHomeSidebarSelection } from '../../lib/localStore';
+import { loadLiveStreams, readHomeSidebarSelection, saveHomeSidebarSelection, saveLiveStreams } from '../../lib/localStore';
 import { useHomeContext } from '../../contexts/HomeContext';
 import ShortNoteSkeleton from '../Skeleton/ShortNoteSkeleton';
 import { Transition } from 'solid-transition-group';
@@ -176,6 +176,8 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
     }, 100);
   });
 
+  const [initialLiveLoaded, setInitialLiveLoaded] = createSignal(false);
+
   onMount(() => {
     const def = sidebarOptions.find(o => o.id === 'trending_4h') || sidebarOptions[0];
     if (account?.isKeyLookupDone && home?.sidebarNotes.length === 0) {
@@ -190,6 +192,8 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
     }
 
     if (unsub) unsub();
+
+    let events: StreamingData[] = []
 
     unsub = subsTo(subId, {
       onEvent: (_, event) => {
@@ -210,48 +214,70 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
             participants: (event.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
           };
 
-          const host = streamData.hosts?.[0] || streamData.pubkey;
-
-          if (!liveAuthorPubkeys.includes(host)) {
-            let newPubkeys = [streamData.pubkey];
-            newPubkeys = [...newPubkeys, ...streamData.hosts, ...streamData.participants].reduce<string[]>((acc, p) => {
-              if (acc.includes(p)) return acc;
-
-              return [...acc, p];
-            }, []);
-
-            setLiveAuthorPubkeys(pks => [...pks, ...newPubkeys]);
-          }
-
-          const index = liveEvents.findIndex(e => e.id === streamData.id && e.pubkey === streamData.pubkey);
-
-          if (index >= 0 && streamData.status !== 'live') {
-            setLiveEvents((le) => le.filter(e => e.id !== streamData.id && e.pubkey !== streamData.pubkey));
+          if (!initialLiveLoaded()) {
+            events.push({ ...streamData });
             return;
           }
 
-          if (index < 0 && streamData.status === 'live') {
-            setLiveEvents(liveEvents.length, () => ({ ...streamData }));
-            return;
-          }
-
-          if (streamData.status === 'live') {
-            setLiveEvents(index, () => ({ ...streamData }));
-          }
-
-          return;
+          storeStreamData(streamData);
         }
+      },
+      onEose: () => {
+        events.forEach(storeStreamData);
+        setInitialLiveLoaded(true);
       }
     })
 
+    setLiveEvents(() => loadLiveStreams(account?.publicKey))
+
     startListeningForLiveEventsSidebar(account?.publicKey, subId);
   });
+
+  createEffect(() => {
+    saveLiveStreams(account?.publicKey, liveEvents);
+  })
 
   onCleanup(() => {
     unsub && unsub();
     stopListeningForLiveEventsSidebar(subId);
     unsub = undefined;
   });
+
+  const storeStreamData = (streamData: StreamingData) => {
+    const host = streamData.hosts?.[0] || streamData.pubkey || '';
+
+    if (!liveAuthorPubkeys.includes(host)) {
+      let newPubkeys = [streamData.pubkey || ''];
+      newPubkeys = [...newPubkeys, ...(streamData.hosts || []), ...(streamData.participants || [])].reduce<string[]>((acc, p) => {
+        if (acc.includes(p)) return acc;
+
+        return [...acc, p];
+      }, []);
+
+      setLiveAuthorPubkeys(pks => [...pks, ...newPubkeys]);
+    }
+
+    const index = liveEvents.findIndex(e => e.id === streamData.id && e.pubkey === streamData.pubkey);
+
+    // Remove ended events
+    if (index >= 0 && streamData.status !== 'live') {
+      setLiveEvents((le) => le.filter(e => e.id !== streamData.id && e.pubkey !== streamData.pubkey));
+      return;
+    }
+
+    // Add new Events
+    if (index < 0 && streamData.status === 'live') {
+      setLiveEvents(liveEvents.length, () => ({ ...streamData }));
+      return;
+    }
+
+    // Update existing events
+    if (streamData.status === 'live') {
+      setLiveEvents(index, () => ({ ...streamData }));
+    }
+
+    return;
+  }
 
   const liveHref = (event: StreamingData | undefined) => {
     if (!event) return '';
