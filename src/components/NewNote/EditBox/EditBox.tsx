@@ -53,7 +53,7 @@ import { useAppContext } from "../../../contexts/AppContext";
 import UploaderBlossom from "../../Uploader/UploaderBlossom";
 import ParsedNote from "../../ParsedNote/ParsedNote";
 import LiveEventPreview from "../../LiveVideo/LiveEventPreview";
-import { StreamingData } from "../../../lib/streaming";
+import { StreamingData, getStreamingEvent } from "../../../lib/streaming";
 import { fetchUserProfile } from "../../../handleFeeds";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
@@ -1491,6 +1491,45 @@ const EditBox: Component<{
     setParsedMessage(parsed);
   };
 
+  const parseExternalLiveStreams = async (text: string) => {
+    // return text;
+
+    const regex = /__EXTERNAL_STREAM__(.*?)__EXTERNAL_STREAM__/g;
+
+    let refs = [];
+    let match;
+
+    while((match = regex.exec(text)) !== null) {
+      refs.push(match[1]);
+    }
+
+    let rec: Record<string, string> = {};
+
+    for (let i = 0; i < refs.length;i++) {
+      const url = refs[i];
+      const sections = url.split('/');
+      const naddr = sections[sections.length - 1];
+
+      const decoded = decodeIdentifier(naddr);
+
+      if (decoded.type === 'naddr' && typeof decoded.data !== 'string') {
+        const { identifier, pubkey } = decoded.data;
+
+        const stream = await getStreamingEvent(identifier, pubkey);
+        const user = await fetchUserProfile(account?.publicKey, stream.hosts?.[0] || pubkey, `missing_user_${APP_ID}`);
+
+        rec[url] = (<div>
+          <LiveEventPreview stream={stream} user={user} />
+        </div>)?.outerHTML || url;
+      }
+    }
+
+    return text.replace(regex, (fullMatch, url) => {
+        // Process the captured content and return the replacement
+        return rec[url];
+    });
+
+  }
 
   const parseForReferece = async (value: string) => {
     const content = await replaceLinkPreviews(
@@ -1506,7 +1545,9 @@ const EditBox: Component<{
     parseNpubLinks(content);
     parseNoteLinks(content);
 
-    return content;
+    const ret = await parseExternalLiveStreams(content);
+
+    return ret;
   };
 
   const onInput = (e: InputEvent) => {

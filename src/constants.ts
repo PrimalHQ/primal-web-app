@@ -320,6 +320,7 @@ export const usernameRegex = /^[a-zA-Z0-9\-\_]+$/;
 // export const magnetRegex = /(magnet:[\S]+)/i;
 // export const tweetUrlRegex = /https?:\/\/twitter\.com\/(?:#!\/)?(\w+)\/status(?:es)?\/(\d+)/;
 // export const tidalRegex = /tidal\.com\/(?:browse\/)?(\w+)\/([a-z0-9-]+)/i;
+export const zapStreamEmbedRegex = /zap\.stream\/.+/i;
 export const tidalEmbedRegex = /embed\.tidal\.com\/.+/i;
 export const spotifyRegex = /open\.spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/;
 export const twitchRegex = /twitch\.tv\/([a-z0-9_]+$)/i;

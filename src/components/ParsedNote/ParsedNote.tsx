@@ -28,6 +28,7 @@ import {
   isWavelake,
   isWebmVideo,
   isYouTube,
+  isZapStream,
   linkPreviews,
 } from '../../lib/notes';
 import { convertToUser, truncateNpub, userName } from '../../stores/profile';
@@ -75,6 +76,7 @@ import SimpleArticlePreview from '../ArticlePreview/SimpleArticlePreview';
 import NostrImage from '../NostrImage/NostrImage';
 import { StreamingData } from '../../lib/streaming';
 import LiveEventPreview from '../LiveVideo/LiveEventPreview';
+import ExternalLiveEventPreview from '../LiveVideo/ExternalLiveEventPreview';
 
 const groupGridLimit = 5;
 
@@ -448,6 +450,14 @@ const ParsedNote: Component<{
           isAfterEmbed = true;
           lastSignificantContent = 'rumble';
           updateContent(content, 'rumble', token);
+          return;
+        }
+
+        if (isZapStream(token)) {
+          removeLinebreaks('zapstream');
+          isAfterEmbed = true;
+          lastSignificantContent = 'zapstream';
+          updateContent(content, 'zapstream', token);
           return;
         }
 
@@ -974,6 +984,20 @@ const ParsedNote: Component<{
           allow="encrypted-media"
           sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
           title="TIDAL Embed Player"
+        />;
+      }}
+    </For>
+  };
+
+  const renderZapStream = (item: NoteContent, index?: number) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + shortMentionInWords);
+
+        return <ExternalLiveEventPreview
+          url={token}
         />;
       }}
     </For>
@@ -1899,6 +1923,7 @@ const ParsedNote: Component<{
       wavelake: renderWavelake,
       rumble: renderRumble,
       tidal: renderTidal,
+      zapstream: renderZapStream,
       link: renderLinks,
       notemention: renderNoteMention,
       usermention: renderUserMention,
