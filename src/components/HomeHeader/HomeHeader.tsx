@@ -183,7 +183,7 @@ const HomeHeader: Component< {
                     class={styles.avatar}
                     title={userName(user)}
                   >
-                    <Avatar user={user} size="xs" />
+                    <Avatar user={user} size="xs" legendWhite={true} />
                   </div>
                 )}
               </For>

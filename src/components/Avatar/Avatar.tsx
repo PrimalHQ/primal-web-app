@@ -22,6 +22,7 @@ const Avatar: Component<{
   zoomable?: boolean,
   showBorderRing?: boolean,
   legendConfig?: LegendCustomizationConfig,
+  legendWhite?: boolean,
 }> = (props) => {
 
   const media = useMediaContext();
@@ -106,6 +107,9 @@ const Avatar: Component<{
   }
 
   const highlightClass = () => {
+    if (props.legendWhite) {
+      return `${styles.legend} ${styles[`legend_WHITE`]}`;
+    }
     if (props.user){
       const legendConfig = props.legendConfig || app?.legendCustomization[props.user?.pubkey];
 

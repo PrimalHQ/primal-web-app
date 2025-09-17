@@ -40,6 +40,11 @@
   background: var(--legend-sunfire) !important;
 }
 
+.legend_WHITE {
+  @include highlight;
+  background: #FFFFFF !important;
+}
+
 .legend_glow_GOLD {
   --glow-color: var(--legend-glow-gold);
 }
