@@ -21,11 +21,45 @@
     left: 0;
   }
 
+  .videoEndedPlaceholder {
+    width: 100%;
+    height: 445.38px;
+    background-color: var(--background-site);
+    z-index: 2;
+    padding-bottom: 12px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+
+    color: var(--text-tertiary-2);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 20px;
+    text-transform: uppercase;
+
+    button {
+      margin: 0;
+      padding: 4px 12px;
+      outline: none;
+      border: none;
+      border-radius: 99px;
+      background-color: var(--text-primary);
+      width: fit-content;
+
+      color: var(--background-site);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 18px;
+    }
+  }
+
   .videoPlaceholder {
     width: 100%;
     height: 445.38px;
-    /* position: absolute; */
-    background-color: var(--background-side);
+    background-color: var(--background-site);
     z-index: 2;
     padding-bottom: 12px;
   }

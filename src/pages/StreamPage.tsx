@@ -1109,16 +1109,25 @@ const StreamPage: Component = () => {
         <div class={styles.streamInfo}>
           <div class={styles.title}>{streamData.title}</div>
           <div class={styles.statsRibbon}>
-            <div class={styles.status}>
-              <Show when={streamData.status === 'live'}>
-                <div class={styles.liveDot}>  </div>
-                Live
-              </Show>
-            </div>
-            <Show when={streamData.starts}>
-              <div class={styles.time}>
-                Started {date(streamData.starts || 0).label} ago
+            <Show
+              when={streamData.status === 'live'}
+              fallback={
+                <div class={styles.time}>
+                  Ended {streamData.ends || streamData.starts ? `${date(streamData.ends || streamData.starts || 0).label} ago` : ''}
+                </div>
+              }
+            >
+              <div class={styles.status}>
+                <Show when={streamData.status === 'live'}>
+                  <div class={styles.liveDot}>  </div>
+                  Live
+                </Show>
               </div>
+              <Show when={streamData.starts}>
+                <div class={styles.time}>
+                  Started {date(streamData.starts || 0).label} ago
+                </div>
+              </Show>
             </Show>
             <Show when={streamData.participants}>
               <div class={styles.participants}>
