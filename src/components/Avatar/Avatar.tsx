@@ -258,7 +258,7 @@ const Avatar: Component<{
         </div>
       </Show>
 
-      <Show when={media?.actions.isStreaming(props.user?.pubkey || 'n/a')}>
+      <Show when={media?.actions.isStreaming(props.user?.pubkey || 'n/a') && !props.legendWhite}>
         <div class={styles.centerBottom}>
           <a
             id={props.id}
