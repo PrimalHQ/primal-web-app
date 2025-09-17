@@ -115,7 +115,8 @@ export const MediaProvider = (props: { children: JSXElement }) => {
   }
 
   const isStreaming = (pubkey: string) => {
-    return store.liveEvents.findIndex((s: StreamingData) => s.hosts?.find(h => h === pubkey) !== undefined || s.pubkey === pubkey) >= 0;
+    const levts = store.liveEvents.filter((s: StreamingData) => s.status === 'live' && s.hosts?.find(h => h === pubkey) !== undefined);
+    return levts.length > 0;
   }
 
 // SOCKET HANDLERS ------------------------------
