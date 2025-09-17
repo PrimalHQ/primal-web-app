@@ -68,8 +68,9 @@ const LiveEventPreview: Component<{
     const event = props.stream;
 
     if (!event) return '';
+    const host = event.hosts?.[0] || event.pubkey;
 
-    return `${app?.actions.profileLink(event.pubkey, true)}/live/${event.id}`;
+    return `${app?.actions.profileLink(host, true)}/live/${event.id}`;
   }
 
   return (

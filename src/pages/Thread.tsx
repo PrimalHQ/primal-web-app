@@ -35,6 +35,7 @@ import { hexToNpub } from '../lib/keys';
 import { fetchKnownProfiles } from '../lib/profile';
 import { fetchUserProfile } from '../handleNotes';
 import { useAppContext } from '../contexts/AppContext';
+import { getStreamingEvent } from '../lib/streaming';
 
 const EventPage: Component = () => {
 
@@ -101,7 +102,62 @@ const EventPage: Component = () => {
     getEvents(account?.publicKey, [id], subId, false);
   }
 
-  const [component, setComponent] = createSignal<'note' | 'read' | 'none' | 'not_found'>('none');
+
+  const resolveFromNaddr = async (id: string) => {
+    try {
+      const decoded = nip19.decode(id);
+
+      const data = decoded.data as nip19.AddressPointer;
+
+      const pubkey = data.pubkey;
+      const identifier = data.identifier;
+      const kind = data.kind;
+
+      if (kind === Kind.LongForm) {
+        // await fetchUserProfile(account?.publicKey, pubkey, `thred_profile_info_${APP_ID}`);
+
+        const vanityName = app?.verifiedUsers[pubkey];
+
+        if (vanityName) {
+          navigate(`/${vanityName}/${identifier}`);
+          return;
+        }
+
+        batch(() => {
+          setComponent(() => 'read');
+          setEvId(() => id);
+        });
+        return;
+      }
+
+      if (kind === Kind.LiveEvent) {
+        const stream = await getStreamingEvent(identifier, pubkey);
+
+        const host = stream.hosts?.[0] || stream.pubkey;
+
+        if (!host) throw new Error('no-pubkey');
+
+        const vanityName = app?.verifiedUsers[host];
+
+        if (vanityName) {
+          navigate(`/${vanityName}/live/${identifier}`);
+          return;
+        }
+
+        batch(() => {
+          setComponent(() => 'live');
+          setEvId(() => id);
+        });
+        return;
+      }
+    }
+    catch (e) {
+      logError(`Failed to load stream: ${e}`);
+      navigate('/404');
+    }
+  }
+
+  const [component, setComponent] = createSignal<'note' | 'read' | 'live' | 'none' | 'not_found'>('none');
 
   createEffect(() => {
     render(params.id, params.identifier);
@@ -146,27 +202,28 @@ const EventPage: Component = () => {
     if (id) {
       if (id.startsWith('naddr')) {
 
-        const decoded = nip19.decode(id);
+        resolveFromNaddr(id);
+        // const decoded = nip19.decode(id);
 
-        const data = decoded.data as nip19.AddressPointer;
+        // const data = decoded.data as nip19.AddressPointer;
 
-        const pubkey = data.pubkey;
-        const identifier = data.identifier;
+        // const pubkey = data.pubkey;
+        // const identifier = data.identifier;
 
-        await fetchUserProfile(account?.publicKey, pubkey, `thred_profile_info_${APP_ID}`);
+        // await fetchUserProfile(account?.publicKey, pubkey, `thred_profile_info_${APP_ID}`);
 
-        const vanityName = app?.verifiedUsers[pubkey];
+        // const vanityName = app?.verifiedUsers[pubkey];
 
-        if (vanityName) {
-          navigate(`/${vanityName}/${identifier}`);
-          return;
-        }
+        // if (vanityName) {
+        //   navigate(`/${vanityName}/${identifier}`);
+        //   return;
+        // }
 
-        batch(() => {
-          setComponent(() => 'read');
-          setEvId(() => id);
-        });
-        return;
+        // batch(() => {
+        //   setComponent(() => 'read');
+        //   setEvId(() => id);
+        // });
+        // return;
       }
 
       if (id.startsWith('note')) {

@@ -218,7 +218,7 @@ const Avatar: Component<{
 
     if (!stream) return '';
 
-    return `${app?.actions.profileLink(stream.pubkey)}/live/${stream.id}`;
+    return `${app?.actions.profileLink(props.user?.pubkey || stream.pubkey)}/live/${stream.id}`;
   }
 
   return (

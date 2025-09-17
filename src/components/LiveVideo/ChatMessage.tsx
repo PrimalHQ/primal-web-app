@@ -715,7 +715,8 @@ const ChatMessage: Component<{
           if (decoded.type === 'naddr') {
             const { kind, pubkey, identifier } = decoded.data;
             const author = props.mentionedUsers.find(u => u.pubkey === pubkey);
-            const vn = vanityName(pubkey);
+
+            let vn = vanityName(pubkey);
 
 
             if (kind === Kind.LongForm) {
@@ -729,12 +730,13 @@ const ChatMessage: Component<{
             }
 
             if (kind === Kind.LiveEvent) {
+
               return <a
-                href={vn ? `/${vn}/live/${urlEncode(identifier)}` : `/p/${pubkey}/live/${identifier}`}
+                href={`/a/${id}`}
                 class={styles.eventMention}
                 target="_blank"
               >
-                Stream <Show when={author}><span> by {userName(author) || vn}</span></Show>
+                Stream <Show when={author || vn}><span> by {userName(author) || vn}</span></Show>
               </a>;
             }
 

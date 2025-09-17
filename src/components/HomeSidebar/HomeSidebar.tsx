@@ -282,7 +282,9 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
   const liveHref = (event: StreamingData | undefined) => {
     if (!event) return '';
 
-    return `${app?.actions.profileLink(event.pubkey, true)}/live/${event.id}`;
+    let host = event.hosts?.[0] || event.pubkey;
+
+    return `${app?.actions.profileLink(host, true)}/live/${event.id}`;
   }
 
   const liveAuthor = (data: StreamingData) => {

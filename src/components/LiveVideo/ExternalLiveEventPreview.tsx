@@ -95,7 +95,9 @@ const ExternalLiveEventPreview: Component<{
 
     if (!event) return '';
 
-    return `${app?.actions.profileLink(event.pubkey, true)}/live/${event.id}`;
+    const host = event.hosts?.[0] || event.pubkey;
+
+    return `${app?.actions.profileLink(host, true)}/live/${event.id}`;
   }
 
   return (

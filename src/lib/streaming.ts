@@ -130,3 +130,54 @@ export const stopListeningForLiveEventsSidebar = (subId: string) => {
     {cache: ["live_events_from_follows"]},
   ]));
 };
+
+export const findStreamByHost = async (identifier: string | undefined, host_pubkey: string | undefined) => {
+  return new Promise<any>((resolve, reject) => {
+    if (!host_pubkey || !identifier) {
+      resolve({});
+      return;
+    }
+
+    const subId = `get_stream_by_host_${APP_ID}`;
+    let streamData: StreamingData = {};
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content.kind === 30_311) {
+          const data = { ...content };
+
+          streamData = {
+            id: (data.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
+            url: (data.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
+            image: (data.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
+            status: (data.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
+            starts: parseInt((data.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
+            ends: parseInt((data.tags?.find((t: string[]) => t[0] === 'ends') || ['', '0'])[1]),
+            summary: (data.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
+            title: (data.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
+            client: (data.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
+            currentParticipants: parseInt((data.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+            pubkey: data.pubkey,
+            event: {...content},
+            hosts: (data.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
+            participants: (data.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
+          }
+
+        }
+      },
+      onEose: () => {
+        unsub();
+        resolve(streamData);
+      },
+      onNotice: () => {
+        reject('failed_to_find_streaming_data');
+      }
+    });
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["find_live_events", { host_pubkey, identifier }]},
+    ]));
+  })
+}

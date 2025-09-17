@@ -24,7 +24,7 @@ import { useSettingsContext } from '../contexts/SettingsContext';
 import { isAndroid } from '@kobalte/utils';
 import { findFirstDifference, isIOS, isPhone, uuidv4 } from '../utils';
 import { useNavigate, useParams, useSearchParams } from '@solidjs/router';
-import { getStreamingEvent, startLiveChat, stopLiveChat, StreamingData } from '../lib/streaming';
+import { findStreamByHost, getStreamingEvent, startLiveChat, stopLiveChat, StreamingData } from '../lib/streaming';
 
 import { useProfileContext } from '../contexts/ProfileContext';
 import { fetchKnownProfiles, getUserProfiles } from '../lib/profile';
@@ -180,7 +180,11 @@ const StreamPage: Component = () => {
   const [streamData, setStreamData] = createStore<StreamingData>({});
 
   const resolveStreamingData = async (id: string, pubkey: string | undefined) => {
-    const data = await getStreamingEvent(id, getHex());
+    let data = await findStreamByHost(id, getHex());
+
+    if (!data.id) {
+      data = await getStreamingEvent(id, getHex());
+    }
 
     setStreamData(() => data || {});
   }
