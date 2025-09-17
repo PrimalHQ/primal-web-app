@@ -4,9 +4,10 @@ import { logError } from "../lib/logger";
 import { NostrUserContent, PrimalUser, UserStats } from "../types/primal";
 
 export const truncateNpub = (npub: string) => {
-  if (npub.length < 24) {
+  if (npub.length < 26) {
     return npub;
   }
+
   return `${npub.slice(0, 15)}..${npub.slice(-10)}`;
 };
 
