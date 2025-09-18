@@ -618,13 +618,13 @@ const StreamPage: Component = () => {
     return (
       <div class={`${styles.liveMessage} ${styles.zapMessage}`}>
         <div class={styles.leftSide}>
-          <Avatar user={author(zap.sender as string)} size="xss" />
+          <Avatar user={account?.activeUser} size="xss" />
         </div>
         <div class={styles.rightSide}>
           <span class={styles.zapInfo}>
             <span class={styles.authorName}>
               <span>
-                {userName(author(zap.sender as string), zap.sender as string)}
+                {userName(account?.activeUser, account?.publicKey)}
               </span>
               <span class={styles.zapped}>
                 zapped
