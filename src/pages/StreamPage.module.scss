@@ -521,6 +521,8 @@
     .zapButton {
       width: 100%;
       height: 32px;
+
+      animation: fadeIn 1s ease-in-out forwards;
     }
 
     .statsLine {

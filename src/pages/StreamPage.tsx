@@ -1110,114 +1110,117 @@ const StreamPage: Component = () => {
           />
         </div>
 
-        <div class={styles.streamInfo}>
-          <div class={styles.title}>{streamData.title}</div>
-          <div class={styles.statsRibbon}>
-            <Show
-              when={streamData.status === 'live'}
-              fallback={
-                <div class={styles.time}>
-                  Ended {streamData.ends || streamData.starts ? `${date(streamData.ends || streamData.starts || 0).label} ago` : ''}
+
+        <Show when={initialLoadDone()}>
+          <div class={styles.streamInfo}>
+            <div class={styles.title}>{streamData.title}</div>
+            <div class={styles.statsRibbon}>
+              <Show
+                when={streamData.status === 'live'}
+                fallback={
+                  <div class={styles.time}>
+                    Ended {streamData.ends || streamData.starts ? `${date(streamData.ends || streamData.starts || 0).label} ago` : ''}
+                  </div>
+                }
+              >
+                <div class={styles.status}>
+                  <Show when={streamData.status === 'live'}>
+                    <div class={styles.liveDot}>  </div>
+                    Live
+                  </Show>
                 </div>
-              }
-            >
-              <div class={styles.status}>
-                <Show when={streamData.status === 'live'}>
-                  <div class={styles.liveDot}>  </div>
-                  Live
+                <Show when={streamData.starts}>
+                  <div class={styles.time}>
+                    Started {date(streamData.starts || 0).label} ago
+                  </div>
+                </Show>
+              </Show>
+              <Show when={streamData.participants}>
+                <div class={styles.participants}>
+                  <div class={styles.participantsIcon}></div>
+                  {streamData.currentParticipants || 0}
+                </div>
+              </Show>
+            </div>
+
+            <div class={`${styles.topZaps} ${topZaps.length === 0 ? styles.centered : ''}`}>
+              <div class={`${styles.zapList} ${topZaps.length === 0 ? styles.emptyZaps : ''}`}>
+                <div class={styles.firstZap}>
+                  {renderFirstZap()}
+                </div>
+                <Show when={topZaps.length > 0}>
+                  <div class={styles.other}>
+                    {renderRestZaps()}
+                  </div>
                 </Show>
               </div>
-              <Show when={streamData.starts}>
-                <div class={styles.time}>
-                  Started {date(streamData.starts || 0).label} ago
+              <div class={`${styles.zapStats} ${topZaps.length === 0 ? styles.centeredZaps : ''}`}>
+                <div class={`${styles.statsLine} ${topZaps.length === 0 ? styles.noStatsLine : ''}`}>
+                  <div class={styles.totalZaps}>Total {totalZaps()} zaps:</div>
+                  <div class={styles.totalSats}>
+                    <div class={styles.zapIcon}></div>
+                    {humanizeNumber(totalSats(), false)}
+                  </div>
                 </div>
-              </Show>
-            </Show>
-            <Show when={streamData.participants}>
-              <div class={styles.participants}>
-                <div class={styles.participantsIcon}></div>
-                {streamData.currentParticipants || 0}
-              </div>
-            </Show>
-          </div>
-
-          <div class={`${styles.topZaps} ${topZaps.length === 0 ? styles.centered : ''}`}>
-            <div class={`${styles.zapList} ${topZaps.length === 0 ? styles.emptyZaps : ''}`}>
-              <div class={styles.firstZap}>
-                {renderFirstZap()}
-              </div>
-              <Show when={topZaps.length > 0}>
-                <div class={styles.other}>
-                  {renderRestZaps()}
-                </div>
-              </Show>
-            </div>
-            <div class={`${styles.zapStats} ${topZaps.length === 0 ? styles.centeredZaps : ''}`}>
-              <div class={`${styles.statsLine} ${topZaps.length === 0 ? styles.noStatsLine : ''}`}>
-                <div class={styles.totalZaps}>Total {totalZaps()} zaps:</div>
-                <div class={styles.totalSats}>
+                <button
+                  class={styles.zapButton}
+                  onMouseDown={startZap}
+                  onMouseUp={commitZap}
+                >
                   <div class={styles.zapIcon}></div>
-                  {humanizeNumber(totalSats(), false)}
-                </div>
+                  {topZaps.length > 0 ? 'Zap Now' : 'Be the first to zap this stream!'}
+                </button>
               </div>
-              <button
-                class={styles.zapButton}
-                onMouseDown={startZap}
-                onMouseUp={commitZap}
-              >
-                <div class={styles.zapIcon}></div>
-                {topZaps.length > 0 ? 'Zap Now' : 'Be the first to zap this stream!'}
-              </button>
             </div>
-          </div>
 
-          <div class={styles.summary}>
-            {parseSummary(streamData.summary || '')}
-          </div>
-
-          <Show when={queryParams.test === 'zaps'}>
-            <div class={styles.testButtons}>
-              <button onClick={() => {
-                setTopZapLimit(() => 0);
-              }}>Hide All</button>
-              <Show when={topZapLimit() > 0}>
-                <button onClick={() => {
-                  const fz = { ...topZaps[0] };
-
-                  fz.id = `random_${Math.floor(Math.random() * 1_000)}`;
-                  fz.amount = fz.amount + 10;
-
-                  setTopZaps((tzs) => [{ ...fz }, ...tzs]);
-                }}>Add top</button>
-              </Show>
-              <Show when={topZapLimit() > 1}>
-                <button onClick={() => {
-                  const fz = { ...topZaps[1] };
-
-                  fz.id = `random_${Math.floor(Math.random() * 1_000)}`;
-                  fz.amount = fz.amount + 10;
-
-                  setTopZaps((tzs) => [{...tzs[0]},{ ...fz }, ...tzs.slice(1)]);
-                }}>Add second</button>
-              </Show>
-              <Show when={topZapLimit() > 2}>
-                <button onClick={() => {
-                  const fz = { ...topZaps[2] };
-
-                  fz.id = `random_${Math.floor(Math.random() * 1_000)}`;
-                  fz.amount = fz.amount + 10;
-
-                  setTopZaps((tzs) => [...tzs.slice(0,2),{ ...fz }, ...tzs.slice(2)]);
-                }}>Add third</button>
-              </Show>
-              <Show when={topZapLimit() < 5}>
-                <button onClick={() =>{
-                  setTopZapLimit((l) => l + 1)
-                }}>Add One</button>
-              </Show>
+            <div class={styles.summary}>
+              {parseSummary(streamData.summary || '')}
             </div>
-          </Show>
-        </div>
+
+            <Show when={queryParams.test === 'zaps'}>
+              <div class={styles.testButtons}>
+                <button onClick={() => {
+                  setTopZapLimit(() => 0);
+                }}>Hide All</button>
+                <Show when={topZapLimit() > 0}>
+                  <button onClick={() => {
+                    const fz = { ...topZaps[0] };
+
+                    fz.id = `random_${Math.floor(Math.random() * 1_000)}`;
+                    fz.amount = fz.amount + 10;
+
+                    setTopZaps((tzs) => [{ ...fz }, ...tzs]);
+                  }}>Add top</button>
+                </Show>
+                <Show when={topZapLimit() > 1}>
+                  <button onClick={() => {
+                    const fz = { ...topZaps[1] };
+
+                    fz.id = `random_${Math.floor(Math.random() * 1_000)}`;
+                    fz.amount = fz.amount + 10;
+
+                    setTopZaps((tzs) => [{...tzs[0]},{ ...fz }, ...tzs.slice(1)]);
+                  }}>Add second</button>
+                </Show>
+                <Show when={topZapLimit() > 2}>
+                  <button onClick={() => {
+                    const fz = { ...topZaps[2] };
+
+                    fz.id = `random_${Math.floor(Math.random() * 1_000)}`;
+                    fz.amount = fz.amount + 10;
+
+                    setTopZaps((tzs) => [...tzs.slice(0,2),{ ...fz }, ...tzs.slice(2)]);
+                  }}>Add third</button>
+                </Show>
+                <Show when={topZapLimit() < 5}>
+                  <button onClick={() =>{
+                    setTopZapLimit((l) => l + 1)
+                  }}>Add One</button>
+                </Show>
+              </div>
+            </Show>
+          </div>
+        </Show>
       </div>
 
       <div class={`${styles.liveSidebar} ${!showLiveChat() ? styles.hidden : ''}`}>
