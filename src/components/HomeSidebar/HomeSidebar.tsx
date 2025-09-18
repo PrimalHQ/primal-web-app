@@ -189,6 +189,13 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
       home?.actions.updateSidebarQuery(stored);
       home?.actions.doSidebarSearch(stored.value || '');
+
+      const cachedStreams = loadLiveStreams(account?.publicKey);
+
+      if (cachedStreams.length > 0) {
+        setInitialLiveLoaded(true);
+        setLiveEvents(() => [...cachedStreams]);
+      }
     }
 
     if (unsub) unsub();
@@ -214,10 +221,10 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
             participants: (event.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
           };
 
-          if (!initialLiveLoaded()) {
-            events.push({ ...streamData });
-            return;
-          }
+          // if (!initialLiveLoaded()) {
+          //   events.push({ ...streamData });
+          //   return;
+          // }
 
           storeStreamData(streamData);
         }
@@ -227,8 +234,6 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
         setInitialLiveLoaded(true);
       }
     })
-
-    setLiveEvents(() => loadLiveStreams(account?.publicKey))
 
     startListeningForLiveEventsSidebar(account?.publicKey, subId);
   });
