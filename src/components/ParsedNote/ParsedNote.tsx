@@ -775,6 +775,11 @@ const ParsedNote: Component<{
           <source src={token} type={item.meta?.videoType} />
         </video>;
 
+        video.addEventListener('click', (e: MouseEvent) => {
+          e.stopPropagation();
+          e.preventDefault();
+        })
+
         media?.actions.addVideo(video as HTMLVideoElement);
 
         return video;
