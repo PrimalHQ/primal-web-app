@@ -1019,14 +1019,19 @@ const StreamPage: Component = () => {
 
     return events.reduce<number>((acc, e) => {
       if (
-        e.kind !== Kind.Zap ||
+        ![-1, Kind.Zap].includes(e.kind) ||
         (e.created_at || 0) <= lastCounted
       ) return acc;
 
       try {
-        const z = convertToZap(e);
+        if (e.kind === Kind.Zap) {
+          const z = convertToZap(e);
 
-        return acc + z.amount;
+          return acc + z.amount;
+        }
+        if (e.kind === -1) {
+          return acc + e.amount;
+        }
       } catch (e) {
         return acc;
       }
