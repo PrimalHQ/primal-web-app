@@ -807,6 +807,8 @@ export const saveLiveStreams = (pubkey: string | undefined, streams: StreamingDa
 
   store.liveStreams = [...streams];
 
+  console.log('SAVED LS: ', streams, store.liveStreams);
+
   setStorage(pubkey, store);
 }
 
@@ -817,5 +819,6 @@ export const loadLiveStreams = (pubkey: string | undefined) => {
   }
   const store = getStorage(pubkey);
 
+  console.log('LOAD LS: ', store.liveStreams || [])
   return store.liveStreams || [];
 };

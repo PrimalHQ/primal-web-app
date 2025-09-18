@@ -189,7 +189,9 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
       home?.actions.updateSidebarQuery(stored);
       home?.actions.doSidebarSearch(stored.value || '');
+    }
 
+    if (account?.isKeyLookupDone) {
       const cachedStreams = loadLiveStreams(account?.publicKey);
 
       if (cachedStreams.length > 0) {
@@ -238,10 +240,6 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
     startListeningForLiveEventsSidebar(account?.publicKey, subId);
   });
 
-  createEffect(() => {
-    saveLiveStreams(account?.publicKey, liveEvents);
-  })
-
   onCleanup(() => {
     unsub && unsub();
     stopListeningForLiveEventsSidebar(subId);
@@ -264,21 +262,26 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
     const index = liveEvents.findIndex(e => e.id === streamData.id && e.pubkey === streamData.pubkey);
 
+    console.log('LIVE STREAMS: ', index, streamData.status, streamData.title)
+
     // Remove ended events
     if (index >= 0 && streamData.status !== 'live') {
       setLiveEvents((le) => le.filter(e => e.id !== streamData.id && e.pubkey !== streamData.pubkey));
+      saveLiveStreams(account?.publicKey, liveEvents);
       return;
     }
 
     // Add new Events
     if (index < 0 && streamData.status === 'live') {
       setLiveEvents(liveEvents.length, () => ({ ...streamData }));
+      saveLiveStreams(account?.publicKey, liveEvents);
       return;
     }
 
     // Update existing events
     if (streamData.status === 'live') {
       setLiveEvents(index, () => ({ ...streamData }));
+      saveLiveStreams(account?.publicKey, liveEvents);
     }
 
     return;
@@ -304,10 +307,9 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
   return (
     <div id={props.id}>
-      <Show when={liveEvents.length > 0}>
         <div class={styles.headingLive}>
           <div>
-            Live on Nostr
+            Live on Nostr {liveEvents.length}
           </div>
         </div>
 
@@ -341,7 +343,6 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
             )}
           </For>
         </div>
-      </Show>
 
 
       <div class={styles.headingTrending}>
