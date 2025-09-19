@@ -696,6 +696,11 @@ const ProfileDesktop: Component = () => {
     return re.slice(0, 5).reverse();
   }
 
+
+  const getStream = () => {
+    return media?.actions.getStream(profile?.profileKey || 'n/a');
+  }
+
   return (
     <>
       <PageTitle title={
@@ -740,6 +745,7 @@ const ProfileDesktop: Component = () => {
               notes={profile?.sidebarNotes.notes}
               articles={profile?.sidebarArticles.notes}
               profile={profile?.userProfile}
+              stream={getStream()}
             />
           </Show>
         </TransitionGroup>

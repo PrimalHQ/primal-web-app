@@ -17,12 +17,17 @@ import ArticlePreviewSidebarSkeleton from '../Skeleton/ArticlePreviewSidebarSkel
 import ShortNoteSkeleton from '../Skeleton/ShortNoteSkeleton';
 import { Transition } from 'solid-transition-group';
 import { Properties } from 'solid-js/web';
+import { StreamingData } from '../../lib/streaming';
+import { createStore } from 'solid-js/store';
+import LivePill from '../LivePill/LivePill';
+import LiveEventSidebarSkeleton from '../Skeleton/LiveEventSidebarSkeleton';
 
 
 const ProfileSidebar: Component<{
   notes: PrimalNote[] | undefined,
   articles: PrimalArticle[] | undefined,
   profile: PrimalUser | undefined,
+  stream: StreamingData,
   id?: string,
 }> = (props) => {
 
@@ -32,8 +37,35 @@ const ProfileSidebar: Component<{
   const topNotes = () => (props.articles || []).length > 0 ?
     (props.notes || []).slice(0, 5) : props.notes;
 
+  const streams = () => props.stream ? [props.stream] : [];
+
   return (
     <div id={props.id} class="animated">
+
+      <Show when={streams().length > 0}>
+        <div class={styles.headingTrending}>
+          <div>
+            Live Now
+          </div>
+        </div>
+
+        <div class={styles.articles}>
+          <For each={streams()}>
+            {liveEvent => (
+              <Show
+                when={props.profile}
+                fallback={<LiveEventSidebarSkeleton />}
+              >
+                <LivePill
+                  liveEvent={liveEvent}
+                  liveAuthor={props.profile}
+                />
+              </Show>
+            )}
+          </For>
+        </div>
+      </Show>
+
         <Show
           when={props.articles && props.articles.length > 0}
           fallback={

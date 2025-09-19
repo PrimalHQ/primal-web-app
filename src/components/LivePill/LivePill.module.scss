@@ -1,0 +1,66 @@
+
+.liveItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 8px;
+  border-radius: 99px;
+  background: var(--background-input);
+  gap: 8px;
+
+  .leftSide {
+    display: flex;
+    gap: 8px;
+  }
+
+  .eventInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .authorName {
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 16px;
+
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      line-clamp: 1;
+      -webkit-box-orient: vertical;
+    }
+
+    .ribbon {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-tertiary);
+      font-size: 12px;
+      font-weight: 400;
+      line-height: 12px;
+    }
+  }
+
+  .liveStatus {
+    display: flex;
+    align-items: center;
+    margin-right: 8px;
+    gap: 4px;
+
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+
+    .liveDot {
+      width: 6px;
+      height: 6px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: #E00;
+      -webkit-mask: url(../../assets/icons/dot.svg) no-repeat center;
+      mask: url(../../assets/icons/dot.svg) no-repeat center;
+    }
+  }
+}

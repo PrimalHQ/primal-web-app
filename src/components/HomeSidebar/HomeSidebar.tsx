@@ -28,6 +28,7 @@ import { date } from '../../lib/dates';
 import { useAppContext } from '../../contexts/AppContext';
 import LiveEventSidebarSkeleton from '../Skeleton/LiveEventSidebarSkeleton';
 import { useSearchParams } from '@solidjs/router';
+import LivePill from '../LivePill/LivePill';
 
 const sidebarOptions = [
   {
@@ -323,31 +324,15 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
                 when={liveAuthor(liveEvent)}
                 fallback={<LiveEventSidebarSkeleton />}
               >
-                <a class={styles.liveItem} href={liveHref(liveEvent)}>
-                  <div class={styles.leftSide}>
-                    <Avatar user={liveAuthor(liveEvent)} size="xxs" />
-                    <div class={styles.eventInfo}>
-                      <div class={styles.authorName}>{liveEvent.title || userName(liveAuthor(liveEvent))}</div>
-                      <div class={styles.ribbon}>
-                        <div class={styles.time}>Started {date(liveEvent.starts || 0).label} ago</div>
-
-                          <div class={styles.participantIcon}></div>
-                          <div>{liveEvent.currentParticipants || 0}</div>
-
-                      </div>
-                    </div>
-                  </div>
-                  <div class={styles.liveStatus}>
-                    <div class={styles.liveDot}></div>
-                    Live
-                  </div>
-                </a>
+                <LivePill
+                  liveEvent={liveEvent}
+                  liveAuthor={liveAuthor(liveEvent)}
+                />
               </Show>
             )}
           </For>
         </div>
       </Show>
-
 
       <div class={styles.headingTrending}>
         <SelectionBox2
