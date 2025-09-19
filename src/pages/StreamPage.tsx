@@ -751,7 +751,12 @@ const StreamPage: Component = () => {
         fallback={<></>}
       >
         <div class={styles.topZap} onClick={() => setOpenZaps(true)}>
-          <Avatar user={author(zap?.sender as string)} size="s38" />
+          <Show
+            when={zap.id === 'NEW_USER_ZAP'}
+            fallback={<Avatar user={author(zap?.sender as string)} size="s38" />}
+          >
+            <Avatar user={account?.activeUser} size="s38" />
+          </Show>
           <div class={styles.amount}>
             <div class={styles.zapIcon}></div>
             <div class={styles.firstZapAmount}>{humanizeNumber(zap?.amount, false)}</div>
@@ -778,7 +783,12 @@ const StreamPage: Component = () => {
       <For each={zaps}>
         {zap => (
           <div class={styles.topZap} onClick={() => setOpenZaps(true)}>
-            <Avatar user={author(zap?.sender as string)} size="s30" />
+            <Show
+              when={zap.id === 'NEW_USER_ZAP'}
+              fallback={<Avatar user={author(zap?.sender as string)} size="s38" />}
+            >
+              <Avatar user={account?.activeUser} size="s38" />
+            </Show>
             <div class={styles.zapAmount}>{humanizeNumber(zap?.amount, false)}</div>
           </div>
         )}
