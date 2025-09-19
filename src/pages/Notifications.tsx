@@ -585,19 +585,22 @@ const Notifications: Component = () => {
     if (!notifs) {
       return;
     }
+    const grouped = groupBy(notifs, 'live_event_id');
 
-    return (<For each={notifs}>
-      {notif => (
-        <NotificationItem
-          type={type}
-          notification={notif}
-          users={getUsers(notifs, type)}
-          streams={relatedNotes.streams}
-        />
+    const keys = Object.keys(grouped);
 
-      )}
+    return <For each={keys}>
+      {key => {
+        return (
+          <NotificationItem
+            type={type}
+            users={getUsers(grouped[key], type)}
+            streams={relatedNotes.streams}
+            notification={notifs[0]}
+          />
+        )}
+      }
     </For>
-    )
   };
 
   const newUserFollowedYou = () => {
