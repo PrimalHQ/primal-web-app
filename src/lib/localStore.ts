@@ -51,6 +51,7 @@ export type LocalStore = {
   nwcActive: string[] | undefined,
   useSystemDarkMode: boolean | undefined,
   liveStreams: StreamingData[] | undefined,
+  liveAuthors: PrimalUser[] | undefined,
 };
 
 export type UploadTime = {
@@ -807,8 +808,6 @@ export const saveLiveStreams = (pubkey: string | undefined, streams: StreamingDa
 
   store.liveStreams = [...streams];
 
-  console.log('SAVED LS: ', streams, store.liveStreams);
-
   setStorage(pubkey, store);
 }
 
@@ -819,6 +818,27 @@ export const loadLiveStreams = (pubkey: string | undefined) => {
   }
   const store = getStorage(pubkey);
 
-  console.log('LOAD LS: ', store.liveStreams || [])
   return store.liveStreams || [];
+};
+
+export const saveLiveAuthors = (pubkey: string | undefined, streams: StreamingData[]) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.liveAuthors = [...streams];
+
+  setStorage(pubkey, store);
+}
+
+
+export const loadLiveAuthors = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return [];
+  }
+  const store = getStorage(pubkey);
+
+  return store.liveAuthors || [];
 };

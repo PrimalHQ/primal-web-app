@@ -11,7 +11,7 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
 import SelectionBox from '../SelectionBox/SelectionBox';
 import Loader from '../Loader/Loader';
-import { loadLiveStreams, readHomeSidebarSelection, saveHomeSidebarSelection, saveLiveStreams } from '../../lib/localStore';
+import { loadLiveAuthors, loadLiveStreams, readHomeSidebarSelection, saveHomeSidebarSelection, saveLiveAuthors, saveLiveStreams } from '../../lib/localStore';
 import { useHomeContext } from '../../contexts/HomeContext';
 import ShortNoteSkeleton from '../Skeleton/ShortNoteSkeleton';
 import { Transition } from 'solid-transition-group';
@@ -161,6 +161,7 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
     const { users } = await fetchPeople(pks, subId);
     setLiveAuthors((peps) => [ ...peps, ...users]);
+    saveLiveAuthors(account?.publicKey, liveAuthors);
   }
 
   let debounce = 0;
@@ -193,10 +194,12 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
     if (account?.isKeyLookupDone) {
       const cachedStreams = loadLiveStreams(account?.publicKey);
+      const cachedLiveAuthors = loadLiveAuthors(account?.publicKey);
 
       if (cachedStreams.length > 0) {
         // setInitialLiveLoaded(true);
         setLiveEvents(() => [...cachedStreams]);
+        setLiveAuthors(() => [ ...cachedLiveAuthors ]);
       }
     }
 
