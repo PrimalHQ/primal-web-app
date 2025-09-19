@@ -298,7 +298,7 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
     const pubkey = data.hosts?.[0]
 
     if (pubkey) {
-      return liveAuthors.find(a => a.pubkey === pubkey) || liveAuthors.find(a => a.pubkey === data.pubkey);
+      return liveAuthors.find(a => a.pubkey === pubkey);
     }
 
     return liveAuthors.find(a => a.pubkey === data.pubkey);
