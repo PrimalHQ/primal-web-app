@@ -195,7 +195,7 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
       const cachedStreams = loadLiveStreams(account?.publicKey);
 
       if (cachedStreams.length > 0) {
-        setInitialLiveLoaded(true);
+        // setInitialLiveLoaded(true);
         setLiveEvents(() => [...cachedStreams]);
       }
     }
@@ -223,15 +223,16 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
             participants: (event.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
           };
 
-          // if (!initialLiveLoaded()) {
-          //   events.push({ ...streamData });
-          //   return;
-          // }
+          if (!initialLiveLoaded()) {
+            events.push({ ...streamData });
+            return;
+          }
 
           storeStreamData(streamData);
         }
       },
       onEose: () => {
+        setLiveEvents([]);
         events.forEach(storeStreamData);
         setInitialLiveLoaded(true);
       }
@@ -261,8 +262,6 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
     }
 
     const index = liveEvents.findIndex(e => e.id === streamData.id && e.pubkey === streamData.pubkey);
-
-    console.log('LIVE STREAMS: ', index, streamData.status, streamData.title)
 
     // Remove ended events
     if (index >= 0 && streamData.status !== 'live') {
@@ -307,9 +306,10 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
   return (
     <div id={props.id}>
+      <Show when={liveEvents.length > 0}>
         <div class={styles.headingLive}>
           <div>
-            Live on Nostr {liveEvents.length}
+            Live on Nostr
           </div>
         </div>
 
@@ -343,6 +343,7 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
             )}
           </For>
         </div>
+      </Show>
 
 
       <div class={styles.headingTrending}>
