@@ -111,7 +111,11 @@ export const MediaProvider = (props: { children: JSXElement }) => {
   }
 
   const getStream = (pubkey: string) => {
-    return store.liveEvents.find((s: StreamingData) => s.pubkey === pubkey);
+    let ret = store.liveEvents.find((s: StreamingData) => s.hosts?.[0] === pubkey);
+
+    if (!ret) return store.liveEvents.find((s: StreamingData) => s.pubkey === pubkey);
+
+    return ret;
   }
 
   const isStreaming = (pubkey: string) => {
