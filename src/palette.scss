@@ -45,7 +45,8 @@
 
   --profile-indicator-border: var(--background-site);
 
-  --check-image: url('./assets/icons/check.svg');
+  --checkbox-check-color: #ffffff;
+  --check-image: url('./assets/icons/check-dark.svg');
   --logo: url('./assets/icons/logo_fire.svg');
   --logo-big: url('./assets/icons/logo_fire_big.svg');
   --icon-follows: url('./assets/icons/follows.svg');
@@ -123,7 +124,8 @@
 
   --profile-indicator-border: var(--background-site);
 
-  --check-image: url('./assets/icons/check.svg');
+  --checkbox-check-color: #ffffff;
+  --check-image: url('./assets/icons/check-dark.svg');
   --logo: url('./assets/icons/logo_ice.svg');
   --logo-big: url('./assets/icons/logo_ice_big.svg');
   --icon-follows: url('./assets/icons/follows.svg');
@@ -200,7 +202,8 @@
 
   --profile-indicator-border: var(--accent);
 
-  --check-image: url('./assets/icons/check.svg');
+  --checkbox-check-color: #000000;
+  --check-image: url('./assets/icons/check-light.svg');
   --logo: url('./assets/icons/logo_fire.svg');
   --logo-big: url('./assets/icons/logo_fire_big_l.svg');
   --icon-follows: url('./assets/icons/follows.svg');
@@ -278,7 +281,8 @@
 
   --profile-indicator-border: var(--accent);
 
-  --check-image: url('./assets/icons/check.svg');
+  --checkbox-check-color: #000000;
+  --check-image: url('./assets/icons/check-light.svg');
   --logo: url('./assets/icons/logo_ice.svg');
   --logo-big: url('./assets/icons/logo_ice_big_l.svg');
   --icon-follows: url('./assets/icons/follows.svg');
