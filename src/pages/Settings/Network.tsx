@@ -16,7 +16,6 @@ import { getDefaultRelays } from '../../lib/relays';
 import { APP_ID } from '../../App';
 import { isConnected as isSocketConnected, socket, subsTo } from '../../sockets';
 import { createStore } from 'solid-js/store';
-import Checkbox from '../../components/Checkbox/Checkbox';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { interpretBold } from '../../translationHelpers';
 import HelpTip from '../../components/HelpTip/HelpTip';
@@ -302,7 +301,7 @@ const Network: Component = () => {
 
       <div class={styles.settingsContentPaddingOnly}>
         <Show when={!isPrimalRelayInUserSettings()}>
-          <Checkbox
+          <CheckBox2
             id="primal_relay_check"
             checked={account?.connectToPrimaryRelays}
             onChange={() => onCheckPrimalRelay()}

@@ -4,7 +4,7 @@ import { Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import Avatar from '../../components/Avatar/Avatar';
-import Checkbox from '../../components/Checkbox/Checkbox';
+import CheckBox2 from '../../components/Checkbox/CheckBox2';
 import HelpTip from '../../components/HelpTip/HelpTip';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import PageTitle from '../../components/PageTitle/PageTitle';
@@ -169,7 +169,7 @@ const Moderation: Component = () => {
 
       <div class={styles.settingsContent}>
         <div class={styles.settingsCaption}>
-          <Checkbox
+          <CheckBox2
             id='applyFiltering'
             label=""
             onChange={() => {settings?.actions.setApplyContentModeration(!settings.applyContentModeration)}}
@@ -225,7 +225,7 @@ const Moderation: Component = () => {
               </A>
             </div>
             <div class={styles.filterListCheck}>
-              <Checkbox
+              <CheckBox2
                 id={`${my()?.pubkey}_content`}
                 onChange={() => account?.actions.updateFilterList(my()?.pubkey, !my()?.content, my()?.trending)}
                 checked={my()?.content}
@@ -233,7 +233,7 @@ const Moderation: Component = () => {
               />
             </div>
             <div class={styles.filterListCheck}>
-              <Checkbox
+              <CheckBox2
                 id={`${my()?.pubkey}_trending`}
                 onChange={() => account?.actions.updateFilterList(my()?.pubkey, my()?.content, !my()?.trending)}
                 checked={my()?.trending}
@@ -257,14 +257,14 @@ const Moderation: Component = () => {
                   </A>
                 </div>
                 <div class={styles.filterListCheck}>
-                  <Checkbox
+                  <CheckBox2
                     id={`${mutelist.pubkey}_content`}
                     onChange={() => account?.actions.updateFilterList(mutelist.pubkey, !mutelist.content, mutelist.trending)}
                     checked={mutelist.content}
                   />
                 </div>
                 <div class={styles.filterListCheck}>
-                  <Checkbox
+                  <CheckBox2
                     id={`${mutelist.pubkey}_trending`}
                     onChange={() => account?.actions.updateFilterList(mutelist.pubkey, mutelist.content, !mutelist.trending)}
                     checked={mutelist.trending}
@@ -307,14 +307,14 @@ const Moderation: Component = () => {
                   </A>
                 </div>
                 <div class={styles.filterListCheck}>
-                  <Checkbox
+                  <CheckBox2
                     id={`${algo.name}_content`}
                     onChange={() => settings?.actions.modifyContentModeration(algo.name, !algo.content, algo.trending)}
                     checked={algo.content}
                   />
                 </div>
                 <div class={styles.filterListCheck}>
-                  <Checkbox
+                  <CheckBox2
                     id={`${algo.name}_trending`}
                     onChange={() => settings?.actions.modifyContentModeration(algo.name, algo.content, !algo.trending)}
                     checked={algo.trending}

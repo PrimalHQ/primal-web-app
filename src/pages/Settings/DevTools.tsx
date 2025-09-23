@@ -6,7 +6,6 @@ import { settings as t } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import { A } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
-import Checkbox from '../../components/Checkbox/Checkbox';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import { storageName } from '../../lib/localStore';
 import { useAccountContext } from '../../contexts/AccountContext';

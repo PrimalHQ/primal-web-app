@@ -1,4 +1,4 @@
-import { Component, For, Show, createEffect, createSignal, on, onMount } from 'solid-js';
+import { Component, For, Show, createEffect, createSignal, on } from 'solid-js';
 import styles from './Settings.module.scss';
 
 import { useIntl } from '@cookbook/solid-intl';
@@ -11,18 +11,13 @@ import {
 import PageCaption from '../../components/PageCaption/PageCaption';
 import { A } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
-import SettingsBlossom from '../../components/SettingsBlossom/SettingsBlossom';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { logError } from '../../lib/logger';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import { primalBlossom } from '../../constants';
 import { useSettingsContext } from '../../contexts/SettingsContext';
-import Checkbox from '../../components/Checkbox/Checkbox';
 import CheckBox2 from '../../components/Checkbox/CheckBox2';
 import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
-import MirrorSorter from '../../components/FeedSorter/MirrorSorter';
-import { APP_ID } from '../../App';
-import { subsTo } from '../../sockets';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { createStore } from 'solid-js/store';
 import { checkBlossomServer } from '../../utils';

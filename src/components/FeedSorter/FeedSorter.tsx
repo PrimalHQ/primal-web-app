@@ -3,7 +3,6 @@ import { useAccountContext } from '../../contexts/AccountContext';
 import { FeedType } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
 import { PrimalArticleFeed } from '../../types/primal';
-import Checkbox from '../Checkbox/Checkbox';
 import CheckBox2 from '../Checkbox/CheckBox2';
 
 import styles from './FeedSorter.module.scss';
