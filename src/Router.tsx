@@ -71,6 +71,8 @@ const ReadsMy = lazy(() => import('./pages/ReadsMy'));
 
 const Streaming = lazy(() => import('./pages/StreamPage'));
 
+const CitadelPage = lazy(() => import(`./pages/CitadelPage`));
+
 const primalWindow = window as PrimalWindow;
 
 const isDev = localStorage.getItem('devMode') === 'true';
@@ -193,6 +195,7 @@ const AppRouter: Component = () => {
             <Route path="/:identifier" component={Thread} preload={getKnownProfiles} />
           </Route>
           <Route path="/rc/:code?" component={() => <Navigate href='/app-download-qr' />}/>
+          <Route path="/citadel_stream" component={CitadelPage} />
           <Route path="/404" component={NotFound} />
         </Route>
       </Router>

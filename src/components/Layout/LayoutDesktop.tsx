@@ -41,6 +41,7 @@ const LayoutDesktop: Component<{
   const containerClass = () => {
     if (location.pathname.startsWith('/e/naddr') || location.pathname.startsWith('/a/naddr')) return styles.containerLF;
     if (location.pathname.includes('/live')) return styles.liveContainer
+    if (location.pathname.includes('/citadel_stream')) return '';
 
     return styles.container;
   }
@@ -56,6 +57,11 @@ const LayoutDesktop: Component<{
       <>
         <div id="container" ref={container} class={containerClass()}>
           <Switch>
+            <Match when={location.pathname.includes('/citadel_stream')}>
+              <div>
+                {props.children}
+              </div>
+            </Match>
             <Match when={location.pathname.includes('/live/')}>
               <div class={`${styles.leftColumn} ${styles.liveStreamLeft}`}>
                 <div>
@@ -100,35 +106,39 @@ const LayoutDesktop: Component<{
             </Match>
           </Switch>
 
-            <Show when={account?.isKeyLookupDone}>
-              <Switch>
-                <Match when={location.pathname.includes('/live')}>
-                  <div class={styles.liveStreamCenter}>
+          <Show when={account?.isKeyLookupDone}>
+            <Switch>
+              <Match when={location.pathname.includes('/citadel_stream')}>
+                <></>
+              </Match>
+
+              <Match when={location.pathname.includes('/live')}>
+                <div class={styles.liveStreamCenter}>
+                  <div id="new_note_input" class={styles.headerFloater}>
+                    <NewNote onSuccess={props.onNewNotePosted}/>
+                  </div>
+                  {props.children}
+                </div>
+              </Match>
+
+              <Match when={true}>
+                <div class={styles.centerColumn}>
+                  <div class={styles.centerContent}>
                     <div id="new_note_input" class={styles.headerFloater}>
                       <NewNote onSuccess={props.onNewNotePosted}/>
                     </div>
-                    {props.children}
-                  </div>
-                </Match>
 
-                <Match when={true}>
-                  <div class={styles.centerColumn}>
-                    <div class={styles.centerContent}>
-                      <div id="new_note_input" class={styles.headerFloater}>
-                        <NewNote onSuccess={props.onNewNotePosted}/>
-                      </div>
-
-                      <div>
-                        {props.children}
-                      </div>
+                    <div>
+                      {props.children}
                     </div>
                   </div>
-                </Match>
-              </Switch>
-            </Show>
+                </div>
+              </Match>
+            </Switch>
+          </Show>
 
           <Switch>
-            <Match when={location.pathname.includes('/live/')}>
+            <Match when={location.pathname.includes('/live/') || location.pathname.includes('/citadel_stream')}>
               <></>
             </Match>
             <Match when={location.pathname.startsWith('/messages') || location.pathname.startsWith('/dms')}>
