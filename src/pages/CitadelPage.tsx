@@ -46,6 +46,9 @@ import mempoolPlaceholder from '../assets/images/mempool_placeholder.png';
 import citadelLogo from '../assets/images/citadel_logo.png';
 
 
+const QA_PUBKEY = '88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079';
+const STREAM_ID = '1752870546';
+
 const CHAT_PAGE_SIZE = 25;
 
 const CitadelPage: Component = () => {
@@ -60,7 +63,7 @@ const CitadelPage: Component = () => {
 
   const [queryParams, setQueryParams] = useSearchParams();
 
-  const streamId = () => params.streamId;
+  const streamId = () => STREAM_ID//params.streamId;
 
   const [getHex, setHex] = createSignal<string>();
 
@@ -82,6 +85,8 @@ const CitadelPage: Component = () => {
   }
 
   const resolveHex = async (vanityName: string | undefined) => {
+    return QA_PUBKEY;
+
     if (vanityName) {
       let name = vanityName.toLowerCase();
 
@@ -104,8 +109,9 @@ const CitadelPage: Component = () => {
     let hex = params.vanityName || account?.publicKey;
 
     if (!hex) {
-      navigate('/404');
-      return;
+      hex = QA_PUBKEY;
+      // navigate('/404');
+      // return;
     }
 
     if (params.vanityName?.startsWith('npub')) {
@@ -161,10 +167,11 @@ const CitadelPage: Component = () => {
   const [streamData, setStreamData] = createStore<StreamingData>({});
 
   const resolveStreamingData = async (id: string, pubkey: string | undefined) => {
-    let data = await findStreamByHost(id, getHex());
+
+    let data = await findStreamByHost(id, pubkey);
 
     if (!data.id) {
-      data = await getStreamingEvent(id, getHex());
+      data = await getStreamingEvent(id, pubkey);
     }
 
     setStreamData(() => data || {});
@@ -185,7 +192,7 @@ const CitadelPage: Component = () => {
         setEvents(() => []);
       }
 
-      startLiveChat(id, pubkey, account?.publicKey, subId, chatMode());
+      startLiveChat(id, pubkey, QA_PUBKEY, subId, chatMode());
 
       refreshSocketListeners(
         socket(),
@@ -468,13 +475,17 @@ const CitadelPage: Component = () => {
   }
 
   onMount(() => {
-    resolveStreamingData('1752870546', '88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079');
+    resolveStreamingData(STREAM_ID, QA_PUBKEY);
+
+    setTimeout(() => {
+      settings?.actions.setThemeByName('sunset', true)
+    }, 1_000)
   });
 
   createEffect(on(getHex, (pubkey) => {
     const stremId = streamId();
 
-    stremId && resolveStreamingData(stremId, pubkey);
+    resolveStreamingData(STREAM_ID, QA_PUBKEY);
   }));
 
   createEffect(() => {

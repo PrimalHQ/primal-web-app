@@ -72,6 +72,7 @@ export type SettingsContextStore = {
   recomendedBlossomServers: string[],
   actions: {
     setTheme: (theme: PrimalTheme | null) => void,
+    setThemeByName: (theme: string | null, temp?: boolean) => void,
     addAvailableFeed: (feed: PrimalFeed, addToTop?: boolean) => void,
     removeAvailableFeed: (feed: PrimalFeed) => void,
     setAvailableFeeds: (feedList: PrimalFeed[]) => void,
@@ -1052,6 +1053,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     ...initialData,
     actions: {
       setTheme,
+      setThemeByName,
       addAvailableFeed,
       removeAvailableFeed,
       setAvailableFeeds,
