@@ -1,33 +1,14 @@
-import { batch, Component, createEffect, createSignal, For, on, onCleanup, onMount, Show } from 'solid-js';
-import Branding from '../components/Branding/Branding';
-import Wormhole from '../components/Wormhole/Wormhole';
-import Search from '../components/Search/Search';
-
-import appstoreImg from '../assets/images/appstore_download.svg';
-import playstoreImg from '../assets/images/playstore_download.svg';
-import primalQR from '../assets/images/primal_qr.png';
-
-import gitHubLight from '../assets/icons/github_light.svg';
-import gitHubDark from '../assets/icons/github.svg';
-
-import primalDownloads from '../assets/images/video_placeholder.png';
+import { batch, Component, createEffect, createSignal, For, on, onCleanup, Show } from 'solid-js';
 
 import styles from './StreamPage.module.scss';
 import { toast as t } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
-import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { appStoreLink, playstoreLink, apkLink, Kind, urlRegex, hashtagRegex, hashtagCharsRegex } from '../constants';
-import ExternalLink from '../components/ExternalLink/ExternalLink';
-import PageCaption from '../components/PageCaption/PageCaption';
-import PageTitle from '../components/PageTitle/PageTitle';
 import { useSettingsContext } from '../contexts/SettingsContext';
-import { isAndroid } from '@kobalte/utils';
-import { findFirstDifference, isIOS, isPhone, uuidv4 } from '../utils';
 import { useNavigate, useParams, useSearchParams } from '@solidjs/router';
 import { findStreamByHost, getStreamingEvent, startLiveChat, stopLiveChat, StreamingData } from '../lib/streaming';
 
 import { useProfileContext } from '../contexts/ProfileContext';
-import { fetchKnownProfiles, getUserProfiles } from '../lib/profile';
+import { fetchKnownProfiles } from '../lib/profile';
 import { nip19 } from '../lib/nTools';
 import { ProfilePointer } from 'nostr-tools/lib/types/nip19';
 import { useAccountContext } from '../contexts/AccountContext';
@@ -38,32 +19,28 @@ import FollowButton from '../components/FollowButton/FollowButton';
 import { createStore } from 'solid-js/store';
 import { date } from '../lib/dates';
 import { APP_ID } from '../App';
-import { readData, refreshSocketListeners, removeSocketListeners, socket, subsTo } from '../sockets';
+import { readData, refreshSocketListeners, removeSocketListeners, socket } from '../sockets';
 
-import { updateFeedPage, pageResolve, fetchPeople } from '../megaFeeds';
-import { NostrEvent, NostrEOSE, NostrEvents, NostrEventContent, NostrLiveEvent, NostrLiveChat, PrimalUser, NostrUserZaps, PrimalZap, ZapOption, NostrRelaySignedEvent } from '../types/primal';
-import VerificationCheck from '../components/VerificationCheck/VerificationCheck';
+import { fetchPeople } from '../megaFeeds';
+import { NostrEvent, NostrEOSE, NostrEvents, NostrEventContent, NostrLiveChat, PrimalUser, NostrUserZaps, PrimalZap, ZapOption, NostrRelaySignedEvent } from '../types/primal';
+
 import { CustomZapInfo, useAppContext } from '../contexts/AppContext';
 import { isHashtag, isUrl, sendEvent, triggerImportEvents } from '../lib/notes';
-import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import { canUserReceiveZaps, convertToZap, zapStream } from '../lib/zap';
 import { readSecFromStorage } from '../lib/localStore';
 import { useToastContext } from '../components/Toaster/Toaster';
-import TopZapSkeleton from '../components/Skeleton/TopZapSkeleton';
 import LiveVideo from '../components/LiveVideo/LiveVideo';
-import DirectMessageParsedContent from '../components/DirectMessages/DirectMessageParsedContent';
 import ChatMessage from '../components/LiveVideo/ChatMessage';
-import DirectMessagesComposer from '../components/DirectMessages/DirectMessagesComposer';
 import ChatMessageComposer from '../components/LiveVideo/ChatMessageComposer';
 import ChatMessageDetails, { ChatMessageConfig } from '../components/LiveVideo/ChatMessageDetails';
 import { Popover } from '@kobalte/core/popover';
-import RadioBox, { RadioBoxOption } from '../components/Checkbox/RadioBox';
+import { RadioBoxOption } from '../components/Checkbox/RadioBox';
 import RadioBoxWithDesc from '../components/Checkbox/RadioBoxWithDesc';
 import { TransitionGroup } from 'solid-transition-group';
-import CheckBox2 from '../components/Checkbox/CheckBox2';
-import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
+import CheckBox from '../components/Checkbox/CheckBox';
 import TopZapModal from '../components/TopZapsModal/TopZapModal';
 import Paginator from '../components/Paginator/Paginator';
+import { Kind } from '../constants';
 
 const CHAT_PAGE_SIZE = 25;
 
@@ -1269,7 +1246,7 @@ const StreamPage: Component = () => {
                       Stream Notifications
                     </div>
                     <div class={styles.checkOptions}>
-                      <CheckBox2
+                      <CheckBox
                         onChange={(checked: boolean) => {
                           const pk = host()?.pubkey;
                           if (!pk) return;

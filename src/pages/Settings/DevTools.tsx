@@ -9,7 +9,7 @@ import PageTitle from '../../components/PageTitle/PageTitle';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import { storageName } from '../../lib/localStore';
 import { useAccountContext } from '../../contexts/AccountContext';
-import CheckBox2 from '../../components/Checkbox/CheckBox2';
+import CheckBox from '../../components/Checkbox/CheckBox';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 
 const DevTools: Component = () => {
@@ -91,7 +91,7 @@ const DevTools: Component = () => {
 
             <div class={styles.devToolsItem}>
               <div>Developer Mode</div>
-              <CheckBox2
+              <CheckBox
                 checked={isDevMode()}
                 onChange={() => setIsDevMode((v) => !v)}
                 label="Enable Dev Mode"

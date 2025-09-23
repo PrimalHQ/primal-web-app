@@ -23,7 +23,7 @@ import PageTitle from '../../components/PageTitle/PageTitle';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import { logError } from '../../lib/logger';
 import { useSettingsContext } from '../../contexts/SettingsContext';
-import CheckBox2 from '../../components/Checkbox/CheckBox2';
+import CheckBox from '../../components/Checkbox/CheckBox';
 
 
 const Network: Component = () => {
@@ -301,7 +301,7 @@ const Network: Component = () => {
 
       <div class={styles.settingsContentPaddingOnly}>
         <Show when={!isPrimalRelayInUserSettings()}>
-          <CheckBox2
+          <CheckBox
             id="primal_relay_check"
             checked={account?.connectToPrimaryRelays}
             onChange={() => onCheckPrimalRelay()}
@@ -349,7 +349,7 @@ const Network: Component = () => {
 
       <div class={styles.settingsContent}>
         <div class={styles.settingsCaption}>
-          <CheckBox2
+          <CheckBox
             id='proxyEvents'
             label=""
             onChange={() => {settings?.actions.setProxyThroughPrimal(!account?.proxyThroughPrimal)}}

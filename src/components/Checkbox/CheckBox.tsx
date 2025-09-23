@@ -4,7 +4,7 @@ import { hookForDev } from '../../lib/devTools';
 
 import styles from './Checkbox.module.scss';
 
-const Checkbox2: Component<{
+const CheckBox: Component<{
   id?: string,
   onChange: (checked: boolean) => void,
   checked?: boolean,
@@ -41,4 +41,4 @@ const Checkbox2: Component<{
 
 }
 
-export default hookForDev(Checkbox2);
+export default hookForDev(CheckBox);

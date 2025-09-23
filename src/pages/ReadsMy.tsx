@@ -1,30 +1,16 @@
-import { batch, Component, createEffect, createSignal, For, JSXElement, Match, onCleanup, onMount, Show, Switch } from 'solid-js'
+import { Component, createSignal, For, Match, onMount, Show, Switch } from 'solid-js'
 
 import styles from './ReadsMy.module.scss'
 import Wormhole from '../components/Wormhole/Wormhole';
-import CheckBox2 from '../components/Checkbox/CheckBox2';
-import ReadsEditorEditor from '../components/ReadsEditor/ReadsEditorEditor';
-import { PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
-import { createStore, unwrap } from 'solid-js/store';
-import { referencesToTags } from '../stores/note';
+import { PrimalArticle } from '../types/primal';
 import { useAccountContext } from '../contexts/AccountContext';
-import { Kind, wordsPerMinute } from '../constants';
+import { wordsPerMinute } from '../constants';
 import { nip19 } from '../lib/nTools';
-import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
-import ArticlePreviewPhone from '../components/ArticlePreview/ArticlePreviewPhone';
-import ArticleShort from '../components/ArticlePreview/ArticleShort';
-import ReadsEditorPreview from '../components/ReadsEditor/ReadsEditorPreview';
-import { nip44 } from 'nostr-tools';
-import { decrypt44, encrypt44 } from '../lib/nostrAPI';
-import { NostrEvent, sendEvent } from '../lib/notes';
-import { useToastContext } from '../components/Toaster/Toaster';
-import { A, useNavigate, useParams } from '@solidjs/router';
-import ReadsHeader from '../components/HomeHeader/ReadsHeader';
-import ReadsSidebar from '../components/HomeSidebar/ReadsSidebar';
+import { useNavigate, useParams } from '@solidjs/router';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { branding, readsMy, actions as tActions } from '../translations';
+import { readsMy, actions as tActions } from '../translations';
 import { isPhone, urlEncode } from '../utils';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
@@ -32,7 +18,6 @@ import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import { Tabs } from '@kobalte/core/tabs';
 import { useProfileContext } from '../contexts/ProfileContext';
 import { TransitionGroup } from 'solid-transition-group';
-import ArticlePreviewSkeleton from '../components/Skeleton/ArticlePreviewSkeleton';
 import Paginator from '../components/Paginator/Paginator';
 import ArticleOverview from '../components/ArticlePreview/ArticleOverview';
 import ArticleOverviewSkeleton from '../components/Skeleton/ArticleOverviewSkeleton';
@@ -47,7 +32,6 @@ import noEditorPhone from '../assets/images/editor-phone-message.png';
 const ReadsMy: Component = () => {
   const account = useAccountContext();
   const profile = useProfileContext();
-  const toast = useToastContext();
   const app = useAppContext();
   const intl = useIntl();
   const navigate = useNavigate();

@@ -212,11 +212,11 @@
   @include avatar;
   width: 28px;
   height: 28px;
-  padding: 1px;
+  padding: 1.5px;
 
   .missingBack {
-    width: 26px;
-    height: 26px;
+    width: 25px;
+    height: 25px;
   }
 
   .iconBackground {
@@ -230,11 +230,15 @@
   }
 
   &.legend {
-    padding: 1px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 0.5px solid var(--background-site);
-      width: 26px;
-      height: 26px;
+      width: 25px;
+      height: 25px;
     }
   }
 }
@@ -243,12 +247,12 @@
   @include avatar;
   width: 26px;
   height: 26px;
-  padding: 1px;
+  padding: 1.5px;
 
   .missingBack {
     border: 1px solid var(--background-site);
-    width: 24px;
-    height: 24px;
+    width: 23px;
+    height: 23px;
   }
 
   .iconBackground {
@@ -262,11 +266,15 @@
   }
 
   &.legend {
-    padding: 1px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 0.5px solid var(--background-site);
-      width: 24px;
-      height: 24px;
+      width: 23px;
+      height: 23px;
     }
   }
 }
@@ -275,11 +283,11 @@
   @include avatar;
   width: 32px;
   height: 32px;
-  padding: 1px;
+  padding: 1.5px;
 
   .missingBack {
-    width: 30px;
-    height: 30px;
+    width: 29px;
+    height: 29px;
   }
 
   .iconBackground {
@@ -289,11 +297,15 @@
   }
 
   &.legend {
-    padding: 1px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 0.5px solid var(--background-site);
-      width: 30px;
-      height: 30px;
+      width: 29px;
+      height: 29px;
     }
   }
 
@@ -317,11 +329,11 @@
   @include avatar;
   width: 30px;
   height: 30px;
-  padding: 1px;
+  padding: 1.5px;
 
   .missingBack {
-    width: 28px;
-    height: 28px;
+    width: 27px;
+    height: 27px;
   }
 
   .iconBackground {
@@ -331,11 +343,15 @@
   }
 
   &.legend {
-    padding: 1px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 0.5px solid var(--background-site);
-      width: 28px;
-      height: 28px;
+      width: 27px;
+      height: 27px;
     }
   }
 
@@ -359,11 +375,11 @@
   @include avatar;
   width: 36px;
   height: 36px;
-  padding: 2px;
+  padding: 1.5px;
 
   .missingBack {
-    width: 32px;
-    height: 32px;
+    width: 33px;
+    height: 33px;
   }
 
   .iconBackground {
@@ -373,11 +389,15 @@
   }
 
   &.legend {
-    padding: 1px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 0.5px solid var(--background-site);
-      width: 34px;
-      height: 34px;
+      width: 33px;
+      height: 33px;
     }
   }
 
@@ -401,11 +421,11 @@
   @include avatar;
   width: 38px;
   height: 38px;
-  padding: 2px;
+  padding: 1.5px;
 
   .missingBack {
-    width: 34px;
-    height: 34px;
+    width: 35px;
+    height: 35px;
   }
 
   .iconBackground {
@@ -415,11 +435,15 @@
   }
 
   &.legend {
-    padding: 1px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 0.5px solid var(--background-site);
-      width: 36px;
-      height: 36px;
+      width: 35px;
+      height: 35px;
     }
   }
 
@@ -444,11 +468,11 @@
   @include avatar;
   width: 40px;
   height: 40px;
-  padding: 3px;
+  padding: 1.5px;
 
   .missingBack {
-    width: 34px;
-    height: 34px;
+    width: 37px;
+    height: 37px;
   }
 
   .iconBackground {
@@ -456,11 +480,15 @@
   }
 
   &.legend {
-    padding: 1px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 0.5px solid var(--background-site);
-      width: 38px;
-      height: 38px;
+      width: 37px;
+      height: 37px;
     }
   }
 
@@ -485,11 +513,11 @@
   @include avatar;
   width: 42px;
   height: 42px;
-  padding: 2px;
+  padding: 1.5px;
 
   .missingBack {
-    width: 38px;
-    height: 38px;
+    width: 39px;
+    height: 39px;
   }
 
   .iconBackground {
@@ -497,11 +525,15 @@
   }
 
   &.legend {
-    padding: 1px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 0.5px solid var(--background-site);
-      width: 40px;
-      height: 40px;
+      width: 39px;
+      height: 39px;
     }
   }
 
@@ -525,11 +557,11 @@
   @include avatar;
   width: 44px;
   height: 44px;
-  padding: 2px;
+  padding: 1.5px;
 
   .missingBack {
-    width: 40px;
-    height: 40px;
+    width: 41px;
+    height: 41px;
   }
 
   .iconBackground {
@@ -537,11 +569,15 @@
   }
 
   &.legend {
-    padding: 1px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 0.5px solid var(--background-site);
-      width: 42px;
-      height: 42px;
+      width: 41px;
+      height: 41px;
     }
   }
 
@@ -566,11 +602,11 @@
   @include avatar;
   width: 50px;
   height: 50px;
-  padding: 3px;
+  padding: 3.5px;
 
   .missingBack {
-    width: 44px;
-    height: 44px;
+    width: 43px;
+    height: 43px;
   }
 
   .iconBackground {
@@ -578,11 +614,15 @@
   }
 
   &.legend {
-    padding: 3px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 0.5px solid var(--background-site);
-      width: 44px;
-      height: 44px;
+      width: 43px;
+      height: 43px;
     }
   }
 
@@ -606,11 +646,11 @@
   @include avatar;
   width: 52px;
   height: 52px;
-  padding: 3px;
+  padding: 1.5px;
 
   .missingBack {
-    width: 46px;
-    height: 46px;
+    width: 49px;
+    height: 49px;
   }
 
   .iconBackground {
@@ -618,11 +658,15 @@
   }
 
   &.legend {
-    padding: 1px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 0.5px solid var(--background-site);
-      width: 50px;
-      height: 50px;
+      width: 49px;
+      height: 49px;
     }
   }
 
@@ -646,11 +690,11 @@
   @include avatar;
   width: 60px;
   height: 60px;
-  padding: 3px;
+  padding: 3.5px;
 
   .missingBack {
-    width: 54px;
-    height: 54px;
+    width: 53px;
+    height: 53px;
   }
 
   .iconBackground {
@@ -658,11 +702,15 @@
   }
 
   &.legend {
-    padding: 3px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 0.5px solid var(--background-site);
-      width: 54px;
-      height: 54px;
+      width: 53px;
+      height: 53px;
     }
   }
 
@@ -685,11 +733,11 @@
   @include avatar;
   width: 64px;
   height: 64px;
-  padding: 3px;
+  padding: 1.5px;
 
   .missingBack {
-    width: 58px;
-    height: 58px;
+    width: 61px;
+    height: 61px;
   }
 
   .iconBackground {
@@ -697,11 +745,15 @@
   }
 
   &.legend {
-    padding: 1px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 0.5px solid var(--background-site);
-      width: 62px;
-      height: 62px;
+      width: 61px;
+      height: 61px;
     }
   }
 
@@ -724,11 +776,11 @@
   @include avatar;
   width: 72px;
   height: 72px;
-  padding: 3px;
+  padding: 3.5px;
 
   .missingBack {
-    width: 66px;
-    height: 66px;
+    width: 67px;
+    height: 67px;
   }
 
   .iconBackground {
@@ -738,11 +790,15 @@
   }
 
   &.legend {
-    padding: 2px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 1px solid var(--background-site);
-      width: 68px;
-      height: 68px;
+      width: 67px;
+      height: 67px;
     }
   }
 
@@ -765,11 +821,11 @@
   @include avatar;
   width: 80px;
   height: 80px;
-  padding: 4px;
+  padding: 2.5px;
 
   .missingBack {
-    width: 72px;
-    height: 72px;
+    width: 75px;
+    height: 75px;
   }
 
   .iconBackground {
@@ -779,11 +835,15 @@
   }
 
   &.legend {
-    padding: 2px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 1px solid var(--background-site);
-      width: 76px;
-      height: 76px;
+      width: 75px;
+      height: 75px;
     }
   }
 
@@ -798,11 +858,11 @@
   @include avatar;
   width: 120px;
   height: 120px;
-  padding: 5px;
+  padding: 3.5px;
 
   .missingBack {
-    width: 110px;
-    height: 110px;
+    width: 113px;
+    height: 113px;
   }
 
   .iconBackground {
@@ -812,11 +872,15 @@
   }
 
   &.legend {
-    padding: 3px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 1px solid var(--background-site);
-      width: 114px;
-      height: 114px;
+      width: 113px;
+      height: 113px;
     }
   }
 
@@ -831,11 +895,11 @@
   @include avatar;
   width: 128px;
   height: 128px;
-  padding: 4px;
+  padding: 5.5px;
 
   .missingBack {
-    width: 120px;
-    height: 120px;
+    width: 119px;
+    height: 119px;
   }
 
   .iconBackground {
@@ -845,11 +909,15 @@
   }
 
   &.legend {
-    padding: 4px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 1px solid var(--background-site);
-      width: 120px;
-      height: 120px;
+      width: 119px;
+      height: 119px;
     }
   }
 

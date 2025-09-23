@@ -16,7 +16,7 @@ import { logError } from '../../lib/logger';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import { primalBlossom } from '../../constants';
 import { useSettingsContext } from '../../contexts/SettingsContext';
-import CheckBox2 from '../../components/Checkbox/CheckBox2';
+import CheckBox from '../../components/Checkbox/CheckBox';
 import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { createStore } from 'solid-js/store';
@@ -175,7 +175,7 @@ const Blossom: Component = () => {
           {intl.formatMessage(t.blossomPage.mediaMirrors)}
         </div>
 
-        <CheckBox2
+        <CheckBox
           id={'toggleMirror'}
           onChange={() => {
             if (mirrorServers().length > 0) {

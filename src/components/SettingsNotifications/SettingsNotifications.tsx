@@ -25,7 +25,7 @@ import { settings as t } from '../../translations';
 import styles from './SettingsNotifications.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { useIntl } from '@cookbook/solid-intl';
-import CheckBox2 from '../Checkbox/CheckBox2';
+import CheckBox from '../Checkbox/CheckBox';
 import { hookForDev } from '../../lib/devTools';
 
 const SettingsNotifications: Component<{ id?: string }> = (props) => {
@@ -150,7 +150,7 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
         <For each={basicNotifications}>
           {(notif) => (
             <li>
-              <CheckBox2
+              <CheckBox
                 id={notif}
                 checked={settings?.notificationSettings[notif]}
                 onChange={() => onChange(notif)}
@@ -169,7 +169,7 @@ const SettingsNotifications: Component<{ id?: string }> = (props) => {
         <For each={additionalNotifications}>
           {(notif) => (
             <li>
-              <CheckBox2
+              <CheckBox
                 id={notif}
                 checked={settings?.notificationAdditionalSettings[notif]}
                 onChange={() => onChangeAdditional(notif)}

@@ -1,11 +1,11 @@
-import { batch, Component, createEffect, createSignal, For, JSXElement, Match, onCleanup, onMount, Show, Switch } from 'solid-js'
+import { Component, createEffect, createSignal, Match, onCleanup, onMount, Show, Switch } from 'solid-js'
 
 import styles from './ReadsEditor.module.scss'
 import Wormhole from '../components/Wormhole/Wormhole';
-import CheckBox2 from '../components/Checkbox/CheckBox2';
+import CheckBox from '../components/Checkbox/CheckBox';
 import ReadsEditorEditor from '../components/ReadsEditor/ReadsEditorEditor';
 import { NostrNoteContent, NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
-import { createStore, unwrap } from 'solid-js/store';
+import { createStore } from 'solid-js/store';
 import { referencesToTags } from '../stores/note';
 import { useAccountContext } from '../contexts/AccountContext';
 import { Kind, wordsPerMinute } from '../constants';
@@ -14,9 +14,8 @@ import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
 import ArticlePreviewPhone from '../components/ArticlePreview/ArticlePreviewPhone';
 import ArticleShort from '../components/ArticlePreview/ArticleShort';
 import ReadsEditorPreview from '../components/ReadsEditor/ReadsEditorPreview';
-import { nip44 } from 'nostr-tools';
-import { decrypt44, encrypt44 } from '../lib/nostrAPI';
-import { importEvents, NostrEvent, sendArticle, sendDeleteEvent, sendDraft, sendEvent, triggerImportEvents } from '../lib/notes';
+import { decrypt44 } from '../lib/nostrAPI';
+import { importEvents, NostrEvent, sendArticle, sendDeleteEvent, sendDraft, triggerImportEvents } from '../lib/notes';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { BeforeLeaveEventArgs, useBeforeLeave, useNavigate, useParams } from '@solidjs/router';
 import { fetchArticles, fetchDrafts } from '../handleNotes';
@@ -26,10 +25,9 @@ import { readSecFromStorage } from '../lib/localStore';
 import { useIntl } from '@cookbook/solid-intl';
 import { toast as tToast, actions as tActions } from '../translations';
 import { subsTo } from '../sockets';
-import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
 import ReadsLeaveDialog from '../components/ReadsMentionDialog/ReadsLeaveDialog';
 import PageTitle from '../components/PageTitle/PageTitle';
-import { date, longDate } from '../lib/dates';
+import { longDate } from '../lib/dates';
 import ReadsPublishSuccessDialog from '../components/ReadsMentionDialog/ReadsPublishSuccessDialog';
 import { Editor } from '@tiptap/core';
 import { isIOS } from '../utils';
@@ -572,7 +570,7 @@ const ReadsEditor: Component = () => {
             <div class={styles.sidebar}>
               <div class={styles.sidebarOptions}>
                 <div class={styles.caption}>Options</div>
-                <CheckBox2
+                <CheckBox
                   onChange={(checked: boolean) => {
                     if (!checked) {
                       setAccordionSection((as) => as.filter(s => s !== 'metadata'));
@@ -584,7 +582,7 @@ const ReadsEditor: Component = () => {
                   checked={accordionSection().includes('metadata')}
                   label="Show article metadata"
                 />
-                <CheckBox2
+                <CheckBox
                   onChange={(checked: boolean) => {
                     if (!checked) {
                       setAccordionSection((as) => as.filter(s => s !== 'hero_image'));

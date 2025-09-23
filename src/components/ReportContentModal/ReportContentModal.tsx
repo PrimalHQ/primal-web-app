@@ -1,30 +1,17 @@
 import { useIntl } from '@cookbook/solid-intl';
 
-import { Component, createEffect, createSignal, For, Show } from 'solid-js';
-import { createStore } from 'solid-js/store';
-import { Kind } from '../../constants';
+import { Component, createSignal } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
-import { NostrLiveChat, NostrTier, PrimalArticle, PrimalNote, PrimalUser } from '../../types/primal';
+import { NostrLiveChat, PrimalArticle, PrimalNote } from '../../types/primal';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
-import Modal from '../Modal/Modal';
 
 import styles from './ReportContentModal.module.scss';
-import { userName } from '../../stores/profile';
-import Avatar from '../Avatar/Avatar';
-import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import { APP_ID } from '../../App';
-import { subsTo, subTo } from '../../sockets';
-import { getAuthorSubscriptionTiers } from '../../lib/feed';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
-import { Select } from '@kobalte/core/select';
-import Loader from '../Loader/Loader';
-import { logInfo } from '../../lib/logger';
-import { getExchangeRate, getMembershipStatus } from '../../lib/membership';
 import { useAccountContext } from '../../contexts/AccountContext';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 import { actions as tActions } from '../../translations';
-import CheckBox2 from '../Checkbox/CheckBox2';
 import { sendContentReport, triggerImportEvents } from '../../lib/notes';
 import { useToastContext } from '../Toaster/Toaster';
 import RadioBox, { RadioBoxOption } from '../Checkbox/RadioBox';

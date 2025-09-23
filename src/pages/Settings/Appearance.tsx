@@ -7,7 +7,7 @@ import { settings as t } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import { A } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
-import CheckBox2 from '../../components/Checkbox/CheckBox2';
+import CheckBox from '../../components/Checkbox/CheckBox';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 
 const Appearance: Component = () => {
@@ -32,23 +32,23 @@ const Appearance: Component = () => {
         <ThemeChooser />
 
         <div>
-          <CheckBox2
+          <CheckBox
             checked={settings?.isAnimated !== undefined ? settings.isAnimated : true}
             onChange={settings?.actions.setAnimation}
           >
             <div class={styles.appearanceCheckLabel}>Show Animations</div>
-          </CheckBox2>
+          </CheckBox>
         </div>
 
         <div>
-          <CheckBox2
+          <CheckBox
             checked={settings?.useSystemTheme !== undefined ? settings.useSystemTheme : false}
             onChange={settings?.actions.setUseSystemTheme}
           >
             <div class={styles.appearanceCheckLabel}>
               Automatically set Dark or Light mode based on your system settings
             </div>
-          </CheckBox2>
+          </CheckBox>
         </div>
       </div>
     </div>
