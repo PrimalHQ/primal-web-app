@@ -117,8 +117,6 @@ const LiveVideo: Component<{
                 onloadstart={() => {
                   const hls = hlsVideo?.api as Hls;
 
-                  console.log('HLS: ', hls.loadLevel)
-
                   if (hls) {
 
                     hls.on(Hls.Events.FRAG_CHANGED, (event, data) => {
@@ -135,6 +133,13 @@ const LiveVideo: Component<{
 
                       setIsLive(() => live);
                     });
+
+                    hlsVideo?.addEventListener('pause', () => {
+                      hls.stopLoad();
+                    })
+                    hlsVideo?.addEventListener('play', () => {
+                      hls.startLoad();
+                    })
                   }
                 }}
                 onloadeddata={() => {
