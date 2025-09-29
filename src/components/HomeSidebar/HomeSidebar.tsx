@@ -237,6 +237,7 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
       },
       onEose: () => {
         setLiveEvents([]);
+        saveLiveStreams(account?.publicKey, []);
         events.forEach(storeStreamData);
         setInitialLiveLoaded(true);
       }
