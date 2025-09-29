@@ -145,12 +145,12 @@ export const extractReplyTo = (tags: string[][]) => {
   return replyTo;
 }
 
-export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
+export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent, naddr = '') => {
 
   const mentionIds = Object.keys(page.mentions || {});
   const userMentionIds = note.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
   const wordCounts = page.wordCount || {};
-  const topZaps = page.topZaps[note.id] || [];
+  const topZaps = naddr.length > 0 ?  page.topZaps[naddr] || [] : page.topZaps[note.id] || [];
 
   const pageUsers = Object.entries(page.users).reduce((acc, [k, u]) => ({ ...acc, [k]: { ...convertToUser(u, k) }}), {})
 
@@ -270,7 +270,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
         coordinate,
         msg: mention,
         mentionedNotes,
-        mentionedUsers: pageUsers,
+        mentionedUsers: {...pageUsers},
         wordCount,
         noteActions,
         bookmarks: stat?.bookmarks || 0,
@@ -329,6 +329,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
 
       let zappedId = '';
       let zappedKind: number = 0;
+
 
       const zapTagA = zapEvent.tags.find((t: string[]) => t[0] === 'a');
       const zapTagE = zapEvent.tags.find((t: string[]) => t[0] === 'e');
@@ -409,7 +410,11 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent) => {
     const topZap = topZaps[i];
     if (mentionedUsers[topZap.pubkey]) continue;
 
-    mentionedUsers[topZap.pubkey] = convertToUser(page.users[topZap.pubkey], topZap.pubkey);
+
+    mentionedUsers[topZap.pubkey] = convertToUser(
+      page.users[topZap.pubkey],
+      topZap.pubkey,
+    );
   }
 
   return {
@@ -615,7 +620,7 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
       mentionedHighlights,
       mentionedZaps,
       mentionedLiveEvents,
-    } = extractMentions(page, read);
+    } = extractMentions(page, read, naddrShort);
 
     const published = read.tags.reduce<number>((acc, t) => {
       if (t[0] !== 'published_at') return acc;
