@@ -78,13 +78,12 @@ export const isRepostInCollection = (collection: NostrNoteContent[], repost: Nos
   if (repost.kind === Kind.Repost) {
     const tag = repost.tags.find(t => t[0] === 'e');
 
-    return tag && !!otherTags.find(t => t[1] === tag[1]);
+    return tag && (!!otherTags.find(t => t[1] === tag[1]) || collection.find(n => n.id === tag[1]));
   }
 
   if (repost.kind === Kind.Text) {
     const id = repost.id;
-
-    return !!otherTags.find(t => t[1] === id);
+    return !!otherTags.find(t => t[1] === id) || collection.find(n => n.id === id);
   }
 
   return false;

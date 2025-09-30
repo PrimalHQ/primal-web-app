@@ -58,7 +58,7 @@ export type NoteProps = {
   quoteCount?: number,
   size?: 'xwide' | 'wide' | 'normal' | 'short',
   defaultParentAuthor?: PrimalUser,
-  onRemove?: (id: string) => void,
+  onRemove?: (id: string, isRepost?: boolean) => void,
 }
 
 export const renderNote = (props: NoteProps) => (
@@ -265,8 +265,8 @@ const Note: Component<NoteProps> = (props) => {
         app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
-      () => {
-        props.onRemove && props.onRemove(props.note.noteId);
+      (id: string, isRepost?: boolean) => {
+        props.onRemove && props.onRemove(id, isRepost);
       },
     );
   }
@@ -349,6 +349,7 @@ const Note: Component<NoteProps> = (props) => {
                   updateState={updateReactionsState}
                   customZapInfo={customZapInfo()}
                   size="notif"
+                  onDelete={props.onRemove}
                 />
               </div>
             </div>
@@ -469,6 +470,7 @@ const Note: Component<NoteProps> = (props) => {
                 large={true}
                 onZapAnim={addTopZap}
                 noteType="primary"
+                onDelete={props.onRemove}
               />
             </div>
           </div>
@@ -538,6 +540,7 @@ const Note: Component<NoteProps> = (props) => {
             customZapInfo={customZapInfo()}
             onZapAnim={addTopZapFeed}
             size={size()}
+            onDelete={props.onRemove}
           />
         </div>
       </Match>
@@ -615,6 +618,7 @@ const Note: Component<NoteProps> = (props) => {
                   customZapInfo={customZapInfo()}
                   onZapAnim={addTopZapFeed}
                   size="short"
+                  onDelete={props.onRemove}
                 />
               </div>
             </div>

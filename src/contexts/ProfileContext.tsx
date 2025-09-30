@@ -165,7 +165,7 @@ export type ProfileContextStore = {
     updateScrollTop: (top: number, tab: 'notes' | 'reads' | 'media' | 'replies' | 'zaps') => void,
     resetScroll: () => void,
     updateProfile: (pubkey: string) => void,
-    removeEvent: (id: string, kind: 'articles' | 'drafts' | 'notes' | 'replies') => void,
+    removeEvent: (id: string, kind: 'articles' | 'drafts' | 'notes' | 'replies', isRepost?: boolean) => void,
   }
 }
 
@@ -458,7 +458,13 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     }
   }
 
-  const removeEvent = (id: string, kind: 'articles' | 'drafts' | 'notes' | 'replies') => {
+  const removeEvent = (id: string, kind: 'articles' | 'drafts' | 'notes' | 'replies', isRepost?: boolean) => {
+
+    if (isRepost) {
+      updateStore(kind, (note) => note.repost?.note?.noteId === id, 'repost', () => undefined);
+
+      return;
+    }
     updateStore(kind, (drs) => drs.filter(d => d.noteId !== id));
   }
 

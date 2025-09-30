@@ -532,6 +532,11 @@ export const actions = {
       defaultMessage: 'Request Delete',
       description: 'Label for edit article from context menu',
     },
+    requestDeleteRepost: {
+      id: 'actions.noteContext.requestDeleteRepost',
+      defaultMessage: 'Request Delete Repost',
+      description: 'Label for edit article from context menu',
+    },
     quoteNote: {
       id: 'actions.noteContext.quoteNote',
       defaultMessage: 'Quote Note',

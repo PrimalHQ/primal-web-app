@@ -903,11 +903,16 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
 };
 
 export const filterAndSortNotes = (notes: PrimalNote[], paging: PaginationInfo) => {
+  let processedIds: string[] = [];
   return paging.elements.reduce<PrimalNote[]>(
     (acc, id) => {
       let note = notes.find(n => [n.id, n.repost?.note.id].includes(id));
 
-      return note ? [ ...acc, { ...note } ] : acc;
+      if (!note || processedIds.includes(note.id)) return acc;
+
+      processedIds.push(note.id);
+
+      return [ ...acc, { ...note } ];
     },
     [],
   );

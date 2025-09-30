@@ -486,8 +486,12 @@ const ProfileTabs: Component<{
                             <Note
                               note={note}
                               shorten={true}
-                              onRemove={(id: string) => {
-                                profile?.actions.removeEvent(id, 'notes');
+                              onRemove={(id: string, isRepost?: boolean) => {
+                                if (note.pubkey !== account?.publicKey) {
+                                  profile?.actions.removeEvent(id, 'notes');
+                                  return;
+                                }
+                                profile?.actions.removeEvent(id, 'notes', isRepost);
                               }}
                             />
                           </div>

@@ -44,7 +44,7 @@ export type NoteContextMenuInfo = {
   position: DOMRect | undefined,
   openCustomZap?: () => void,
   openReactions?: () => void,
-  onDelete?: (id: string) => void,
+  onDelete?: (id: string, isRepost?: Boolean) => void,
 };
 
 export type ConfirmInfo = {

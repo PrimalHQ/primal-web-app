@@ -105,6 +105,8 @@
     align-items: center;
     gap: 4px;
     padding-inline: 6px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     background-color: var(--background-site);
     border-radius: 10px;

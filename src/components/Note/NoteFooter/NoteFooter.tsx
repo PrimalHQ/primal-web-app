@@ -1,6 +1,6 @@
-import { batch, Component, createEffect, Show } from 'solid-js';
+import { batch, Component, createEffect, createSignal, Show } from 'solid-js';
 import { MenuItem, PrimalNote, ZapOption } from '../../../types/primal';
-import { sendRepost, triggerImportEvents } from '../../../lib/notes';
+import { sendDeleteEvent, sendRepost, triggerImportEvents } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
 import { useAccountContext } from '../../../contexts/AccountContext';
@@ -24,6 +24,8 @@ import { SetStoreFunction } from 'solid-js/store';
 import BookmarkNote from '../../BookmarkNote/BookmarkNote';
 import { readSecFromStorage } from '../../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
+import { Kind } from '../../../constants';
+import { APP_ID } from '../../../App';
 
 export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
@@ -36,6 +38,7 @@ const NoteFooter: Component<{
   customZapInfo?: CustomZapInfo,
   large?: boolean,
   onZapAnim?: (zapOption: ZapOption) => void,
+  onDelete?: (noteId: string, isRepost?: boolean) => void,
   noteType?: 'primary',
 }> = (props) => {
 
@@ -54,12 +57,32 @@ const NoteFooter: Component<{
 
   const size = () => props.size ?? 'normal';
 
-  const repostMenuItems: MenuItem[] = [
-    {
-      action: () => doRepost(),
-      label: 'Repost Note',
-      icon: 'feed_repost',
+  const repostItem: MenuItem = props.note.repost && props.note.repost.note.pubkey === account?.publicKey ? {
+    action: () => {
+      app?.actions.openConfirmModal({
+        title: "Delete Repost?",
+        description: "You are about to delete this repost. Are you sure?",
+        confirmLabel: "Yes",
+        abortLabel: "Cancel",
+        onConfirm: () => {
+          doRepostDelete();
+          app.actions.closeConfirmModal();
+        },
+        onAbort: () => {app.actions.closeConfirmModal()},
+      })
     },
+    warning: true,
+    label: 'Delete Repost',
+    icon: 'feed_repost',
+  } :
+  {
+    action: () => doRepost(),
+    label: 'Repost Note',
+    icon: 'feed_repost',
+  };
+
+  const repostMenuItems: MenuItem[] = [
+    repostItem,
     {
       action: () => doQuote(),
       label: 'Quote Note',
@@ -67,6 +90,35 @@ const NoteFooter: Component<{
     },
   ];
 
+  const doRepostDelete = async () => {
+    const user = account?.activeUser;
+
+    let noteToDelete = props.note.repost;
+
+    if (!user || !noteToDelete) return;
+
+    const id = noteToDelete.note.id;
+
+    const { success, note: deleteEvent } = await sendDeleteEvent(
+      user.pubkey,
+      id,
+      Kind.Repost,
+      account.activeRelays,
+      account.relaySettings,
+      account.proxyThroughPrimal,
+    );
+
+    if (!success || !deleteEvent) return;
+
+    triggerImportEvents([deleteEvent], `delete_import_${APP_ID}`);
+
+    // id of the note to remove from UI
+    let removeId = props.note.pubkey === account.publicKey ?
+      noteToDelete.note.noteId :
+      props.note.noteId;
+
+    props.onDelete && props.onDelete(removeId, true);
+  };
 
   const onClickOutside = (e: MouseEvent) => {
     if (
