@@ -1,4 +1,4 @@
-import { batch, Component, createEffect, createSignal, Show } from 'solid-js';
+import { batch, Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { MenuItem, PrimalNote, ZapOption } from '../../../types/primal';
 import { sendDeleteEvent, sendRepost, triggerImportEvents } from '../../../lib/notes';
 

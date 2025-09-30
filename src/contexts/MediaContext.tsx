@@ -24,6 +24,7 @@ export type MediaContextStore = {
   thumbnails: Record<string, string>,
   mediaStats: MediaStats,
   liveEvents: StreamingData[],
+  videoAutoplay: string[],
   actions: {
     getMedia: (url: string , size?: MediaSize, animated?: boolean) => MediaVariant | undefined,
     getMediaUrl: (url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined,
@@ -31,6 +32,7 @@ export type MediaContextStore = {
     getThumbnail: (url: string | undefined) => string | undefined,
     getStream: (pubkey: string) => StreamingData,
     isStreaming: (pubkey: string) => boolean,
+    removeAutoplayVideo: (videoId: string) => void,
   },
 }
 
@@ -44,25 +46,34 @@ const initialData = {
   thumbnails: {},
   windowSize: { w: window.innerWidth, h: window.innerHeight },
   liveEvents: [],
+  videoAutoplay: [],
 };
 
 export const MediaContext = createContext<MediaContextStore>();
 
 export const MediaProvider = (props: { children: JSXElement }) => {
 
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach((entry) => {
-      if (entry.target.tagName !== 'VIDEO') return;
+  // const observer = new IntersectionObserver(entries => {
+  //   entries.forEach((entry) => {
+  //     console.log('VIDEO: ', entry.target)
+  //     // if (entry.target.tagName !== 'VIDEO') return;
 
-      const video = entry.target as HTMLVideoElement;
+  //     const video = entry.target as HTMLVideoElement;
+  //     updateStore('videoAutoplay', store.videoAutoplay.length, () => video.getAttribute('data-uuid') || '');
 
-      if (entry.isIntersecting && video.paused) {
-        video.play();
-      } else {
-        video.pause();
-      }
-    });
-  });;
+
+  //     if (entry.isIntersecting && video.paused) {
+  //       video.play()
+  //       // .finally(() => {
+  //       //   removeAutoplayVideo(video.getAttribute('data-uuid') || '');
+  //       // });
+  //     }
+  //     else {
+  //       // removeAutoplayVideo(video.getAttribute('data-uuid') || '');
+  //       video.pause();
+  //     }
+  //   });
+  // });
 
   const getMedia = (url: string, size?: MediaSize , animated?: boolean) => {
     const variants: MediaVariant[] = store.media[url] || [];
@@ -101,7 +112,7 @@ export const MediaProvider = (props: { children: JSXElement }) => {
   const addVideo = (video: HTMLVideoElement | undefined) => {
     if (!video) return;
 
-    observer.observe(video);
+    // observer.observe(video);
   };
 
   const getThumbnail = (url: string | undefined) => {
@@ -121,6 +132,10 @@ export const MediaProvider = (props: { children: JSXElement }) => {
   const isStreaming = (pubkey: string) => {
     const levts = store.liveEvents.filter((s: StreamingData) => s.status === 'live' && s.hosts?.find(h => h === pubkey) !== undefined);
     return levts.length > 0;
+  }
+
+  const removeAutoplayVideo = (videoId: string) => {
+    updateStore('videoAutoplay', (ids) => ids.filter(id => id !== videoId))
   }
 
 // SOCKET HANDLERS ------------------------------
@@ -251,6 +266,7 @@ export const MediaProvider = (props: { children: JSXElement }) => {
       getThumbnail,
       getStream,
       isStreaming,
+      removeAutoplayVideo,
     },
   });
 

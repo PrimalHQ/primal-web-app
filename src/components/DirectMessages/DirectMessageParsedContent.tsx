@@ -28,6 +28,7 @@ import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import { logError } from '../../lib/logger';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import Lnbc from '../Lnbc/Lnbc';
+import NoteVideo from '../ParsedNote/NoteVideo';
 
 
 const groupGridLimit = 7;
@@ -486,17 +487,13 @@ const DirectMessageParsedContent: Component<{
         klass += ' embeddedContent';
         klass += ` ${lastClass}`;
 
-        const video = <video
+        const video = <NoteVideo
           class={klass}
           width={w}
           height={h}
-          controls
-          muted={true}
-          loop={true}
-          playsinline={true}
-        >
-          <source src={token} type={item.meta?.videoType} />
-        </video>;
+          src={token}
+          type={item.meta?.videoType}
+        />;
 
         media?.actions.addVideo(video as HTMLVideoElement);
 

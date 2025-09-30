@@ -77,6 +77,7 @@ import NostrImage from '../NostrImage/NostrImage';
 import { StreamingData } from '../../lib/streaming';
 import LiveEventPreview from '../LiveVideo/LiveEventPreview';
 import ExternalLiveEventPreview from '../LiveVideo/ExternalLiveEventPreview';
+import NoteVideo from './NoteVideo';
 
 const groupGridLimit = 5;
 
@@ -762,25 +763,47 @@ const ParsedNote: Component<{
 
         setWordsDisplayed(w => w + shortMentionInWords);
 
-        const video = <video
+        const video = <NoteVideo
           class={klass}
           width={w}
           height={h}
-          controls
-          muted={true}
-          loop={true}
-          playsinline={true}
-          data-ratio={`${ratio}`}
-        >
-          <source src={token} type={item.meta?.videoType} />
-        </video>;
+          ratio={ratio}
+          src={token}
+          type={item.meta?.videoType}
+        />
 
-        video.addEventListener('click', (e: MouseEvent) => {
-          e.stopPropagation();
-          e.preventDefault();
-        })
+        // const video = <video
+        //   class={klass}
+        //   width={w}
+        //   height={h}
+        //   controls
+        //   muted
+        //   loop={true}
+        //   playsinline={true}
+        //   data-ratio={`${ratio}`}
+        // >
+        //   <source src={token} type={item.meta?.videoType} />
+        // </video>;
 
-        media?.actions.addVideo(video as HTMLVideoElement);
+        // video.addEventListener('click', (e: MouseEvent) => {
+        //   e.stopPropagation();
+        //   e.preventDefault();
+        //   (video as HTMLVideoElement).setAttribute('data-user-played', 'true');
+        // });
+
+        // video.addEventListener('playing', () => {
+        //   console.log('PLAY', video.getAttribute('data-user-played'))
+        //   if (video.getAttribute('data-user-played') === 'true') {
+        //     video.muted = false;
+        //   }
+        // });
+
+        // video.addEventListener('pause', () => {
+        //   console.log('PAUSE')
+        //   video.muted = true;
+        // });
+
+        // media?.actions.addVideo(video as HTMLVideoElement);
 
         return video;
       }

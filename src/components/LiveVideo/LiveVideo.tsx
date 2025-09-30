@@ -7,6 +7,7 @@ import styles from './LiveVideo.module.scss';
 import { StreamingData } from '../../lib/streaming';
 import { PrimalUser } from '../../types/primal';
 import { useAppContext } from '../../contexts/AppContext';
+import { logInfo } from '../../lib/logger';
 
 const LiveVideo: Component<{
   src: string,
@@ -30,10 +31,10 @@ const LiveVideo: Component<{
 
   let mediaController: HTMLElement | undefined;
   let hlsVideo: HTMLMediaElement | undefined;
+  let streamContextMenu: HTMLButtonElement | undefined;
 
   const [isLive, setIsLive] = createSignal(false);
 
-  let streamContextMenu: HTMLButtonElement | undefined;
 
   const triggerContextMenu = () => {
     if (!props.streamAuthor) return;
@@ -143,7 +144,7 @@ const LiveVideo: Component<{
                   }
                 }}
                 onloadeddata={() => {
-                  console.log('HLS data loaded')
+                  logInfo('HLS data loaded')
                 }}
               ></hls-video>
             </Show>

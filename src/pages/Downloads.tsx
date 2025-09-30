@@ -23,6 +23,7 @@ import PageTitle from '../components/PageTitle/PageTitle';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { isAndroid } from '@kobalte/utils';
 import { isIOS, isPhone } from '../utils';
+import NoteVideo from '../components/ParsedNote/NoteVideo';
 
 const Downloads: Component = () => {
 
@@ -123,13 +124,9 @@ const Downloads: Component = () => {
       <div class={styles.downloadsContent}>
 
         <div class={styles.promoVideo}>
-          <video
+          <NoteVideo
             src='https://m.primal.net/MAww.mp4'
-            controls={true}
-            muted={true}
-            loop={true}
-            playsinline={true}
-            autoplay={true}
+            width={600}
           />
         </div>
 
