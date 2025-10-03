@@ -57,7 +57,7 @@ const NoteFooter: Component<{
 
   const size = () => props.size ?? 'normal';
 
-  const repostItem: MenuItem = props.note.repost && props.note.repost.note.pubkey === account?.publicKey ? {
+  const repostItem: MenuItem = props.note.post.noteActions.reposted ? {
     action: () => {
       app?.actions.openConfirmModal({
         title: "Delete Repost?",
