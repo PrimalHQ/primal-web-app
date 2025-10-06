@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, JSX,  JSXElement,  onCleanup, onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, JSX,  JSXElement,  onCleanup, Show } from "solid-js";
 import styles from "./NostrImage.module.scss";
 import { generatePrivateKey } from "../../lib/nTools";
 import { MediaVariant, NostrImageContent, NostrUserContent } from "../../types/primal";
@@ -20,22 +20,16 @@ const NostrImage: Component<{
 
   let imgVirtual: HTMLImageElement | undefined;
   let imgWrapper: HTMLDivElement | undefined;
+  let resizeObserver: ResizeObserver | undefined;
 
   const [isImageLoaded, setIsImageLoaded] = createSignal(false);
+  const [wrapperWidth, setWrapperWidth] = createSignal(538);
 
   const id = () => {
     return `nostr_image_${props.event.id}`;
   }
 
   let lightbox: PhotoSwipeLightbox | undefined;
-
-  onMount(() => {
-    // setTimeout(
-      // () =>
-    // lightbox.init();
-      // 100,
-    // )
-  });
 
   const src = () => {
     if (!props.event) return '';
@@ -79,6 +73,8 @@ const NostrImage: Component<{
   onCleanup(() => {
     lightbox?.destroy();
     lightbox = undefined;
+    resizeObserver?.disconnect();
+    resizeObserver = undefined;
   });
 
   const ratio = () => {
@@ -88,11 +84,29 @@ const NostrImage: Component<{
   };
 
 
-  const width = () => {
-    if (!imgWrapper) return 538;
+  const width = () => wrapperWidth();
 
-    return imgWrapper.getBoundingClientRect().width - 40;
-  }
+  const setupWrapperObserver = () => {
+    if (!imgWrapper || resizeObserver) return;
+
+    const updateWidth = () => {
+      const rect = imgWrapper?.getBoundingClientRect();
+      if (!rect) return;
+
+      setWrapperWidth(Math.max(180, rect.width - 40));
+    };
+
+    resizeObserver = new ResizeObserver(() => {
+      window.requestAnimationFrame(updateWidth);
+    });
+
+    resizeObserver.observe(imgWrapper);
+    updateWidth();
+  };
+
+  createEffect(() => {
+    setupWrapperObserver();
+  });
 
   const height = () => {
     return `${width() / ratio()}px`;
@@ -131,7 +145,13 @@ const NostrImage: Component<{
       when={isImageLoaded()}
       fallback={<div class={styles.placeholderImage}></div>}
     >
-      <div class={styles.nostrImageWrapper} ref={imgWrapper}>
+      <div
+        class={styles.nostrImageWrapper}
+        ref={(el) => {
+          imgWrapper = el;
+          setupWrapperObserver();
+        }}
+      >
         <Show when={author() !== undefined}>
           <div class={styles.header}>
             <a href={app?.actions.profileLink(author()?.npub) || ''}>
