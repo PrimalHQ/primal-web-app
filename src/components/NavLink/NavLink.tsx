@@ -1,8 +1,28 @@
-import { A, useLocation, useNavigate } from '@solidjs/router';
+import { A, useLocation } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 
 import styles from './NavLink.module.scss';
+
+const prefetchedRoutes = new Set<string>();
+
+const routePrefetchers: Record<string, () => Promise<unknown>> = {
+  '/dms': () => import('../../pages/DirectMessages'),
+  '/bookmarks': () => import('../../pages/Bookmarks'),
+  '/notifications': () => import('../../pages/Notifications'),
+};
+
+export const prefetchRouteChunk = (path: string) => {
+  if (typeof window === 'undefined') return;
+
+  const loader = routePrefetchers[path];
+  if (!loader || prefetchedRoutes.has(path)) return;
+
+  prefetchedRoutes.add(path);
+  loader().catch(() => {
+    prefetchedRoutes.delete(path);
+  });
+};
 
 const NavLink: Component<{
   id?: string,
@@ -43,6 +63,8 @@ const NavLink: Component<{
           activeClass={styles.active}
           inactiveClass={styles.inactive}
           onClick={scrollIfInactive}
+          onPointerEnter={() => prefetchRouteChunk(props.to)}
+          onFocus={() => prefetchRouteChunk(props.to)}
         >
           <div class={styles[props.icon]}></div>
           <Show when={props.label}>

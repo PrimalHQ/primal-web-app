@@ -4,7 +4,7 @@ import { Component, For, Match, Show, Switch } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useNotificationsContext } from '../../contexts/NotificationsContext';
 import { navBar as t, actions as tActions, placeholders as tPlaceholders } from '../../translations';
-import NavLink from '../NavLink/NavLink';
+import NavLink, { prefetchRouteChunk } from '../NavLink/NavLink';
 
 import styles from './NavPhone.module.scss';
 import { hookForDev } from '../../lib/devTools';
@@ -134,8 +134,13 @@ const NavPhone: Component< { id?: string } > = (props) => {
                       <For each={link.links}>
                         {sublink => (
                           <DropdownMenu.Item
-                            onSelect={() => navigate(sublink.to)}
+                            onSelect={() => {
+                              prefetchRouteChunk(sublink.to);
+                              navigate(sublink.to);
+                            }}
                             class={styles.subMenuItem}
+                            onPointerEnter={() => prefetchRouteChunk(sublink.to)}
+                            onFocus={() => prefetchRouteChunk(sublink.to)}
                           >
                             <div class={styles[sublink.icon]}></div>
                             {sublink.label}
