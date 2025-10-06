@@ -698,7 +698,7 @@ const ProfileDesktop: Component = () => {
 
 
   const getStream = () => {
-    return media?.actions.getStream(profile?.profileKey || 'n/a');
+    return media?.actions.getStream(profile?.profileKey || 'n/a', true);
   }
 
   return (

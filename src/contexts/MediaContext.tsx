@@ -30,7 +30,7 @@ export type MediaContextStore = {
     getMediaUrl: (url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined,
     addVideo: (video: HTMLVideoElement | undefined) => void,
     getThumbnail: (url: string | undefined) => string | undefined,
-    getStream: (pubkey: string) => StreamingData,
+    getStream: (pubkey: string, onlyLive?: boolean) => StreamingData,
     isStreaming: (pubkey: string) => boolean,
     removeAutoplayVideo: (videoId: string) => void,
   },
@@ -121,10 +121,10 @@ export const MediaProvider = (props: { children: JSXElement }) => {
     return store.thumbnails[url];
   }
 
-  const getStream = (pubkey: string) => {
-    let ret = store.liveEvents.find((s: StreamingData) => s.hosts?.[0] === pubkey);
+  const getStream = (pubkey: string, onlyLive?: boolean) => {
+    let ret = store.liveEvents.find((s: StreamingData) => s.hosts?.[0] === pubkey && (onlyLive ? s.status === 'live' : true));
 
-    if (!ret) return store.liveEvents.find((s: StreamingData) => s.pubkey === pubkey);
+    if (!ret) return store.liveEvents.find((s: StreamingData) => s.pubkey === pubkey && (onlyLive ? s.status === 'live' : true));
 
     return ret;
   }

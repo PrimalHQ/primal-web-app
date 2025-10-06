@@ -1,4 +1,4 @@
-import { Component } from "solid-js";
+import { Component, Show } from "solid-js";
 import { PrimalUser, SendNoteResult } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
 import styles from  "./LivePill.module.scss";
@@ -28,7 +28,12 @@ const LivePill: Component<{
         <div class={styles.eventInfo}>
           <div class={styles.authorName}>{props.liveEvent?.title || userName(props.liveAuthor)}</div>
           <div class={styles.ribbon}>
-            <div class={styles.time}>Started {date(props.liveEvent?.starts || 0).label} ago</div>
+            <Show
+              when={props.liveEvent.status === 'live'}
+              fallback={<div class={styles.time}>Ended {date(props.liveEvent?.ends || 0).label} ago</div>}
+            >
+              <div class={styles.time}>Started {date(props.liveEvent?.starts || 0).label} ago</div>
+            </Show>
 
               <div class={styles.participantIcon}></div>
               <div>{props.liveEvent?.currentParticipants || 0}</div>
@@ -36,10 +41,12 @@ const LivePill: Component<{
           </div>
         </div>
       </div>
-      <div class={styles.liveStatus}>
-        <div class={styles.liveDot}></div>
-        Live
-      </div>
+      <Show when={props.liveEvent.status === 'live'}>
+        <div class={styles.liveStatus}>
+          <div class={styles.liveDot}></div>
+          Live
+        </div>
+      </Show>
     </a>
   )
 }
