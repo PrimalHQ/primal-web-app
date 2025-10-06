@@ -5,11 +5,7 @@ import { MediaVariant, PrimalNote } from '../../types/primal';
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { hookForDev } from '../../lib/devTools';
-import PhotoSwipeLightbox from 'photoswipe/lightbox';
-// @ts-ignore
-import PhotoSwipeDynamicCaption from 'photoswipe-dynamic-caption-plugin';
-// @ts-ignore
-import PhotoSwipeVideoPlugin from 'photoswipe-video-plugin';
+import type PhotoSwipeLightbox from 'photoswipe/lightbox';
 
 import NoteImage from '../NoteImage/NoteImage';
 import { imageOrVideoRegexG } from '../../constants';
@@ -20,6 +16,12 @@ import ParsedNote from '../ParsedNote/ParsedNote';
 import { humanizeTime, isDev, isPhone } from '../../utils';
 import { nip19 } from 'nostr-tools';
 import NoteImageSmall from '../NoteImage/NoteImageSmall';
+import {
+  loadPhotoSwipeDynamicCaption,
+  loadPhotoSwipeLightbox,
+  loadPhotoSwipeModule,
+  loadPhotoSwipeVideoPlugin,
+} from '../../lib/photoswipe';
 
 const NoteGallery: Component<{
   note: PrimalNote,
@@ -30,17 +32,7 @@ const NoteGallery: Component<{
   const media = useMediaContext();
   const navigate = useNavigate();
 
-  const lightbox = new PhotoSwipeLightbox({
-    gallery: `#galleryimage_${props.note.id}`,
-    children: `a.image_${props.note.post.noteId}`,
-    showHideAnimationType: 'zoom',
-    initialZoomLevel: 'fit',
-    secondaryZoomLevel: 2,
-    maxZoomLevel: 3,
-    thumbSelector: `a.image_${props.note.post.noteId}`,
-    preloadFirstSlide: true,
-    pswpModule: () => import('photoswipe'),
-  });
+  let lightbox: PhotoSwipeLightbox | undefined;
 
   const [store, setStore] = createStore<{
     images : {
@@ -83,23 +75,40 @@ const NoteGallery: Component<{
     }
 
 
-    const videoPlugin = new PhotoSwipeVideoPlugin(lightbox, {
-      // Plugins options
-      // type: 'aside',
-      // captionContent: '.pswp-caption-content'
-    });
+    (async () => {
+      if (!lightbox) {
+        const Lightbox = await loadPhotoSwipeLightbox();
+        lightbox = new Lightbox({
+          gallery: `#galleryimage_${props.note.id}`,
+          children: `a.image_${props.note.post.noteId}`,
+          showHideAnimationType: 'zoom',
+          initialZoomLevel: 'fit',
+          secondaryZoomLevel: 2,
+          maxZoomLevel: 3,
+          thumbSelector: `a.image_${props.note.post.noteId}`,
+          preloadFirstSlide: true,
+          pswpModule: loadPhotoSwipeModule,
+        });
 
-    const captionPlugin = new PhotoSwipeDynamicCaption(lightbox, {
-      // Plugins options
-      type: 'aside',
-      captionContent: '.pswp-caption-content'
-    });
+        const [VideoPlugin, DynamicCaption] = await Promise.all([
+          loadPhotoSwipeVideoPlugin(),
+          loadPhotoSwipeDynamicCaption(),
+        ]);
 
-    lightbox.init();
+        new VideoPlugin(lightbox, {});
+        new DynamicCaption(lightbox, {
+          type: 'aside',
+          captionContent: '.pswp-caption-content',
+        });
+      }
+
+      lightbox?.init();
+    })();
   });
 
   onCleanup(() => {
-    lightbox.destroy()
+    lightbox?.destroy();
+    lightbox = undefined;
   })
 
   const mediaFreeNote = (note: PrimalNote) => {

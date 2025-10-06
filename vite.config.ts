@@ -30,6 +30,56 @@ export default defineConfig({
     target: 'esnext',
     sourcemap: true,
     manifest: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return undefined;
+
+          const normalized = id.replace(/\\/g, '/');
+
+          const match = (packages: string[]) =>
+            packages.some((pkg) =>
+              normalized.includes(`/node_modules/${pkg}/`) ||
+              normalized.includes(`/node_modules/${pkg}@`) ||
+              normalized.includes(pkg)
+            );
+
+          if (match([
+            '@milkdown/',
+            '@tiptap/',
+            'prosemirror-',
+          ])) {
+            return 'editor';
+          }
+
+          if (match([
+            'photoswipe',
+            'photoswipe-dynamic-caption-plugin',
+            'photoswipe-video-plugin',
+          ])) {
+            return 'photoswipe';
+          }
+
+          if (match([
+            'medium-zoom',
+            'highlight.js',
+            'dayjs',
+          ])) {
+            return 'media';
+          }
+
+          if (match([
+            'nostr-tools',
+            '@cashu/cashu-ts',
+            '@scure/base',
+          ])) {
+            return 'nostr';
+          }
+
+          return undefined;
+        },
+      },
+    },
   },
   envPrefix: 'PRIMAL_',
   define: {

@@ -112,24 +112,47 @@ const NoteImage: Component<{
 
   const width = () => props.width || 538;
 
-  const height = () => {
+  const computedHeight = () => {
     if (props.forceHeight) {
       return `${props.forceHeight}px`;
     }
 
     if (props.isGallery) return '250px';
 
-    if (!props.media || props.ignoreRatio) return '100%';
+    if (props.ignoreRatio) return '100%';
 
-    const img = props.media;
+    const currentRatio = ratio();
 
-    if (!img || ratio() <= 0.8) return '680px';
-    if (!img || ratio() <= 1.2) return 'auto';
+    if (!Number.isFinite(currentRatio) || currentRatio <= 0) {
+      return `${width()}px`;
+    }
 
-    // width of the note over the ratio of the preview image
-    const h = width() / ratio();
+    if (props.media) {
+      if (currentRatio <= 0.8) return '680px';
+      if (currentRatio <= 1.2) return 'auto';
+    }
 
-    return `${h}px`;
+    const h = width() / currentRatio;
+    const clamped = Math.max(180, Math.min(h, 680));
+
+    return `${clamped}px`;
+  };
+
+  const reservedHeight = () => {
+    const value = computedHeight();
+
+    if (value === 'auto' || value === '100%') {
+      const currentRatio = ratio();
+      if (!Number.isFinite(currentRatio) || currentRatio <= 0) {
+        return `${width()}px`;
+      }
+
+      const h = width() / currentRatio;
+      const clamped = Math.max(180, Math.min(h, 680));
+      return `${clamped}px`;
+    }
+
+    return value;
   };
 
   const zoomW = () => {
@@ -212,7 +235,7 @@ const NoteImage: Component<{
   return (
     <Show
       when={props.noPlaceholders || isImageLoaded()}
-      fallback={<div class={styles.placeholderImage}></div>}
+      fallback={<div class={styles.placeholderImage} style={`min-height: ${reservedHeight()}; height: ${reservedHeight()};`}></div>}
     >
       <a
         class={`${styles.noteImageHolder} ${props.class || ''} ${props.plainBorder ? '' : 'roundedImage'}`}
@@ -224,6 +247,7 @@ const NoteImage: Component<{
         data-thumb-src={thumbSrc()}
         data-ratio={ratio()}
         target="_blank"
+        style={`min-height: ${reservedHeight()};`}
       >
         <div class={props.seeMore ? styles.seeMore : styles.hidden}>
           <div>+{props.seeMore || '0'}</div>
@@ -234,7 +258,7 @@ const NoteImage: Component<{
           src={thumbSrc()}
           class={klass()}
           onerror={onError}
-          style={`${willBeTooBig() && !props.ignoreRatio ? `width: 528px; height: 680px` : `width: ${width()}px; height: ${height()}`}`}
+          style={`${willBeTooBig() && !props.ignoreRatio ? `width: 528px; height: 680px` : `width: ${width()}px; height: ${reservedHeight()}`}`}
           loading={props.loading ?? 'lazy'}
           decoding="async"
           alt={altText()}

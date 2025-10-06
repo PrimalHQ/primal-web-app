@@ -24,7 +24,7 @@ import { createStore } from 'solid-js/store';
 import { nip19 } from '../../lib/nTools';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import NoteImage from '../NoteImage/NoteImage';
-import PhotoSwipeLightbox from 'photoswipe/lightbox';
+import type PhotoSwipeLightbox from 'photoswipe/lightbox';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import ArticleHighlightActionMenu from '../ArticleHighlight/ArticleHighlightActionMenu';
 import { useToastContext } from '../Toaster/Toaster';
@@ -35,6 +35,7 @@ import { useAppContext } from '../../contexts/AppContext';
 import { isAndroid } from '@kobalte/utils';
 import { logError } from '../../lib/logger';
 import LiveEventPreview from '../LiveVideo/LiveEventPreview';
+import { loadPhotoSwipeLightbox, loadPhotoSwipeModule } from '../../lib/photoswipe';
 
 export type Coord = {
   x: number;
@@ -106,19 +107,26 @@ const PrimalMarkdown: Component<{
     return `note_${props.noteId}`;
   }
 
-  const lightbox = new PhotoSwipeLightbox({
-    gallery: `#${id()}`,
-    children: `a.image_${props.noteId}`,
-    showHideAnimationType: 'zoom',
-    initialZoomLevel: 'fit',
-    secondaryZoomLevel: 2,
-    maxZoomLevel: 3,
-    thumbSelector: `a.image_${props.noteId}`,
-    pswpModule: () => import('photoswipe')
-  });
+  let lightbox: PhotoSwipeLightbox | undefined;
 
   onMount(() => {
-    lightbox.init();
+    (async () => {
+      if (!lightbox) {
+        const Lightbox = await loadPhotoSwipeLightbox();
+        lightbox = new Lightbox({
+          gallery: `#${id()}`,
+          children: `a.image_${props.noteId}`,
+          showHideAnimationType: 'zoom',
+          initialZoomLevel: 'fit',
+          secondaryZoomLevel: 2,
+          maxZoomLevel: 3,
+          thumbSelector: `a.image_${props.noteId}`,
+          pswpModule: loadPhotoSwipeModule,
+        });
+      }
+
+      lightbox?.init();
+    })();
   });
 
   const isHighlight = (el: Element) => {
@@ -531,6 +539,8 @@ const PrimalMarkdown: Component<{
   onCleanup(() => {
     document?.removeEventListener('mouseup', onMouseUp);
     viewer?.removeEventListener('click', onMouseClick);
+    lightbox?.destroy();
+    lightbox = undefined;
   });
 
   const onMouseClick= (e: MouseEvent) => {

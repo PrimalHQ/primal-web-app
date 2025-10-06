@@ -1,15 +1,16 @@
-import { Component, createEffect, createSignal, JSX,  JSXElement,  onMount, Show } from "solid-js";
+import { Component, createEffect, createSignal, JSX,  JSXElement,  onCleanup, onMount, Show } from "solid-js";
 import styles from "./NostrImage.module.scss";
 import { generatePrivateKey } from "../../lib/nTools";
 import { MediaVariant, NostrImageContent, NostrUserContent } from "../../types/primal";
 import { useAppContext } from "../../contexts/AppContext";
 
-import PhotoSwipeLightbox from 'photoswipe/lightbox';
+import type PhotoSwipeLightbox from 'photoswipe/lightbox';
 import { Kind } from "../../constants";
 import { convertToUser, nip05Verification, userName } from "../../stores/profile";
 import Avatar from "../Avatar/Avatar";
 import VerificationCheck from "../VerificationCheck/VerificationCheck";
 import NoteAuthorInfo from "../Note/NoteAuthorInfo";
+import { loadPhotoSwipeLightbox, loadPhotoSwipeModule } from "../../lib/photoswipe";
 
 const NostrImage: Component<{
   event: NostrImageContent,
@@ -26,15 +27,7 @@ const NostrImage: Component<{
     return `nostr_image_${props.event.id}`;
   }
 
-  const lightbox = new PhotoSwipeLightbox({
-    gallery: `#${id()}`,
-    children: `a.image_${props.event.id}`,
-    showHideAnimationType: 'zoom',
-    initialZoomLevel: 'fit',
-    secondaryZoomLevel: 2,
-    maxZoomLevel: 3,
-    pswpModule: () => import('photoswipe')
-  });
+  let lightbox: PhotoSwipeLightbox | undefined;
 
   onMount(() => {
     // setTimeout(
@@ -65,10 +58,28 @@ const NostrImage: Component<{
   });
 
   createEffect(() => {
-    if (isImageLoaded()){
-      lightbox.init();
+    if (isImageLoaded()) {
+      (async () => {
+        if (!lightbox) {
+          const Lightbox = await loadPhotoSwipeLightbox();
+          lightbox = new Lightbox({
+            gallery: `#${id()}`,
+            children: `a.image_${props.event.id}`,
+            showHideAnimationType: 'zoom',
+            initialZoomLevel: 'fit',
+            secondaryZoomLevel: 2,
+            maxZoomLevel: 3,
+            pswpModule: loadPhotoSwipeModule,
+          });
+        }
+        lightbox?.init();
+      })();
     }
   })
+  onCleanup(() => {
+    lightbox?.destroy();
+    lightbox = undefined;
+  });
 
   const ratio = () => {
     return imgVirtual ?

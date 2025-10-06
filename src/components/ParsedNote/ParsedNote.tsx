@@ -34,7 +34,7 @@ import {
 import { convertToUser, truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component, createSignal, For, JSXElement, Match, onMount, Show, Switch,
+  Component, createSignal, For, JSXElement, Match, onCleanup, onMount, Show, Switch,
 } from 'solid-js';
 import {
   NostrEventContent,
@@ -60,7 +60,7 @@ import { addrRegex, hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, not
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
-import PhotoSwipeLightbox from 'photoswipe/lightbox';
+import type PhotoSwipeLightbox from 'photoswipe/lightbox';
 import Lnbc from '../Lnbc/Lnbc';
 import { logError } from '../../lib/logger';
 import { useAppContext } from '../../contexts/AppContext';
@@ -77,6 +77,7 @@ import NostrImage from '../NostrImage/NostrImage';
 import { StreamingData } from '../../lib/streaming';
 import LiveEventPreview from '../LiveVideo/LiveEventPreview';
 import ExternalLiveEventPreview from '../LiveVideo/ExternalLiveEventPreview';
+import { loadPhotoSwipeLightbox, loadPhotoSwipeModule } from '../../lib/photoswipe';
 
 const groupGridLimit = 5;
 
@@ -201,21 +202,31 @@ const ParsedNote: Component<{
 
   let thisNote: HTMLDivElement | undefined;
 
-  const lightbox = new PhotoSwipeLightbox({
-    gallery: `#${id()}`,
-    children: `a.image_${props.note.noteId}`,
-    showHideAnimationType: 'zoom',
-    initialZoomLevel: 'fit',
-    secondaryZoomLevel: 2,
-    maxZoomLevel: 3,
-    thumbSelector: `a.image_${props.note.noteId}`,
-    pswpModule: () => import('photoswipe')
-  });
+  let lightbox: PhotoSwipeLightbox | undefined;
 
   onMount(() => {
     if (props.noLightbox) return;
+    (async () => {
+      if (!lightbox) {
+        const Lightbox = await loadPhotoSwipeLightbox();
+        lightbox = new Lightbox({
+          gallery: `#${id()}`,
+          children: `a.image_${props.note.noteId}`,
+          showHideAnimationType: 'zoom',
+          initialZoomLevel: 'fit',
+          secondaryZoomLevel: 2,
+          maxZoomLevel: 3,
+          thumbSelector: `a.image_${props.note.noteId}`,
+          pswpModule: loadPhotoSwipeModule,
+        });
+      }
+      lightbox?.init();
+    })();
+  });
 
-    lightbox.init();
+  onCleanup(() => {
+    lightbox?.destroy();
+    lightbox = undefined;
   });
 
   const [tokens, setTokens] = createStore<string[]>([]);

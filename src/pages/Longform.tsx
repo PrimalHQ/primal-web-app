@@ -22,7 +22,7 @@ import NoteTopZaps from "../components/Note/NoteTopZaps";
 import { isPhone, parseBolt11, uuidv4 } from "../utils";
 import Note, { NoteReactionsState } from "../components/Note/Note";
 import { getAuthorSubscriptionTiers } from "../lib/feed";
-import PhotoSwipeLightbox from "photoswipe/lightbox";
+import type PhotoSwipeLightbox from "photoswipe/lightbox";
 import NoteImage from "../components/NoteImage/NoteImage";
 import { nip19 } from "../lib/nTools";
 import { sortByRecency, convertToNotes, convertToArticles } from "../stores/note";
@@ -47,6 +47,7 @@ import { useMediaContext } from "../contexts/MediaContext";
 import { Transition } from "solid-transition-group";
 import { fetchReadThread } from "../megaFeeds";
 import { useToastContext } from "../components/Toaster/Toaster";
+import { loadPhotoSwipeLightbox, loadPhotoSwipeModule } from "../lib/photoswipe";
 
 export type LongFormData = {
   title: string,
@@ -195,21 +196,30 @@ const Longform: Component< { naddr: string } > = (props) => {
   }));
 
   createEffect(() => {
+    let lightbox: PhotoSwipeLightbox | undefined;
+
     if (store.article) {
+      (async () => {
+        const Lightbox = await loadPhotoSwipeLightbox();
+        lightbox = new Lightbox({
+          gallery: `#read_${naddr()}`,
+          children: `a.hero_image_${naddr()}`,
+          showHideAnimationType: 'zoom',
+          initialZoomLevel: 'fit',
+          secondaryZoomLevel: 2,
+          maxZoomLevel: 3,
+          thumbSelector: `a.hero_image_${naddr()}`,
+          pswpModule: loadPhotoSwipeModule,
+        });
 
-      const lightbox = new PhotoSwipeLightbox({
-        gallery: `#read_${naddr()}`,
-        children: `a.hero_image_${naddr()}`,
-        showHideAnimationType: 'zoom',
-        initialZoomLevel: 'fit',
-        secondaryZoomLevel: 2,
-        maxZoomLevel: 3,
-        thumbSelector: `a.hero_image_${naddr()}`,
-        pswpModule: () => import('photoswipe')
-      });
-
-      lightbox.init();
+        lightbox.init();
+      })();
     }
+
+    return () => {
+      lightbox?.destroy();
+      lightbox = undefined;
+    };
   })
 
   createEffect(() => {
