@@ -1,11 +1,11 @@
-import { createContext, createEffect, on, onCleanup, useContext } from "solid-js";
+import { batch, createContext, createEffect, on, onCleanup, useContext } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind, minKnownProfiles } from "../constants";
 import { getEvents } from "../lib/feed";
 import { setLinkPreviews } from "../lib/notes";
 import { getRecomendedArticleIds } from "../lib/search";
-import { emptyPaging, fetchMegaFeed, fetchRecomendedReads, filterAndSortReads, PaginationInfo } from "../megaFeeds";
+import { emptyPaging, fetchMegaFeed, fetchRecomendedReads, filterAndSortReads, PaginationInfo, megaFeedCacheApi } from "../megaFeeds";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
 import { parseEmptyReposts, isRepostInCollection, convertToArticles } from "../stores/note";
 import {
@@ -174,17 +174,21 @@ const removeEvent = (id: string) => {
 
     const reads = await fetchRecomendedReads(`reads_recomended_${APP_ID}`);
 
-    updateStore('topPicks', () => [ ...reads ]);
-    updateStore('isFetchingSidebar', () => false);
+    batch(() => {
+      updateStore('topPicks', () => [ ...reads ]);
+      updateStore('isFetchingSidebar', () => false);
+    });
   }
 
   const clearFuture = () => {
-    updateStore('futureNotes', () => []);
-    updateStore('paging', 'future', () => ({
-      since: 0,
-      until: 0,
-      sortBy: 'published_at',
-    }));
+    batch(() => {
+      updateStore('futureNotes', () => []);
+      updateStore('paging', 'future', () => ({
+        since: 0,
+        until: 0,
+        sortBy: 'published_at',
+      }));
+    });
   }
 
 
@@ -224,8 +228,10 @@ const removeEvent = (id: string) => {
     const ids = lastPageNotes.map(n => n.id);
     const filtered = reads.filter(n => !ids.includes(n.id));
 
-    updateStore('paging', 'future', () => ({ ...paging }));
-    updateStore('futureNotes', (ns) => [ ...ns, ...filtered]);
+    batch(() => {
+      updateStore('paging', 'future', () => ({ ...paging }));
+      updateStore('futureNotes', (ns) => [ ...ns, ...filtered]);
+    });
   }
 
   const loadFutureContent = () => {
@@ -240,27 +246,51 @@ const removeEvent = (id: string) => {
 
   const fetchNotes = async (spec: string, until = 0, includeIsFetching = true) => {
 
-    updateStore('isFetching' , () => includeIsFetching);
-
     const pubkey = account?.publicKey || minKnownProfiles.names['primal'];
 
     const offset = calculateReadsOffset(store.notes, store.paging.notes);
+
+    const pagingParams = {
+      until,
+      limit: 20,
+      offset,
+    };
+
+    const useCache = megaFeedCacheApi.shouldUseCache(pagingParams);
+    const cacheKey = useCache ? megaFeedCacheApi.buildKey(pubkey, spec, pagingParams) : undefined;
+    const cached = useCache && cacheKey ? megaFeedCacheApi.get(cacheKey) : undefined;
+
+    if (cached) {
+      const sortedReads = filterAndSortReads(cached.reads, cached.paging);
+
+      batch(() => {
+        updateStore('paging', 'notes', () => ({ ...cached.paging }));
+        updateStore('notes', (ns) => [ ...ns, ...sortedReads]);
+        if (includeIsFetching) {
+          updateStore('isFetching', () => false);
+        }
+      });
+
+      return;
+    }
+
+    if (includeIsFetching) {
+      updateStore('isFetching' , () => true);
+    }
 
     const { reads, paging } = await fetchMegaFeed(
       pubkey,
       spec,
       `reads_feed_${APP_ID}`,
-      {
-        until,
-        limit: 20,
-        offset,
-      });
+      pagingParams);
 
       const sortedReads = filterAndSortReads(reads, paging);
 
+    batch(() => {
       updateStore('paging', 'notes', () => ({ ...paging }));
       updateStore('notes', (ns) => [ ...ns, ...sortedReads]);
       updateStore('isFetching', () => false);
+    });
 
   };
 
@@ -268,12 +298,14 @@ const removeEvent = (id: string) => {
     updateStore('scrollTop', () => 0);
     window.scrollTo({ top: 0 });
 
-    updateStore('notes', () => []);
-    updateStore('paging', 'notes', () => ({
-      since: 0,
-      until: 0,
-      sortBy: 'published_at',
-    }));
+    batch(() => {
+      updateStore('notes', () => []);
+      updateStore('paging', 'notes', () => ({
+        since: 0,
+        until: 0,
+        sortBy: 'published_at',
+      }));
+    });
 
     clearFuture();
   };

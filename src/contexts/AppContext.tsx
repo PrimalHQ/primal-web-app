@@ -1,5 +1,6 @@
 import { createStore, reconcile } from "solid-js/store";
 import {
+  batch,
   createContext,
   createEffect,
   JSXElement,
@@ -8,15 +9,69 @@ import {
   useContext
 } from "solid-js";
 import { MediaEvent, MediaVariant, NostrBlossom, NostrEOSE, NostrEvent, NostrEventContent, NostrEvents, NostrLiveChat, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
-import { CashuMint } from "@cashu/cashu-ts";
 import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
 import { connect, disconnect, isConnected, isNotConnected, readData, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
 import { nip19, Relay } from "../lib/nTools";
-import { logInfo } from "../lib/logger";
+import { logError, logInfo } from "../lib/logger";
 import { Kind } from "../constants";
 import { LegendCustomizationConfig } from "../lib/premium";
-import { config } from "@milkdown/core";
 import { StreamingData } from "../lib/streaming";
+import { createCashuMint, type CashuMint } from "../lib/cashu";
+
+
+const decodedPubkeyCache = new Map<string, string>();
+const encodedProfileCache = new Map<string, string>();
+
+const stripProfilePrefix = (value: string) => {
+  if (value.startsWith('p/')) {
+    return value.slice(2);
+  }
+
+  if (value.startsWith('/')) {
+    return value.slice(1);
+  }
+
+  return value;
+};
+
+const decodeToHex = (value: string) => {
+  const normalized = stripProfilePrefix(value);
+
+  if (!normalized.startsWith('npub')) {
+    return normalized;
+  }
+
+  const cached = decodedPubkeyCache.get(normalized);
+  if (cached) {
+    return cached;
+  }
+
+  try {
+    const decoded = nip19.decode(normalized);
+    const hex = typeof decoded.data === 'string' ? decoded.data : decoded.data.pubkey;
+    decodedPubkeyCache.set(normalized, hex);
+    return hex;
+  } catch (e) {
+    decodedPubkeyCache.set(normalized, normalized);
+    return normalized;
+  }
+};
+
+const encodeProfilePointer = (hex: string) => {
+  const cached = encodedProfileCache.get(hex);
+  if (cached) {
+    return cached;
+  }
+
+  try {
+    const encoded = nip19.nprofileEncode({ pubkey: hex });
+    encodedProfileCache.set(hex, encoded);
+    return encoded;
+  } catch (e) {
+    encodedProfileCache.set(hex, hex);
+    return hex;
+  }
+};
 
 
 export type ReactionStats = {
@@ -101,7 +156,7 @@ export type AppContextStore = {
   cashu: InvoiceInfo | undefined,
   showConfirmModal: boolean,
   confirmInfo: ConfirmInfo | undefined,
-  cashuMints: Map<string, CashuMint>,
+  cashuMints: Map<string, Promise<CashuMint | undefined>>,
   subscribeToAuthor: PrimalUser | undefined,
   subscribeToTier: (tier: Tier) => void,
   connectedRelays: Relay[],
@@ -153,7 +208,7 @@ export type AppContextStore = {
     closeCashuModal: () => void,
     openConfirmModal: (confirmInfo: ConfirmInfo) => void,
     closeConfirmModal: () => void,
-    getCashuMint: (url: string) => CashuMint | undefined,
+    getCashuMint: (url: string) => Promise<CashuMint | undefined>,
     openAuthorSubscribeModal: (author: PrimalUser | undefined, subscribeTo: (tier: Tier, cost: TierCost) => void) => void,
     closeAuthorSubscribeModal: () => void,
     addConnectedRelay: (relay: Relay) => void,
@@ -196,7 +251,7 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   cashu: undefined,
   showConfirmModal: false,
   confirmInfo: undefined,
-  cashuMints: new Map(),
+  cashuMints: new Map<string, Promise<CashuMint | undefined>>(),
   subscribeToAuthor: undefined,
   connectedRelays: [],
   verifiedUsers: {},
@@ -226,23 +281,30 @@ export const AppProvider = (props: { children: JSXElement }) => {
   };
 
   const openReactionModal = (noteId: string, stats: ReactionStats) => {
-    updateStore('reactionStats', () => ({ ...stats }));
-    updateStore('showReactionsModal', () => noteId);
+    batch(() => {
+      updateStore('reactionStats', () => ({ openOn: 'default', ...stats }));
+      updateStore('showReactionsModal', () => noteId);
+    });
   };
 
   const closeReactionModal = () => {
-    updateStore('reactionStats', () => ({
-      likes: 0,
-      zaps: 0,
-      reposts: 0,
-      quotes: 0,
-    }));
-    updateStore('showReactionsModal', () => undefined);
+    batch(() => {
+      updateStore('reactionStats', () => ({
+        likes: 0,
+        zaps: 0,
+        reposts: 0,
+        quotes: 0,
+        openOn: 'default',
+      }));
+      updateStore('showReactionsModal', () => undefined);
+    });
   };
 
   const openCustomZapModal = (customZapInfo: CustomZapInfo) => {
-    updateStore('customZap', () => ({ ...customZapInfo }));
-    updateStore('showCustomZapModal', () => true);
+    batch(() => {
+      updateStore('customZap', () => ({ ...customZapInfo }));
+      updateStore('showCustomZapModal', () => true);
+    });
   };
 
   const closeCustomZapModal = () => {
@@ -260,14 +322,16 @@ export const AppProvider = (props: { children: JSXElement }) => {
     openReactions: () => void,
     onDelete: (id: string) => void,
   ) => {
-    updateStore('noteContextMenuInfo', reconcile({
-      note,
-      position,
-      openCustomZap,
-      openReactions,
-      onDelete,
-    }))
-    updateStore('showNoteContextMenu', () => true);
+    batch(() => {
+      updateStore('noteContextMenuInfo', reconcile({
+        note,
+        position,
+        openCustomZap,
+        openReactions,
+        onDelete,
+      }));
+      updateStore('showNoteContextMenu', () => true);
+    });
   };
 
   const openStreamContextMenu = (
@@ -276,13 +340,15 @@ export const AppProvider = (props: { children: JSXElement }) => {
     position: DOMRect | undefined,
     onDelete: (id: string) => void,
   ) => {
-    updateStore('streamContextMenuInfo', reconcile({
-      stream,
-      streamAuthor,
-      position,
-      onDelete,
-    }))
-    updateStore('showStreamContextMenu', () => true);
+    batch(() => {
+      updateStore('streamContextMenuInfo', reconcile({
+        stream,
+        streamAuthor,
+        position,
+        onDelete,
+      }));
+      updateStore('showStreamContextMenu', () => true);
+    });
   };
 
   const openArticleOverviewContextMenu = (
@@ -292,14 +358,16 @@ export const AppProvider = (props: { children: JSXElement }) => {
     openReactions: () => void,
     onDelete: (id: string) => void,
   ) => {
-    updateStore('articleOverviewContextMenuInfo', reconcile({
-      note,
-      position,
-      openCustomZap,
-      openReactions,
-      onDelete,
-    }))
-    updateStore('showArticleOverviewContextMenu', () => true);
+    batch(() => {
+      updateStore('articleOverviewContextMenuInfo', reconcile({
+        note,
+        position,
+        openCustomZap,
+        openReactions,
+        onDelete,
+      }));
+      updateStore('showArticleOverviewContextMenu', () => true);
+    });
   };
 
   const openArticleDraftContextMenu = (
@@ -309,53 +377,67 @@ export const AppProvider = (props: { children: JSXElement }) => {
       openReactions: () => void,
       onDelete: (id: string) => void,
     ) => {
-      updateStore('articleDraftContextMenuInfo', reconcile({
-        note,
-        position,
-        openCustomZap,
-        openReactions,
-        onDelete,
-      }))
-      updateStore('showArticleDraftContextMenu', () => true);
+      batch(() => {
+        updateStore('articleDraftContextMenuInfo', reconcile({
+          note,
+          position,
+          openCustomZap,
+          openReactions,
+          onDelete,
+        }));
+        updateStore('showArticleDraftContextMenu', () => true);
+      });
     };
 
   const openLnbcModal = (lnbc: string, onPay: () => void) => {
-    updateStore('showLnInvoiceModal', () => true);
-    updateStore('lnbc', () => ({
-      invoice: lnbc,
-      onPay,
-      onCancel: () => updateStore('showLnInvoiceModal', () => false),
-    }))
+    batch(() => {
+      updateStore('showLnInvoiceModal', () => true);
+      updateStore('lnbc', () => ({
+        invoice: lnbc,
+        onPay,
+        onCancel: () => updateStore('showLnInvoiceModal', () => false),
+      }));
+    });
   };
 
   const closeLnbcModal = () => {
-    updateStore('showLnInvoiceModal', () => false);
-    updateStore('lnbc', () => undefined);
+    batch(() => {
+      updateStore('showLnInvoiceModal', () => false);
+      updateStore('lnbc', () => undefined);
+    });
   };
 
 
   const openCashuModal = (cashu: string, onPay: () => void) => {
-    updateStore('showCashuInvoiceModal', () => true);
-    updateStore('cashu', () => ({
-      invoice: cashu,
-      onPay,
-      onCancel: () => updateStore('showCashuInvoiceModal', () => false),
-    }))
+    batch(() => {
+      updateStore('showCashuInvoiceModal', () => true);
+      updateStore('cashu', () => ({
+        invoice: cashu,
+        onPay,
+        onCancel: () => updateStore('showCashuInvoiceModal', () => false),
+      }));
+    });
   };
 
   const closeCashuModal = () => {
-    updateStore('showCashuInvoiceModal', () => false);
-    updateStore('cashu', () => undefined);
+    batch(() => {
+      updateStore('showCashuInvoiceModal', () => false);
+      updateStore('cashu', () => undefined);
+    });
   };
 
   const openConfirmModal = (confirmInfo: ConfirmInfo) => {
-    updateStore('showConfirmModal', () => true);
-    updateStore('confirmInfo', () => ({...confirmInfo }));
+    batch(() => {
+      updateStore('showConfirmModal', () => true);
+      updateStore('confirmInfo', () => ({...confirmInfo }));
+    });
   };
 
   const closeConfirmModal = () => {
-    updateStore('showConfirmModal', () => false);
-    updateStore('confirmInfo', () => undefined);
+    batch(() => {
+      updateStore('showConfirmModal', () => false);
+      updateStore('confirmInfo', () => undefined);
+    });
   };
 
   const closeContextMenu = () => {
@@ -374,20 +456,30 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('showArticleDraftContextMenu', () => false);
   };
 
-  const getCashuMint = (url: string) => {
-    const formatted = new URL(url).toString();
-    if (!store.cashuMints.has(formatted)) {
-      const mint = new CashuMint(formatted);
-      store.cashuMints.set(formatted, mint);
+  const getCashuMint = async (url: string) => {
+    try {
+      const formatted = new URL(url).toString();
+      let cached = store.cashuMints.get(formatted);
+
+      if (!cached) {
+        cached = createCashuMint(formatted);
+        store.cashuMints.set(formatted, cached);
+      }
+
+      return await cached;
+    } catch (error) {
+      logError('Failed to initialise Cashu mint', error);
+      return undefined;
     }
-    return store.cashuMints.get(formatted);
   };
 
   const openAuthorSubscribeModal = (author: PrimalUser | undefined, subscribeTo: (tier: Tier, cost: TierCost) => void) => {
     if (!author) return;
 
-    updateStore('subscribeToAuthor', () => ({ ...author }));
-    updateStore('subscribeToTier', () => subscribeTo);
+    batch(() => {
+      updateStore('subscribeToAuthor', () => ({ ...author }));
+      updateStore('subscribeToTier', () => subscribeTo);
+    });
   };
 
   const closeAuthorSubscribeModal = () => {
@@ -407,30 +499,25 @@ export const AppProvider = (props: { children: JSXElement }) => {
   };
 
   const profileLink = (pubkey: string | undefined, noP?: boolean) => {
-    if (!pubkey) return '/home';
-
-    let pk = `${pubkey}`;
-
-    if (pk.startsWith('npub')) {
-      // @ts-ignore
-      pk = nip19.decode(pk).data;
+    if (!pubkey) {
+      return '/home';
     }
 
-    const verifiedUser: string = store.verifiedUsers[pk];
+    const normalized = decodeToHex(pubkey);
+    const verifiedUser = store.verifiedUsers[normalized];
 
-    if (verifiedUser) return `/${verifiedUser}`;
-
-    try {
-      const npub = nip19.nprofileEncode({ pubkey: pk });
-      return `/${noP ? '' : 'p/'}${npub}`;
-    } catch (e) {
-      return `/${noP ? '' : 'p/'}${pk}`;
+    if (verifiedUser) {
+      return `/${verifiedUser}`;
     }
 
+    const profileSegment = encodeProfilePointer(normalized);
+    const prefix = noP ? '' : 'p/';
+
+    return `/${prefix}${profileSegment}`;
   }
 
   const setLegendCustomization = (pubkey: string, config: LegendCustomizationConfig) => {
-    updateStore('legendCustomization', () => ({ [pubkey]: { ...config }}));
+    updateStore('legendCustomization', (lc) => ({ ...lc, [pubkey]: { ...config } }));
   }
 
   const getUserBlossomUrls = (pubkey: string) => {
@@ -462,48 +549,51 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
 // SOCKET HANDLERS ------------------------------
 
-const handleVerifiedUsersEvent = (content: NostrEventContent, subId?: string) => {
-  if (content.kind === Kind.VerifiedUsersDict) {
-    const verifiedUsers: Record<string, string> = JSON.parse(content.content);
+const handleVerifiedUsersEvent = (incoming: NostrEventContent, subId?: string) => {
+  let content = incoming;
 
-    updateStore('verifiedUsers', (vu) => ({ ...vu, ...verifiedUsers }));
+  if (incoming.kind === Kind.Mentions) {
+    try {
+      const wrappedEvent = JSON.parse(incoming.content) as NostrEventContent;
+      content = { ...wrappedEvent };
+    } catch (e) {
+      content = incoming;
+    }
   }
 
-  if (content.kind === Kind.LegendCustomization) {
-    const config = JSON.parse(content.content) as Record<string, LegendCustomizationConfig>;
+  batch(() => {
+    if (content.kind === Kind.VerifiedUsersDict) {
+      const verifiedUsers: Record<string, string> = JSON.parse(content.content);
+      updateStore('verifiedUsers', (vu) => ({ ...vu, ...verifiedUsers }));
+    }
 
-    updateStore('legendCustomization', (lc) => ({ ...lc, ...config }));
-  }
+    if (content.kind === Kind.LegendCustomization) {
+      const config = JSON.parse(content.content) as Record<string, LegendCustomizationConfig>;
+      updateStore('legendCustomization', (lc) => ({ ...lc, ...config }));
+    }
 
-  if (content.kind === Kind.MembershipCohortInfo) {
-    const config = JSON.parse(content.content) as Record<string, CohortInfo>;
+    if (content.kind === Kind.MembershipCohortInfo) {
+      const config = JSON.parse(content.content) as Record<string, CohortInfo>;
+      updateStore('memberCohortInfo', (lc) => ({ ...lc, ...config }));
+    }
 
-    updateStore('memberCohortInfo', (lc) => ({ ...lc, ...config }));
-  }
+    const events = store.events[content.kind] || [];
 
-  const events = store.events[content.kind] || [];
-
-  if (content.kind === Kind.Mentions) {
-    const wrappedEvent = JSON.parse(content.content) as NostrEventContent;
-
-    content = { ...wrappedEvent };
-  }
-
-  if (events.length === 0) {
-    updateStore(
-      'events',
-      content.kind,
-      () => [{ ...content }],
-    );
-  } else if (!events.find((e: NostrEventContent) => e.id === content.id)) {
-    updateStore(
-      'events',
-      content.kind,
-      events.length,
-      () => ({ ...content }),
-    );
-  }
-
+    if (events.length === 0) {
+      updateStore(
+        'events',
+        content.kind,
+        () => [{ ...content }],
+      );
+    } else if (!events.find((e: NostrEventContent) => e.id === content.id)) {
+      updateStore(
+        'events',
+        content.kind,
+        events.length,
+        () => ({ ...content }),
+      );
+    }
+  });
 }
 
 const onMessage = async (event: MessageEvent) => {

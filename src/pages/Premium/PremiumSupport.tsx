@@ -32,7 +32,7 @@ const PremiumSupport: Component<{
         </div>
 
         <div class={styles.supportCard}>
-          <img class={styles.starsImage} src={stars} />
+          <img class={styles.starsImage} src={stars} alt="Five star rating" />
           <div class={styles.title}>
             {intl.formatMessage(t.labels.leaveStars)}
           </div>
@@ -57,7 +57,7 @@ const PremiumSupport: Component<{
           </div>
         </div>
         <div class={styles.supportCard}>
-        <img class={styles.purpleCheckImage} src={purpleCheck} />
+        <img class={styles.purpleCheckImage} src={purpleCheck} alt="Purple check icon" />
           <div class={styles.title}>
             {intl.formatMessage(t.labels.extendSubscription)}
           </div>
@@ -73,7 +73,7 @@ const PremiumSupport: Component<{
           </div>
         </div>
         <div class={styles.supportCard}>
-          <img class={styles.legendImage} src={legend} />
+          <img class={styles.legendImage} src={legend} alt="Primal Legend badge" />
           <div class={styles.title}>
             {intl.formatMessage(t.labels.becomeLegend)}
           </div>

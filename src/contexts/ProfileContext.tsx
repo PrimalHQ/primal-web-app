@@ -60,7 +60,7 @@ import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
 import { fetchUserZaps } from "../handleFeeds";
 import { convertToUser } from "../stores/profile";
 import ProfileAbout from "../components/ProfileAbout/ProfileAbout";
-import { emptyPaging, fetchMegaFeed, filterAndSortDrafts, filterAndSortNotes, filterAndSortReads, filterAndSortZaps, MegaFeedResults, PaginationInfo } from "../megaFeeds";
+import { emptyPaging, fetchMegaFeed, filterAndSortDrafts, filterAndSortNotes, filterAndSortReads, filterAndSortZaps, MegaFeedResults, PaginationInfo, megaFeedCacheApi } from "../megaFeeds";
 import { calculateReadsOffset, handleSubscription } from "../utils";
 import { decrypt44 } from "../lib/nostrAPI";
 import { updatePage } from "../services/StoreService";
@@ -308,24 +308,45 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         pubkey,
       };
 
+      const specString = JSON.stringify(specification);
+      const pagingParams = {
+        limit,
+        until,
+        offset: offset || store.notes.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
+      };
+
+      const useCache = megaFeedCacheApi.shouldUseCache(pagingParams);
+      const cacheKey = useCache ? megaFeedCacheApi.buildKey(account?.publicKey, specString, pagingParams) : undefined;
+      const cached = useCache && cacheKey ? megaFeedCacheApi.get(cacheKey) : undefined;
+
+      if (cached) {
+        const sortedNotes = filterAndSortNotes(cached.notes, cached.paging);
+
+        batch(() => {
+          updateStore('paging', 'notes', () => ({ ...cached.paging }));
+          updateStore('notes', (ns) => [ ...ns, ...sortedNotes]);
+          updateStore('isFetching', () => false);
+        });
+
+        return;
+      }
+
       updateStore('isFetching', () => true);
 
       const { notes, paging } = await fetchMegaFeed(
         account?.publicKey,
-        JSON.stringify(specification),
+        specString,
         `profile_notes_${APP_ID}`,
-        {
-          limit,
-          until,
-          offset: offset || store.notes.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
-        },
+        pagingParams,
       );
 
       const sortedNotes = filterAndSortNotes(notes, paging);
 
-      updateStore('paging', 'notes', () => ({ ...paging }));
-      updateStore('notes', (ns) => [ ...ns, ...sortedNotes]);
-      updateStore('isFetching', () => false);
+      batch(() => {
+        updateStore('paging', 'notes', () => ({ ...paging }));
+        updateStore('notes', (ns) => [ ...ns, ...sortedNotes]);
+        updateStore('isFetching', () => false);
+      });
       return;
     }
 
@@ -337,24 +358,45 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         pubkey,
       };
 
+      const specString = JSON.stringify(specification);
+      const pagingParams = {
+        limit,
+        until,
+        offset: offset || store.replies.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
+      };
+
+      const useCache = megaFeedCacheApi.shouldUseCache(pagingParams);
+      const cacheKey = useCache ? megaFeedCacheApi.buildKey(account?.publicKey, specString, pagingParams) : undefined;
+      const cached = useCache && cacheKey ? megaFeedCacheApi.get(cacheKey) : undefined;
+
+      if (cached) {
+        const sortedNotes = filterAndSortNotes(cached.notes, cached.paging);
+
+        batch(() => {
+          updateStore('paging', 'replies', () => ({ ...cached.paging }));
+          updateStore('replies', (ns) => [ ...ns, ...sortedNotes]);
+          updateStore('isFetchingReplies', () => false);
+        });
+
+        return;
+      }
+
       updateStore('isFetchingReplies', () => true);
 
       const { notes, paging } = await fetchMegaFeed(
         account?.publicKey,
-        JSON.stringify(specification),
+        specString,
         `profile_replies_${APP_ID}`,
-        {
-          limit,
-          until,
-          offset: offset || store.replies.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
-        },
+        pagingParams,
       );
 
       const sortedNotes = filterAndSortNotes(notes, paging);
 
-      updateStore('paging', 'replies', () => ({ ...paging }));
-      updateStore('replies', (ns) => [ ...ns, ...sortedNotes]);
-      updateStore('isFetchingReplies', () => false);
+      batch(() => {
+        updateStore('paging', 'replies', () => ({ ...paging }));
+        updateStore('replies', (ns) => [ ...ns, ...sortedNotes]);
+        updateStore('isFetchingReplies', () => false);
+      });
       return;
     }
 
@@ -367,26 +409,46 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         minwords,
       };
 
-      updateStore('isFetching', () => true);
-
+      const specString = JSON.stringify(specification);
       const off = offset || calculateReadsOffset(store.articles, store.paging['reads']);
+      const pagingParams = {
+        limit,
+        until,
+        offset: off,
+      };
+
+      const useCache = megaFeedCacheApi.shouldUseCache(pagingParams);
+      const cacheKey = useCache ? megaFeedCacheApi.buildKey(account?.publicKey, specString, pagingParams) : undefined;
+      const cached = useCache && cacheKey ? megaFeedCacheApi.get(cacheKey) : undefined;
+
+      if (cached) {
+        const sortedReads = filterAndSortReads(cached.reads, cached.paging);
+
+        batch(() => {
+          updateStore('paging', 'reads', () => ({ ...cached.paging }));
+          updateStore('articles', (ns) => [ ...ns, ...sortedReads]);
+          updateStore('isFetching', () => false);
+        });
+
+        return;
+      }
+
+      updateStore('isFetching', () => true);
 
       const { reads, paging } = await fetchMegaFeed(
         account?.publicKey,
-        JSON.stringify(specification),
+        specString,
         `profile_reads_${APP_ID}`,
-        {
-          limit,
-          until,
-          offset: off,
-        },
+        pagingParams,
       );
 
       const sortedReads = filterAndSortReads(reads, paging);
 
-      updateStore('paging', 'reads', () => ({ ...paging }));
-      updateStore('articles', (ns) => [ ...ns, ...sortedReads]);
-      updateStore('isFetching', () => false);
+      batch(() => {
+        updateStore('paging', 'reads', () => ({ ...paging }));
+        updateStore('articles', (ns) => [ ...ns, ...sortedReads]);
+        updateStore('isFetching', () => false);
+      });
       return;
     }
 
@@ -421,9 +483,11 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       const sortedDrafts = drafts.filter(d => !store.drafts.find(sd => sd.id === d.id));
 
-      updateStore('paging', 'drafts', () => ({ ...paging }));
-      updateStore('drafts', (ns) => [ ...ns, ...sortedDrafts]);
-      updateStore('isFetchingDrafts', () => false);
+      batch(() => {
+        updateStore('paging', 'drafts', () => ({ ...paging }));
+        updateStore('drafts', (ns) => [ ...ns, ...sortedDrafts]);
+        updateStore('isFetchingDrafts', () => false);
+      });
       return;
     }
 
@@ -436,24 +500,45 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         pubkey,
       };
 
+      const specString = JSON.stringify(specification);
+      const pagingParams = {
+        limit,
+        until,
+        offset: offset || store.gallery.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
+      };
+
+      const useCache = megaFeedCacheApi.shouldUseCache(pagingParams);
+      const cacheKey = useCache ? megaFeedCacheApi.buildKey(account?.publicKey, specString, pagingParams) : undefined;
+      const cached = useCache && cacheKey ? megaFeedCacheApi.get(cacheKey) : undefined;
+
+      if (cached) {
+        const sortedNotes = filterAndSortNotes(cached.notes, cached.paging);
+
+        batch(() => {
+          updateStore('paging', 'media', () => ({ ...cached.paging }));
+          updateStore('gallery', (ns) => [ ...ns, ...sortedNotes]);
+          updateStore('isFetchingGallery', () => false);
+        });
+
+        return;
+      }
+
       updateStore('isFetchingGallery', () => true);
 
       const { notes, paging } = await fetchMegaFeed(
         account?.publicKey,
-        JSON.stringify(specification),
+        specString,
         `profile_media_${APP_ID}`,
-        {
-          limit,
-          until,
-          offset: offset || store.gallery.map(n => n.repost ? n.repost.note.created_at : (n.post.created_at || 0)),
-        },
+        pagingParams,
       );
 
       const sortedNotes = filterAndSortNotes(notes, paging);
 
-      updateStore('paging', 'media', () => ({ ...paging }));
-      updateStore('gallery', (ns) => [ ...ns, ...sortedNotes]);
-      updateStore('isFetchingGallery', () => false);
+      batch(() => {
+        updateStore('paging', 'media', () => ({ ...paging }));
+        updateStore('gallery', (ns) => [ ...ns, ...sortedNotes]);
+        updateStore('isFetchingGallery', () => false);
+      });
       return;
     }
   }
@@ -482,11 +567,12 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
     const sortedZaps = filterAndSortZaps(zaps, paging);
 
-    updateStore('zaps', (zs) => [ ...zs, ...sortedZaps ]);
-    updateStore('zappedNotes', (zn) => [ ...zn,  ...notes ]);
-    updateStore('zappedArticles', (za) => [ ...za, ...articles ]);
-
-    updateStore('isFetchingZaps', () => false);
+    batch(() => {
+      updateStore('zaps', (zs) => [ ...zs, ...sortedZaps ]);
+      updateStore('zappedNotes', (zn) => [ ...zn,  ...notes ]);
+      updateStore('zappedArticles', (za) => [ ...za, ...articles ]);
+      updateStore('isFetchingZaps', () => false);
+    });
   };
 
   const fetchNextZapsPage = () => {

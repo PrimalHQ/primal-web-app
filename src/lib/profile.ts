@@ -10,6 +10,44 @@ import { signEvent } from "./nostrAPI";
 import { sendEvent, triggerImportEvents } from "./notes";
 import { APP_ID } from "../App";
 
+const allowedNip05Suffixes = ["primal.net"];
+
+const shouldFetchNip05Profile = (address: string) => {
+  const match = address.match(nip05.NIP05_REGEX);
+
+  if (!match) {
+    return false;
+  }
+
+  const domainPart = match[2]?.toLowerCase();
+
+  if (!domainPart) {
+    return false;
+  }
+
+  const isAllowedBySuffix = allowedNip05Suffixes.some(suffix => (
+    domainPart === suffix || domainPart.endsWith(`.${suffix}`)
+  ));
+
+  if (isAllowedBySuffix) {
+    return true;
+  }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const host = window.location.hostname?.toLowerCase();
+
+      if (host && domainPart === host) {
+        return true;
+      }
+    } catch (_err) {
+      // window might not be available in non-browser contexts.
+    }
+  }
+
+  return false;
+};
+
 export const getUserProfiles = (pubkeys: string[], subid: string) => {
   sendMessage(JSON.stringify([
     "REQ",
@@ -264,6 +302,10 @@ export const checkVerification: (user: PrimalUser | undefined) => Promise<boolea
 
 export const isAccountVerified: (domain: string | undefined) => Promise<nip19.ProfilePointer | null> = async (domain: string | undefined) => {
   if (!domain) return null;
+
+  if (!shouldFetchNip05Profile(domain)) {
+    return null;
+  }
 
   try {
     const profile = await nip05.queryProfile(domain);

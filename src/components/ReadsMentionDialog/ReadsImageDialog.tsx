@@ -173,11 +173,12 @@ const ReadsImageDialog: Component<{
                       <div>Chage hero Image</div>
                     </div>
                   </Show>
-                  <img
-                    class={styles.titleImage}
-                    src={state.image}
-                    onload={() => setImageLoaded(true)}
-                  />
+                <img
+                  class={styles.titleImage}
+                  src={state.image}
+                  onload={() => setImageLoaded(true)}
+                  alt="Article image preview"
+                />
                 </div>
               </Match>
 

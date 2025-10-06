@@ -234,13 +234,14 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
             <div>
               <div class={styles.parentsHolder}>
                 <For each={parentNotes()}>
-                  {note =>
+                  {(note, index) =>
                     <div>
                       <Note
                         note={note}
                         parent={true}
                         shorten={true}
                         noteType="thread"
+                        priorityMedia={index() === 0}
                         onRemove={(id: string) => {
                           threadContext?.actions.removeEvent(id, 'notes');
                         }}
@@ -267,6 +268,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                     note={primaryNote() as PrimalNote}
                     noteType="primary"
                     quoteCount={threadContext?.quoteCount}
+                    priorityMedia={true}
                     onRemove={(id: string) => {
                       toast?.sendSuccess('Delete request sent');
                       navigate('/home');
@@ -283,12 +285,13 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
 
               <div class={styles.repliesHolder} ref={repliesHolder}>
                 <For each={replyNotes()}>
-                  {note =>
+                  {(note, index) =>
                     <div class="animated">
                       <Note
                         note={note}
                         shorten={true}
                         noteType="thread"
+                        priorityMedia={index() === 0 && !primaryNote()}
                         onRemove={(id: string) => {
                           threadContext?.actions.removeEvent(id, 'notes');
                         }}

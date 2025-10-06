@@ -171,7 +171,12 @@ const NoteGallery: Component<{
                         <video src={image.origUrl} width={148} height={148} ></video>
                       </div>}
                     >
-                      <img src={image.imageThumb} onerror={() => setStore('images', 0, 'noVideoThumbnail', true)} />
+                      <img
+                        src={image.imageThumb}
+                        onerror={() => setStore('images', 0, 'noVideoThumbnail', true)}
+                        alt={`Media preview ${index() + 1}`}
+                        loading="lazy"
+                      />
                     </Show>
 
                     <div class="pswp-caption-content">

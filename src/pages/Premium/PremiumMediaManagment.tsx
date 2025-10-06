@@ -349,14 +349,14 @@ const PremiumMediaManagment: Component<{
                     <Show
                       when={item.mimetype.startsWith('video')}
                       fallback={
-                        <img src={getMediaUrl(item.url)} onerror={onImgError} />
+                        <img src={getMediaUrl(item.url)} onerror={onImgError} alt="Uploaded media preview" loading="lazy" />
                       }
                     >
                       <Show
                         when={media?.thumbnails[item.url]}
-                        fallback={<img src={missingVideo} />}
+                        fallback={<img src={missingVideo} alt="Video thumbnail unavailable" loading="lazy" />}
                       >
-                        <img src={media?.thumbnails[item.url]} onerror={onVideoThumbnailError} />
+                        <img src={media?.thumbnails[item.url]} onerror={onVideoThumbnailError} alt="Uploaded video thumbnail" loading="lazy" />
                       </Show>
                     </Show>
                   </td>

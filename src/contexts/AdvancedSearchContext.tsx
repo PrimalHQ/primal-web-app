@@ -1,5 +1,6 @@
 import { createStore } from "solid-js/store";
 import {
+  batch,
   createContext,
   JSX,
   useContext
@@ -142,11 +143,13 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
         }
       },
       onEose: () => {
-        if (users.length > 0) {
-          updateStore('users', () => [users[0]]);
-        }
+        batch(() => {
+          if (users.length > 0) {
+            updateStore('users', () => [users[0]]);
+          }
 
-        updateStore('isFetchingUsers', () => false);
+          updateStore('isFetchingUsers', () => false);
+        });
 
         unsub();
       },
@@ -190,8 +193,10 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
           sorted = [...profiles, ...sorted].slice(0, 9);
         }
 
-        updateStore('users', () => sorted);
-        updateStore('isFetchingUsers', () => false);
+        batch(() => {
+          updateStore('users', () => sorted);
+          updateStore('isFetchingUsers', () => false);
+        });
 
         unsub();
       },
@@ -234,8 +239,10 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
           return bScore - aScore;
         });
 
-        updateStore('users', () => sorted.slice(0, 10));
-        updateStore('isFetchingUsers', () => false);
+        batch(() => {
+          updateStore('users', () => sorted.slice(0, 10));
+          updateStore('isFetchingUsers', () => false);
+        });
 
         unsub();
       },
@@ -283,18 +290,18 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
   };
 
   const clearSearch = () => {
-    updateStore('paging', () => ({ ...emptyPaging() }));
-    updateStore('reads', () => []);
-    updateStore('notes', () => []);
+    batch(() => {
+      updateStore('paging', () => ({ ...emptyPaging() }));
+      updateStore('reads', () => []);
+      updateStore('notes', () => []);
+    });
   }
 
   const findContent = async (query: string, until = 0) => {
+    updateStore('isFetchingContent', () => true);
 
     try {
-
       const spec = JSON.stringify({ id: 'advsearch', query });
-
-      updateStore('isFetchingContent' , () => true);
 
       const kind = query.includes('kind:30023') ? 'reads' : 'notes';
 
@@ -320,15 +327,17 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
       const sortedNotes = filterAndSortNotes(notes, paging);
       const sortedReads = filterAndSortReads(reads, paging);
 
-      updateStore('paging', () => ({ ...paging }));
-      updateStore('reads', (ns) => [ ...ns, ...sortedReads]);
-      updateStore('notes', (ns) => [ ...ns, ...sortedNotes]);
+      batch(() => {
+        updateStore('paging', () => ({ ...paging }));
+        updateStore('reads', (ns) => [ ...ns, ...sortedReads]);
+        updateStore('notes', (ns) => [ ...ns, ...sortedNotes]);
+      });
 
     } catch (e) {
       logError('ERROR fetching search results: ', e);
+    } finally {
+      updateStore('isFetchingContent', () => false);
     }
-
-    updateStore('isFetchingContent' , () => false);
   }
 
   const setContentQuery = (query: string) => {

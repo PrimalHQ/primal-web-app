@@ -12,6 +12,30 @@ export const [isConnected, setConnected] = createSignal<Boolean>(false);
 
 export const isNotConnected = () => !isConnected();
 
+let reconnectAttempt = 0;
+
+const getReconnectDelay = () => {
+  const baseDelay = 200;
+  const maxDelay = 30_000;
+  const delay = Math.min(maxDelay, baseDelay * Math.pow(2, reconnectAttempt));
+  const jitter = Math.random() * 0.2 * delay;
+
+  return delay + jitter;
+};
+
+const resetReconnectAttempts = () => {
+  reconnectAttempt = 0;
+};
+
+const scheduleReconnect = () => {
+  reconnectAttempt += 1;
+  const delay = getReconnectDelay();
+
+  setTimeout(() => {
+    connect();
+  }, delay);
+};
+
 export const setPrimalProtocol = (compression: 'zlib', then: () => void) => {
 
   const subId = `set_protocol_${APP_ID}`;
@@ -42,6 +66,8 @@ const onOpen = () => {
     });
   }
 
+  resetReconnectAttempts();
+
   if (localStorage.getItem('devMode') === 'true') {
     const hook = (window as PrimalWindow).onPrimalCacheServerConnected;
     hook && hook(cacheServer, socket());
@@ -61,9 +87,7 @@ const onClose = () => {
   socket()?.removeEventListener('error', onError);
 
   if (reconnect()) {
-    setTimeout(() => {
-      connect();
-    }, 200);
+    scheduleReconnect();
   }
 }
 
@@ -95,6 +119,10 @@ export const connect = () => {
 export const disconnect = (autoreconnect = true) => {
   setReconnect(() => autoreconnect)
   socket()?.close();
+
+  if (!autoreconnect) {
+    resetReconnectAttempts();
+  }
 };
 
 export const reset = () => {

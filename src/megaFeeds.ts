@@ -39,6 +39,7 @@ import { LeaderboardSort } from "./pages/Premium/PremiumLegendLeaderboard";
 import { LegendCustomizationConfig, fetchLeaderboard } from "./lib/premium";
 import { CohortInfo } from "./contexts/AppContext";
 import { nip19 } from './lib/nTools';
+import { buildTagValueMap, getTagValue, getTagValueInt } from "./stores/note";
 
 export type PaginationInfo = {
   since: number,
@@ -132,6 +133,127 @@ export const emptyMegaFeedResults = () => ({
   leaderboard: [],
 });
 
+const MEGA_FEED_CACHE_TTL = 30_000;
+
+type MegaFeedCacheValue = {
+  timestamp: number,
+  result: MegaFeedResults,
+  pubkeyKey: string,
+  spec: string,
+};
+
+const megaFeedCache = new Map<string, MegaFeedCacheValue>();
+
+const normalizeSpecification = (spec: any) => {
+  if (typeof spec === 'string') {
+    return spec;
+  }
+
+  try {
+    return JSON.stringify(spec ?? {});
+  } catch (e) {
+    return String(spec);
+  }
+};
+
+const buildMegaFeedCacheKey = (
+  pubkey: string | undefined,
+  specification: any,
+  paging?: FeedPaging,
+  normalizedSpec?: string,
+) => {
+  const specKey = normalizedSpec ?? normalizeSpecification(specification);
+  const pubkeyKey = pubkey || 'anon';
+  const limit = paging?.limit ?? 0;
+  const until = paging?.until ?? 0;
+  const since = paging?.since ?? 0;
+
+  let offsetKey = 'none';
+
+  if (typeof paging?.offset === 'number') {
+    offsetKey = paging.offset.toString();
+  } else if (Array.isArray(paging?.offset)) {
+    offsetKey = paging.offset.join(',');
+  }
+
+  return `${pubkeyKey}|${specKey}|${limit}|${until}|${since}|${offsetKey}`;
+};
+
+const shouldUseMegaFeedCache = (paging?: FeedPaging) => {
+  if (!paging) {
+    return true;
+  }
+
+  if ((paging.until ?? 0) !== 0) {
+    return false;
+  }
+
+  if ((paging.since ?? 0) !== 0) {
+    return false;
+  }
+
+  if (typeof paging.offset === 'number') {
+    return paging.offset === 0;
+  }
+
+  if (Array.isArray(paging.offset)) {
+    return paging.offset.length === 0;
+  }
+
+  return true;
+};
+
+const getCachedMegaFeed = (key: string) => {
+  const cached = megaFeedCache.get(key);
+
+  if (!cached) {
+    return undefined;
+  }
+
+  if (Date.now() - cached.timestamp > MEGA_FEED_CACHE_TTL) {
+    megaFeedCache.delete(key);
+    return undefined;
+  }
+
+  return cached.result;
+};
+
+const setCachedMegaFeed = (
+  key: string,
+  result: MegaFeedResults,
+  meta: { pubkeyKey: string; spec: string },
+) => {
+  megaFeedCache.set(key, {
+    timestamp: Date.now(),
+    result,
+    pubkeyKey: meta.pubkeyKey,
+    spec: meta.spec,
+  });
+};
+
+const invalidateMegaFeedCache = ({ pubkey, specification }: { pubkey?: string; specification?: any } = {}) => {
+  const specKey = specification !== undefined ? normalizeSpecification(specification) : undefined;
+  const pubkeyKey = pubkey !== undefined ? (pubkey || 'anon') : undefined;
+
+  megaFeedCache.forEach((value, key) => {
+    const matchesPubkey = pubkeyKey === undefined || value.pubkeyKey === pubkeyKey;
+    const matchesSpec = specKey === undefined || value.spec === specKey;
+
+    if (matchesPubkey && matchesSpec) {
+      megaFeedCache.delete(key);
+    }
+  });
+};
+
+export const megaFeedCacheApi = {
+  get: getCachedMegaFeed,
+  set: setCachedMegaFeed,
+  buildKey: buildMegaFeedCacheKey,
+  shouldUseCache: shouldUseMegaFeedCache,
+  invalidate: invalidateMegaFeedCache,
+  normalizeSpec: normalizeSpecification,
+};
+
 export const parseEmptyReposts = (page: MegaFeedPage) => {
   let reposts: Record<string, string> = {};
 
@@ -153,13 +275,28 @@ export const fetchMegaFeed = (
   subId: string,
   paging?: FeedPaging,
 ) => {
+    const normalizedSpec = normalizeSpecification(specification);
+    const pubkeyKey = pubkey || 'anon';
+    const useCache = shouldUseMegaFeedCache(paging);
+    const cacheKey = useCache ? buildMegaFeedCacheKey(pubkey, specification, paging, normalizedSpec) : undefined;
+    if (useCache && cacheKey) {
+      const cached = getCachedMegaFeed(cacheKey);
+      if (cached) {
+        return Promise.resolve(cached);
+      }
+    }
+
     return new Promise<MegaFeedResults>((resolve) => {
       let page: MegaFeedPage = {...emptyMegaFeedPage()};
 
       const unsub = subsTo(subId, {
         onEose: () => {
           unsub();
-          resolve(pageResolve(page));
+          const result = pageResolve(page);
+          if (useCache && cacheKey) {
+            setCachedMegaFeed(cacheKey, result, { pubkeyKey, spec: normalizedSpec });
+          }
+          resolve(result);
         },
         onEvent: (s, content) => {
           updateFeedPage(page, content);
@@ -195,13 +332,23 @@ export const fetchScoredContent = (
   selector: string,
   subId: string,
 ) => {
+  const normalizedSpec = normalizeSpecification(selector);
+  const pubkeyKey = pubkey || 'anon';
+  const cacheKey = buildMegaFeedCacheKey(pubkey, selector, undefined, normalizedSpec);
+  const cached = getCachedMegaFeed(cacheKey);
+  if (cached) {
+    return Promise.resolve(cached);
+  }
+
   return new Promise<MegaFeedResults>((resolve) => {
     let page: MegaFeedPage = {...emptyMegaFeedPage()};
 
     const unsub = subsTo(subId, {
       onEose: () => {
         unsub();
-        resolve(pageResolve(page));
+        const result = pageResolve(page);
+        setCachedMegaFeed(cacheKey, result, { pubkeyKey, spec: normalizedSpec });
+        resolve(result);
       },
       onEvent: (_, content) => {
         updateFeedPage(page, content);
@@ -765,34 +912,40 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
   if (content.kind === Kind.Zap) {
     page.zaps.push(content);
 
-    const zapTag = content.tags.find(t => t[0] === 'description');
+    const contentTags = buildTagValueMap(content.tags);
+    const zapTag = getTagValue(contentTags, 'description');
 
     if (!zapTag) return;
 
-    const zapInfo = JSON.parse(zapTag[1] || '{}');
+    const zapInfo = JSON.parse(zapTag || '{}');
+    const zapInfoTags = buildTagValueMap(zapInfo.tags);
+
+    const bolt11Tag = getTagValue(contentTags, 'bolt11');
 
     let amount = '0';
 
-    let bolt11Tag = content?.tags?.find(t => t[0] === 'bolt11');
-
     if (bolt11Tag) {
       try {
-        amount = `${parseBolt11(bolt11Tag[1]) || 0}`;
+        amount = `${parseBolt11(bolt11Tag) || 0}`;
       } catch (e) {
-        const amountTag = zapInfo.tags.find((t: string[]) => t[0] === 'amount');
+        const amountTag = getTagValue(zapInfoTags, 'amount');
 
-        amount = amountTag ? amountTag[1] : '0';
+        amount = amountTag ? amountTag : '0';
       }
     }
 
-    let eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'a') || [])[1];
+    let eventId = getTagValue(zapInfoTags, 'a');
 
     if (eventId && eventId.includes(':')) {
       const [kind, pubkey, identifier] = eventId.split(':');
 
       eventId = nip19.naddrEncode({ kind, pubkey, identifier })
     } else {
-      eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+      eventId = getTagValue(zapInfoTags, 'e');
+    }
+
+    if (!eventId) {
+      return;
     }
 
     const topZap: TopZap = {
@@ -903,81 +1056,163 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
 };
 
 export const filterAndSortNotes = (notes: PrimalNote[], paging: PaginationInfo) => {
-  return paging.elements.reduce<PrimalNote[]>(
-    (acc, id) => {
-      let note = notes.find(n => [n.id, n.repost?.note.id].includes(id));
+  if (!notes.length || !paging.elements.length) {
+    return [];
+  }
 
-      return note ? [ ...acc, { ...note } ] : acc;
-    },
-    [],
-  );
+  const noteIndex = new Map<string, PrimalNote>();
+
+  for (const note of notes) {
+    noteIndex.set(note.id, note);
+
+    const repostId = note.repost?.note.id;
+    if (repostId) {
+      noteIndex.set(repostId, note);
+    }
+  }
+
+  const ordered: PrimalNote[] = [];
+
+  for (const id of paging.elements) {
+    const note = noteIndex.get(id);
+
+    if (note) {
+      ordered.push({ ...note });
+    }
+  }
+
+  return ordered;
 }
 
 export const filterAndSortReads = (reads: PrimalArticle[], paging: PaginationInfo) => {
-  return paging.elements.reduce<PrimalArticle[]>(
-    (acc, id) => {
-      const read = reads.find(n => n.id === id);
+  if (!paging.elements.length || !reads.length) {
+    return [];
+  }
 
-      return read ? [ ...acc, { ...read } ] : acc;
-    },
-    [],
-  );
+  const readIndex = new Map<string, PrimalArticle>();
+
+  for (const read of reads) {
+    readIndex.set(read.id, read);
+  }
+
+  const ordered: PrimalArticle[] = [];
+
+  for (const id of paging.elements) {
+    const read = readIndex.get(id);
+
+    if (read) {
+      ordered.push({ ...read });
+    }
+  }
+
+  return ordered;
 }
 
 export const filterAndSortDrafts = (drafts: PrimalDraft[], paging: PaginationInfo) => {
-  return paging.elements.reduce<PrimalDraft[]>(
-    (acc, id) => {
-      const read = drafts.find(n => n.id === id);
+  if (!paging.elements.length || !drafts.length) {
+    return [];
+  }
 
-      return read ? [ ...acc, { ...read } ] : acc;
-    },
-    [],
-  );
+  const draftIndex = new Map<string, PrimalDraft>();
+
+  for (const draft of drafts) {
+    draftIndex.set(draft.id, draft);
+  }
+
+  const ordered: PrimalDraft[] = [];
+
+  for (const id of paging.elements) {
+    const draft = draftIndex.get(id);
+
+    if (draft) {
+      ordered.push({ ...draft });
+    }
+  }
+
+  return ordered;
 }
 
 export const filterAndSortZaps = (zaps: PrimalZap[], paging: PaginationInfo) => {
-  return paging.elements.reduce<PrimalZap[]>(
-    (acc, id) => {
-      const zap = zaps.find(n => n.id === id);
+  if (!paging.elements.length || !zaps.length) {
+    return [];
+  }
 
-      return zap ? [ ...acc, { ...zap } ] : acc;
-    },
-    [],
-  );
+  const zapIndex = new Map<string, PrimalZap>();
+
+  for (const zap of zaps) {
+    zapIndex.set(zap.id, zap);
+  }
+
+  const ordered: PrimalZap[] = [];
+
+  for (const id of paging.elements) {
+    const zap = zapIndex.get(id);
+
+    if (zap) {
+      ordered.push({ ...zap });
+    }
+  }
+
+  return ordered;
 }
 
 export const filterAndSortUsers = (users: PrimalUser[], paging: PaginationInfo, page: MegaFeedPage) => {
-  return paging.elements.reduce<PrimalUser[]>((acc, pk) => {
+  if (!paging.elements.length) {
+    return [];
+  }
 
-    let f: PrimalUser | undefined = users.find(u => u.pubkey === pk);
+  const userIndex = new Map<string, PrimalUser>();
 
-    // If we encounter a user without a metadata event
-    // construct a user object for them
-    if (!f) {
-      f = emptyUser(pk);
+  for (const user of users) {
+    userIndex.set(user.pubkey, user);
+  }
+
+  const ordered: PrimalUser[] = [];
+
+  for (const pk of paging.elements) {
+    let user = userIndex.get(pk);
+
+    if (!user) {
       const stats = { ...emptyStats };
-
-      f.userStats = {
+      user = emptyUser(pk);
+      user.userStats = {
         ...stats,
         followers_increase: page.userFollowerIncrease[pk],
         followers_count: page.userFollowerCounts[pk],
       };
     }
 
-    return f ? [...acc, {...f}] : acc;
-  } , []);
+    if (user) {
+      ordered.push({ ...user });
+    }
+  }
+
+  return ordered;
 }
 
 
 export const filterAndSortLeaderboard = (lb: LeaderboardInfo[], paging: PaginationInfo) => {
-  return paging.elements.reduce<LeaderboardInfo[]>(
-    (acc, id) => {
-      let leader = lb.find(n => n.pubkey === id);
+  if (!paging.elements.length || !lb.length) {
+    return [];
+  }
 
-      return leader ? [ ...acc, { ...leader } ] : acc;
-    },
-    [],
-  );
+  const leaderIndex = new Map<string, LeaderboardInfo>();
+
+  for (const leader of lb) {
+    leaderIndex.set(leader.pubkey, leader);
+  }
+
+  const ordered: LeaderboardInfo[] = [];
+
+  for (const id of paging.elements) {
+    const leader = leaderIndex.get(id);
+
+    if (leader) {
+      ordered.push({ ...leader });
+    }
+  }
+
+  return ordered;
 }
 
 const convertToZapsMega = (page: MegaFeedPage) => {
@@ -985,33 +1220,52 @@ const convertToZapsMega = (page: MegaFeedPage) => {
 
   let zaps: PrimalZap[] = [];
 
+  const readsIndex = new Map<string, NostrNoteContent>();
+  for (let i = 0; i < page.reads.length; i++) {
+    const read = page.reads[i];
+    readsIndex.set(read.id, read);
+  }
+
+  const notesIndex = new Map<string, NostrNoteContent>();
+  for (let i = 0; i < page.notes.length; i++) {
+    const note = page.notes[i];
+    notesIndex.set(note.id, note);
+  }
+
   for (let i=0; i< pageZaps.length; i++) {
     const zapContent = pageZaps[i];
 
-    const bolt11 = (zapContent.tags.find(t => t[0] === 'bolt11') || [])[1];
-    const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
+    const zapContentTags = buildTagValueMap(zapContent.tags);
+    const bolt11 = getTagValue(zapContentTags, 'bolt11');
+    const zapEvent = JSON.parse(getTagValue(zapContentTags, 'description') || '{}');
     const senderPubkey = zapEvent.pubkey as string;
-    const receiverPubkey = zapEvent.tags.find((t: string[]) => t[0] === 'p')[1] as string;
+
+    const zapEventTagMap = buildTagValueMap(zapEvent.tags);
+    const receiverPubkey = getTagValue(zapEventTagMap, 'p') || '';
+
+    if (!receiverPubkey) {
+      continue;
+    }
 
     let zappedId = '';
     let zappedKind: number = 0;
 
-    const zapTagA = zapEvent.tags.find((t: string[]) => t[0] === 'a');
-    const zapTagE = zapEvent.tags.find((t: string[]) => t[0] === 'e');
+    const zapTagA = getTagValue(zapEventTagMap, 'a');
+    const zapTagE = getTagValue(zapEventTagMap, 'e');
 
     if (zapTagA) {
-      const [kind, pubkey, identifier] = zapTagA[1].split(':');
+      const [kind, pubkey, identifier] = zapTagA.split(':');
 
       zappedId = nip19.naddrEncode({ kind, pubkey, identifier });
 
-      const article = page.reads.find(a => a.id === zappedId);
+      const article = readsIndex.get(zappedId);
       zappedKind = article?.kind || 0;
     }
     else if (zapTagE) {
-      zappedId = zapTagE[1];
+      zappedId = zapTagE;
 
-      const article = page.reads.find(a => a.id === zappedId);
-      const note = page.notes.find(n => n.id === zappedId);
+      const article = readsIndex.get(zappedId);
+      const note = notesIndex.get(zappedId);
 
       zappedKind = article?.kind || note?.kind || 0;
     }
@@ -1024,7 +1278,7 @@ const convertToZapsMega = (page: MegaFeedPage) => {
     const zap: PrimalZap = {
       id: zapContent.id,
       message: zapEvent.content || '',
-      amount: parseBolt11(bolt11) || 0,
+      amount: parseBolt11(bolt11 || '') || 0,
       sender,
       reciver,
       created_at: zapContent.created_at,

@@ -9,6 +9,58 @@ import { convertToUser, emptyUser } from "./profile";
 import { StreamingData } from "../lib/streaming";
 import { encodeCoordinate } from "./megaFeed";
 
+export const buildTagValueMap = (tags: string[][] | undefined) => {
+  const map = new Map<string, string[]>();
+
+  if (!tags) {
+    return map;
+  }
+
+  for (let i = 0; i < tags.length; i++) {
+    const tag = tags[i];
+    if (!tag || tag.length < 2) {
+      continue;
+    }
+
+    const [key, value] = tag;
+
+    if (value === undefined) {
+      continue;
+    }
+
+    const existing = map.get(key);
+    if (existing) {
+      existing.push(value);
+    } else {
+      map.set(key, [value]);
+    }
+  }
+
+  return map;
+};
+
+export const getTagValue = (map: Map<string, string[]>, key: string, fallback?: string) => {
+  const values = map.get(key);
+
+  if (!values || values.length === 0) {
+    return fallback;
+  }
+
+  return values[0];
+};
+
+export const getTagValueInt = (map: Map<string, string[]>, key: string, fallback = 0) => {
+  const value = getTagValue(map, key);
+
+  if (value === undefined) {
+    return fallback;
+  }
+
+  const parsed = parseInt(value, 10);
+
+  return Number.isNaN(parsed) ? fallback : parsed;
+};
+
 
 export const getRepostInfo: RepostInfo = (page, message) => {
   const user = page?.users[message.pubkey];
@@ -470,7 +522,9 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             zapped: false,
           };
 
-          const identifier = (m.tags.find(t => t[0] === 'd') || [])[1];
+          const tagValues = buildTagValueMap(m.tags);
+
+          const identifier = getTagValue(tagValues, 'd', '') || '';
           const pubkey = m.pubkey;
           const kind = Kind.LongForm;
 
@@ -509,30 +563,37 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             relayHints: page.relayHints,
           };
 
-          m.tags.forEach(tag => {
-            switch (tag[0]) {
-              case 't':
-                article.tags.push(tag[1]);
-                break;
-              case 'title':
-                article.title = tag[1];
-                break;
-              case 'summary':
-                article.summary = tag[1];
-                break;
-              case 'image':
-                article.image = tag[1];
-                break;
-              case 'published':
-                article.published = parseInt(tag[1]);
-                break;
-              case 'client':
-                article.client = tag[1];
-                break;
-              default:
-                break;
-            }
-          });
+          const topicTags = tagValues.get('t');
+          if (topicTags && topicTags.length > 0) {
+            article.tags.push(...topicTags);
+          }
+
+          const title = getTagValue(tagValues, 'title');
+          const summary = getTagValue(tagValues, 'summary');
+          const image = getTagValue(tagValues, 'image');
+          const publishedTag = getTagValue(tagValues, 'published');
+          const client = getTagValue(tagValues, 'client');
+
+          if (title) {
+            article.title = title;
+          }
+
+          if (summary) {
+            article.summary = summary;
+          }
+
+          if (image) {
+            article.image = image;
+          }
+
+          if (publishedTag) {
+            const parsed = parseInt(publishedTag, 10);
+            article.published = Number.isNaN(parsed) ? article.published : parsed;
+          }
+
+          if (client) {
+            article.client = client;
+          }
 
           mentionedArticles[article.naddr] = { ...article };
         }
@@ -549,16 +610,18 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
           const [kind, pubkey, identifier] = coordinate.split(':');
           const naddrShort = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
 
+          const tagValues = buildTagValueMap(m.tags);
+
           const streamData = {
-            id: (m.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
-            url: (m.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
-            image: (m.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
-            status: (m.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
-            starts: parseInt((m.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
-            summary: (m.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
-            title: (m.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
-            client: (m.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
-            currentParticipants: parseInt((m.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+            id: getTagValue(tagValues, 'd'),
+            url: getTagValue(tagValues, 'streaming'),
+            image: getTagValue(tagValues, 'image'),
+            status: getTagValue(tagValues, 'status'),
+            starts: getTagValueInt(tagValues, 'starts'),
+            summary: getTagValue(tagValues, 'summary'),
+            title: getTagValue(tagValues, 'title'),
+            client: getTagValue(tagValues, 'client'),
+            currentParticipants: getTagValueInt(tagValues, 'current_participants'),
             pubkey: m.pubkey,
             hosts: (m.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
             participants: (m.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
@@ -668,9 +731,10 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
   return  pageMessages.map((message) => {
 
     const msg: NostrNoteContent = message.kind === Kind.Repost ? parseKind6(message, Kind.LongForm) : message;
+    const msgTagValues = buildTagValueMap(msg.tags);
 
     const pubkey = msg.pubkey;
-    const identifier = (msg.tags.find(t => t[0] === 'd') || [])[1];
+    const identifier = getTagValue(msgTagValues, 'd', '') || '';
     const kind = Kind.LongForm;
     const relays = (msg.tags || []).reduce<string[]>((acc, t) => t[0] === 'r' && acc.length < 2 ? [...acc, t[1]] : acc, []);
 
@@ -779,7 +843,9 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
             zapped: false,
           };
 
-          const identifier = (m.tags.find(t => t[0] === 'd') || [])[1];
+          const tagValues = buildTagValueMap(m.tags);
+
+          const identifier = getTagValue(tagValues, 'd', '') || '';
           const pubkey = m.pubkey;
           const kind = Kind.LongForm;
 
@@ -817,30 +883,37 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
             relayHints: page.relayHints,
           };
 
-          m.tags.forEach(tag => {
-            switch (tag[0]) {
-              case 't':
-                article.tags.push(tag[1]);
-                break;
-              case 'title':
-                article.title = tag[1];
-                break;
-              case 'summary':
-                article.summary = tag[1];
-                break;
-              case 'image':
-                article.image = tag[1];
-                break;
-              case 'published':
-                article.published = parseInt(tag[1]);
-                break;
-              case 'client':
-                article.client = tag[1];
-                break;
-              default:
-                break;
-            }
-          });
+          const topicTags = tagValues.get('t');
+          if (topicTags && topicTags.length > 0) {
+            article.tags.push(...topicTags);
+          }
+
+          const title = getTagValue(tagValues, 'title');
+          const summary = getTagValue(tagValues, 'summary');
+          const image = getTagValue(tagValues, 'image');
+          const publishedTag = getTagValue(tagValues, 'published');
+          const client = getTagValue(tagValues, 'client');
+
+          if (title) {
+            article.title = title;
+          }
+
+          if (summary) {
+            article.summary = summary;
+          }
+
+          if (image) {
+            article.image = image;
+          }
+
+          if (publishedTag) {
+            const parsed = parseInt(publishedTag, 10);
+            article.published = Number.isNaN(parsed) ? article.published : parsed;
+          }
+
+          if (client) {
+            article.client = client;
+          }
 
 
           mentionedArticles[article.naddr] = { ...article };
@@ -858,16 +931,18 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
           const [kind, pubkey, identifier] = coordinate.split(':');
           const naddrShort = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
 
+          const tagValues = buildTagValueMap(m.tags);
+
           const streamData = {
-            id: (m.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
-            url: (m.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
-            image: (m.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
-            status: (m.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
-            starts: parseInt((m.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
-            summary: (m.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
-            title: (m.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
-            client: (m.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
-            currentParticipants: parseInt((m.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+            id: getTagValue(tagValues, 'd'),
+            url: getTagValue(tagValues, 'streaming'),
+            image: getTagValue(tagValues, 'image'),
+            status: getTagValue(tagValues, 'status'),
+            starts: getTagValueInt(tagValues, 'starts'),
+            summary: getTagValue(tagValues, 'summary'),
+            title: getTagValue(tagValues, 'title'),
+            client: getTagValue(tagValues, 'client'),
+            currentParticipants: getTagValueInt(tagValues, 'current_participants'),
             pubkey: m.pubkey,
             hosts: (m.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
             participants: (m.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
@@ -890,6 +965,13 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
 
     const wordCount = page.wordCount ? page.wordCount[message.id] || 0 : 0;
 
+    const topicTags = msgTagValues.get('t');
+    const title = getTagValue(msgTagValues, 'title');
+    const summary = getTagValue(msgTagValues, 'summary');
+    const image = getTagValue(msgTagValues, 'image');
+    const publishedTag = getTagValue(msgTagValues, 'published_at');
+    const client = getTagValue(msgTagValues, 'client');
+
     let article: PrimalArticle = {
       id: msg.id,
       pubkey: msg.pubkey,
@@ -897,7 +979,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
       summary: '',
       image: '',
       tags: [],
-      published: parseInt((msg.tags.find(t => t[0] === 'published_at') || [])[1] || `${msg.created_at}` || '0'),
+      published: publishedTag ? parseInt(publishedTag, 10) || msg.created_at || 0 : msg.created_at || 0,
       content: sanitize(msg.content || ''),
       user: convertToUser(user, msg.pubkey),
       topZaps: [...tz],
@@ -927,30 +1009,30 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
       relayHints: page.relayHints,
     };
 
-    msg.tags.forEach(tag => {
-      switch (tag[0]) {
-        case 't':
-          article.tags.push(tag[1]);
-          break;
-        case 'title':
-          article.title = tag[1];
-          break;
-        case 'summary':
-          article.summary = tag[1];
-          break;
-        case 'image':
-          article.image = tag[1];
-          break;
-        case 'published':
-          article.published = parseInt(tag[1]);
-          break;
-        case 'client':
-          article.client = tag[1];
-          break;
-        default:
-          break;
-      }
-    });
+    if (topicTags && topicTags.length > 0) {
+      article.tags.push(...topicTags);
+    }
+
+    if (title) {
+      article.title = title;
+    }
+
+    if (summary) {
+      article.summary = summary;
+    }
+
+    if (image) {
+      article.image = image;
+    }
+
+    if (publishedTag) {
+      const parsed = parseInt(publishedTag, 10);
+      article.published = Number.isNaN(parsed) ? article.published : parsed;
+    }
+
+    if (client) {
+      article.client = client;
+    }
 
     return article;
   });
@@ -969,24 +1051,25 @@ export const convertToLiveEvents: ConvertToLiveEvents = (page) => {
   return  pageMessages.map((message) => {
 
     const msg: NostrNoteContent = message;
+    const tagValues = buildTagValueMap(msg.tags);
 
     const pubkey = msg.pubkey;
-    const identifier = (msg.tags.find(t => t[0] === 'd') || [])[1];
+    const identifier = getTagValue(tagValues, 'd', '') || '';
     const kind = Kind.LiveEvent;
     const relays = (msg.tags || []).reduce<string[]>((acc, t) => t[0] === 'r' && acc.length < 2 ? [...acc, t[1]] : acc, []);
 
     const naddr = nip19.naddrEncode({ identifier, pubkey, kind, relays });
 
     return {
-      id: (msg.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
-      url: (msg.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
-      image: (msg.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
-      status: (msg.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
-      starts: parseInt((msg.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
-      summary: (msg.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
-      title: (msg.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
-      client: (msg.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
-      currentParticipants: parseInt((msg.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+      id: getTagValue(tagValues, 'd'),
+      url: getTagValue(tagValues, 'streaming'),
+      image: getTagValue(tagValues, 'image'),
+      status: getTagValue(tagValues, 'status'),
+      starts: getTagValueInt(tagValues, 'starts'),
+      summary: getTagValue(tagValues, 'summary'),
+      title: getTagValue(tagValues, 'title'),
+      client: getTagValue(tagValues, 'client'),
+      currentParticipants: getTagValueInt(tagValues, 'current_participants'),
       pubkey: msg.pubkey,
       hosts: (msg.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
       participants: (msg.tags || []).filter(t => t[0] === 'p').map(t => t[1]),

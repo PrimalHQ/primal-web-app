@@ -128,12 +128,13 @@ const FeedsQueryTest: Component = () => {
           <div class={`${styles.section} ${styles.borderless}`}>
             <div class={styles.list}>
              <For each={items}>
-              {item => (
+              {(item, index) => (
                 <Switch>
                   <Match when={feed.category === 'notes'}>
                     <Note
                       note={item}
                       noteType="feed"
+                      priorityMedia={index() === 0}
                       // @ts-ignore
                       // setItems((rs) => rs.filter(r => r.noteId !== id))
                     />

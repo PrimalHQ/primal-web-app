@@ -9,6 +9,7 @@ import {
 import { convertToUser } from "../stores/profile";
 import { Kind } from "../constants";
 import {
+  batch,
   createContext,
   createEffect,
   onCleanup,
@@ -116,8 +117,10 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
     const oldNotesIds = store.notes.map(n => n.post.id);
     const reallyNewNotes = newNotes.filter(n => !oldNotesIds.includes(n.post.id));
 
-    updateStore('notes', (notes) => [ ...reallyNewNotes, ...notes ]);
-    updateStore('isFetching', () => false);
+    batch(() => {
+      updateStore('notes', (notes) => [ ...reallyNewNotes, ...notes ]);
+      updateStore('isFetching', () => false);
+    });
   };
 
   const fetchNotes = (noteId: string, until = 0, limit = 100) => {
@@ -156,10 +159,12 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
   }
 
   const clearNotes = () => {
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {}, mentions: {} }));
-    updateStore('notes', () => []);
-    updateStore('reposts', () => undefined);
-    updateStore('lastNote', () => undefined);
+    batch(() => {
+      updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {}, mentions: {} }));
+      updateStore('notes', () => []);
+      updateStore('reposts', () => undefined);
+      updateStore('lastNote', () => undefined);
+    });
   };
 
   const fetchNextPage = () => {

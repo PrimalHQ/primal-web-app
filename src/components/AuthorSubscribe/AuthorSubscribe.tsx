@@ -132,7 +132,7 @@ const AuthorSubscribe: Component<{
         <A href={app?.actions.profileLink(props.author?.npub) || ''} class={styles.authorFeaturCard}>
           <Show when={props.author?.picture}>
             <div class={styles.imageHolder}>
-              <img class={styles.image} src={props.author?.picture} />
+              <img class={styles.image} src={props.author?.picture} alt={`${userName(props.author)} profile picture`} />
             </div>
           </Show>
           <div class={styles.userInfo}>

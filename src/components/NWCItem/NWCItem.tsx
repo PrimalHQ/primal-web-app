@@ -25,7 +25,7 @@ const NWCItem: Component<{
 
   return (
     <div class={styles.nwcWallet} data-status={props.status}>
-        <img src={props.logo} class={styles.logo} />
+        <img src={props.logo} class={styles.logo} alt={`${props.name} logo`} />
         <div class={styles.walletInfos}>
           <div class={styles.walletInfo}>
             <div class={styles.walletName}>

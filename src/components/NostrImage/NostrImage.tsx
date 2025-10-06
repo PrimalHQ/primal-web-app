@@ -147,6 +147,8 @@ const NostrImage: Component<{
               class={styles.nostrImage}
               src={imgVirtual?.src}
               style={`width: ${width()}px; height: ${height()};`}
+              alt={`${author() ? userName(author()) : 'Nostr'} image attachment`}
+              loading="lazy"
             />
           </a>
         </div>

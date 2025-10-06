@@ -187,6 +187,8 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
           onload={onImageLoaded}
           onerror={onImageError}
           class={isDev && missingCacheImage() ? 'redBorder' : ''}
+          alt={`${props.article.title || userName(props.article.user)} cover`}
+          loading="lazy"
         />
       </div>
       <div class={styles.rightColumn}>

@@ -386,8 +386,8 @@ const Muted: Component = () => {
                 </Show>
               }
             >
-              {note => (
-                <Note note={note} noteType="feed" shorten={true} />
+              {(note, index) => (
+                <Note note={note} noteType="feed" shorten={true} priorityMedia={index() === 0} />
               )}
             </For>
             <Paginator

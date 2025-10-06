@@ -26,12 +26,12 @@ const ThemeOption: Component<{
           class={`${styles[props.theme.name]} ${selectedClass()}`}
           onClick={() => props.onSelect(props.theme)}
         >
-          <img src={props.theme.logo} />
+          <img src={props.theme.logo} alt={`${props.theme.label} theme preview`} />
           <Show
             when={props.isSelected}
             fallback={<div class={uncheckedTheme()}></div>}
           >
-            <div class={styles.themeChecked}><img src={check} /></div>
+            <div class={styles.themeChecked}><img src={check} alt="Selected theme" /></div>
           </Show>
         </button>
         <p>{props.theme.label}</p>

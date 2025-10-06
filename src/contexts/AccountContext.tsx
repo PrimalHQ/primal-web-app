@@ -1,5 +1,6 @@
 import { createStore, unwrap } from "solid-js/store";
 import {
+  batch,
   createContext,
   createEffect,
   JSXElement,
@@ -254,12 +255,16 @@ export function AccountProvider(props: { children: JSXElement }) {
       updateStore('suspendedRelays', () => suspendedRelays);
     }
     else {
+    batch(() => {
       updateStore('suspendedRelays', () => store.relays);
 
       for (let i=0; i<store.relays.length; i++) {
         const relay = store.relays[i];
         relay.close();
       }
+      updateStore('relays', () => []);
+      updateStore('activeRelays', () => [...store.suspendedRelays]);
+    });
     }
 
     const priorityRelays: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
@@ -272,8 +277,7 @@ export function AccountProvider(props: { children: JSXElement }) {
       }
     }
 
-    updateStore('relays', () => []);
-    updateStore('activeRelays', () => [...store.suspendedRelays]);
+    
   }
 
   const reconnectSuspendedRelays = async () => {
@@ -288,8 +292,10 @@ export function AccountProvider(props: { children: JSXElement }) {
 
     await connectToRelays(relaysToConnect);
 
-    updateStore('suspendedRelays', () => []);
-    updateStore('activeRelays', () => store.relays);
+    batch(() => {
+      updateStore('suspendedRelays', () => []);
+      updateStore('activeRelays', () => store.relays);
+    });
   }
 
   const setProxyThroughPrimal = async (shouldProxy: boolean) => {

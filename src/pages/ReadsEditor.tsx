@@ -550,7 +550,7 @@ const ReadsEditor: Component = () => {
       <Switch>
         <Match when={isIOS() || isAndroid()}>
           <div class={styles.noArticlePhone}>
-            <img src={noEditorPhone} />
+            <img src={noEditorPhone} alt="Reads editor not available on mobile illustration" />
           </div>
         </Match>
 

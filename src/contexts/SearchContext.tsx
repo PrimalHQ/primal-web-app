@@ -1,5 +1,6 @@
 import { createStore } from "solid-js/store";
 import {
+  batch,
   createContext,
   JSX,
   useContext
@@ -130,12 +131,13 @@ export function SearchProvider(props: { children: JSX.Element }) {
         }
       },
       onEose: () => {
+        batch(() => {
+          if (users.length > 0) {
+            updateStore('users', () => [users[0]]);
+          }
 
-        if (users.length > 0) {
-          updateStore('users', () => [users[0]]);
-        }
-
-        updateStore('isFetchingUsers', () => false);
+          updateStore('isFetchingUsers', () => false);
+        });
 
         unsub();
       },
@@ -178,8 +180,10 @@ export function SearchProvider(props: { children: JSX.Element }) {
           sorted = [...profiles, ...sorted].slice(0, 9);
         }
 
-        updateStore('users', () => sorted);
-        updateStore('isFetchingUsers', () => false);
+        batch(() => {
+          updateStore('users', () => sorted);
+          updateStore('isFetchingUsers', () => false);
+        });
 
         unsub();
       },
@@ -224,8 +228,10 @@ export function SearchProvider(props: { children: JSX.Element }) {
           return bScore - aScore;
         });
 
-        updateStore('users', () => sorted.slice(0, 10));
-        updateStore('isFetchingUsers', () => false);
+        batch(() => {
+          updateStore('users', () => sorted.slice(0, 10));
+          updateStore('isFetchingUsers', () => false);
+        });
 
         unsub();
         return;
@@ -271,7 +277,10 @@ export function SearchProvider(props: { children: JSX.Element }) {
           return bScore - aScore;
         });
 
-        updateStore('contentUsers', () => sorted.slice(0, 10));
+        batch(() => {
+          updateStore('contentUsers', () => sorted.slice(0, 10));
+          updateStore('isFetchingUsers', () => false);
+        });
 
         unsub();
       },
@@ -284,8 +293,10 @@ export function SearchProvider(props: { children: JSX.Element }) {
   }
 
   const saveNotes = (newNotes: PrimalNote[]) => {
-    updateStore('notes', () => [ ...newNotes ]);
-    updateStore('isFetchingContent', () => false);
+    batch(() => {
+      updateStore('notes', () => [ ...newNotes ]);
+      updateStore('isFetchingContent', () => false);
+    });
   };
 
 
@@ -359,9 +370,11 @@ export function SearchProvider(props: { children: JSX.Element }) {
       },
     });
 
-    updateStore('isFetchingContent', () => true);
-    updateStore('notes', () => []);
-    updateStore('page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} })
+    batch(() => {
+      updateStore('isFetchingContent', () => true);
+      updateStore('notes', () => []);
+      updateStore('page', () => ({ messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} }));
+    });
     searchContent(account?.publicKey, subid, query);
   }
 

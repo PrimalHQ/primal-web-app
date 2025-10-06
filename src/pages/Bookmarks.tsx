@@ -178,10 +178,11 @@ const Bookmarks: Component = () => {
               <Switch>
                 <Match when={kind() === 'notes'}>
                   <For each={store.notes}>
-                    {(note) =>
+                    {(note, index) =>
                       <div class="animated">
                         <Note
                           note={note}
+                          priorityMedia={index() === 0}
                           onRemove={(id: string) => {
                             updateStore('notes', (rs) => rs.filter(r => r.noteId !== id))
                           }}

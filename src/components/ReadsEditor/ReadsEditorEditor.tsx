@@ -777,6 +777,7 @@ const ReadsEditorEditor: Component<{
                         src={heroImgSrc()}
                         onload={() => setImageLoaded(true)}
                         onError={onImageError}
+                        alt="Article hero image"
                       />
                     </div>
                   </Match>

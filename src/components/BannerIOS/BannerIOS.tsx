@@ -36,12 +36,12 @@ const BannerIOS: Component< { id?: string } > = (props) => {
     <Show when={isIOS() && showBanner()}>
       <button class={styles.iosBanner} onClick={linkToiOS}>
         <div>
-          <img src={primalWhite} />
+          <img src={primalWhite} alt="Primal app" />
           <div class={styles.iosDesc}>
             <div class={styles.title}>Primal</div>
             <div class={styles.desc}>Open in Primal app</div>
           </div>
-          <img src={openWhite} />
+          <img src={openWhite} alt="Open" />
         </div>
       </button>
     </Show>

@@ -1,6 +1,7 @@
 import { createStore } from "solid-js/store";
 import { andRD, andVersion, iosRD, iosVersion, Kind } from "../constants";
 import {
+  batch,
   createContext,
   createEffect,
   onCleanup,
@@ -93,7 +94,7 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
       count++;
     }
 
-    updateStore('downloadsCount', () => count);
+    return count;
 
   };
 
@@ -112,11 +113,19 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
         return acc + content[key];
       }, 0);
 
-      if (sum !== store.notificationCount) {
-        updateStore('notificationCount', () => sum)
-      }
+      const downloadCount = calculateDownloadCount();
 
-      calculateDownloadCount();
+      if (sum !== store.notificationCount || downloadCount !== store.downloadsCount) {
+        batch(() => {
+          if (sum !== store.notificationCount) {
+            updateStore('notificationCount', () => sum);
+          }
+
+          if (downloadCount !== store.downloadsCount) {
+            updateStore('downloadsCount', () => downloadCount);
+          }
+        });
+      }
 
     }
   }

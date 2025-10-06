@@ -3,6 +3,11 @@ import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
 import Hls from 'hls.js';
 
+import 'media-chrome';
+import 'media-chrome/media-theme-element';
+import 'hls-video-element';
+import 'videojs-video-element';
+
 import styles from './LiveVideo.module.scss';
 import { StreamingData } from '../../lib/streaming';
 import { PrimalUser } from '../../types/primal';

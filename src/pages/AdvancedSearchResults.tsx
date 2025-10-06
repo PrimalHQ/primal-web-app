@@ -121,9 +121,10 @@ const AdvancedSearchResults: Component = () => {
           </Match>
           <Match when={[Kind.Text].includes(kind())}>
             <For each={search?.notes} >
-              {note => <Note
+              {(note, index) => <Note
                 note={note}
                 shorten={true}
+                priorityMedia={index() === 0}
                 onRemove={(id: string) => {
                   search?.actions.removeEvent(id, 'notes');
                 }}

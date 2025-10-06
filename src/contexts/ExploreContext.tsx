@@ -194,8 +194,10 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
     const stats = loadNostrStats();
     const topics = loadHotTopics();
 
-    updateStore('stats', () => ({ ...stats }));
-    updateStore('exploreTopics', () => [...topics])
+    batch(() => {
+      updateStore('stats', () => ({ ...stats }));
+      updateStore('exploreTopics', () => [...topics]);
+    });
   })
 
 // ACTIONS --------------------------------------
@@ -208,29 +210,35 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
     const sorted = filterAndSortUsers(users, paging, page);
 
-    updateStore('explorePeople', (usrs) => [ ...usrs, ...sorted]);
-    updateStore('peoplePaging', () => ({ ...paging }));
+    batch(() => {
+      updateStore('explorePeople', (usrs) => [ ...usrs, ...sorted]);
+      updateStore('peoplePaging', () => ({ ...paging }));
+    });
   }
 
   const setExploreZaps = (zaps: PrimalZap[], paging: PaginationInfo, subjects: { notes: PrimalNote[], users: PrimalUser[], reads: PrimalArticle[]}) => {
 
     const zapsToAdd = filterAndSortZaps(zaps, paging);
 
-    updateStore('exploreZaps', (zps) => [...zps, ...zapsToAdd]);
-    updateStore('zapPaging', () => ({ ...paging }));
-    updateStore('zapSubjects', (s) => ({
-      notes: [ ...s.notes, ...subjects.notes],
-      reads: [ ...s.reads, ...subjects.reads],
-      users: [ ...s.users, ...subjects.users],
-    }));
+    batch(() => {
+      updateStore('exploreZaps', (zps) => [...zps, ...zapsToAdd]);
+      updateStore('zapPaging', () => ({ ...paging }));
+      updateStore('zapSubjects', (s) => ({
+        notes: [ ...s.notes, ...subjects.notes],
+        reads: [ ...s.reads, ...subjects.reads],
+        users: [ ...s.users, ...subjects.users],
+      }));
+    });
   }
 
   const setExploreMedia = (notes: PrimalNote[], paging: PaginationInfo) => {
 
     const notesToAdd = filterAndSortNotes(notes, paging);
 
-    updateStore('exploreMedia', (nts) => [...nts, ...notesToAdd]);
-    updateStore('mediaPaging', () => ({ ...paging }));
+    batch(() => {
+      updateStore('exploreMedia', (nts) => [...nts, ...notesToAdd]);
+      updateStore('mediaPaging', () => ({ ...paging }));
+    });
   }
 
   const setExploreTopics = (topics: TopicStat[]) => {
@@ -264,8 +272,10 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
   const saveNotes = (newNotes: PrimalNote[]) => {
 
-    updateStore('notes', (notes) => [ ...notes, ...newNotes ]);
-    updateStore('isFetching', () => false);
+    batch(() => {
+      updateStore('notes', (notes) => [ ...notes, ...newNotes ]);
+      updateStore('isFetching', () => false);
+    });
   };
 
   const fetchNotes = (topic: string, until = 0, limit = 20) => {
@@ -273,11 +283,12 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
 
     if (scope && timeframe) {
-      updateStore('isFetching', true);
-      updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
-
-      updateStore('scope', () => scope);
-      updateStore('timeframe', () => timeframe);
+      batch(() => {
+        updateStore('isFetching', true);
+        updateStore('page', () => ({ messages: [], users: {}, postStats: {} }));
+        updateStore('scope', () => scope);
+        updateStore('timeframe', () => timeframe);
+      });
 
       const exploreId = `explore_${APP_ID}`;
 
@@ -301,10 +312,12 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
   }
 
   const clearNotes = () => {
-    updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
-    updateStore('notes', () => []);
-    updateStore('reposts', () => undefined);
-    updateStore('lastNote', () => undefined);
+    batch(() => {
+      updateStore('page', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
+      updateStore('notes', () => []);
+      updateStore('reposts', () => undefined);
+      updateStore('lastNote', () => undefined);
+    });
   };
 
   const fetchNextPage = () => {

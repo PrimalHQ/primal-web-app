@@ -28,9 +28,10 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
         fallback={<Loader />}
       >
         <For each={explore?.notes} >
-          {(note) => <Note
+          {(note, index) => <Note
             note={note}
             shorten={true}
+            priorityMedia={index() === 0}
             onRemove={(id: string) => {
               explore?.actions.removeEvent(id, 'notes');
             }}

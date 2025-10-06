@@ -166,11 +166,12 @@ const Home: Component = () => {
           >
             <div class={isPhone() ? styles.readsFeed : ''}>
               <For each={context?.notes} >
-                {note => (
+                {(note, index) => (
                   <div class="animated">
                     <Note
                       note={note}
                       shorten={true}
+                      priorityMedia={index() === 0}
                       onRemove={(id: string) => {
                         context?.actions.removeEvent(id, 'notes');
                       }}

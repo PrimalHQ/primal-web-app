@@ -10,7 +10,7 @@ import Loader from '../Loader/Loader';
 import { logError } from '../../lib/logger';
 import { useIntl } from '@cookbook/solid-intl';
 import { cashuInvoice } from '../../translations';
-import { getDecodedToken, Token, TokenEntry } from "@cashu/cashu-ts";
+import { decodeCashuToken, type CashuToken, type CashuTokenEntry } from "../../lib/cashu";
 import { useAccountContext } from '../../contexts/AccountContext';
 
 
@@ -20,43 +20,65 @@ const Cashu: Component< { id?: string, token: string, alternative?: boolean, noB
   const app = useAppContext();
   const intl = useIntl();
 
-  const [invoice, setInvoice] = createStore<Token>({ token: [] });
+  const [invoice, setInvoice] = createStore<CashuToken>({ token: [] } as CashuToken);
   const [cashuSpendable, setCashuSpendable] = createSignal<boolean>(false);
 
   const [invoiceCopied, setInvoiceCopied] = createSignal(false);
 
   const [paymentInProgress, setPaymentInProgress] = createSignal(false);
 
-  const checkMints = async (entries: TokenEntry[]) => {
-    let statuses: boolean[] = [];
+  const checkMints = async (entries: CashuTokenEntry[]) => {
+    try {
+      let statuses: boolean[] = [];
 
-    for (const entry of entries) {
-      const mint = app?.actions.getCashuMint(entry.mint);
-      if (!mint) continue;
+      for (const entry of entries) {
+        const mint = await app?.actions.getCashuMint(entry.mint);
 
-      const spent = await mint.check({ proofs: entry.proofs.map((p) => ({ secret: p.secret })) });
+        if (!mint) {
+          continue;
+        }
 
-      const data = spent.spendable.map(s => s);
+        const spent = await mint.check({ proofs: entry.proofs.map((p) => ({ secret: p.secret })) });
 
-      statuses = [ ...statuses, ...data];
+        const data = spent.spendable.map(s => s);
+
+        statuses = [ ...statuses, ...data];
+      }
+
+      setCashuSpendable(() => !statuses.includes(false));
+    } catch (error) {
+      logError('Failed to check cashu mints: ', error);
+      setCashuSpendable(false);
     }
-
-    setCashuSpendable(() => !statuses.includes(false));
-  }
+  };
 
   createEffect(() => {
-    if (invoice.token.length === 0) return;
+    if (!Array.isArray(invoice.token) || invoice.token.length === 0) {
+      return;
+    }
 
-    checkMints(invoice.token);
+    void checkMints(invoice.token);
   });
 
   createEffect(() => {
-    try {
-      const dec: Token = getDecodedToken(props.token);
-      setInvoice(() => ({ ...dec }));
-    } catch (e) {
-      logError('Failed to decode cashu token: ', e);
+    const token = props.token;
+
+    if (!token) {
+      return;
     }
+
+    (async () => {
+      try {
+        const decoded = await decodeCashuToken(token);
+        if (token !== props.token) {
+          return;
+        }
+
+        setInvoice(() => ({ ...decoded }));
+      } catch (e) {
+        logError('Failed to decode cashu token: ', e);
+      }
+    })();
   });
 
   createEffect(() => {

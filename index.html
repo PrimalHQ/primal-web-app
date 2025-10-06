@@ -6,11 +6,22 @@
     <meta name="theme-color" content="#000000" />
     <meta property="og:title" content="Primal">
     <meta property="og:description" content="Discover the best of Nostr">
+    <meta name="description" content="Discover the best of Nostr">
     <meta property="og:image" content="https://primal.net/public/primal-logo-large.png">
     <meta property="og:url" content="https://primal.net">
     <meta property="primal:git-commit-id" content="XXXXXXXXXXXXX-GIT-COMMIT-ID-XXXXXXXXXXXX">
 
-    <link href="/public/fonts.css" rel="stylesheet">
+    <link rel="preload" href="/public/fonts.css" as="style">
+    <link rel="stylesheet" href="/public/fonts.css" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="/public/fonts.css">
+    </noscript>
+
+    <link rel="preload" href="/src/index.scss" as="style">
+    <link rel="stylesheet" href="/src/index.scss" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="/src/index.scss">
+    </noscript>
 
     <link rel="shortcut icon" type="image/ico" href="/src/assets/favicon.ico" />
     <title>Primal</title>

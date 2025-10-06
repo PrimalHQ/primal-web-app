@@ -126,12 +126,16 @@ const ArticleShort: Component<{
               <img
                 src={authorAvatar()}
                 class={isDev && missingCacheImage() ? 'redBorder' : ''}
+                alt={`${userName(props.article.user)} profile picture`}
+                loading="lazy"
               />
             }
           >
             <img
               src={articleImage()}
               class={isDev && missingCacheImage() ? 'redBorder' : ''}
+              alt={`${props.article.title || userName(props.article.user)} cover`}
+              loading="lazy"
             />
           </Show>
         </div>

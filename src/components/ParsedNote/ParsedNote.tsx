@@ -179,6 +179,7 @@ const ParsedNote: Component<{
   rootNote?: PrimalNote,
   noPlaceholders?: boolean,
   footerSize?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'mini',
+  priorityMedia?: boolean,
 }> = (props) => {
 
   const intl = useIntl();
@@ -187,6 +188,8 @@ const ParsedNote: Component<{
   const account = useAccountContext();
 
   const dev = localStorage.getItem('devMode') === 'true';
+
+  let priorityImageAssigned = false;
 
   const id = () => {
     // if (props.id) return props.id;
@@ -658,7 +661,9 @@ const ParsedNote: Component<{
       // Images tell a 100 words :)
       setWordsDisplayed(w => w + 100);
 
-      return <NoteImage
+      const shouldPrioritize = props.priorityMedia && !priorityImageAssigned;
+
+      const noteImage = <NoteImage
         class={`noteimage image_${props.note.noteId} ${lastClass}`}
         src={url}
         altSrc={token}
@@ -671,7 +676,14 @@ const ParsedNote: Component<{
         onError={imageError}
         authorPk={props.note.pubkey}
         noPlaceholders={props.noPlaceholders}
+        fetchPriority={shouldPrioritize ? 'high' : undefined}
       />
+
+      if (shouldPrioritize) {
+        priorityImageAssigned = true;
+      }
+
+      return noteImage;
     }
 
     const gridClass = groupCount < groupGridLimit ? `grid-${groupCount}` : 'grid-large';
@@ -699,7 +711,9 @@ const ParsedNote: Component<{
             return <></>;
           }
 
-          return <NoteImage
+          const shouldPrioritize = props.priorityMedia && !priorityImageAssigned && index() === 0;
+
+          const galleryImage = <NoteImage
             class={`noteimage_gallery image_${props.note.noteId} cell_${index()+1}`}
             src={url}
             altSrc={url}
@@ -715,7 +729,14 @@ const ParsedNote: Component<{
             noPlaceholders={props.noPlaceholders}
             seeMore={index() === 3 ? item.tokens.length - 4 : 0}
             isGallery={true}
+            fetchPriority={shouldPrioritize ? 'high' : undefined}
           />
+
+          if (shouldPrioritize) {
+            priorityImageAssigned = true;
+          }
+
+          return galleryImage;
         }}
       </For>
     </div>
@@ -1947,6 +1968,8 @@ const ParsedNote: Component<{
   onMount(() => {
     generateContent();
   });
+
+  priorityImageAssigned = false;
 
   return (
     <div ref={thisNote} id={id()} class={`${styles.parsedNote} ${props.veryShort ? styles.shortNote : ''}`} >
