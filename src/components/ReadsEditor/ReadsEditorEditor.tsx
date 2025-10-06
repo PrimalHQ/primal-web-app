@@ -778,6 +778,8 @@ const ReadsEditorEditor: Component<{
                         onload={() => setImageLoaded(true)}
                         onError={onImageError}
                         alt="Article hero image"
+                        loading="lazy"
+                        decoding="async"
                       />
                     </div>
                   </Match>

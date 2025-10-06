@@ -155,14 +155,14 @@ const Downloads: Component = () => {
                 href={appStoreLink}
                 target='_blank'
               >
-                <img src={appstoreImg} alt="Download on the App Store" />
+                <img src={appstoreImg} alt="Download on the App Store" loading="lazy" decoding="async" />
               </a>
             </div>
           </Show>
 
           <Show when={!isAndroid() && !isIOS()}>
             <div class={styles.qrCode}>
-              <img src={primalQR} width={180} alt="Download Primal QR code" />
+              <img src={primalQR} width={180} alt="Download Primal QR code" loading="lazy" decoding="async" />
               <div class={styles.qrCaption}>
               {intl.formatMessage(t.callToActionQRTitle)}
               </div>
@@ -190,7 +190,7 @@ const Downloads: Component = () => {
                 target='_blank'
                 class={styles.playstoreLink}
               >
-                <img src={playstoreImg} alt="Get it on Google Play" />
+                <img src={playstoreImg} alt="Get it on Google Play" loading="lazy" decoding="async" />
               </a>
 
               <a

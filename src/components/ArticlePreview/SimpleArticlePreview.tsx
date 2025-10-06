@@ -280,6 +280,7 @@ const SimpleArticlePreview: Component<{
                   onload={onImageLoaded}
                   alt={`${userName(props.article.user)} profile picture`}
                   loading="lazy"
+                  decoding="async"
                 />
               </Show>
             }
@@ -289,6 +290,7 @@ const SimpleArticlePreview: Component<{
               onload={onImageLoaded}
               alt={`${props.article.title || userName(props.article.user)} cover`}
               loading="lazy"
+              decoding="async"
             />
           </Show>
         </div>

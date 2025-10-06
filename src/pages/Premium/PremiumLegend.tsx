@@ -51,7 +51,7 @@ const PremiumLegend: Component<{
 
       <div class={styles.legendPerks}>
         <div class={styles.legendPerk}>
-          <img class={styles.foreverPremiumIcon} src={foreverPremium} alt="Forever premium icon"></img>
+          <img class={styles.foreverPremiumIcon} src={foreverPremium} alt="Forever premium icon" loading="lazy" decoding="async"></img>
           <div class={styles.perkInfo}>
             <div class={styles.perkTitle}>
             {intl.formatMessage(t.labels.foreverPremium)}
@@ -62,7 +62,7 @@ const PremiumLegend: Component<{
           </div>
         </div>
         <div class={styles.legendPerk}>
-          <img class={styles.privateBetaIcon} src={moreMediaSpace} alt="Expanded media storage icon"></img>
+          <img class={styles.privateBetaIcon} src={moreMediaSpace} alt="Expanded media storage icon" loading="lazy" decoding="async"></img>
           <div class={styles.perkInfo}>
             <div class={styles.perkTitle}>
               {intl.formatMessage(t.labels.moreMediaSpace)}
@@ -73,7 +73,7 @@ const PremiumLegend: Component<{
           </div>
         </div>
         <div class={styles.legendPerk}>
-          <img class={styles.customProfileIcon} src={customProfile} alt="Custom profile icon"></img>
+          <img class={styles.customProfileIcon} src={customProfile} alt="Custom profile icon" loading="lazy" decoding="async"></img>
           <div class={styles.perkInfo}>
             <div class={styles.perkTitle}>
               {intl.formatMessage(t.labels.customLegendProfile)}
@@ -87,7 +87,7 @@ const PremiumLegend: Component<{
 
       <div class={styles.gratitude}>
         <div class={styles.gratitudeTitle}>
-          <img src={heart} alt="Heart icon"></img> Our Eternal Gratitude <img src={heart} alt="Heart icon"></img>
+          <img src={heart} alt="Heart icon" loading="lazy" decoding="async"></img> Our Eternal Gratitude <img src={heart} alt="Heart icon" loading="lazy" decoding="async"></img>
         </div>
         <div class={styles.gratitudeMessage}>
           We’ll never forget our biggest supporters. People like you will help Nostr succeed.

@@ -381,6 +381,7 @@ const ArticleCompactPreview: Component<{
                 onerror={onImageError}
                 alt={`${userName(props.article.user)} profile picture`}
                 loading="lazy"
+                decoding="async"
               />
             </Show>
           }
@@ -392,6 +393,7 @@ const ArticleCompactPreview: Component<{
             class={isDev && missingCacheImage() ? 'redBorder' : ''}
             alt={`${props.article.title || userName(props.article.user)} cover`}
             loading="lazy"
+            decoding="async"
           />
         </Show>
       </div>

@@ -128,6 +128,7 @@ const ArticleShort: Component<{
                 class={isDev && missingCacheImage() ? 'redBorder' : ''}
                 alt={`${userName(props.article.user)} profile picture`}
                 loading="lazy"
+                decoding="async"
               />
             }
           >
@@ -136,6 +137,7 @@ const ArticleShort: Component<{
               class={isDev && missingCacheImage() ? 'redBorder' : ''}
               alt={`${props.article.title || userName(props.article.user)} cover`}
               loading="lazy"
+              decoding="async"
             />
           </Show>
         </div>

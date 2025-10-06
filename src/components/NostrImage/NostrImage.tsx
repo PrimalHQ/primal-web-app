@@ -149,6 +149,7 @@ const NostrImage: Component<{
               style={`width: ${width()}px; height: ${height()};`}
               alt={`${author() ? userName(author()) : 'Nostr'} image attachment`}
               loading="lazy"
+              decoding="async"
             />
           </a>
         </div>

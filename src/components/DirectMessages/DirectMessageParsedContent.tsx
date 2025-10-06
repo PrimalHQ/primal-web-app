@@ -1114,7 +1114,7 @@ const DirectMessageParsedContent: Component<{
         // const image = tag[2];
 
         // return image ?
-        //   <span><img height={15} width={15} src={image} alt={`emoji: ${emoji}`} /></span> :
+        //   <span><img height={15} width={15} src={image} alt={`emoji: ${emoji}`} loading="lazy" decoding="async" /></span> :
         //   <>{token}</>;
       }}
     </For>

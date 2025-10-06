@@ -19,10 +19,10 @@ const ExternalLink: Component<{
       <Show
         when={['sunset', 'midnight'].includes(settings?.theme || 'sunset')}
         fallback={
-          <img src={props.darkIcon} alt={`${props.label} icon`} />
+          <img src={props.darkIcon} alt={`${props.label} icon`} loading="lazy" decoding="async" />
         }
       >
-        <img src={props.lightIcon} alt={`${props.label} icon`} />
+        <img src={props.lightIcon} alt={`${props.label} icon`} loading="lazy" decoding="async" />
       </Show>
       <a
         href={props.href}

@@ -197,10 +197,10 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
     <div id={props.id} class={styles.notifItem} data-notif={props.notification.id}>
       <div class={`${styles.notifType} ${props.notification.type === NotificationType.YOUR_POST_WAS_REPLIED_TO ? styles.replyAvatar : ''}`}>
         <Switch fallback={
-          <img src={typeIcon()} alt="notification icon" />
+          <img src={typeIcon()} alt="notification icon" loading="lazy" decoding="async" />
         }>
           <Match when={isLike() && reactionIcon() === ''}>
-            <img src={isLight() ? postLikedLight : postLiked} alt="notification icon" />
+            <img src={isLight() ? postLikedLight : postLiked} alt="notification icon" loading="lazy" decoding="async" />
           </Match>
 
           <Match when={props.notification.type === NotificationType.YOUR_POST_WAS_LIKED}>

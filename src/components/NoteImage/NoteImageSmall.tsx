@@ -21,6 +21,7 @@ const NoteImageSmall: Component<{
   ignoreRatio?: boolean,
   forceHeight?: number;
   authorPk?: string,
+  loading?: 'lazy' | 'eager' | 'auto',
 }> = (props) => {
   const app = useAppContext();
   const imgId = generatePrivateKey();
@@ -212,6 +213,8 @@ const NoteImageSmall: Component<{
           class={klass()}
           onerror={onError}
           // style={`${willBeTooBig() && !props.ignoreRatio ? `width: 528px; height: 680px` : `width: ${width()}px; height: ${height()}`}`}
+          loading={props.loading ?? 'lazy'}
+          decoding="async"
         />
         <div class="pswp-caption-content">{props.caption}</div>
       </a>

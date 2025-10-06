@@ -11,7 +11,7 @@ const FeedbackCircle: Component<{ success?: boolean }> = (props) => {
   return (
     <div class={styles.container}>
       <div class={`${styles.circle} ${props.success ? styles.success : styles.fail}`}>
-        {props.success ? <img src={checkIcon} alt="Success" /> : <img src={closeIcon} alt="Error" />}
+        {props.success ? <img src={checkIcon} alt="Success" loading="lazy" decoding="async" /> : <img src={closeIcon} alt="Error" loading="lazy" decoding="async" />}
       </div>
     </div>
   );

@@ -268,6 +268,7 @@ const ReadsMy: Component = () => {
                       onerror={onImageError}
                       alt={`${topZappedArticle()?.title || 'Top zapped article'} cover`}
                       loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 </div>
@@ -304,6 +305,7 @@ const ReadsMy: Component = () => {
                       onerror={onImageError}
                       alt={`${topEngagedArticle()?.title || 'Top engaged article'} cover`}
                       loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 </div>
@@ -315,7 +317,7 @@ const ReadsMy: Component = () => {
         <Switch>
           <Match when={isPhone()}>
             <div class={styles.noArticlePhone}>
-              <img src={noEditorPhone} alt="Reads dashboard not available on mobile" />
+              <img src={noEditorPhone} alt="Reads dashboard not available on mobile" loading="lazy" decoding="async" />
             </div>
           </Match>
 

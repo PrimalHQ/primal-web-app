@@ -176,6 +176,7 @@ const NoteGallery: Component<{
                         onerror={() => setStore('images', 0, 'noVideoThumbnail', true)}
                         alt={`Media preview ${index() + 1}`}
                         loading="lazy"
+                        decoding="async"
                       />
                     </Show>
 

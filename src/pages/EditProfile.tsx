@@ -298,6 +298,8 @@ const EditProfile: Component = () => {
                 src={banner()}
                 onerror={imgError}
                 alt="Profile banner preview"
+                loading="lazy"
+                decoding="async"
               />
               <div>{intl.formatMessage(tSettings.profile.uploadBanner)}</div>
             </label>

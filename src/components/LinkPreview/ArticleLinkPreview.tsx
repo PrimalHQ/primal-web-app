@@ -73,6 +73,8 @@ const ArticleLinkPreview: Component<{ preview: any, id?: string, bordered?: bool
           src={image()?.media_url || props.preview.images[0]}
           style={`width: 100%; height: ${height()}`}
           onerror={onError}
+          loading="lazy"
+          decoding="async"
         />
       </Show>
 

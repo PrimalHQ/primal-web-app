@@ -126,12 +126,12 @@ export const urlify = (
         if (!imgUrl) {
           // @ts-ignore
           // return (<div><NoteImage src={getMediaUrlDefault(url)} isDev={dev} /></div>).outerHTML;
-          return `<img src="${getMediaUrlDefault(url)}" class="postImage${dev ? ' redBorder' : ''}" alt="Note attachment"/>`;
+          return `<img src="${getMediaUrlDefault(url)}" class="postImage${dev ? ' redBorder' : ''}" alt="Note attachment" loading="lazy" decoding="async"/>`;
         }
 
         // @ts-ignore
         // return (<div><NoteImage src={imgUrl} isDev={dev} /></div>).outerHTML;
-        return `<img src="${imgUrl}" class="postImage" alt="Note attachment"/>`;
+        return `<img src="${imgUrl}" class="postImage" alt="Note attachment" loading="lazy" decoding="async"/>`;
       }
 
       if (isMp4Video(url)) {

@@ -52,8 +52,8 @@ const Landing: Component = () => {
     <div class={styles.landingPage}>
       <div class={styles.landingContent}>
         <div class={styles.mobileBranding}>
-          <img src={primalLogo} alt="Primal logo" />
-          <img src={primalName} alt="Primal wordmark" />
+          <img src={primalLogo} alt="Primal logo" loading="eager" decoding="async" fetchpriority="high" />
+          <img src={primalName} alt="Primal wordmark" loading="eager" decoding="async" fetchpriority="high" />
         </div>
         <div class={styles.landingVideo}>
           <video
@@ -67,8 +67,8 @@ const Landing: Component = () => {
         </div>
         <div class={styles.landingInfo}>
           <div class={styles.branding}>
-            <img src={primalLogo} width={64} height={64} alt="Primal logo" />
-            <img src={primalName} height={60} alt="Primal wordmark" />
+            <img src={primalLogo} width={64} height={64} alt="Primal logo" loading="eager" decoding="async" fetchpriority="high" />
+            <img src={primalName} height={60} alt="Primal wordmark" loading="eager" decoding="async" fetchpriority="high" />
           </div>
           <div class={styles.text}>
             <div class={styles.tagline}>
@@ -80,21 +80,21 @@ const Landing: Component = () => {
           </div>
           <div class={styles.actions}>
             <div class={styles.qrCode}>
-              <img src={primalQR} width={180} alt="Download Primal QR code" />
+              <img src={primalQR} width={180} alt="Download Primal QR code" loading="lazy" decoding="async" />
             </div>
             <div class={styles.appLinks}>
               <Show when={isIOS() || !isAndroid()}>
                 <a href={appStoreLink} target="_blank">
-                  <img src={primalIOS} alt="Download Primal for iOS" />
+                  <img src={primalIOS} alt="Download Primal for iOS" loading="lazy" decoding="async" />
                 </a>
               </Show>
               <Show when={isAndroid() || !isIOS()}>
                 <a href={playstoreLink} target="_blank">
-                  <img src={primalAndroid} alt="Download Primal for Android" />
+                  <img src={primalAndroid} alt="Download Primal for Android" loading="lazy" decoding="async" />
                 </a>
               </Show>
               <A href="/home" class={styles.linkToWeb}>
-                <img src={primalWeb} alt="Open Primal on the web" />
+                <img src={primalWeb} alt="Open Primal on the web" loading="lazy" decoding="async" />
                 <p>{intl.formatMessage(t.browserOption)}</p>
               </A>
             </div>
@@ -106,27 +106,27 @@ const Landing: Component = () => {
           <p class={styles.pink}>
             Nostr & Bitcoin Lightning is a game changer. Primal is not just better than Wallet of Satoshi, it is 1000x better than Venmo.
           </p>
-          <img src={nvk} alt="NVK" />
+          <img src={nvk} alt="NVK" loading="lazy" decoding="async" />
         </div>
 
         <div class={styles.testemonial}>
           <p class={styles.cyan}>
             Primal is the freedom tech alternative to platforms like Twitter and TikTok. True free speech does not have gatekeepers.</p>
-          <img src={odell} alt="Matt Odell" />
+          <img src={odell} alt="Matt Odell" loading="lazy" decoding="async" />
         </div>
 
         <div class={styles.testemonial}>
           <p class={styles.orange}>
             I don’t know how anyone can stop this. I think we finally have a payments revolution for this epoch.
           </p>
-          <img src={preston} alt="Preston Pysh" />
+          <img src={preston} alt="Preston Pysh" loading="lazy" decoding="async" />
         </div>
 
         <div class={styles.testemonial}>
           <p class={styles.blue}>
             The Primal wallet has erased all my memories of other wallets. Having an integrated social graph is a game-changer.
           </p>
-          <img src={pablo} alt="Pablo F7z" />
+          <img src={pablo} alt="Pablo F7z" loading="lazy" decoding="async" />
         </div>
       </div>
     </div>

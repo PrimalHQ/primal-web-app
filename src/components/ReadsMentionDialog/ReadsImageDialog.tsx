@@ -178,6 +178,8 @@ const ReadsImageDialog: Component<{
                   src={state.image}
                   onload={() => setImageLoaded(true)}
                   alt="Article image preview"
+                  loading="lazy"
+                  decoding="async"
                 />
                 </div>
               </Match>

@@ -237,7 +237,7 @@ const Avatar: Component<{
       >
         <div class={`${styles.missingBack} ${notCachedFlag()}`}>
           <Show when={props.zoomable} fallback={
-            <img src={imageSrc()} alt="avatar" onerror={imgError}/>
+            <img src={imageSrc()} alt="avatar" onerror={imgError} loading="lazy" decoding="async"/>
           }>
             <NoteImage
               class={props.zoomable ? 'profile_image' : ''}
@@ -248,6 +248,7 @@ const Avatar: Component<{
               mediaThumb={imageThumb()}
               ignoreRatio={true}
               authorPk={props.user?.pubkey}
+              loading="lazy"
             />
           </Show>
         </div>
