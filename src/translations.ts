@@ -861,6 +861,11 @@ export const messages = {
     defaultMessage: 'Mark All Read',
     description: 'DM mark as read label',
   },
+  sendComment: {
+    id: 'messages.sendComment',
+    defaultMessage: 'Send a comment...',
+    description: 'Placeholder for comment input',
+  },
 };
 
 export const navBar = {

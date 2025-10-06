@@ -873,10 +873,16 @@ const ChatMessage: Component<{
   const renderUserMention = (item: NoteContent) => {
     return <For each={item.tokens}>
       {(token) => {
+        console.log('USER MENTION: ', token);
         let [nostr, id] = token.split(':');
 
         if (!id) {
-          return <>{token}</>;
+          if ((nostr.startsWith('npub1') || nostr.startsWith('nprofile1'))) {
+            id = nostr;
+            nostr = '';
+          } else {
+            return <>{token}</>;
+          }
         }
 
         let prefix = '';

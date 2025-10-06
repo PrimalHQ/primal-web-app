@@ -135,6 +135,16 @@ const ChatMessageComposer: Component<{
 
   }
 
+  const onFocus = () => {
+    if (!newMessageInput) return;
+    newMessageInput.placeholder = '';
+  }
+
+  const onBlur = () => {
+    if (!newMessageInput) return;
+    newMessageInput.placeholder = intl.formatMessage(tMessages.sendComment);
+  }
+
   const onKeyDown = (e: KeyboardEvent) => {
     if (!newMessageInput || !newMessageWrapper) {
       return false;
@@ -369,12 +379,20 @@ const ChatMessageComposer: Component<{
 
   onMount(() => {
     newMessageWrapper?.addEventListener('input', () => onExpandableTextareaInput());
-    newMessageInput && newMessageInput.addEventListener('keydown', onKeyDown);
+    if (newMessageInput) {
+      newMessageInput.addEventListener('keydown', onKeyDown);
+      newMessageInput.addEventListener('focus', onFocus);
+      newMessageInput.addEventListener('blur', onBlur);
+    }
   });
 
   onCleanup(() => {
     newMessageWrapper?.removeEventListener('input', () => onExpandableTextareaInput());
-    newMessageInput && newMessageInput.removeEventListener('keydown', onKeyDown);
+    if (newMessageInput) {
+      newMessageInput.removeEventListener('keydown', onKeyDown);
+      newMessageInput.removeEventListener('focus', onFocus);
+      newMessageInput.removeEventListener('blur', onBlur);
+    }
   });
 
   // MENTIONING
@@ -525,6 +543,8 @@ const ChatMessageComposer: Component<{
     // Dispatch input event to recalculate UI position
     const e = new Event('input', { bubbles: true, cancelable: true});
     newMessageInput.dispatchEvent(e);
+
+    profile?.actions.addProfileToHistory(user);
   };
 
   const msgHasInvoice = (msg: DirectMessage) => {
@@ -579,7 +599,7 @@ const ChatMessageComposer: Component<{
         onFocus={() => setInputFocused(true)}
         onBlur={() => setInputFocused(false)}
         onInput={onInput}
-        placeholder='Send a comment...'
+        placeholder={intl.formatMessage(tMessages.sendComment)}
       ></textarea>
 
       <Show when={isMentioning()}>
