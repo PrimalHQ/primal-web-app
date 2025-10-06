@@ -8,6 +8,7 @@ import {
   For,
   Match,
   on,
+  onCleanup,
   Show,
   Switch,
 } from 'solid-js';
@@ -131,30 +132,28 @@ const ProfileDesktop: Component = () => {
     resolveHex(params.vanityName)
   })
 
-  createEffect(() => {
-    (async () => {
-      if (!profile?.profile) return;
+  const ensureLightbox = async () => {
+    if (!profile?.profile) return;
 
-      if (!lightbox) {
-        const Lightbox = await loadPhotoSwipeLightbox();
-        lightbox = new Lightbox({
-          gallery: '#central_header',
-          children: 'a.profile_image',
-          showHideAnimationType: 'zoom',
-          initialZoomLevel: 'fit',
-          secondaryZoomLevel: 2,
-          maxZoomLevel: 3,
-          pswpModule: loadPhotoSwipeModule,
-        });
-      }
+    if (!lightbox) {
+      const Lightbox = await loadPhotoSwipeLightbox();
+      lightbox = new Lightbox({
+        gallery: '#central_header',
+        children: 'a.profile_image',
+        showHideAnimationType: 'zoom',
+        initialZoomLevel: 'fit',
+        secondaryZoomLevel: 2,
+        maxZoomLevel: 3,
+        pswpModule: loadPhotoSwipeModule,
+      });
+    }
 
-      lightbox?.init();
-    })();
+    lightbox?.init();
+  };
 
-    return () => {
-      lightbox?.destroy();
-      lightbox = undefined;
-    };
+  onCleanup(() => {
+    lightbox?.destroy();
+    lightbox = undefined;
   });
 
   createEffect(on(() => profile?.profileKey, (v,p) => {
@@ -540,10 +539,10 @@ const ProfileDesktop: Component = () => {
   })
 
   createEffect(() => {
-    if (isProfileLoaded()) {
-      lightbox.init();
-    }
-  })
+    if (!isProfileLoaded()) return;
+
+    ensureLightbox();
+  });
 
   const customZapInfo: () => CustomZapInfo = () => ({
     profile: profile?.userProfile,
