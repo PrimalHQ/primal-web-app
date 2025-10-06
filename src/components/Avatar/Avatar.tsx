@@ -23,6 +23,7 @@ const Avatar: Component<{
   showBorderRing?: boolean,
   legendConfig?: LegendCustomizationConfig,
   legendWhite?: boolean,
+  alt?: string,
 }> = (props) => {
 
   const media = useMediaContext();
@@ -237,7 +238,7 @@ const Avatar: Component<{
       >
         <div class={`${styles.missingBack} ${notCachedFlag()}`}>
           <Show when={props.zoomable} fallback={
-            <img src={imageSrc()} alt="avatar" onerror={imgError} loading="lazy" decoding="async"/>
+            <img src={imageSrc()} alt={props.alt || 'avatar'} onerror={imgError} loading="lazy" decoding="async"/>
           }>
             <NoteImage
               class={props.zoomable ? 'profile_image' : ''}
@@ -249,6 +250,7 @@ const Avatar: Component<{
               ignoreRatio={true}
               authorPk={props.user?.pubkey}
               loading="lazy"
+              alt={props.alt || 'avatar'}
             />
           </Show>
         </div>

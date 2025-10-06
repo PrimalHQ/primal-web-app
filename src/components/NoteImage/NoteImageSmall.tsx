@@ -22,6 +22,7 @@ const NoteImageSmall: Component<{
   forceHeight?: number;
   authorPk?: string,
   loading?: 'lazy' | 'eager' | 'auto',
+  alt?: string,
 }> = (props) => {
   const app = useAppContext();
   const imgId = generatePrivateKey();
@@ -167,6 +168,16 @@ const NoteImageSmall: Component<{
 
   const klass = () => `${styles.noteImage} ${props.shortHeight ? styles.shortHeight : ''} ${isCached() ? '' : 'redBorder'}`;
 
+  const altText = () => {
+    if (props.alt) return props.alt;
+
+    if (typeof props.caption === 'string' && props.caption.trim().length > 0) {
+      return props.caption;
+    }
+
+    return 'Note image thumbnail';
+  };
+
   onMount(() => {
     // if we have media info, shortcut image dimension calc
     if (props.media) {
@@ -215,6 +226,7 @@ const NoteImageSmall: Component<{
           // style={`${willBeTooBig() && !props.ignoreRatio ? `width: 528px; height: 680px` : `width: ${width()}px; height: ${height()}`}`}
           loading={props.loading ?? 'lazy'}
           decoding="async"
+          alt={altText()}
         />
         <div class="pswp-caption-content">{props.caption}</div>
       </a>

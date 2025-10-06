@@ -81,6 +81,8 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
 
   const hasImage = () => errorCount() < errorCountLimit && (image() || props.preview.images[0]);
 
+  const altText = () => props.preview.title || props.preview.description || props.preview.url || 'Link preview image';
+
   return (
     <a
       id={props.id}
@@ -96,6 +98,7 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
           onerror={onError}
           loading="lazy"
           decoding="async"
+          alt={altText()}
         />
       </Show>
 
