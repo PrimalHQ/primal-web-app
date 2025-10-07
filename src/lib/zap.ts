@@ -4,13 +4,99 @@ import { Tier } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModa
 import { Kind } from "../constants";
 import { MegaFeedPage, NostrRelaySignedEvent, NostrUserZaps, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, PrimalZap, TopZap } from "../types/primal";
 import { logError } from "./logger";
-import { decrypt, enableWebLn, encrypt, sendPayment, signEvent } from "./nostrAPI";
+import { decrypt, enableWebLn, sendPayment, signEvent } from "./nostrAPI";
 import { decodeNWCUri } from "./wallet";
 import { hexToBytes, parseBolt11 } from "../utils";
 import { convertToUser } from "../stores/profile";
 import { StreamingData } from "./streaming";
 
 export let lastZapError: string = "";
+
+const errorMessageFrom = (reason: unknown) => {
+  if (!reason) return '';
+
+  if (typeof reason === 'string') {
+    return reason;
+  }
+
+  if (reason instanceof Error) {
+    return reason.message;
+  }
+
+  if (typeof reason === 'object' && 'message' in (reason as Record<string, unknown>)) {
+    const message = (reason as Record<string, unknown>).message;
+    if (typeof message === 'string') {
+      return message;
+    }
+  }
+
+  try {
+    return JSON.stringify(reason);
+  } catch {
+    return String(reason);
+  }
+};
+
+const openLightningInvoice = (invoice: string) => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+
+  const lightningUrl = `lightning:${invoice}`;
+
+  try {
+    const opened = window.open(lightningUrl, '_blank', 'noopener,noreferrer');
+
+    if (!opened) {
+      window.location.href = lightningUrl;
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Failed to open lightning URL:', err);
+    return false;
+  }
+};
+
+const tryPayInvoice = async (
+  sender: string,
+  nwc: string[] | undefined,
+  invoice: string,
+) => {
+  lastZapError = '';
+
+  if (nwc && nwc[1] && nwc[1].length > 0) {
+    const success = await zapOverNWC(sender, nwc[1], invoice);
+
+    if (!success && !lastZapError) {
+      lastZapError = 'Failed to send zap through Nostr Wallet Connect.';
+    }
+
+    return success;
+  }
+
+  try {
+    await enableWebLn();
+    await sendPayment(invoice);
+    return true;
+  } catch (reason) {
+    const message = errorMessageFrom(reason);
+
+    if (message === 'no_webln_extension') {
+      const opened = openLightningInvoice(invoice);
+
+      lastZapError = opened
+        ? 'Opening your Lightning wallet so you can complete the zap.'
+        : 'No WebLN wallet detected. Install a WebLN wallet or connect via NWC in Settings.';
+
+      return false;
+    }
+
+    lastZapError = message || 'Failed to send zap.';
+    console.error('Failed to zap: ', reason);
+    return false;
+  }
+};
 
 export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string) => {
   let promises: Promise<boolean>[] = [];
@@ -79,7 +165,7 @@ export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string
   catch (e: any) {
     logError('Failed NWC payment init: ', e);
     console.error('Failed NWC payment init: ', e)
-    lastZapError = e;
+    lastZapError = errorMessageFrom(e) || 'Failed to send zap through Nostr Wallet Connect.';
     result = false;
   }
 
@@ -107,6 +193,7 @@ export const zapNote = async (
   const callback = await getZapEndpoint(note.user);
 
   if (!callback) {
+    lastZapError = 'This user has not configured a Lightning address yet.';
     return false;
   }
 
@@ -134,15 +221,9 @@ export const zapNote = async (
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
-    if (nwc && nwc[1] && nwc[1].length > 0) {
-      return await zapOverNWC(sender, nwc[1], pr);
-    }
-
-    await enableWebLn();
-    await sendPayment(pr);
-
-    return true;
+    return await tryPayInvoice(sender, nwc, pr);
   } catch (reason) {
+    lastZapError = errorMessageFrom(reason) || 'Failed to send zap.';
     console.error('Failed to zap: ', reason);
     return false;
   }
@@ -163,6 +244,7 @@ export const zapArticle = async (
   const callback = await getZapEndpoint(note.user);
 
   if (!callback) {
+    lastZapError = 'This user has not configured a Lightning address yet.';
     return false;
   }
 
@@ -196,15 +278,9 @@ export const zapArticle = async (
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
-    if (nwc && nwc[1] && nwc[1].length > 0) {
-      return await zapOverNWC(sender, nwc[1], pr);
-    }
-
-    await enableWebLn();
-    await sendPayment(pr);
-
-    return true;
+    return await tryPayInvoice(sender, nwc, pr);
   } catch (reason) {
+    lastZapError = errorMessageFrom(reason) || 'Failed to send zap.';
     console.error('Failed to zap: ', reason);
     return false;
   }
@@ -225,6 +301,7 @@ export const zapProfile = async (
   const callback = await getZapEndpoint(profile);
 
   if (!callback) {
+    lastZapError = 'This user has not configured a Lightning address yet.';
     return false;
   }
 
@@ -250,15 +327,9 @@ export const zapProfile = async (
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
-    if (nwc && nwc[1] && nwc[1].length > 0) {
-      return await zapOverNWC(sender, nwc[1], pr);
-    }
-
-    await enableWebLn();
-    await sendPayment(pr);
-
-    return true;
+    return await tryPayInvoice(sender, nwc, pr);
   } catch (reason) {
+    lastZapError = errorMessageFrom(reason) || 'Failed to send zap.';
     console.error('Failed to zap: ', reason);
     return false;
   }
@@ -279,6 +350,7 @@ export const zapSubscription = async (
   const callback = await getZapEndpoint(recipient);
 
   if (!callback) {
+    lastZapError = 'This user has not configured a Lightning address yet.';
     return false;
   }
 
@@ -322,15 +394,9 @@ export const zapSubscription = async (
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
-    if (nwc && nwc[1] && nwc[1].length > 0) {
-      return await zapOverNWC(sender, nwc[1], pr);
-    }
-
-    await enableWebLn();
-    await sendPayment(pr);
-
-    return true;
+    return await tryPayInvoice(sender, nwc, pr);
   } catch (reason) {
+    lastZapError = errorMessageFrom(reason) || 'Failed to send zap.';
     console.error('Failed to zap: ', reason);
     return false;
   }
@@ -352,6 +418,7 @@ export const zapDVM = async (
   const callback = await getZapEndpoint(author);
 
   if (!callback) {
+    lastZapError = 'This user has not configured a Lightning address yet.';
     return false;
   }
 
@@ -385,15 +452,9 @@ export const zapDVM = async (
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
-    if (nwc && nwc[1] && nwc[1].length > 0) {
-      return await zapOverNWC(sender, nwc[1], pr);
-    }
-
-    await enableWebLn();
-    await sendPayment(pr);
-
-    return true;
+    return await tryPayInvoice(sender, nwc, pr);
   } catch (reason) {
+    lastZapError = errorMessageFrom(reason) || 'Failed to send zap.';
     console.error('Failed to zap: ', reason);
     return false;
   }
@@ -415,6 +476,7 @@ export const zapStream = async (
   const callback = await getZapEndpoint(host);
 
   if (!callback) {
+    lastZapError = 'This user has not configured a Lightning address yet.';
     return { success: false };
   }
 
@@ -448,19 +510,17 @@ export const zapStream = async (
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
-    if (nwc && nwc[1] && nwc[1].length > 0) {
-      const success = await zapOverNWC(sender, nwc[1], pr);
+    const success = await tryPayInvoice(sender, nwc, pr);
 
-      return { success: true, event: signedEvent }
+    if (!success) {
+      return { success: false };
     }
 
-    await enableWebLn();
-    await sendPayment(pr);
-
-    return { success: true, event: signEvent };
+    return { success: true, event: signedEvent };
   } catch (reason) {
+    lastZapError = errorMessageFrom(reason) || 'Failed to send zap.';
     console.error('Failed to zap: ', reason);
-    return { sucess: false };
+    return { success: false };
   }
 }
 

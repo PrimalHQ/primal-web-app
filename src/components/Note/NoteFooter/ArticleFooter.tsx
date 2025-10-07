@@ -285,10 +285,23 @@ const ArticleFooter: Component<{
       medZapAnimation.addEventListener('complete', onAnimDone);
 
       try {
-        // @ts-ignore
-        medZapAnimation.seek(0);
-        // @ts-ignore
-        medZapAnimation.play();
+        const player = medZapAnimation as unknown as {
+          seek?: (value: number) => void,
+          stop?: () => void,
+          play?: () => void,
+        };
+
+        if (typeof player.seek === 'function') {
+          player.seek(0);
+        } else if (typeof player.stop === 'function') {
+          player.stop();
+        }
+
+        if (typeof player.play === 'function') {
+          player.play();
+        } else {
+          throw new Error('Zap animation player missing play method');
+        }
       } catch (e) {
         console.warn('Failed to animte zap:', e);
         onAnimDone();

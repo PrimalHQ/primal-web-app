@@ -98,20 +98,86 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
 
   };
 
+  const excludedNotificationStatKeys = new Set([
+    'kind',
+    'pubkey',
+    'created_at',
+    'id',
+    'tags',
+  ]);
+  const excludedNotificationStatKeysTopLevel = new Set([
+    ...excludedNotificationStatKeys,
+    'content',
+  ]);
+
+  const sumNumericValues = (value: unknown, excludedKeys: Set<string>): number => {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+      return value;
+    }
+
+    if (typeof value === 'string') {
+      const parsed = Number(value);
+
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+
+      try {
+        const parsedJson = JSON.parse(value);
+
+        return sumNumericValues(parsedJson, excludedKeys);
+      } catch {
+        return 0;
+      }
+    }
+
+    if (Array.isArray(value)) {
+      return value.reduce((acc, item) => acc + sumNumericValues(item, excludedKeys), 0);
+    }
+
+    if (value && typeof value === 'object') {
+      return Object.entries(value as Record<string, unknown>).reduce((acc, [key, val]) => {
+        if (excludedKeys.has(key)) {
+          return acc;
+        }
+
+        return acc + sumNumericValues(val, excludedKeys);
+      }, 0);
+    }
+
+    return 0;
+  };
+
+  const getNotificationCountTotal = (event: NostrEventContent) => {
+    const topLevelTotal = sumNumericValues(event, excludedNotificationStatKeysTopLevel);
+    if (Number.isFinite(topLevelTotal) && topLevelTotal > 0) {
+      return Math.max(0, Math.trunc(topLevelTotal));
+    }
+
+    const rawContent = (event as { content?: unknown }).content;
+    if (typeof rawContent === 'string') {
+      try {
+        const parsed = JSON.parse(rawContent);
+        const parsedTotal = sumNumericValues(parsed, excludedNotificationStatKeys);
+
+        if (Number.isFinite(parsedTotal)) {
+          return Math.max(0, Math.trunc(parsedTotal));
+        }
+      } catch {
+        // ignore invalid JSON payloads
+      }
+    }
+
+    return 0;
+  };
+
   const resetNotificationCounter = () => updateStore('notificationCount', () => 0);
 
 // SOCKET HANDLERS ------------------------------
 
   const handleNotifStatsEvent = (content: NostrEventContent) => {
     if (content?.kind === Kind.NotificationStats) {
-      const sum = Object.keys(content).reduce((acc, key) => {
-        if (key === 'pubkey' || key == 'kind') {
-          return acc;
-        }
-
-        // @ts-ignore
-        return acc + content[key];
-      }, 0);
+      const sum = getNotificationCountTotal(content);
 
       const downloadCount = calculateDownloadCount();
 
