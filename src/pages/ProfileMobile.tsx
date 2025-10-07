@@ -763,7 +763,7 @@ const ProfileMobile: Component = () => {
               fallback={<div class={styles.bannerPlaceholder}></div>}
             >
               <NoteImage
-                class="profile_image"
+                class="profile_banner_image"
                 src={banner()}
                 altSrc={profile?.userProfile?.banner}
                 onError={imgError}

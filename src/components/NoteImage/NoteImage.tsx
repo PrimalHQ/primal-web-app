@@ -156,6 +156,13 @@ const NoteImage: Component<{
   };
 
   const placeholderStyle = (): JSX.CSSProperties | undefined => {
+    if (props.ignoreRatio) {
+      return {
+        width: '100%',
+        height: '100%',
+      };
+    }
+
     const value = reservedHeight();
     if (!value) return undefined;
 
@@ -166,6 +173,13 @@ const NoteImage: Component<{
   };
 
   const wrapperStyle = (): JSX.CSSProperties | undefined => {
+    if (props.ignoreRatio) {
+      return {
+        width: '100%',
+        height: '100%',
+      };
+    }
+
     const value = reservedHeight();
     if (!value) return undefined;
 
@@ -175,7 +189,13 @@ const NoteImage: Component<{
   };
 
   const imageStyle = (): JSX.CSSProperties | undefined => {
-    if (props.ignoreRatio) return undefined;
+    if (props.ignoreRatio) {
+      return {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+      };
+    }
 
     if (willBeTooBig() && !props.ignoreRatio) {
       return {
