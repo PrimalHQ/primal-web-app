@@ -241,7 +241,8 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                         parent={true}
                         shorten={true}
                         noteType="thread"
-                        onRemove={(id: string) => {
+                        onRemove={(id: string, isRepost?: boolean) => {
+                          if (isRepost) return;
                           threadContext?.actions.removeEvent(id, 'notes');
                         }}
                       />
@@ -267,7 +268,9 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                     note={primaryNote() as PrimalNote}
                     noteType="primary"
                     quoteCount={threadContext?.quoteCount}
-                    onRemove={(id: string) => {
+                    onRemove={(id: string, isRepost?: boolean) => {
+                      if (isRepost) return;
+
                       toast?.sendSuccess('Delete request sent');
                       navigate('/home');
                     }}
@@ -289,7 +292,9 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                         note={note}
                         shorten={true}
                         noteType="thread"
-                        onRemove={(id: string) => {
+                        onRemove={(id: string, isRepost?: boolean) => {
+                          if (isRepost) return;
+
                           threadContext?.actions.removeEvent(id, 'notes');
                         }}
                       />

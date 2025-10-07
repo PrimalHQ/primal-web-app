@@ -10,6 +10,7 @@ import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { encrypt44, signEvent } from "./nostrAPI";
 import { ArticleEdit } from "../pages/ReadsEditor";
 import ExternalLiveEventPreview from "../components/LiveVideo/ExternalLiveEventPreview";
+import { APP_ID } from "../App";
 
 const getLikesStorageKey = () => {
   const key = localStorage.getItem('pubkey') || 'anon';
@@ -996,4 +997,45 @@ export const getHighlights = (pubkey: string, identifier: string, kind: number, 
     subid,
     {cache: ["get_highlights", { pubkey, identifier, kind, user_pubkey }]},
   ]));
+};
+
+export const getMyRepostOfEvent = (event_id: string, pubkey: string | undefined) => {
+  const subId = `find_repost_${APP_ID}`;
+  return new Promise<string | undefined>((resolve) => {
+    if (!pubkey) {
+      resolve(undefined);
+      return;
+    }
+
+    let id = '';
+
+    const unsub = subsTo(subId, {
+      onEvent: (_,event) => {
+        if (event.kind === Kind.Repost) {
+          console.log('content: ', event);
+          id = event.id || '';
+        }
+      },
+      onEose: () => {
+        unsub();
+        console.log('ID: ', id)
+        if (!id || id.length === 0) {
+          resolve(undefined);
+          return;
+        }
+
+        resolve(id);
+      },
+      onNotice: () => {
+        unsub();
+        resolve(undefined);
+      }
+    })
+
+    sendMessage(JSON.stringify([
+      "REQ",
+      subId,
+      {cache: ["find_reposts", { event_id, pubkey }]},
+    ]));
+  })
 };

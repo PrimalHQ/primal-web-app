@@ -1,4 +1,3 @@
-import { nip19 } from "../lib/nTools";
 import { createStore } from "solid-js/store";
 import { getEvents, getThread } from "../lib/feed";
 import {
@@ -10,26 +9,12 @@ import { convertToUser } from "../stores/profile";
 import { Kind } from "../constants";
 import {
   createContext,
-  createEffect,
-  onCleanup,
   useContext
 } from "solid-js";
 import {
-  decompressBlob,
-  isConnected,
-  readData,
-  refreshSocketListeners,
-  removeSocketListeners,
-  socket
-} from "../sockets";
-import {
   ContextChildren,
   FeedPage,
-  NostrEOSE,
-  NostrEvent,
   NostrEventContent,
-  NostrEvents,
-  NostrMediaInfo,
   NostrMentionContent,
   NostrNoteActionsContent,
   NostrNoteContent,
@@ -71,7 +56,7 @@ export type ThreadContextStore = {
     fetchTopZaps: (noteId: string) => void,
     fetchUsers: (pubkeys: string[]) => void,
     insertNote: (note: PrimalNote) => void,
-    removeEvent: (id: string, kind: 'notes') => void,
+    removeEvent: (id: string, kind: 'notes', isRepost?: boolean) => void,
   }
 }
 

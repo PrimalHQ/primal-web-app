@@ -1,6 +1,6 @@
 import { batch, Component, createEffect, createSignal, onMount, Show } from 'solid-js';
 import { MenuItem, PrimalNote, ZapOption } from '../../../types/primal';
-import { sendDeleteEvent, sendRepost, triggerImportEvents } from '../../../lib/notes';
+import { getMyRepostOfEvent, sendDeleteEvent, sendRepost, triggerImportEvents } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
 import { useAccountContext } from '../../../contexts/AccountContext';
@@ -57,32 +57,34 @@ const NoteFooter: Component<{
 
   const size = () => props.size ?? 'normal';
 
-  const repostItem: MenuItem = props.note.post.noteActions.reposted ? {
-    action: () => {
-      app?.actions.openConfirmModal({
-        title: "Delete Repost?",
-        description: "You are about to delete this repost. Are you sure?",
-        confirmLabel: "Yes",
-        abortLabel: "Cancel",
-        onConfirm: () => {
-          doRepostDelete();
-          app.actions.closeConfirmModal();
-        },
-        onAbort: () => {app.actions.closeConfirmModal()},
-      })
-    },
-    warning: true,
-    label: 'Delete Repost',
-    icon: 'feed_repost',
-  } :
-  {
-    action: () => doRepost(),
-    label: 'Repost Note',
-    icon: 'feed_repost',
-  };
+  const repostItem = (): MenuItem => {
+    return props.state.reposted ? {
+      action: () => {
+        app?.actions.openConfirmModal({
+          title: "Delete Repost?",
+          description: "You are about to delete this repost. Are you sure?",
+          confirmLabel: "Yes",
+          abortLabel: "Cancel",
+          onConfirm: () => {
+            doRepostDelete();
+            app.actions.closeConfirmModal();
+          },
+          onAbort: () => {app.actions.closeConfirmModal()},
+        })
+      },
+      warning: true,
+      label: 'Delete Repost',
+      icon: 'feed_repost',
+    } :
+    {
+      action: () => doRepost(),
+      label: 'Repost Note',
+      icon: 'feed_repost',
+    };
+  }
 
-  const repostMenuItems: MenuItem[] = [
-    repostItem,
+  const repostMenuItems = (): MenuItem[] => [
+    repostItem(),
     {
       action: () => doQuote(),
       label: 'Quote Note',
@@ -91,16 +93,25 @@ const NoteFooter: Component<{
   ];
 
   const doRepostDelete = async () => {
-    const user = account?.activeUser;
+    const pubkey = account?.publicKey;
 
     let noteToDelete = props.note.repost;
 
-    if (!user || !noteToDelete) return;
+    if (!pubkey) return;
 
-    const id = noteToDelete.note.id;
+    let id: string | undefined = noteToDelete?.note.id;
+
+
+    if (!id) {
+      id = await getMyRepostOfEvent(props.note.id, pubkey);
+    }
+
+    if (!id) {
+      return;
+    }
 
     const { success, note: deleteEvent } = await sendDeleteEvent(
-      user.pubkey,
+      pubkey,
       id,
       Kind.Repost,
       account.activeRelays,
@@ -114,8 +125,11 @@ const NoteFooter: Component<{
 
     // id of the note to remove from UI
     let removeId = props.note.pubkey === account.publicKey ?
-      noteToDelete.note.noteId :
+      id :
       props.note.noteId;
+
+    props.updateState && props.updateState('reposts', (r) => r - 1);
+    props.updateState && props.updateState('reposted', () => false);
 
     props.onDelete && props.onDelete(removeId, true);
   };
@@ -522,7 +536,7 @@ const NoteFooter: Component<{
           </Show>
           <PrimalMenu
             id={`repost_menu_${props.note.post.id}`}
-            items={repostMenuItems}
+            items={repostMenuItems()}
             position="note_footer"
             orientation={determineOrient()}
             hidden={!props.state.isRepostMenuVisible}
