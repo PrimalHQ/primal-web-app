@@ -32,7 +32,7 @@
       height: 18px;
       padding-right: 6px;
 
-      background-color: var(--text-tertiary-2);
+      background-color: var(--surface-tertiary-2);
       -webkit-mask: url(../../assets/icons/feed_picker.svg) no-repeat 0 0/ 14px 14px;
       mask: url(../../assets/icons/feed_picker.svg) no-repeat 0 0/ 14px 14px;
     }
@@ -87,7 +87,7 @@
   .solid-select-list {
     margin-top: 0;
     padding: 8px;
-    border: solid 1px var(--text-tertiary-2);
+    border: solid 1px var(--surface-tertiary-2);
     border-radius: 4px;
     background-color: var(--background-site);
     right: 0;
@@ -213,7 +213,7 @@
   .solid-select-list {
     margin-top: 0;
     padding: 8px;
-    border: solid 1px var(--text-tertiary-2);
+    border: solid 1px var(--surface-tertiary-2);
     border-radius: 4px;
     background-color: var(--background-site);
     right: 0;

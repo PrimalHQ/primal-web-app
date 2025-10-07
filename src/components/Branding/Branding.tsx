@@ -21,19 +21,22 @@ const Branding: Component<{ small?: boolean, isHome?: boolean }> = (props) => {
 
   return (
     <button
+      type="button"
       class={styles.logoLink}
       onClick={toHomeOrScrollToTop}
+      aria-label={intl.formatMessage(branding)}
+      title={intl.formatMessage(branding)}
     >
       <Show
         when={!props.small}
         fallback={
           <div class={styles.brandingSmall}>
-            <div class={styles.logo} />
+            <div class={styles.logo} aria-hidden="true" />
           </div>
         }
       >
         <div class={styles.branding}>
-          <div class={styles.logoBig} />
+          <div class={styles.logoBig} aria-hidden="true" />
         </div>
       </Show>
     </button>

@@ -12,7 +12,7 @@ import { humanizeNumber } from '../../lib/stats';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import ChatMessage from './ChatMessage';
 import FollowButtonChat from '../FollowButton/FollowButtonChat';
-import { actions as tActions, toastZapProfile } from '../../translations';
+import { actions as tActions, toastZapProfile, ariaLabels as tAria } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import { useToastContext } from '../Toaster/Toaster';
 
@@ -39,6 +39,8 @@ const ChatMessageDetails: Component<{
   let chatMessageDetails: HTMLDivElement | undefined;
 
   const [position, setPosition] = createSignal<number>(0);
+
+  const authorName = () => userName(props.config?.author);
 
   createEffect(() => {
     if (!props.config) return;
@@ -175,33 +177,43 @@ const ChatMessageDetails: Component<{
 
         <div class={styles.controls}>
           <button
+            type="button"
             class={styles.controlMuteButton}
             onClick={doMute}
           >
-            <div class={styles.iconMute}></div>
+            <div class={styles.iconMute} aria-hidden="true"></div>
             { account?.muted.includes(props.config?.message.pubkey || '') ? 'Unmute' : 'Mute'}
           </button>
           <button
+            type="button"
             class={styles.controlButton}
             onClick={() => {
               props.config?.author && app?.actions.openProfileQr(props.config?.author)
             }}
+            aria-label={intl.formatMessage(tAria.liveVideo.openQr, { name: authorName() || 'user' })}
+            title={intl.formatMessage(tAria.liveVideo.openQr, { name: authorName() || 'user' })}
           >
-            <div class={styles.iconQr}></div>
+            <div class={styles.iconQr} aria-hidden="true"></div>
           </button>
           <button
+            type="button"
             class={styles.controlButton}
             onClick={() => {
               app?.actions.openCustomZapModal(customZapInfo())
             }}
+            aria-label={intl.formatMessage(tAria.liveVideo.sendZap, { name: authorName() || 'user' })}
+            title={intl.formatMessage(tAria.liveVideo.sendZap, { name: authorName() || 'user' })}
           >
-            <div class={styles.iconZap}></div>
+            <div class={styles.iconZap} aria-hidden="true"></div>
           </button>
           <button
+            type="button"
             class={styles.controlButton}
             onClick={() => navigate(`/dms/${props.config?.author?.npub || props.config?.message.pubkey || ''}`)}
+            aria-label={intl.formatMessage(tAria.liveVideo.openDm, { name: authorName() || 'user' })}
+            title={intl.formatMessage(tAria.liveVideo.openDm, { name: authorName() || 'user' })}
           >
-            <div class={styles.iconMessages}></div>
+            <div class={styles.iconMessages} aria-hidden="true"></div>
           </button>
           <FollowButtonChat person={props.config?.author} />
         </div>
@@ -213,15 +225,15 @@ const ChatMessageDetails: Component<{
           {renderChatMessage()}
         </div>
         <div class={styles.report}>
-          <button onClick={reportMessage}>
-            <div class={styles.iconReport}>b</div>
+          <button type="button" onClick={reportMessage}>
+            <div class={styles.iconReport} aria-hidden="true">b</div>
             <div>Report message</div>
           </button>
         </div>
       </div>
 
       <div class={styles.footer}>
-        <button class={styles.closeButton} onClick={props.onClose}>
+        <button type="button" class={styles.closeButton} onClick={props.onClose}>
           Close
         </button>
       </div>

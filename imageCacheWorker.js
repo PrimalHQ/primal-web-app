@@ -1,6 +1,8 @@
 const IMAGE_CACHE = 'images-v1';
+const IMAGE_METADATA_CACHE = 'images-metadata-v1';
 
 const DAY = 1000 * 60 * 60 * 24;
+const MAX_IMAGE_AGE = 30 * DAY;
 
 let imageToElementMap = {};
 
@@ -37,38 +39,61 @@ self.addEventListener('activate', event => {
 // Fetch event - intercept image requests
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  const isLocal = url.origin === location.origin;
+  const isImageRequest = event.request.destination === 'image';
 
-  if (event.request.destination === 'image') {
-
-    event.respondWith(
-      caches.open(IMAGE_CACHE).then(cache => {
-        return cache.match(event.request).then(response => {
-          if (response) {
-            return response;
-          }
-
-          if (isLocal) {
-            // Fetch fresh image
-            return fetch(event.request).then(fetchResponse => {
-              cache.put(event.request, fetchResponse.clone());
-              return fetchResponse;
-            }).catch(error => {
-              // console.error('FAILED TO FETCH IMAGE: ', url);
-            });
-          }
-
-
-          return fetch(event.request).then(fetchResponse => {
-            return fetchResponse;
-          }).catch(error => {
-            // console.error('FAILED TO FETCH IMAGE: ', url);
-          });
-        });
-      })
-    );
+  if (!isImageRequest) {
+    return;
   }
+
+  event.respondWith(handleImageRequest(event.request, url));
 });
+
+async function handleImageRequest(request, url) {
+  const cache = await caches.open(IMAGE_CACHE);
+  const metadataCache = await caches.open(IMAGE_METADATA_CACHE);
+
+  const cachedResponse = await cache.match(request);
+
+  if (cachedResponse) {
+    const metadataResponse = await metadataCache.match(new Request(request.url));
+
+    if (metadataResponse) {
+      const timestamp = parseInt(await metadataResponse.text(), 10);
+      if (!Number.isNaN(timestamp) && (Date.now() - timestamp) < MAX_IMAGE_AGE) {
+        return cachedResponse;
+      }
+    }
+  }
+
+  try {
+    const networkResponse = await fetch(request);
+
+    const canCache = networkResponse && (networkResponse.ok || networkResponse.type === 'opaqueredirect' || networkResponse.type === 'opaque');
+
+    if (canCache) {
+      try {
+        await cache.put(request, networkResponse.clone());
+        await metadataCache.put(new Request(request.url), new Response(Date.now().toString()));
+      } catch (error) {
+        if (self.location.hostname === 'localhost') {
+          console.log('Failed to cache image response', url.href, error);
+        }
+      }
+    }
+
+    return networkResponse;
+  } catch (error) {
+    if (self.location.hostname === 'localhost') {
+      console.log('Image fetch failed, falling back to cache if available', url.href, error);
+    }
+
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+
+    throw error;
+  }
+}
 
 self.addEventListener('message', event => {
   if (event.data.type === 'CACHE_AVATAR' && typeof event.data.url === 'string') {

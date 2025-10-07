@@ -9,7 +9,7 @@ import { getBookmarks, sendBookmarks } from '../../lib/profile';
 import { subsTo } from '../../sockets';
 import { PrimalNote } from '../../types/primal';
 import ButtonGhost from '../Buttons/ButtonGhost';
-import { bookmarks as tBookmarks, toast } from '../../translations';
+import { bookmarks as tBookmarks, toast, ariaLabels as tAria } from '../../translations';
 
 import styles from './BookmarkNote.module.scss';
 import { readSecFromStorage, saveBookmarks } from '../../lib/localStore';
@@ -163,6 +163,8 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
 
         }}
         disabled={bookmarkInProgress()}
+        ariaLabel={intl.formatMessage(isBookmarked() ? tAria.bookmarks.remove : tAria.bookmarks.add)}
+        title={intl.formatMessage(isBookmarked() ? tAria.bookmarks.remove : tAria.bookmarks.add)}
       >
         <Show
           when={isBookmarked()}

@@ -12,6 +12,9 @@ const ButtonGhost: Component<{
   disabled?: boolean,
   highlight?: boolean,
   class?: string,
+  ariaLabel?: string,
+  title?: string,
+  ariaPressed?: boolean,
 }> = (props) => {
   return (
     <Button
@@ -19,6 +22,9 @@ const ButtonGhost: Component<{
       class={`${styles.ghost} ${props.highlight ? styles.highlight : ''} ${props.class || ''}`}
       onClick={props.onClick}
       disabled={props.disabled}
+      aria-label={props.ariaLabel}
+      title={props.title}
+      aria-pressed={props.ariaPressed}
     >
       {props.children}
     </Button>

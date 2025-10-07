@@ -436,7 +436,7 @@
     .ellipsisIcon {
       width: 11px;
       height: 14px;
-      background-color: var(--text-tertiary);
+      background-color: var(--surface-tertiary);
       -webkit-mask: url(../../assets/icons/ellipsis.svg) no-repeat center;
       mask: url(../../assets/icons/ellipsis.svg) no-repeat center;
     }
@@ -469,7 +469,7 @@
 .repostIcon {
   width: 16px;
   height: 16px;
-  background-color: var(--text-tertiary);
+  background-color: var(--surface-tertiary);
   -webkit-mask: url(../../assets/icons/feed_repost.svg) no-repeat 0 / 100%;
   mask: url(../../assets/icons/feed_repost.svg) no-repeat 0 / 100%;
 }
@@ -513,7 +513,7 @@
   .contextIcon {
     width: 16px;
     height: 14px;
-    background-color: var(--text-tertiary);
+    background-color: var(--surface-tertiary);
     -webkit-mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
     mask: url(../../assets/icons/context.svg) no-repeat 0 / 100%;
   }
@@ -1284,7 +1284,7 @@
     line-height: 14px;
 
     &:hover {
-      background-color: var(--text-tertiary-2);
+      background-color: var(--surface-tertiary-2);
     }
   }
 }

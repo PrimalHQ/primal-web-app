@@ -100,7 +100,7 @@
         height: 20px;
         display: inline-block;
         margin: 0px 0px;
-        background-color: var(--text-tertiary-2);
+        background-color: var(--surface-tertiary-2);
         -webkit-mask: url(../../assets/icons/delete.svg) no-repeat 0px / 20px;
         mask: url(../../assets/icons/delete.svg) no-repeat 0px / 20px;
       }
@@ -110,7 +110,7 @@
         height: 20px;
         display: inline-block;
         margin: 0px 0px;
-        background-color: var(--text-tertiary-2);
+        background-color: var(--surface-tertiary-2);
         -webkit-mask: url(../../assets/icons/edit.svg) no-repeat 0px / 20px;
         mask: url(../../assets/icons/edit.svg) no-repeat 0px / 20px;
       }
@@ -168,7 +168,7 @@
   height: 36px;
   display: inline-block;
   margin: 0px 0px;
-  background-color: var(--text-tertiary-2);
+  background-color: var(--surface-tertiary-2);
   -webkit-mask: url(../../assets/icons/hamburger.svg) no-repeat center;
   mask: url(../../assets/icons/hamburger.svg) no-repeat center;
 }

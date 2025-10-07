@@ -40,7 +40,7 @@
         height: 4px;
         margin-inline: 6px;
         border-radius: 2px;
-        background-color: var(--text-tertiary-2);
+        background-color: var(--surface-tertiary-2);
       }
       .lastMessageTime {
         color: var(--text-tertiary-2);
@@ -419,7 +419,7 @@
     align-items: center;
 
     &:hover, &.highlight {
-      background-color: var(--text-tertiary-2);
+      background-color: var(--surface-tertiary-2);
     }
 
     &:focus {

@@ -12,7 +12,7 @@ import { canUserReceiveZaps, lastZapError, zapNote } from '../../../lib/zap';
 import { useSettingsContext } from '../../../contexts/SettingsContext';
 
 import zapMD from '../../../assets/lottie/zap_md_2.json';
-import { toast as t } from '../../../translations';
+import { toast as t, ariaLabels as tAria } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { hookForDev } from '../../../lib/devTools';
 import { getScreenCordinates, isPhone } from '../../../utils';
@@ -420,6 +420,7 @@ const NoteFooter: Component<{
         title={props.state.replies.toLocaleString()}
         large={props.large}
         noteType={props.noteType}
+        ariaLabel={intl.formatMessage(tAria.noteFooter.reply)}
       />
 
       <NoteFooterActionButton
@@ -436,6 +437,7 @@ const NoteFooter: Component<{
         title={props.state.satsZapped.toLocaleString()}
         large={props.large}
         noteType={props.noteType}
+        ariaLabel={intl.formatMessage(tAria.noteFooter.zap)}
       />
 
       <NoteFooterActionButton
@@ -447,6 +449,7 @@ const NoteFooter: Component<{
         title={props.state.likes.toLocaleString()}
         large={props.large}
         noteType={props.noteType}
+        ariaLabel={intl.formatMessage(tAria.noteFooter.like)}
       />
 
       <button
@@ -454,6 +457,8 @@ const NoteFooter: Component<{
         class={`${styles.stat} ${props.state.reposted ? styles.highlighted : ''}`}
         onClick={showRepostMenu}
         title={props.state.reposts.toLocaleString()}
+        type="button"
+        aria-label={intl.formatMessage(tAria.noteFooter.repost)}
       >
         <div
           class={`${buttonTypeClasses.repost}`}
@@ -462,6 +467,7 @@ const NoteFooter: Component<{
           <div
             class={`${styles.icon} ${props.large ? styles.large : ''}`}
             style={'visibility: visible'}
+            aria-hidden="true"
           ></div>
           <Show when={!isPhone() || props.noteType !== 'primary'}>
             <div class={styles.statNumber}>

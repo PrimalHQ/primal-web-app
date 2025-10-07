@@ -50,7 +50,7 @@
   .copyIcon {
     width: 16px;
     height: 16px;
-    background-color: var(--text-tertiary-2);
+    background-color: var(--surface-tertiary-2);
     -webkit-mask: url(../../assets/icons/copy.svg) no-repeat 0 / 100%;
     mask: url(../../assets/icons/copy.svg) no-repeat 0 / 100%;
 
@@ -115,7 +115,7 @@
   &.dark {
     color: var(--text-tertiary-2);
     .copyIcon {
-      background-color: var(--text-tertiary-2) !important;
+      background-color: var(--surface-tertiary-2) !important;
     }
   }
 
@@ -303,7 +303,7 @@
   border: 1px solid var(--subtile-devider);
 
   &:hover {
-    border: 1px solid var(--text-tertiary);
+    border: 1px solid var(--surface-tertiary);
   }
 }
 

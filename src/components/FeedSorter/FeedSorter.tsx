@@ -1,4 +1,5 @@
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { useIntl } from '@cookbook/solid-intl';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { FeedType } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
@@ -6,6 +7,7 @@ import { PrimalArticleFeed } from '../../types/primal';
 import CheckBox2 from '../Checkbox/CheckBox';
 
 import styles from './FeedSorter.module.scss';
+import { ariaLabels as tAria } from '../../translations';
 
 const lockedFeeds = ['primal'];
 
@@ -26,6 +28,7 @@ const FeedSorter: Component<{
 
   let sorter: any;
   const account = useAccountContext();
+  const intl = useIntl();
 
   const [editMode, setEditMode] = createSignal('');
 
@@ -155,25 +158,34 @@ const FeedSorter: Component<{
 
                           <Show when={!isLockedFeed(feed)}>
                             <button
+                              type="button"
                               class={styles.mngButton}
                               onClick={() => editFeed(feed)}
                               disabled={isLockedFeed(feed)}
+                              aria-label={intl.formatMessage(tAria.feedSorter.rename, { name: feed.name })}
+                              title={intl.formatMessage(tAria.feedSorter.rename, { name: feed.name })}
                             >
-                              <div class={styles.editButton}></div>
+                              <div class={styles.editButton} aria-hidden="true"></div>
                             </button>
                             <button
+                              type="button"
                               class={styles.mngButton}
                               onClick={() => removeFeed(feed)}
                               disabled={isLockedFeed(feed)}
+                              aria-label={intl.formatMessage(tAria.feedSorter.remove, { name: feed.name })}
+                              title={intl.formatMessage(tAria.feedSorter.remove, { name: feed.name })}
                             >
-                              <div class={styles.deleteButton}></div>
+                              <div class={styles.deleteButton} aria-hidden="true"></div>
                             </button>
                           </Show>
                           <button
+                            type="button"
                             class={styles.sortButton}
                             onClick={() => {}}
+                            aria-label={intl.formatMessage(tAria.feedSorter.reorder, { name: feed.name })}
+                            title={intl.formatMessage(tAria.feedSorter.reorder, { name: feed.name })}
                           >
-                            <div class={styles.dragIcon}></div>
+                            <div class={styles.dragIcon} aria-hidden="true"></div>
                           </button>
                         </div>
                       </div>
@@ -200,16 +212,20 @@ const FeedSorter: Component<{
                   />
                   <div class={styles.feedEditControl}>
                     <button
+                      type="button"
                       onClick={() => updateFeedName(feed)}
-                      title="Update"
+                      aria-label={intl.formatMessage(tAria.feedSorter.save, { name: feed.name })}
+                      title={intl.formatMessage(tAria.feedSorter.save, { name: feed.name })}
                     >
-                      <div class={styles.checkIcon}></div>
+                      <div class={styles.checkIcon} aria-hidden="true"></div>
                     </button>
                     <button
+                      type="button"
                       onClick={() => {setEditMode('')}}
-                      title="Cancel"
+                      aria-label={intl.formatMessage(tAria.feedSorter.cancel, { name: feed.name })}
+                      title={intl.formatMessage(tAria.feedSorter.cancel, { name: feed.name })}
                     >
-                      <div class={styles.closeIcon}></div>
+                      <div class={styles.closeIcon} aria-hidden="true"></div>
                     </button>
                   </div>
                 </div>

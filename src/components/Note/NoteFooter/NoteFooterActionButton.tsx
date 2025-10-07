@@ -1,4 +1,4 @@
-import { Component, Show, createEffect, onCleanup } from 'solid-js';
+import { Component, Show } from 'solid-js';
 import { PrimalNote } from '../../../types/primal';
 
 import styles from './NoteFooter.module.scss';
@@ -26,6 +26,7 @@ const NoteFooterActionButton: Component<{
   title?: string,
   large?: boolean,
   noteType?: 'primary',
+  ariaLabel?: string,
 }> = (props) => {
 
   return (
@@ -38,11 +39,15 @@ const NoteFooterActionButton: Component<{
       onTouchStart={props.onTouchStart ?? (() => {})}
       onTouchEnd={props.onTouchEnd ?? (() => {})}
       disabled={props.disabled}
+      type="button"
+      aria-label={props.ariaLabel}
+      title={props.title}
     >
       <div class={`${buttonTypeClasses[props.type]} ${props.large ? styles.large : ''}`}>
         <div
           class={`${styles.icon} ${props.large ? styles.large : ''}`}
           style={props.hidden ? 'visibility: hidden': 'visibility: visible'}
+          aria-hidden="true"
         ></div>
         <Show when={!(isPhone() && props.noteType === 'primary')}>
           <div class={styles.statNumber}>{props.label || ''}</div>
