@@ -5,10 +5,12 @@ import {
   createSignal,
   For,
   Match,
+  on,
   onCleanup,
   onMount,
   Show,
-  Switch
+  Switch,
+  untrack,
 } from 'solid-js';
 import Note from '../components/Note/Note';
 import styles from './Home.module.scss';
@@ -146,27 +148,38 @@ const Home: Component = () => {
     syncVisibleNotesWithContent();
   });
 
-  createEffect(() => {
-    if ((context?.futureNotes.length || 0) > 99 || app?.isInactive) {
-      clearInterval(checkNewNotesTimer);
-      return;
-    }
+  let lastSpec: string | undefined;
 
-    const spec = context?.selectedFeed?.spec || '';
+  createEffect(on(
+    () => [context?.selectedFeed?.spec, app?.isInactive],
+    ([spec, isInactive]) => {
+      const futureCount = untrack(() => context?.futureNotes.length || 0);
 
-    if (checkNewNotesTimer) {
-      clearInterval(checkNewNotesTimer);
-      setHasNewPosts(false);
-      setNewNotesCount(0);
-      setNewPostAuthors(() => []);
-    }
+      if (futureCount > 99 || isInactive) {
+        clearInterval(checkNewNotesTimer);
+        return;
+      }
 
-    const timeout = 25_000 + Math.random() * 10_000;
+      if (checkNewNotesTimer) {
+        clearInterval(checkNewNotesTimer);
 
-    checkNewNotesTimer = setInterval(() => {
-      context?.actions.checkForNewNotes(spec);
-    }, timeout);
-  });
+        if (lastSpec !== spec) {
+          setHasNewPosts(false);
+          setNewNotesCount(0);
+          setNewPostAuthors(() => []);
+        }
+      }
+
+      lastSpec = spec;
+
+      const timeout = 25_000 + Math.random() * 10_000;
+
+      checkNewNotesTimer = setInterval(() => {
+        context?.actions.checkForNewNotes(spec || '');
+      }, timeout);
+    },
+    { defer: true }
+  ));
 
   createEffect(() => {
     const count = context?.futureNotes.length || 0;
