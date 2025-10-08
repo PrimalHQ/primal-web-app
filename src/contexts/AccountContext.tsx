@@ -1381,7 +1381,7 @@ export function AccountProvider(props: { children: JSXElement }) {
           content.created_at &&
           content.created_at > store.followingSince
         ) {
-          updateMuted(content as NostrMutedContent);
+          updateStreamMuted(content as NostrMutedContent);
         }
       },
       onEose: async () => {
@@ -1400,7 +1400,7 @@ export function AccountProvider(props: { children: JSXElement }) {
           updateStore('streamMuted', () => muted);
           updateStore('streamMutedTags', () => tags);
           updateStore('streamMutedSince', () => date);
-          saveMuted(store.publicKey, muted, date);
+          saveStreamMuted(store.publicKey, muted, date);
           note && triggerImportEvents([note], `import_mute_list_remove_${APP_ID}`);
         }
 
