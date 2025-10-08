@@ -106,10 +106,22 @@ const NoteVideo: Component<{
     return true;
   }
 
+  const videoStyle = () => {
+    let s = 'width: 100%;'
+    if (props.width) {
+      s = `width: ${props.width}px;`;
+    }
+
+    if (props.height) {
+      s += `height: ${props.height}px;`;
+    }
+    return s;
+  }
+
   return (
     <div
       class={`${styles.noteVideo} ${props.class}`}
-      style={`width: ${props.width || 640}px; height: ${props.height}px;`}
+      style={videoStyle()}
     >
       <Switch
         fallback={<div class={styles.videoPlaceholder}></div>}
