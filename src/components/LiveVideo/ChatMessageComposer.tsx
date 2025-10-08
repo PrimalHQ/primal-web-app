@@ -17,6 +17,7 @@ import { DirectMessage, PrimalUser } from '../../types/primal';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useProfileContext } from '../../contexts/ProfileContext';
 import SearchOption from '../Search/SearchOption';
+import DOMPurify from 'dompurify';
 import {
   placeholders,
   messages as tMessages,
@@ -89,7 +90,7 @@ const ChatMessageComposer: Component<{
   };
 
   const onInput = () => {
-    newMessageInput && setMessage(newMessageInput.value);
+    newMessageInput && setMessage(DOMPurify.sanitize(newMessageInput.value));
   }
 
   const getScrollHeight = (elm: AutoSizedTextArea) => {
@@ -430,7 +431,7 @@ const ChatMessageComposer: Component<{
 
   createEffect(() => {
     if (query().length === 0) {
-      search?.actions.getRecomendedUsers();
+      search?.actions.getRecomendedUsers(profile?.profileHistory.profiles || []);
       return;
     }
 
@@ -510,6 +511,8 @@ const ChatMessageComposer: Component<{
       return;
     }
 
+    profile?.actions.addProfileToHistory(user);
+
     setMentioning(false);
 
     const name = userName(user);
@@ -543,8 +546,6 @@ const ChatMessageComposer: Component<{
     // Dispatch input event to recalculate UI position
     const e = new Event('input', { bubbles: true, cancelable: true});
     newMessageInput.dispatchEvent(e);
-
-    profile?.actions.addProfileToHistory(user);
   };
 
   const msgHasInvoice = (msg: DirectMessage) => {

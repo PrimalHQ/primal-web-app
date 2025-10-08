@@ -973,6 +973,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       list.splice(index, 1);
 
       updateStore('profileHistory', 'profiles', () => [user, ...list]);
+      saveRecomendedUsers(account?.publicKey, { ...store.profileHistory });
 
       return;
     }
@@ -987,15 +988,22 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       delete stats[last];
 
       updateStore('profileHistory', 'stats', reconcile(stats));
+      saveRecomendedUsers(account?.publicKey, { ...store.profileHistory });
 
       list.pop()
     }
 
     updateStore('profileHistory', 'profiles', () => [...list]);
+    saveRecomendedUsers(account?.publicKey, { ...store.profileHistory });
+
+    if (user.userStats) {
+      addStatsToHistory(user.userStats);
+    }
   };
 
   const addStatsToHistory = (stats: UserStats) => {
     updateStore('profileHistory', 'stats', () => ({ [stats.pubkey]: stats }));
+    saveRecomendedUsers(account?.publicKey, { ...store.profileHistory });
   };
 
 // SOCKET HANDLERS ------------------------------
@@ -1069,12 +1077,12 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     }
   });
 
-  createEffect(() => {
-    const profiles = [...store.profileHistory.profiles];
-    const stats = { ...store.profileHistory.stats };
+  // createEffect(() => {
+  //   const profiles = [...store.profileHistory.profiles];
+  //   const stats = { ...store.profileHistory.stats };
 
-    saveRecomendedUsers(account?.publicKey, { profiles, stats });
-  });
+  //   saveRecomendedUsers(account?.publicKey, { profiles, stats });
+  // });
 
   // createEffect(() => {
   //   if (store.isProfileFetched) {

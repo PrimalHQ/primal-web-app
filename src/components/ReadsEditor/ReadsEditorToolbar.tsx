@@ -12,6 +12,7 @@ import ReadsEditorTableSelector from './ReadsEditorTableSelector';
 import ReadsEditorBubbleMenu from './ReadsEditorBubbleMenu';
 import ReadsImageDialog from '../ReadsMentionDialog/ReadsImageDialog';
 import { insertContent } from '@tiptap/core/dist/commands';
+import { useProfileContext } from '../../contexts/ProfileContext';
 
 export type FormatControls = {
   isBoldActive: boolean,
@@ -35,6 +36,8 @@ const ReadsEditorToolbar: Component<{
   toggleEditorMode: () => void,
   fixed?: boolean,
 }> = (props) => {
+
+  const profile = useProfileContext();
 
   let contentFileUpload: HTMLInputElement | undefined;
 
@@ -299,6 +302,8 @@ const ReadsEditorToolbar: Component<{
     }
 
     const nprofile = nip19.nprofileEncode(pInfo);
+
+    profile?.actions.addProfileToHistory(user);
 
     editor
       .chain()
