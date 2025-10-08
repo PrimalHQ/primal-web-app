@@ -13,7 +13,7 @@ import { createStore } from 'solid-js/store';
 import { getCaretCoordinates } from '../../lib/textArea';
 import { debounce, isVisibleInContainer, uuidv4 } from '../../utils';
 import emojiSearch from '@jukben/emoji-search';
-import { DirectMessage, PrimalUser } from '../../types/primal';
+import { DirectMessage, PrimalUser, UserStats } from '../../types/primal';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useProfileContext } from '../../contexts/ProfileContext';
 import SearchOption from '../Search/SearchOption';
@@ -511,7 +511,20 @@ const ChatMessageComposer: Component<{
       return;
     }
 
-    profile?.actions.addProfileToHistory(user);
+    let stats: UserStats = {
+      pubkey: user.pubkey,
+      follows_count: user.userStats?.follows_count || 0,
+      followers_count: user.userStats?.followers_count || search?.scores[user.pubkey] || 0,
+      note_count: user.userStats?.note_count || 0,
+      reply_count: user.userStats?.reply_count || 0,
+      time_joined: user.userStats?.time_joined || 0,
+      total_zap_count: user.userStats?.total_zap_count || 0,
+      total_satszapped: user.userStats?.total_satszapped || 0,
+      relay_count: user.userStats?.relay_count || 0,
+      media_count: user.userStats?.media_count || 0,
+    };
+
+    profile?.actions.addProfileToHistory({...user, userStats: stats });
 
     setMentioning(false);
 

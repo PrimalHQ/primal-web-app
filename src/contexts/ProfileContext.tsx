@@ -975,6 +975,9 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('profileHistory', 'profiles', () => [user, ...list]);
       saveRecomendedUsers(account?.publicKey, { ...store.profileHistory });
 
+      if (user.userStats) {
+        addStatsToHistory(user.userStats);
+      }
       return;
     }
 
