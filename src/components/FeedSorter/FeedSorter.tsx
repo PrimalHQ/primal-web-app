@@ -34,6 +34,8 @@ const FeedSorter: Component<{
 
   const [newName, setNewName] = createSignal('');
 
+  const [statusMessage, setStatusMessage] = createSignal('');
+
   const constructId = (feed: PrimalArticleFeed) => {
     return feed.spec;
   }
@@ -54,6 +56,24 @@ const FeedSorter: Component<{
     props.actions.rename && props.actions.rename(feed, newName(), props.feedType);
     setEditMode('');
   }
+
+  const moveItemUp = (index: number) => {
+    if (index > 0) {
+      props.actions.move && props.actions.move(index, index - 1, props.feedType);
+      const feed = props.feeds[index];
+      setStatusMessage(intl.formatMessage(tAria.feedSorter.movedUp, { name: feed.name }));
+      setTimeout(() => setStatusMessage(''), 1000);
+    }
+  };
+
+  const moveItemDown = (index: number) => {
+    if (index < props.feeds.length - 1) {
+      props.actions.move && props.actions.move(index, index + 1, props.feedType);
+      const feed = props.feeds[index];
+      setStatusMessage(intl.formatMessage(tAria.feedSorter.movedDown, { name: feed.name }));
+      setTimeout(() => setStatusMessage(''), 1000);
+    }
+  };
 
   const sortList = (target: any) => {
     // Get all items
@@ -130,10 +150,29 @@ const FeedSorter: Component<{
 
   return (
     <div id={props.id} class={styles.feedSorter} ref={sorter}>
+      <div class="sr-only" aria-live="polite" aria-atomic="true">
+        {statusMessage()}
+      </div>
       <Show when={props.feeds.length > 0}>
         <For each={props.feeds}>
           {(feed, index) => (
-            <div class={styles.feedItem} data-value={feed.spec} data-index={index()}>
+            <div
+              class={styles.feedItem}
+              data-value={feed.spec}
+              data-index={index()}
+              role="listitem"
+              tabIndex={0}
+              onKeyDown={(e: KeyboardEvent) => {
+                if (e.ctrlKey && e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  moveItemUp(index());
+                }
+                if (e.ctrlKey && e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  moveItemDown(index());
+                }
+              }}
+            >
               <Show
                 when={editMode() === constructId(feed)}
                 fallback={
@@ -198,6 +237,7 @@ const FeedSorter: Component<{
                     id={`input_${constructId(feed)}`}
                     class={styles.feedNameInput}
                     value={newName()}
+                    aria-label={intl.formatMessage(tAria.feedSorter.inputLabel, { name: feed.name })}
                     // @ts-ignore
                     onInput={(e: InputEvent) => setNewName(() => e.target?.value)}
                     onKeyUp={(e: KeyboardEvent) => {

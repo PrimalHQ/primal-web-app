@@ -1,6 +1,8 @@
 import { A, useLocation } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
+import { useIntl } from '@cookbook/solid-intl';
+import { ariaLabels as tAria } from '../../translations';
 
 import styles from './NavLink.module.scss';
 
@@ -34,6 +36,7 @@ const NavLink: Component<{
   isPhone?: boolean,
 }> = (props) => {
   const location = useLocation();
+  const intl = useIntl();
 
   const scrollIfInactive = (e: Event) => {
     if (props.to === location.pathname) {
@@ -72,8 +75,15 @@ const NavLink: Component<{
           </Show>
         </A>
         <Show when={props.bubble && props.bubble() > 0}>
-          <div class={`${styles.bubble} ${bubbleClass()}`}>
-            <div>{props.bubble && props.bubble() < 100 ? props.bubble() : '99+'}</div>
+          <div
+            class={`${styles.bubble} ${bubbleClass()}`}
+            role="status"
+            aria-label={intl.formatMessage(tAria.navLink.unreadCount, {
+              section: props.label || 'Section',
+              count: props.bubble?.() || 0
+            })}
+          >
+            <div aria-hidden="true">{props.bubble && props.bubble() < 100 ? props.bubble() : '99+'}</div>
           </div>
         </Show>
       </div>

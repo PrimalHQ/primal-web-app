@@ -11,6 +11,7 @@ import styles from './Avatar.module.scss';
 import { useAppContext } from '../../contexts/AppContext';
 import { LegendCustomizationConfig } from '../../lib/premium';
 import { useSearchParams } from '@solidjs/router';
+import { userName } from '../../stores/profile';
 
 const isClient = typeof window !== 'undefined';
 
@@ -306,7 +307,13 @@ const Avatar: Component<{
       >
         <div class={`${styles.missingBack} ${notCachedFlag()}`}>
           <Show when={props.zoomable} fallback={
-            <img src={imageSrc()} alt={props.alt || 'avatar'} onerror={imgError} loading="lazy" decoding="async"/>
+            <img
+              src={imageSrc()}
+              alt={props.alt || (props.user ? `${userName(props.user)}'s avatar` : 'avatar')}
+              onerror={imgError}
+              loading="lazy"
+              decoding="async"
+            />
           }>
             <NoteImage
               class={props.zoomable ? 'profile_image' : ''}
@@ -318,7 +325,7 @@ const Avatar: Component<{
               ignoreRatio={true}
               authorPk={props.user?.pubkey}
               loading="lazy"
-              alt={props.alt || 'avatar'}
+              alt={props.alt || (props.user ? `${userName(props.user)}'s avatar` : 'avatar')}
             />
           </Show>
         </div>

@@ -8,7 +8,7 @@ import SmallCallToAction from '../SmallCallToAction/SmallCallToAction';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { useSettingsContext } from '../../contexts/SettingsContext';
-import { placeholders as t, actions as tActions, feedNewPosts } from '../../translations';
+import { placeholders as t, actions as tActions, feedNewPosts, ariaLabels as tAria } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import CreateAccountModal from '../CreateAccountModal/CreateAccountModal';
@@ -104,7 +104,11 @@ const HomeHeader: Component< {
           </Show>
         }
       >
-        <button class={styles.callToAction} onClick={onShowNewNoteinput}>
+        <button
+          class={styles.callToAction}
+          onClick={onShowNewNoteinput}
+          aria-label={intl.formatMessage(tAria.homeHeader.newNote)}
+        >
           <Avatar
             user={activeUser()}
             size="vs"
@@ -125,6 +129,7 @@ const HomeHeader: Component< {
           <button
             class={styles.newContentItem}
             onClick={props.loadNewContent}
+            aria-label={intl.formatMessage(tAria.homeHeader.loadNewPosts, { count: props.newPostCount() })}
           >
             <div class={styles.counter}>
               {intl.formatMessage(
@@ -169,12 +174,18 @@ const HomeHeader: Component< {
         </div>
 
 
+      <div aria-live="polite" aria-atomic="true" class="sr-only">
+        {props.hasNewPosts() &&
+          intl.formatMessage(tAria.homeHeader.newPostsAvailable, { count: props.newPostCount() })
+        }
+      </div>
       <Show when={
         props.hasNewPosts() && !account?.showNewNoteForm
       }>
         <div class={styles.newContentNotification}>
           <button
             onClick={props.loadNewContent}
+            aria-label={intl.formatMessage(tAria.homeHeader.loadNewPosts, { count: props.newPostCount() })}
           >
             <div class={styles.avatars}>
               <For each={props.newPostAuthors}>

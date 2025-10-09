@@ -56,7 +56,7 @@ import NoteImage from '../NoteImage/NoteImage';
 import { createStore, unwrap } from 'solid-js/store';
 import { addrRegex, hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, primalUserRegex, profileRegex, shortMentionInWords, shortNoteChars, shortNoteWords, specialCharsRegex, urlExtractRegex, userMentionUrlRegex } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
-import { actions } from '../../translations';
+import { actions, ariaLabels as tAria } from '../../translations';
 
 import type PhotoSwipeLightbox from 'photoswipe/lightbox';
 import { logError } from '../../lib/logger';
@@ -795,8 +795,10 @@ const ParsedNote: Component<{
           loop={true}
           playsinline={true}
           data-ratio={`${ratio}`}
+          aria-label={intl.formatMessage(tAria.embeddedMedia.video)}
         >
           <source src={token} type={item.meta?.videoType} />
+          {intl.formatMessage(tAria.embeddedMedia.videoNotSupported)}
         </video>;
 
         video.addEventListener('click', (e: MouseEvent) => {
@@ -857,6 +859,7 @@ const ParsedNote: Component<{
           src={convertedUrl}
           width="100%"
           height="352"
+          title="Spotify player"
           // @ts-ignore no property
           frameBorder="0"
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
@@ -884,6 +887,7 @@ const ParsedNote: Component<{
         return <iframe
           class={`embeddedContent ${lastClass}`}
           src={`https://player.twitch.tv/${args}`}
+          title={`Twitch stream for ${channel}`}
           // @ts-ignore no property
           className="w-max"
           allowFullScreen
@@ -934,6 +938,7 @@ const ParsedNote: Component<{
           class={`embeddedContent ${lastClass}`}
           width="100%"
           height="166"
+          title="SoundCloud player"
           // @ts-ignore no property
           scrolling="no"
           allow="autoplay"
@@ -960,6 +965,7 @@ const ParsedNote: Component<{
         return <iframe
           class={`embeddedContent ${lastClass}`}
           allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+          title="Apple Music player"
           // @ts-ignore no property
           frameBorder="0"
           height={`${isSongLink ? 175 : 450}`}
@@ -1940,7 +1946,7 @@ const ParsedNote: Component<{
         const image = tag[2];
 
         return image ?
-          <span><img height={15} width={15} src={image} alt={`emoji: ${emoji}`} loading="lazy" decoding="async" /></span> :
+          <span><img height={15} width={15} src={image} alt={emoji} role="img" aria-label={`${emoji} emoji`} loading="lazy" decoding="async" /></span> :
           <>{token}</>;
       }}
     </For>

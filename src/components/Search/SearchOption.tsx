@@ -35,13 +35,14 @@ const SearchOption: Component<{
       <Show
         when={props.href}
         fallback={
-          <div
+          <button
             id={props.id}
+            type="button"
             class={klass()}
             onClick={props.onClick}
           >
             {prp.children}
-          </div>
+          </button>
         }
       >
         <A

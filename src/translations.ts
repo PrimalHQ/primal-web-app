@@ -2518,6 +2518,42 @@ export const bookmarks = {
 }
 
 export const ariaLabels = {
+  homeHeader: {
+    newNote: {
+      id: 'aria.homeHeader.newNote',
+      defaultMessage: 'Create a new note',
+      description: 'Accessible label for new note button',
+    },
+    loadNewPosts: {
+      id: 'aria.homeHeader.loadNewPosts',
+      defaultMessage: 'Load {count, plural, one {# new post} other {# new posts}}',
+      description: 'Accessible label for loading new posts',
+    },
+    newPostsAvailable: {
+      id: 'aria.homeHeader.newPostsAvailable',
+      defaultMessage: '{count, plural, one {# new post} other {# new posts}} available',
+      description: 'Status message for new posts availability',
+    },
+  },
+  embeddedMedia: {
+    video: {
+      id: 'aria.embeddedMedia.video',
+      defaultMessage: 'Embedded video',
+      description: 'Accessible label for embedded video',
+    },
+    videoNotSupported: {
+      id: 'aria.embeddedMedia.videoNotSupported',
+      defaultMessage: 'Your browser does not support the video tag.',
+      description: 'Message shown when video is not supported',
+    },
+  },
+  navLink: {
+    unreadCount: {
+      id: 'aria.navLink.unreadCount',
+      defaultMessage: '{section}: {count, plural, one {# unread item} other {# unread items}}',
+      description: 'Accessible label for navigation badge showing unread count',
+    },
+  },
   feedSorter: {
     rename: {
       id: 'aria.feedSorter.rename',
@@ -2531,7 +2567,7 @@ export const ariaLabels = {
     },
     reorder: {
       id: 'aria.feedSorter.reorder',
-      defaultMessage: 'Drag to reorder {name} feed',
+      defaultMessage: 'Drag to reorder {name} feed. Press Ctrl+Up or Ctrl+Down to reorder with keyboard.',
       description: 'Accessible label for feed drag handle',
     },
     save: {
@@ -2543,6 +2579,21 @@ export const ariaLabels = {
       id: 'aria.feedSorter.cancel',
       defaultMessage: 'Cancel renaming {name} feed',
       description: 'Accessible label for cancelling feed rename',
+    },
+    inputLabel: {
+      id: 'aria.feedSorter.inputLabel',
+      defaultMessage: 'New name for {name} feed',
+      description: 'Accessible label for feed rename input',
+    },
+    movedUp: {
+      id: 'aria.feedSorter.movedUp',
+      defaultMessage: '{name} feed moved up',
+      description: 'Status message when feed is moved up',
+    },
+    movedDown: {
+      id: 'aria.feedSorter.movedDown',
+      defaultMessage: '{name} feed moved down',
+      description: 'Status message when feed is moved down',
     },
   },
   pageNav: {
