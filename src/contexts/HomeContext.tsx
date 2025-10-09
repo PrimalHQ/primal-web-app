@@ -211,8 +211,17 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    updateStore('notes', (notes) => [...store.futureNotes, ...notes]);
-    clearFuture();
+    // Use batch to ensure atomic update - clear future before any effects can run
+    batch(() => {
+      const futureCopy = [...store.futureNotes];
+      updateStore('futureNotes', () => []);
+      updateStore('paging', 'future', () => ({
+        since: 0,
+        until: 0,
+        sortBy: 'created_at',
+      }));
+      updateStore('notes', (notes) => [...futureCopy, ...notes]);
+    });
   };
 
   const fetchNotes = async (spec: string, until = 0, includeIsFetching = true) => {

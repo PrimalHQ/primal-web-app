@@ -1319,9 +1319,13 @@ const Notifications: Component = () => {
   }
 
   const loadNewContent = () => {
-    copyNewNotifsToOld();
+    // Use batch to ensure atomic updates - prevents race condition where
+    // indicator stays visible because counter reset and content clear happen separately
+    batch(() => {
+      copyNewNotifsToOld();
+      notifications?.actions.resetNotificationCounter();
+    });
 
-    notifications?.actions.resetNotificationCounter();
     setLastSeen(`notif_sls_${APP_ID}`, timeNow());
 
     if (notificationGroup() !== 'all') {

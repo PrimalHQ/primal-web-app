@@ -9,6 +9,7 @@ import styles from './NavLink.module.scss';
 const prefetchedRoutes = new Set<string>();
 
 const routePrefetchers: Record<string, () => Promise<unknown>> = {
+  '/reads': () => import('../../pages/Reads'),
   '/dms': () => import('../../pages/DirectMessages'),
   '/bookmarks': () => import('../../pages/Bookmarks'),
   '/notifications': () => import('../../pages/Notifications'),

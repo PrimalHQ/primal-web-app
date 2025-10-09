@@ -183,8 +183,15 @@ const Home: Component = () => {
 
   createEffect(() => {
     const count = context?.futureNotes.length || 0;
+
+    // Reset indicator when there are no future notes
     if (count === 0) {
-      return
+      if (hasNewPosts()) {
+        setHasNewPosts(false);
+        setNewNotesCount(0);
+        setNewPostAuthors(() => []);
+      }
+      return;
     }
 
     if (!hasNewPosts()) {
@@ -284,14 +291,14 @@ const Home: Component = () => {
   const loadNewContent = () => {
     if (newNotesCount() > 100 || app?.appState === 'waking') {
       context?.actions.getFirstPage();
+      // State will be cleared by the effect watching futureNotes
       return;
     }
 
+    // Load content - the batched update in loadFutureContent will clear futureNotes
+    // which will trigger the effect above to reset our local state
     context?.actions.loadFutureContent();
     scrollWindowTo(0, true);
-    setHasNewPosts(false);
-    setNewNotesCount(0);
-    setNewPostAuthors(() => []);
   }
 
   return (
