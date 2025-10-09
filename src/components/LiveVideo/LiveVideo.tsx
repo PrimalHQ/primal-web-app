@@ -1,12 +1,8 @@
 import { Component, createEffect, createSignal, Match, on, onMount, Show, Switch } from 'solid-js';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
-import Hls from 'hls.js';
-
-import 'media-chrome';
-import 'media-chrome/media-theme-element';
-import 'hls-video-element';
-import 'videojs-video-element';
+import type Hls from 'hls.js';
+import { loadHls, loadMediaElements } from '../../lib/videoStreaming';
 
 import styles from './LiveVideo.module.scss';
 import { StreamingData } from '../../lib/streaming';
@@ -22,12 +18,21 @@ const LiveVideo: Component<{
   const app = useAppContext();
 
   let videoElement: HTMLVideoElement | undefined;
+  let HlsClass: typeof Hls | undefined;
+
+  // Load video streaming dependencies on mount
+  onMount(async () => {
+    await loadMediaElements();
+    HlsClass = await loadHls();
+  });
 
   createEffect(() => {
+    if (!HlsClass) return;
+
     if (videoElement?.canPlayType('application/vnd.apple.mpegurl')) {
       videoElement.src = props.src;
-    } else if (Hls.isSupported() && videoElement) {
-      var hls = new Hls();
+    } else if (HlsClass.isSupported() && videoElement) {
+      var hls = new HlsClass();
       hls.loadSource(props.src);
       hls.attachMedia(videoElement);
     }
@@ -120,13 +125,15 @@ const LiveVideo: Component<{
                   setIsMediaLoaded(true);
                 }}
                 onloadstart={() => {
+                  if (!HlsClass) return;
+
                   const hls = hlsVideo?.api as Hls;
 
                   console.log('HLS: ', hls.loadLevel)
 
                   if (hls) {
 
-                    hls.on(Hls.Events.FRAG_CHANGED, (event, data) => {
+                    hls.on(HlsClass.Events.FRAG_CHANGED, (event, data) => {
 
                       const seekable = mediaController?.media.seekable;
 

@@ -1,7 +1,6 @@
 import { Component, createEffect, createSignal, on, onMount, Show } from 'solid-js';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
-import Hls from 'hls.js';
 
 import styles from './LiveVideo.module.scss';
 import { StreamingData } from '../../lib/streaming';
