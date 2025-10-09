@@ -1,4 +1,4 @@
-import { batch, Component, createEffect, Show } from 'solid-js';
+import { batch, Component, createEffect, lazy, Show, Suspense } from 'solid-js';
 import { MenuItem, PrimalNote, ZapOption } from '../../../types/primal';
 import { sendRepost, triggerImportEvents } from '../../../lib/notes';
 
@@ -11,12 +11,10 @@ import { truncateNumber } from '../../../lib/notifications';
 import { canUserReceiveZaps, lastZapError, zapNote } from '../../../lib/zap';
 import { useSettingsContext } from '../../../contexts/SettingsContext';
 
-import zapMD from '../../../assets/lottie/zap_md_2.json';
 import { toast as t, ariaLabels as tAria } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { hookForDev } from '../../../lib/devTools';
 import { getScreenCordinates, isPhone } from '../../../utils';
-import ZapAnimation from '../../ZapAnimation/ZapAnimation';
 import { CustomZapInfo, useAppContext } from '../../../contexts/AppContext';
 import NoteFooterActionButton from './NoteFooterActionButton';
 import { NoteReactionsState } from '../Note';
@@ -25,7 +23,25 @@ import BookmarkNote from '../../BookmarkNote/BookmarkNote';
 import { readSecFromStorage } from '../../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 
-export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
+// Lazy load ZapAnimation and lottie data (480KB) - only loaded when zap animation is triggered
+const ZapAnimation = lazy(() => import('../../ZapAnimation/ZapAnimation'));
+
+let zapMDData: any = null;
+let zapMDPromise: Promise<any> | null = null;
+
+const loadZapMD = async () => {
+  if (zapMDData) return zapMDData;
+  if (!zapMDPromise) {
+    zapMDPromise = import('../../../assets/lottie/zap_md_2.json').then(module => module.default);
+  }
+  zapMDData = await zapMDPromise;
+  return zapMDData;
+};
+
+export const lottieDuration = () => {
+  if (!zapMDData) return 0;
+  return zapMDData.op * 1_000 / zapMDData.fr;
+};
 
 const NoteFooter: Component<{
   note: PrimalNote,
@@ -262,7 +278,10 @@ const NoteFooter: Component<{
     }
   };
 
-  const animateZap = () => {
+  const animateZap = async () => {
+    // Load lottie data if not already loaded
+    await loadZapMD();
+
     setTimeout(() => {
       props.updateState && props.updateState('hideZapIcon', () => true);
 
@@ -415,13 +434,15 @@ const NoteFooter: Component<{
       ref={footerDiv}
       onClick={(e) => e.preventDefault() }
     >
-      <Show when={props.state.showZapAnim}>
-        <ZapAnimation
-          id={`note-med-zap-${props.note.post.id}`}
-          src={zapMD}
-          class={props.large ? styles.largeZapLottie : styles.mediumZapLottie}
-          ref={medZapAnimation}
-        />
+      <Show when={props.state.showZapAnim && zapMDData}>
+        <Suspense>
+          <ZapAnimation
+            id={`note-med-zap-${props.note.post.id}`}
+            src={zapMDData}
+            class={props.large ? styles.largeZapLottie : styles.mediumZapLottie}
+            ref={medZapAnimation}
+          />
+        </Suspense>
       </Show>
 
       <NoteFooterActionButton
