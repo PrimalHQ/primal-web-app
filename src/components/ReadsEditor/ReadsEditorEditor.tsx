@@ -2,7 +2,7 @@ import { Component, For, JSXElement, Match, Setter, Show, Switch, batch, createE
 
 import styles from './ReadsEditor.module.scss';
 import { SetStoreFunction, createStore } from 'solid-js/store';
-import { Editor, Extension } from '@tiptap/core';
+import type { Editor, Extension } from '@tiptap/core';
 import { PrimalUser } from '../../types/primal';
 import { nip19 } from '../../lib/nTools';
 import { useIntl } from '@cookbook/solid-intl';
@@ -29,21 +29,7 @@ import { TextField } from '@kobalte/core/text-field';
 import Uploader from '../Uploader/Uploader';
 
 
-import StarterKit from '@tiptap/starter-kit';
-import Link from '@tiptap/extension-link';
-import Mention from '@tiptap/extension-mention';
-import Image from '@tiptap/extension-image';
-import BubbleMenu from '@tiptap/extension-bubble-menu';
-import Underline from '@tiptap/extension-underline';
-import Table from '@tiptap/extension-table';
-import TableCell from '@tiptap/extension-table-cell';
-import TableHeader from '@tiptap/extension-table-header';
-import TableRow from '@tiptap/extension-table-row';
-import Gapcursor from '@tiptap/extension-gapcursor';
-import CodeBlock from '@tiptap/extension-code-block';
-
-import { createTiptapEditor } from 'solid-tiptap';
-import { Markdown } from 'tiptap-markdown';
+import { loadTipTapExtensions, loadTipTapCore } from '../../lib/tiptap';
 
 import tippy, { Instance } from 'tippy.js';
 
@@ -112,8 +98,11 @@ const ReadsEditorEditor: Component<{
   const [isUploading, setIsUploading] = createSignal(false);
   const [cancelUploading, setCancelUploading] = createSignal<() => void>();
   const [imageLoaded, setImageLoaded] = createSignal(false);
+  const [editorTipTap, setEditorTipTap] = createSignal<Editor | undefined>();
 
   let titleImageUpload: HTMLInputElement | undefined;
+  let tiptapExtensions: any;
+  let tiptapCore: any;
 
   createEffect(() => {
     const editor = editorTipTap();
@@ -179,308 +168,127 @@ const ReadsEditorEditor: Component<{
 
   const [isInScrollMode, setScrollMode] = createSignal(false);
 
-  const AutoScrollExtension = Extension.create({
-    addOptions() {
-      return {
-        // Default minimum padding
-        minPadding: 32,
-        // Whether to use dynamic padding based on node height
-        useDynamicPadding: true
-      }
-    },
+  // Load TipTap extensions and core, then create editor
+  onMount(async () => {
+    const [extensions, core, solidTiptap] = await Promise.all([
+      loadTipTapExtensions(),
+      loadTipTapCore(),
+      import('solid-tiptap'),
+    ]);
 
-    onUpdate({ editor, transaction }) {
-      // Skip if not a user-originated change
-      if (!transaction.docChanged || transaction.getMeta('preventScroll')) {
-        return;
-      }
+    tiptapExtensions = extensions;
+    tiptapCore = core;
 
-      // Get the currently active node and calculate padding based on its height
-      const { selection } = editor.state;
-      const domPositionInfo = editor.view.domAtPos(selection.from);
-      let targetNode = domPositionInfo.node;
-
-      let padding = this.options.minPadding
-      // If it's a text node, get its parent element
-      if (targetNode.nodeType === Node.TEXT_NODE) {
-        targetNode = targetNode.parentElement;
-      }
-
-      let breakout = false;
-
-      while (!breakout) {
-        breakout =
-          !targetNode.parentElement ||
-          (
-            targetNode.parentElement.className.includes('tiptap') &&
-            targetNode.parentElement.className.includes('ProseMirror')
-          );
-
-        if (breakout) break;
-
-        breakout = ['TABLE'].includes(targetNode.parentElement.nodeName);
-
-        targetNode = targetNode.parentElement;
-
-        if (breakout) break;
-      }
-
-      if (targetNode) {
-        // Get the height of the node and use it as padding
-        const rect = targetNode.getBoundingClientRect();
-        padding = Math.max(this.options.minPadding, rect.height);
-      }
-
-      // Scroll to the node with the calculated padding
-      scrollToActiveNode(editor, { padding });
-    }
-  });
-
-  const editorTipTap = createTiptapEditor(() => ({
-    element: tiptapEditor!,
-    extensions: [
-      StarterKit.configure({
-        dropcursor: false,
-      }),
-      Link.configure({
-        openOnClick: false,
-        autolink: true,
-        defaultProtocol: 'https',
-        protocols: ['http', 'https'],
-      }),
-      Image.configure({ inline: true }),
-      CodeBlock,
-      // Markdown.configure({
-      //   html: true,
-      //   breaks: false,
-      //   transformPastedText: true,
-      //   transformCopiedText: true,
-      // }),
-      NAddrExtension,
-      Gapcursor,
-      Table.configure({
-        resizable: false,
-      }),
-      TableRow,
-      TableHeader,
-      TableCell,
-      Underline.configure({
-        HTMLAttributes: {
-          'data-underline': true,
-        }
-      }),
-      NProfileExtension,
-      NEventExtension,
-      MarkdownPlugin.configure({
-        exportOnUpdate: true,
-        onMarkdownUpdate: (md) => {
-          // console.log('MD UPDATE: ', md)
-          // props.setMarkdownContent(() => md)
-          // setMarkdown(md);
-        }
-      }),
-      BubbleMenu.configure({
-        pluginKey: 'bubbleMenuOne',
-        element: document.getElementById('bubble_menu_one'),
-        tippyOptions: {
-          triggerTarget: document.getElementById('tableTrigger'),
-          popperOptions: {
-            strategy: 'fixed',
+    // Create editor with loaded extensions
+    const editor = solidTiptap.createTiptapEditor(() => ({
+      element: tiptapEditor!,
+      extensions: [
+        tiptapExtensions.StarterKit.configure({
+          dropcursor: false,
+        }),
+        tiptapExtensions.Link.configure({
+          openOnClick: false,
+          autolink: true,
+          defaultProtocol: 'https',
+          protocols: ['http', 'https'],
+        }),
+        tiptapExtensions.Image.configure({ inline: true }),
+        tiptapExtensions.CodeBlock,
+        NAddrExtension,
+        tiptapExtensions.Gapcursor,
+        tiptapExtensions.Table.configure({
+          resizable: false,
+        }),
+        tiptapExtensions.TableRow,
+        tiptapExtensions.TableHeader,
+        tiptapExtensions.TableCell,
+        tiptapExtensions.Underline.configure({
+          HTMLAttributes: {
+            'data-underline': true,
+          }
+        }),
+        NProfileExtension,
+        NEventExtension,
+        MarkdownPlugin.configure({
+          exportOnUpdate: true,
+          onMarkdownUpdate: (md) => {
+            // console.log('MD UPDATE: ', md)
+            // props.setMarkdownContent(() => md)
+            // setMarkdown(md);
+          }
+        }),
+        tiptapExtensions.BubbleMenu.configure({
+          pluginKey: 'bubbleMenuOne',
+          element: document.getElementById('bubble_menu_one'),
+          tippyOptions: {
+            triggerTarget: document.getElementById('tableTrigger'),
+            popperOptions: {
+              strategy: 'fixed',
+            },
           },
-        },
-        shouldShow: ({ editor, view, state, oldState, from, to }) => {
+          shouldShow: ({ editor, view, state, oldState, from, to }) => {
+            const dom = editor.view.coordsAtPos(state.selection.from);
+            props.showTableOptions(editor.isActive('table'), dom);
+            return false;
+          },
+        }),
+        tiptapCore.Extension.create({
+          addOptions() {
+            return {
+              minPadding: 32,
+              useDynamicPadding: true
+            }
+          },
+          onUpdate({ editor, transaction }) {
+            if (!transaction.docChanged || transaction.getMeta('preventScroll')) {
+              return;
+            }
+            const { selection } = editor.state;
+            const domPositionInfo = editor.view.domAtPos(selection.from);
+            let targetNode = domPositionInfo.node;
+            let padding = this.options.minPadding
+            if (targetNode.nodeType === Node.TEXT_NODE) {
+              targetNode = targetNode.parentElement;
+            }
+            let breakout = false;
+            while (!breakout) {
+              breakout =
+                !targetNode.parentElement ||
+                (
+                  targetNode.parentElement.className.includes('tiptap') &&
+                  targetNode.parentElement.className.includes('ProseMirror')
+                );
+              if (breakout) break;
+              breakout = ['TABLE'].includes(targetNode.parentElement.nodeName);
+              targetNode = targetNode.parentElement;
+              if (breakout) break;
+            }
+            if (targetNode) {
+              const rect = targetNode.getBoundingClientRect();
+              padding = Math.max(this.options.minPadding, rect.height);
+            }
+            scrollToActiveNode(editor, { padding });
+          }
+        }).configure({
+          minPadding: 32,
+          useDynamicPadding: true
+        })
+      ],
+      editorProps: { handleDOMEvents: {
+        drop: (view, e) => { e.preventDefault(); },
+      } },
+      content: '',
+      onCreate({ editor }) {
+        setEditorContent(editor, props.markdownContent);
+        props.setEditor(editor);
+      },
+      onUpdate({ editor, transaction }) {
+        props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown());
+      },
+    }))();
 
-          const dom = editor.view.coordsAtPos(state.selection.from);
-          props.showTableOptions(editor.isActive('table'), dom);
-
-
-          return false;
-        },
-      }),
-
-      AutoScrollExtension.configure({
-        minPadding: 32,  // Minimum padding in pixels
-        useDynamicPadding: true // Use the node height as padding
-      })
-      // Mention.configure({
-      //   suggestion: {
-      //     char: '@',
-      //     command: ({ editor, range, props }) => {
-      //       const user = selectedUser();
-
-      //       if (!user) return;
-
-      //       let pInfo: nip19.ProfilePointer = { pubkey: user.pubkey };
-      //       const relays = userRelays[user.pubkey] || [];
-
-      //       if (relays.length > 0) {
-      //         pInfo.relays = [...relays];
-      //       }
-
-      //       const nprofile = nip19.nprofileEncode(pInfo);
-
-      //       const delRange = {
-      //         from: range.from,
-      //         to: range.from + searchQuery().length,
-      //       };
-
-      //       setSearchQuery(() => '');
-
-      //       editor
-      //         .chain()
-      //         .focus()
-      //         .deleteRange({ ...delRange })
-      //         .insertNProfileAt(range, { nprofile, user, relays})
-      //         .insertContent({ type: 'text', text: ' ' })
-      //         .run()
-      //     },
-      //     items: async ({ editor, query}) => {
-      //       users = query.length < 2 ?
-      //         await fetchRecomendedUsersAsync() :
-      //         await fetchUserSearch(undefined, `mention_users_${APP_ID}`, query);
-
-      //       userRelays = await getUserRelays();
-      //       setSuggestedUsers(() => [...users]);
-
-      //       return users;
-      //     },
-      //     render: () => {
-      //       let component: JSXElement | undefined;
-      //       let popup: Instance[] = [];
-
-      //       return {
-      //         onStart: props => {
-
-      //           component = <div>
-      //             <For each={suggestedUsers}>
-      //               {(user, index) => (
-      //                 <SearchOption
-      //                   id={`reads_suggested_user_${index()}`}
-      //                   title={userName(user)}
-      //                   description={nip05Verification(user)}
-      //                   icon={<Avatar user={user} size="xs" />}
-      //                   statNumber={profile?.profileHistory.stats[user.pubkey]?.followers_count || search?.scores[user.pubkey]}
-      //                   statLabel={intl.formatMessage(tSearch.followers)}
-      //                   // @ts-ignore
-      //                   onClick={() => {
-      //                     setSelectedUser(() => user);
-      //                     props.command({ id: user.pubkey, label: user.name})
-      //                   }}
-      //                   highlighted={highlightedUser() === index()}
-      //                   hasBackground={true}
-      //                 />
-      //               )}
-      //             </For>
-      //           </div>
-
-      //           // @ts-ignore
-      //           popup = tippy('#tiptapEditor', {
-      //             getReferenceClientRect: props.clientRect,
-      //             content: component,
-      //             showOnCreate: true,
-      //             interactive: true,
-      //             trigger: 'manual',
-      //             placement: 'bottom-start',
-      //           })
-      //         },
-      //         onUpdate: (props) => {
-      //           setSearchQuery(() => props.query || '');
-      //         },
-
-      //         onKeyDown(props) {
-      //           if (props.event.key === 'Escape') {
-      //             popup[0].hide();
-
-      //             return true;
-      //           }
-
-      //           if (props.event.key === 'ArrowDown') {
-      //             setHighlightedUser(i => {
-      //               if (!search?.users || search.users.length === 0) {
-      //                 return 0;
-      //               }
-
-      //               return i < search.users.length ? i + 1 : 0;
-      //             });
-
-      //             return true;
-      //           }
-
-      //           if (props.event.key === 'ArrowUp') {
-      //             setHighlightedUser(i => {
-      //               if (!search?.users || search.users.length === 0) {
-      //                 return 0;
-      //               }
-
-      //               return i > 0 ? i - 1 : search.users.length;
-      //             });
-      //             return true;
-      //           }
-
-
-      //           if (['Enter', 'Space', 'Comma', 'Tab'].includes(props.event.code)) {
-      //             const sel = document.getElementById(`reads_suggested_user_${highlightedUser()}`);
-
-      //             sel && sel.click();
-
-      //             return true;
-      //           }
-
-      //           // @ts-ignore
-      //           return component?.ref?.onKeyDown(props)
-      //         },
-      //         onExit: () => {
-      //           popup[0].destroy();
-      //         }
-      //       }
-      //     },
-      //   },
-      // }),
-    ],
-    editorProps: { handleDOMEvents: {
-      drop: (view, e) => { e.preventDefault(); },
-    } },
-    content: '',
-    onCreate({ editor }) {
-      setEditorContent(editor, props.markdownContent);
-      props.setEditor(editor);
-      // editor.chain().setContent('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').applyNostrPasteRules('nevent1qvzqqqqqqypzp8z8hdgslrnn927xs5v0r6yd8h70ut7vvfxdjsn6alr4n5qq8qwsqqsqf7fpdxt7qz32ve4v52pzyguccd22rwcfysp27q3h5zmvu9lp74c0edy08').focus().run();
-    },
-    onUpdate({ editor, transaction }) {
-      // console.log('UPDATE: ', transaction)
-      // scrollToActiveNode(editor);
-      // editor.commands.scrollIntoView();
-      // const activeElement = editor.state.selection.$anchor.parent;
-      // console.log('Active: ', activeElement.type)
-      // const scr = document.body.scrollHeight > window.innerHeight;
-      // if (scr && !isInScrollMode()) {
-      //   setScrollMode(() => true);
-      // }
-
-      // if (!scr && isInScrollMode()) {
-      //   setScrollMode(() => false);
-      // }
-
-      // if (isInScrollMode()) {
-      //   window.scrollTo(0, Math.max(document.body.scrollHeight, window.innerHeight));
-      // }
-
-
-      props.setMarkdownContent(() => extendMarkdownEditor(editor).getMarkdown());
-    },
-    // onPaste(e) {
-    //   const data = e.clipboardData?.getData('Text') || '';
-    //   console.log('PASTE', data);
-    // },
-    // onSelectionUpdate({ editor: ed }) {
-    //   updateFormatControls(() => ({
-    //     isBoldActive: ed.isActive('bold'),
-    //     isItalicActive: ed.isActive('italic'),
-    //     isStrikeActive: ed.isActive('strike'),
-    //     isUlineActive: ed.isActive('underline'),
-    //   }))
-    // },
-  }));
+    setEditorTipTap(editor);
+  });
 
   const scrollToActiveNode = (editor, options = {}) => {
     const { padding = 32, behavior = 'instant' } = options;

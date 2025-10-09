@@ -32,9 +32,8 @@ import {
   linkPreviews,
 } from '../../lib/notes';
 import { convertToUser, truncateNpub, userName } from '../../stores/profile';
-import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component, createSignal, For, JSXElement, Match, onCleanup, onMount, Show, Switch,
+  Component, createSignal, For, JSXElement, Match, onCleanup, onMount, Show, Switch, Suspense,
 } from 'solid-js';
 import {
   NostrEventContent,
@@ -49,7 +48,6 @@ import {
 
 import styles from './ParsedNote.module.scss';
 import { nip19, generatePrivateKey } from '../../lib/nTools';
-import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
@@ -61,23 +59,17 @@ import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
 import type PhotoSwipeLightbox from 'photoswipe/lightbox';
-import Lnbc from '../Lnbc/Lnbc';
 import { logError } from '../../lib/logger';
 import { useAppContext } from '../../contexts/AppContext';
-import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
 import { fetchArticles } from '../../handleNotes';
 import { APP_ID } from '../../App';
 import { getEvents } from '../../lib/feed';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { subsTo } from '../../sockets';
-import ProfileNoteZap from '../ProfileNoteZap/ProfileNoteZap';
 import { parseBolt11 } from '../../utils';
-import SimpleArticlePreview from '../ArticlePreview/SimpleArticlePreview';
-import NostrImage from '../NostrImage/NostrImage';
 import { StreamingData } from '../../lib/streaming';
-import LiveEventPreview from '../LiveVideo/LiveEventPreview';
-import ExternalLiveEventPreview from '../LiveVideo/ExternalLiveEventPreview';
 import { loadPhotoSwipeLightbox, loadPhotoSwipeModule } from '../../lib/photoswipe';
+import * as LazyComponents from './lazyComponents';
 
 const groupGridLimit = 5;
 
@@ -1033,9 +1025,11 @@ const ParsedNote: Component<{
 
         setWordsDisplayed(w => w + shortMentionInWords);
 
-        return <ExternalLiveEventPreview
-          url={token}
-        />;
+        return <Suspense>
+          <LazyComponents.ExternalLiveEventPreview
+            url={token}
+          />
+        </Suspense>;
       }}
     </For>
   };
@@ -1099,11 +1093,13 @@ const ParsedNote: Component<{
         if (item.meta && item.meta.preview && (props.shorten ? totalLinks < 2 : true)) {
           setWordsDisplayed(w => w + shortMentionInWords);
           return (
-            <LinkPreview
-              preview={item.meta.preview}
-              bordered={props.isEmbeded}
-              isLast={index === content.length-1}
-            />
+            <Suspense>
+              <LazyComponents.LinkPreview
+                preview={item.meta.preview}
+                bordered={props.isEmbeded}
+                isLast={index === content.length-1}
+              />
+            </Suspense>
           );
         }
 
@@ -1166,14 +1162,18 @@ const ParsedNote: Component<{
           </Show>
         }>
           <Match when={unknownEvents[nid]?.kind === Kind.Image}>
-            <NostrImage
-              event={unknownEvents[nid] as NostrImageContent}
-            />
+            <Suspense>
+              <LazyComponents.NostrImage
+                event={unknownEvents[nid] as NostrImageContent}
+              />
+            </Suspense>
           </Match>
           <Match when={unknownEvents[nid]?.kind === Kind.LiveEvent && token.startsWith('https://')}>
-            <LinkPreview
-              preview={getLinkPreview(token)}
-            />
+            <Suspense>
+              <LazyComponents.LinkPreview
+                preview={getLinkPreview(token)}
+              />
+            </Suspense>
           </Match>
         </Switch>
       );
@@ -1214,9 +1214,11 @@ const ParsedNote: Component<{
           </Show>
         }>
           <Match when={unknownEvents[nid]?.kind === Kind.LiveEvent && token.startsWith('https://')}>
-            <LinkPreview
-              preview={getLinkPreview(token)}
-            />
+            <Suspense>
+              <LazyComponents.LinkPreview
+                preview={getLinkPreview(token)}
+              />
+            </Suspense>
           </Match>
         </Switch>
       )
@@ -1335,9 +1337,11 @@ const ParsedNote: Component<{
   }
 
   const renderLiveEvent = (mention: StreamingData, index?: number) => {
-    return <LiveEventPreview
-      stream={mention}
-    />;
+    return <Suspense>
+      <LazyComponents.LiveEventPreview
+        stream={mention}
+      />
+    </Suspense>;
   }
 
   const renderLongFormMention = (mention: PrimalArticle | undefined, index?: number) => {
@@ -1345,18 +1349,22 @@ const ParsedNote: Component<{
     if(!mention || props.veryShort) return <></>;
 
     if (props.noLinks === 'links') {
-      return <SimpleArticlePreview article={mention} noLink={true} />
+      return <Suspense>
+        <LazyComponents.SimpleArticlePreview article={mention} noLink={true} />
+      </Suspense>
     }
 
     return (
       <div class={styles.articlePreview}>
-        <ArticleCompactPreview
-          article={mention}
-          hideFooter={true}
-          hideContext={true}
-          bordered={(props.embedLevel || 0) > 0}
-          noLinks={props.noLinks}
-        />
+        <Suspense>
+          <LazyComponents.ArticleCompactPreview
+            article={mention}
+            hideFooter={true}
+            hideContext={true}
+            bordered={(props.embedLevel || 0) > 0}
+            noLinks={props.noLinks}
+          />
+        </Suspense>
       </div>);
   };
 
@@ -1467,16 +1475,18 @@ const ParsedNote: Component<{
                 }
                 else {
                   link = <div>
-                    <EmbeddedNote
-                      note={ment}
-                      mentionedUsers={mentionedUsers || {}}
-                      isLast={index === content.length-1}
-                      alternativeBackground={props.altEmbeds}
-                      footerSize={props.footerSize}
-                      hideFooter={true}
-                      embedLevel={props.embedLevel}
-                      rootNote={rn}
-                    />
+                    <Suspense>
+                      <LazyComponents.EmbeddedNote
+                        note={ment}
+                        mentionedUsers={mentionedUsers || {}}
+                        isLast={index === content.length-1}
+                        alternativeBackground={props.altEmbeds}
+                        footerSize={props.footerSize}
+                        hideFooter={true}
+                        embedLevel={props.embedLevel}
+                        rootNote={rn}
+                      />
+                    </Suspense>
                   </div>;
                 }
               }
@@ -1533,7 +1543,9 @@ const ParsedNote: Component<{
                 zapSubject = mentionedUsers[zapObject.zappedId!];
               }
 
-              link = <ProfileNoteZap zap={zapObject} subject={zapSubject} />
+              link = <Suspense>
+                <LazyComponents.ProfileNoteZap zap={zapObject} subject={zapSubject} />
+              </Suspense>
             } else {
               let zapContent = app?.events[Kind.Zap].find(e => e.id === hex) as NostrUserZaps | undefined;
 
@@ -1600,7 +1612,9 @@ const ParsedNote: Component<{
                 };
 
 
-                link = <ProfileNoteZap zap={zap} subject={zapSubject} />
+                link = <Suspense>
+                  <LazyComponents.ProfileNoteZap zap={zap} subject={zapSubject} />
+                </Suspense>
               }
 
             }
@@ -1796,12 +1810,14 @@ const ParsedNote: Component<{
               setWordsDisplayed(w => w + shortMentionInWords - 1);
 
               embeded = <div>
-                <EmbeddedNote
-                  note={ment}
-                  mentionedUsers={mentionedUsers}
-                  hideFooter={true}
-                  embedLevel={props.embedLevel}
-                />
+                <Suspense>
+                  <LazyComponents.EmbeddedNote
+                    note={ment}
+                    mentionedUsers={mentionedUsers}
+                    hideFooter={true}
+                    embedLevel={props.embedLevel}
+                  />
+                </Suspense>
                 {end}
               </div>;
             }
@@ -1937,7 +1953,9 @@ const ParsedNote: Component<{
 
         setWordsDisplayed(w => w + 100);
 
-        return <Lnbc lnbc={token} />
+        return <Suspense>
+          <LazyComponents.Lnbc lnbc={token} />
+        </Suspense>
       }}
     </For>
   }
