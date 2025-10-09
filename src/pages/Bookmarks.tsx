@@ -52,19 +52,32 @@ const Bookmarks: Component = () => {
 
   createEffect(on(() => account?.isKeyLookupDone, (v) => {
     if (v && account?.publicKey) {
-      const k = fetchBookmarksFeed(account?.publicKey);
+      const k = fetchBookmarksFeed(account?.publicKey) || 'notes';
 
-      if (k && k !== store.kind) {
+      const kindChanged = k !== store.kind;
+
+      if (kindChanged) {
         updateStore('kind', () => k);
       }
 
       if (
+        kindChanged ||
         (k==='notes' && store.notes.length === 0) ||
         (k==='reads' && store.reads.length === 0)
-      )
+      ) {
         updateStore('fetchingInProgress', () => true);
         fetchBookmarks(account?.publicKey);
       }
+    }
+  }));
+
+  // React to bookmark changes and refresh the page
+  createEffect(on(() => account?.bookmarks.length, () => {
+    if (account?.isKeyLookupDone && account?.publicKey) {
+      updateStore(() => ({ ...emptyStore, kind: store.kind }));
+      updateStore('fetchingInProgress', () => true);
+      fetchBookmarks(account?.publicKey);
+    }
   }));
 
   onCleanup(() => {

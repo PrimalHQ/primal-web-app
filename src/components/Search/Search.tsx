@@ -159,7 +159,7 @@ const Search: Component<{
         onsubmit={onSearch}
         autocomplete="off"
       >
-        <label for="search-input" class="sr-only">
+        <label for="search-input" class="visually-hidden">
           {props.placeholder ?? intl.formatMessage(placeholders.search)}
         </label>
         <div class={styles.searchIcon}></div>

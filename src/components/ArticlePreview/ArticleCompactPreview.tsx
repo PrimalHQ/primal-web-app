@@ -290,14 +290,21 @@ const ArticleCompactPreview: Component<{
   };
 
   const countLines = (el: Element) => {
+    const divHeight = (el as HTMLElement).offsetHeight;
+    const computedStyle = window.getComputedStyle(el);
+    const lineHeightStr = computedStyle.getPropertyValue('line-height');
 
-    // @ts-ignore
-    var divHeight = el.offsetHeight
+    // Parse line-height (could be 'normal', a number with 'px', or a unitless multiplier)
+    let lineHeight: number;
+    if (lineHeightStr === 'normal') {
+      // Approximate 'normal' as 1.2 times font size
+      const fontSize = parseFloat(computedStyle.getPropertyValue('font-size'));
+      lineHeight = fontSize * 1.2;
+    } else {
+      lineHeight = parseFloat(lineHeightStr);
+    }
 
-    // @ts-ignore
-    var lineHeight = el.computedStyleMap().get('line-height').value;
-
-    var lines = divHeight / lineHeight;
+    const lines = divHeight / lineHeight;
 
     return lines;
   }
