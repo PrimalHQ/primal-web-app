@@ -1,6 +1,6 @@
 .terms {
-  background-color: black;
-  color: #bfbfbf;
+  background-color: var(--background-site);
+  color: var(--text-secondary);
   max-width: 840px;
   min-width: var(--center-col-w);
   margin-inline: auto;
@@ -16,7 +16,7 @@
       margin-inline: 24px 0px;
       margin-block: 12px;
       h3 {
-        color: white;
+        color: var(--text-primary);
         margin: 0;
         font-weight: 700;
         display: inline;
@@ -30,7 +30,7 @@
   }
 
   h1, h2 {
-    color: white;
+    color: var(--text-primary);
     margin: 0;
     font-weight: 700;
   }
@@ -44,7 +44,7 @@
   }
 
   p {
-    color: #bfbfbf;
+    color: var(--text-secondary);
     font-size: 16px;
     margin-inline: 0;
     margin-block: 12px;
@@ -53,7 +53,7 @@
   ul {
     padding-left: 2rem;
     li {
-      color: #bfbfbf;
+      color: var(--text-secondary);
       font-size: 16px;
       margin-inline: 0;
       margin-block: 12px;

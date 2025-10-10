@@ -275,11 +275,23 @@ const SimpleArticlePreview: Component<{
                 when={props.article.user.picture}
                 fallback={<div class={styles.placeholderImage}></div>}
               >
-                <img src={props.article.user.picture} onload={onImageLoaded} />
+                <img
+                  src={props.article.user.picture}
+                  onload={onImageLoaded}
+                  alt={`${userName(props.article.user)} profile picture`}
+                  loading="lazy"
+                  decoding="async"
+                />
               </Show>
             }
           >
-            <img src={props.article.image} onload={onImageLoaded} />
+            <img
+              src={props.article.image}
+              onload={onImageLoaded}
+              alt={`${props.article.title || userName(props.article.user)} cover`}
+              loading="lazy"
+              decoding="async"
+            />
           </Show>
         </div>
       </div>

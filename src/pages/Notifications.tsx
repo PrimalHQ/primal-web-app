@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useSearchParams } from '@solidjs/router';
 import { nip19 } from '../lib/nTools';
-import { Component, createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, batch, onCleanup, onMount, Show } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 import { APP_ID } from '../App';
 import Loader from '../components/Loader/Loader';
@@ -17,7 +17,7 @@ import { useAccountContext } from '../contexts/AccountContext';
 import { notifSince, setNotifSince, useNotificationsContext } from '../contexts/NotificationsContext';
 import { getNotifications, getOldNotifications, setLastSeen, truncateNumber } from '../lib/notifications';
 import { subsTo } from '../sockets';
-import { convertToArticles, convertToNotes } from '../stores/note';
+import { buildTagValueMap, convertToArticles, convertToNotes, getTagValue, getTagValueInt } from '../stores/note';
 import { convertToUser, emptyUser } from '../stores/profile';
 import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, NoteActions, NotificationGroup, PrimalArticle, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
 import { notifications as t } from '../translations';
@@ -179,16 +179,17 @@ const Notifications: Component = () => {
     const unsub = subsTo(subid, {
       onEvent: (_, content) => {
         if (content.kind === Kind.LiveEvent) {
+          const tagValues = buildTagValueMap(content.tags);
           const stream: StreamingData = {
-            id: (content.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
-            url: (content.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
-            image: (content.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
-            status: (content.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
-            starts: parseInt((content.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
-            summary: (content.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
-            title: (content.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
-            client: (content.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
-            currentParticipants: parseInt((content.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+            id: getTagValue(tagValues, 'd'),
+            url: getTagValue(tagValues, 'streaming'),
+            image: getTagValue(tagValues, 'image'),
+            status: getTagValue(tagValues, 'status'),
+            starts: getTagValueInt(tagValues, 'starts'),
+            summary: getTagValue(tagValues, 'summary'),
+            title: getTagValue(tagValues, 'title'),
+            client: getTagValue(tagValues, 'client'),
+            currentParticipants: getTagValueInt(tagValues, 'current_participants'),
             pubkey: content.pubkey,
             hosts: (content.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
             participants: (content.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
@@ -296,20 +297,22 @@ const Notifications: Component = () => {
         }
       },
       onEose: () => {
-        setSortedNotifications(() => newNotifs);
+        const notes = convertToNotes(relatedNotes.page);
+        const articles = convertToArticles(relatedNotes.page);
+        const highlights = relatedNotes.page.highlights;
+        const streams = relatedNotes.page.streams;
+        const now = timeNow();
 
-        setRelatedNotes('notes', () => [...convertToNotes(relatedNotes.page)])
+        batch(() => {
+          setSortedNotifications(() => newNotifs);
+          setRelatedNotes('notes', () => [...notes]);
+          setRelatedNotes('highlights', (h) => [...h, ...highlights]);
+          setRelatedNotes('reads', () => [...articles]);
+          setRelatedNotes('streams', (existing) => [...existing, ...streams]);
+          setAllSet(true);
+          setNotifSince(now);
+        });
 
-        // Convert related highlights
-        setRelatedNotes('highlights', (h) => [...h, ...relatedNotes.page.highlights])
-
-        // Convert related articles
-        setRelatedNotes('reads', () => [...convertToArticles(relatedNotes.page)])
-
-        setRelatedNotes('streams', (streams) => [...streams, ...relatedNotes.page.streams])
-
-        setAllSet(true);
-        setNotifSince(timeNow());
         unsub();
       },
     });
@@ -366,16 +369,17 @@ const Notifications: Component = () => {
     const unsub = subsTo(subid, {
       onEvent: (_, content) => {
         if (content.kind === Kind.LiveEvent) {
+          const tagValues = buildTagValueMap(content.tags);
           const stream: StreamingData = {
-            id: (content.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
-            url: (content.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
-            image: (content.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
-            status: (content.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
-            starts: parseInt((content.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
-            summary: (content.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
-            title: (content.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
-            client: (content.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
-            currentParticipants: parseInt((content.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+            id: getTagValue(tagValues, 'd'),
+            url: getTagValue(tagValues, 'streaming'),
+            image: getTagValue(tagValues, 'image'),
+            status: getTagValue(tagValues, 'status'),
+            starts: getTagValueInt(tagValues, 'starts'),
+            summary: getTagValue(tagValues, 'summary'),
+            title: getTagValue(tagValues, 'title'),
+            client: getTagValue(tagValues, 'client'),
+            currentParticipants: getTagValueInt(tagValues, 'current_participants'),
             pubkey: content.pubkey,
             hosts: (content.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
             participants: (content.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
@@ -485,33 +489,26 @@ const Notifications: Component = () => {
 
       },
       onEose: () => {
-        // Sort notifications
-        const notifs = [...oldNotifications.page.notifications];
-
-        const sorted = sortNotifByRecency(notifs);
-
-        setOldNotifications('notifications', (notifs) => [ ...notifs, ...sorted])
-
-        // Convert related notes
-        setOldNotifications('notes', (notes) => [...notes, ...convertToNotes(oldNotifications.page)])
-
-        // Convert related highlights
-        setOldNotifications('highlights', (high) => [...high, ...oldNotifications.page.highlights])
-
-        // Convert related articles
-        setOldNotifications('reads', (reads) => [...reads, ...convertToArticles(oldNotifications.page)])
-
-        setOldNotifications('streams', (streams) => [...streams, ...oldNotifications.page.streams])
-
+        const sorted = sortNotifByRecency([...oldNotifications.page.notifications]);
+        const notes = convertToNotes(oldNotifications.page);
+        const highlights = oldNotifications.page.highlights;
+        const articles = convertToArticles(oldNotifications.page);
+        const streams = oldNotifications.page.streams;
         const pageUsers = oldNotifications.page.users;
-
         const newUsers = Object.keys(pageUsers).reduce((acc, key) => {
           return { ...acc, [pageUsers[key].pubkey]: { ...convertToUser(pageUsers[key], key)}};
         },  {});
 
-        setOldNotifications('users', (users) => ({ ...users, ...newUsers }));
+        batch(() => {
+          setOldNotifications('notifications', (notifs) => [ ...notifs, ...sorted]);
+          setOldNotifications('notes', (existing) => [...existing, ...notes]);
+          setOldNotifications('highlights', (existing) => [...existing, ...highlights]);
+          setOldNotifications('reads', (existing) => [...existing, ...articles]);
+          setOldNotifications('streams', (existing) => [...existing, ...streams]);
+          setOldNotifications('users', (users) => ({ ...users, ...newUsers }));
+          setfetchingOldNotifs(false);
+        });
 
-        setfetchingOldNotifs(false);
         unsub();
       },
     });
@@ -1322,9 +1319,13 @@ const Notifications: Component = () => {
   }
 
   const loadNewContent = () => {
-    copyNewNotifsToOld();
+    // Use batch to ensure atomic updates - prevents race condition where
+    // indicator stays visible because counter reset and content clear happen separately
+    batch(() => {
+      copyNewNotifsToOld();
+      notifications?.actions.resetNotificationCounter();
+    });
 
-    notifications?.actions.resetNotificationCounter();
     setLastSeen(`notif_sls_${APP_ID}`, timeNow());
 
     if (notificationGroup() !== 'all') {

@@ -389,7 +389,14 @@ const ArticlePreviewPhone: Component<{
                 when={authorAvatar()}
                 fallback={<div class={styles.placeholderImage}></div>}
               >
-                <img src={props.article.user.picture} onload={onImageLoaded} onerror={onImageError} />
+                <img
+                  src={props.article.user.picture}
+                  onload={onImageLoaded}
+                  onerror={onImageError}
+                  alt={`${userName(props.article.user)} profile picture`}
+                  loading="lazy"
+                  decoding="async"
+                />
               </Show>
             }
           >
@@ -398,6 +405,9 @@ const ArticlePreviewPhone: Component<{
               onload={onImageLoaded}
               onerror={onImageError}
               class={isDev && missingCacheImage() ? 'redBorder' : ''}
+              alt={`${props.article.title || userName(props.article.user)} cover`}
+              loading="lazy"
+              decoding="async"
             />
           </Show>
         </div>

@@ -21,6 +21,8 @@ const NoteImageSmall: Component<{
   ignoreRatio?: boolean,
   forceHeight?: number;
   authorPk?: string,
+  loading?: 'lazy' | 'eager' | 'auto',
+  alt?: string,
 }> = (props) => {
   const app = useAppContext();
   const imgId = generatePrivateKey();
@@ -102,24 +104,102 @@ const NoteImageSmall: Component<{
       2;
   };
 
-  const width = () => props.width || 538;
+  const width = () => props.width || 148;
 
-  const height = () => {
+  const computedHeight = () => {
     if (props.forceHeight) {
       return `${props.forceHeight}px`;
     }
 
-    if (!props.media || props.ignoreRatio) return '100%';
+    const currentRatio = ratio();
 
-    const img = props.media;
+    if (!Number.isFinite(currentRatio) || currentRatio <= 0) {
+      return `${width()}px`;
+    }
 
-    if (!img || ratio() <= 0.9) return '680px';
-    if (!img || ratio() <= 1.2) return 'auto';
+    if (props.media) {
+      if (currentRatio <= 0.9) return '680px';
+      if (currentRatio <= 1.2) return 'auto';
+    }
 
-    // width of the note over the ratio of the preview image
-    const h = width() / ratio();
+    const h = width() / currentRatio;
+    const clamped = Math.max(150, Math.min(h, 680));
 
-    return `${h}px`;
+    return `${clamped}px`;
+  };
+
+  const reservedHeight = () => {
+    if (props.ignoreRatio) return undefined;
+
+    const value = computedHeight();
+
+    if (value === 'auto') {
+      const currentRatio = ratio();
+      if (!Number.isFinite(currentRatio) || currentRatio <= 0) {
+        return `${width()}px`;
+      }
+
+      const h = width() / currentRatio;
+      const clamped = Math.max(150, Math.min(h, 680));
+      return `${clamped}px`;
+    }
+
+    return value;
+  };
+
+  const placeholderStyle = (): JSX.CSSProperties | undefined => {
+    if (props.ignoreRatio) {
+      return {
+        width: '100%',
+        height: '100%',
+      };
+    }
+
+    const value = reservedHeight();
+    if (!value) return undefined;
+
+    return {
+      'min-height': value,
+      height: value,
+    };
+  };
+
+  const wrapperStyle = (): JSX.CSSProperties | undefined => {
+    if (props.ignoreRatio) {
+      return {
+        width: '100%',
+        height: '100%',
+      };
+    }
+
+    const value = reservedHeight();
+    if (!value) return undefined;
+
+    return {
+      'min-height': value,
+    };
+  };
+
+  const imageStyle = (): JSX.CSSProperties | undefined => {
+    if (props.ignoreRatio) {
+      return {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+      };
+    }
+
+    if (willBeTooBig() && !props.ignoreRatio) {
+      return {
+        width: '528px',
+        height: '680px',
+      };
+    }
+
+    const value = reservedHeight();
+    const widthValue = `${width()}px`;
+
+    return value ? { width: widthValue, height: value } : { width: widthValue };
   };
 
   const zoomW = () => {
@@ -166,6 +246,16 @@ const NoteImageSmall: Component<{
 
   const klass = () => `${styles.noteImage} ${props.shortHeight ? styles.shortHeight : ''} ${isCached() ? '' : 'redBorder'}`;
 
+  const altText = () => {
+    if (props.alt) return props.alt;
+
+    if (typeof props.caption === 'string' && props.caption.trim().length > 0) {
+      return props.caption;
+    }
+
+    return 'Note image thumbnail';
+  };
+
   onMount(() => {
     // if we have media info, shortcut image dimension calc
     if (props.media) {
@@ -192,7 +282,7 @@ const NoteImageSmall: Component<{
   return (
     <Show
       when={isImageLoaded()}
-      fallback={<div class={styles.placeholderImage}></div>}
+      fallback={<div class={styles.placeholderImage} style={placeholderStyle()}></div>}
     >
       <a
         class={`${styles.imageHolder} ${props.class || ''} ${props.plainBorder ? '' : 'roundedImage'}`}
@@ -204,6 +294,7 @@ const NoteImageSmall: Component<{
         data-thumb-src={thumbSrc()}
         data-ratio={ratio()}
         target="_blank"
+        style={wrapperStyle()}
       >
         <img
           id={`${imgId}`}
@@ -211,7 +302,10 @@ const NoteImageSmall: Component<{
           src={thumbSrc()}
           class={klass()}
           onerror={onError}
-          // style={`${willBeTooBig() && !props.ignoreRatio ? `width: 528px; height: 680px` : `width: ${width()}px; height: ${height()}`}`}
+          loading={props.loading ?? 'lazy'}
+          decoding="async"
+          alt={altText()}
+          style={imageStyle()}
         />
         <div class="pswp-caption-content">{props.caption}</div>
       </a>

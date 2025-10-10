@@ -9,6 +9,7 @@
   grid-template-columns: 1fr;
   grid-template-rows: 32px 1fr;
   grid-row-gap: 8px;
+  min-height: 44px;
   text-decoration: none;
   color: var(--text-primary);
   line-height: 20px;
@@ -91,7 +92,7 @@
   height: 15px;
   display: inline-block;
   margin: 0px 2px;
-  background-color: var(--text-tertiary-2);
+  background-color: var(--surface-tertiary-2);
   -webkit-mask: url(../../assets/icons/verified.svg) no-repeat 0 / 100%;
   mask: url(../../assets/icons/verified.svg) no-repeat 0 / 100%;
 }

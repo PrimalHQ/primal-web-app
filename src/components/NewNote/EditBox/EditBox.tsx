@@ -31,6 +31,7 @@ import {
   search as tSearch,
   actions as tActions,
   upload as tUpload,
+  ariaLabels as tAria,
 } from "../../../translations";
 import { useMediaContext } from "../../../contexts/MediaContext";
 import { hookForDev } from "../../../lib/devTools";
@@ -1728,6 +1729,7 @@ const EditBox: Component<{
   }
 
   const [isPickingEmoji, setIsPickingEmoji] = createSignal(false);
+  const emojiPickerLabel = () => intl.formatMessage(isPickingEmoji() ? tAria.editor.closeEmojiPicker : tAria.editor.openEmojiPicker);
 
   const addSelectedEmoji = (emoji: EmojiOption) => {
     if (!textArea || !emoji) {
@@ -1843,6 +1845,12 @@ const EditBox: Component<{
 
       <div class={styles.editorWrap} onClick={focusInput}>
         <div>
+          <label
+            class="visually-hidden"
+            for={`${prefix()}new_note_text_area`}
+          >
+            {intl.formatMessage(tAria.editor.noteInput)}
+          </label>
           <textarea
             id={`${prefix()}new_note_text_area`}
             rows={1}
@@ -2019,10 +2027,15 @@ const EditBox: Component<{
               onClick={() => {
                 setIsPickingEmoji((v) => !v);
                 !isPickingEmoji() && textArea?.focus();
-              }}>
+              }}
+              ariaLabel={emojiPickerLabel()}
+              title={emojiPickerLabel()}
+              ariaPressed={isPickingEmoji()}
+            >
               <div
                 ref={emojiPicker}
                 class={`emoji_icon ${styles.emojiIcon} ${isPickingEmoji() ? styles.highlight : ''}`}
+                aria-hidden="true"
               ></div>
             </ButtonGhost>
 

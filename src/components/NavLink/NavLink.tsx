@@ -1,8 +1,31 @@
-import { A, useLocation, useNavigate } from '@solidjs/router';
+import { A, useLocation } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
+import { useIntl } from '@cookbook/solid-intl';
+import { ariaLabels as tAria } from '../../translations';
 
 import styles from './NavLink.module.scss';
+
+const prefetchedRoutes = new Set<string>();
+
+const routePrefetchers: Record<string, () => Promise<unknown>> = {
+  '/reads': () => import('../../pages/Reads'),
+  '/dms': () => import('../../pages/DirectMessages'),
+  '/bookmarks': () => import('../../pages/Bookmarks'),
+  '/notifications': () => import('../../pages/Notifications'),
+};
+
+export const prefetchRouteChunk = (path: string) => {
+  if (typeof window === 'undefined') return;
+
+  const loader = routePrefetchers[path];
+  if (!loader || prefetchedRoutes.has(path)) return;
+
+  prefetchedRoutes.add(path);
+  loader().catch(() => {
+    prefetchedRoutes.delete(path);
+  });
+};
 
 const NavLink: Component<{
   id?: string,
@@ -14,6 +37,7 @@ const NavLink: Component<{
   isPhone?: boolean,
 }> = (props) => {
   const location = useLocation();
+  const intl = useIntl();
 
   const scrollIfInactive = (e: Event) => {
     if (props.to === location.pathname) {
@@ -43,6 +67,8 @@ const NavLink: Component<{
           activeClass={styles.active}
           inactiveClass={styles.inactive}
           onClick={scrollIfInactive}
+          onPointerEnter={() => prefetchRouteChunk(props.to)}
+          onFocus={() => prefetchRouteChunk(props.to)}
         >
           <div class={styles[props.icon]}></div>
           <Show when={props.label}>
@@ -50,8 +76,15 @@ const NavLink: Component<{
           </Show>
         </A>
         <Show when={props.bubble && props.bubble() > 0}>
-          <div class={`${styles.bubble} ${bubbleClass()}`}>
-            <div>{props.bubble && props.bubble() < 100 ? props.bubble() : '99+'}</div>
+          <div
+            class={`${styles.bubble} ${bubbleClass()}`}
+            role="status"
+            aria-label={intl.formatMessage(tAria.navLink.unreadCount, {
+              section: props.label || 'Section',
+              count: props.bubble?.() || 0
+            })}
+          >
+            <div aria-hidden="true">{props.bubble && props.bubble() < 100 ? props.bubble() : '99+'}</div>
           </div>
         </Show>
       </div>

@@ -8,9 +8,11 @@
   text-decoration: none;
   border-radius: 4px;
   cursor: pointer;
+  border: none;
+  background-color: transparent;
 
   &.hasBackground {
-    background-color: var(--background-site);
+    background-color: var(--background-input);
   }
 
   &:hover, &:focus, &.highlight {
@@ -29,7 +31,7 @@
       width: 18px;
       height: 18px;
 
-      background-color: var(--text-tertiary-2);
+      background-color: var(--surface-tertiary-2);
       -webkit-mask: url(../../assets/icons/search.svg) 0 0/18px 18px;
       mask: url(../../assets/icons/search.svg) 0 0/18px 18px;
     }

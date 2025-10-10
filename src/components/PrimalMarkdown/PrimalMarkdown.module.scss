@@ -210,7 +210,7 @@
       padding-block: 0;
       margin-top: 0;
       margin-bottom: 20px;
-      border-left: 4px solid var(--text-tertiary);
+      border-left: 4px solid var(--surface-tertiary);
     }
 
 
@@ -267,7 +267,7 @@
       white-space: nowrap;
 
       border-collapse: separate;
-      border: 1px solid var(--text-tertiary-2);
+      border: 1px solid var(--surface-tertiary-2);
       border-radius: 8px;
 
       tbody {
@@ -286,7 +286,7 @@
         font-weight: 700;
         line-height: 28px;
         padding: 12px 8px;
-        border-left: 1px solid var(--text-tertiary-2);
+        border-left: 1px solid var(--surface-tertiary-2);
         border-block: none;
         background-color: var(--devider);
 
@@ -312,8 +312,8 @@
         font-size: 16px;
         font-weight: 400;
         line-height: 24px;
-        border-left: 1px solid var(--text-tertiary-2);
-        border-top: 1px solid var(--text-tertiary-2);
+        border-left: 1px solid var(--surface-tertiary-2);
+        border-top: 1px solid var(--surface-tertiary-2);
         border-bottom: none;
         padding: 12px 8px;
 

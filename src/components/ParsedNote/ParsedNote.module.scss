@@ -17,6 +17,11 @@
   /* width: fit-content; */
   max-width: 60ch;
   color: var(--accent-links);
+  padding-block: 12px;
+  padding-inline: 4px;
+  min-height: 44px;
+  border-radius: var(--border-radius-small);
+  margin-block: 4px;
 }
 
 .mentionedNote {
@@ -28,6 +33,7 @@
   grid-template-columns: 1fr;
   grid-template-rows: 32px 1fr;
   grid-row-gap: 8px;
+  min-height: 44px;
   text-decoration: none;
   color: unset;
   line-height: 20px;
@@ -89,7 +95,7 @@
   height: 12px;
   display: inline-block;
   margin: 0px 2px;
-  background-color: var(--text-tertiary-2);
+  background-color: var(--surface-tertiary-2);
   -webkit-mask: url(../../assets/icons/verified.svg) no-repeat center;
   mask: url(../../assets/icons/verified.svg) no-repeat center;
 }
@@ -181,7 +187,7 @@
   .icon {
     width: 20px;
     height: 20px;
-    background-color: var(--text-tertiary);
+    background-color: var(--surface-tertiary);
 
     &.bang {
       -webkit-mask: url(../../assets/icons/bang.svg) no-repeat 0 / 100%;

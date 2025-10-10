@@ -1,22 +1,52 @@
-import { Component, createSignal, JSXElement, onMount, Show } from 'solid-js';
+import { Component, createSignal, JSXElement, onCleanup, onMount, Show } from 'solid-js';
 import { Portal } from 'solid-js/web';
 
 const Wormhole: Component<{children: JSXElement, to: string }> = (props) => {
 
-  const [mounted, setMounted] = createSignal(false);
+  const [portalTarget, setPortalTarget] = createSignal<HTMLElement | null>(null);
+
+  const resolveTarget = () => {
+    const target = document.getElementById(props.to);
+
+    if (target && target instanceof HTMLElement) {
+      setPortalTarget(target);
+      return true;
+    }
+
+    return false;
+  };
 
   onMount(() => {
-    setTimeout(() => {
-      // Temporary fix for Portal rendering on initial load.
-      setMounted(true);
+    if (resolveTarget()) {
+      return;
+    }
+
+    const observer = new MutationObserver(() => {
+      if (resolveTarget()) {
+        observer.disconnect();
+      }
     });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    onCleanup(() => observer.disconnect());
   });
 
   return (
-    <Show when={mounted()}>
-      <Portal mount={document.getElementById(props.to) as Node}>
-        {props.children}
-      </Portal>
+    <Show when={portalTarget()}>
+      {(getTarget) => {
+        const target = getTarget();
+
+        if (!target) {
+          return null;
+        }
+
+        return (
+          <Portal mount={target}>
+            {props.children}
+          </Portal>
+        );
+      }}
     </Show>
   );
 }

@@ -220,7 +220,7 @@
   height: 18px;
   border-radius: 50%;
   display: inline-block;
-  border-top: 3px solid var(--text-tertiary);
+  border-top: 3px solid var(--surface-tertiary);
   border-right: 3px solid transparent;
   box-sizing: border-box;
   animation: rotation 1s linear infinite;
@@ -231,7 +231,7 @@
   width: 18px;
   height: 18px;
 
-  background-color: var(--text-tertiary);
+  background-color: var(--surface-tertiary);
   -webkit-mask: url(../../assets/icons/search.svg) 0 0/18px 18px;
   mask: url(../../assets/icons/search.svg) 0 0/18px 18px;
 }
@@ -426,7 +426,7 @@ input.textInput {
   height: 20px;
   margin: 0;
   display: inline-block;
-  background-color: var(--text-tertiary);
+  background-color: var(--surface-tertiary);
   -webkit-mask: url(../../assets/icons/lf_editor_toolbar/image.svg) no-repeat center;
   mask: url(../../assets/icons/lf_editor_toolbar/image.svg) no-repeat center;
   cursor: pointer;

@@ -1,4 +1,4 @@
-import { Component, createMemo, createSignal, Show } from 'solid-js';
+import { Component, createMemo, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import defaultAvatar from '../../assets/icons/default_avatar.svg';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
@@ -11,6 +11,39 @@ import styles from './Avatar.module.scss';
 import { useAppContext } from '../../contexts/AppContext';
 import { LegendCustomizationConfig } from '../../lib/premium';
 import { useSearchParams } from '@solidjs/router';
+import { userName } from '../../stores/profile';
+
+const isClient = typeof window !== 'undefined';
+
+let avatarObserver: IntersectionObserver | undefined;
+const avatarCallbacks = new WeakMap<Element, () => void>();
+
+const getAvatarObserver = () => {
+  if (!isClient) return undefined;
+
+  if (!avatarObserver) {
+    avatarObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+
+        const callback = avatarCallbacks.get(entry.target);
+        if (callback) {
+          callback();
+          avatarCallbacks.delete(entry.target);
+        }
+
+        avatarObserver?.unobserve(entry.target);
+      });
+    }, {
+      rootMargin: '200px 0px 400px 0px',
+      threshold: 0.1,
+    });
+  }
+
+  return avatarObserver;
+};
 
 const Avatar: Component<{
   src?: string | undefined,
@@ -23,6 +56,7 @@ const Avatar: Component<{
   showBorderRing?: boolean,
   legendConfig?: LegendCustomizationConfig,
   legendWhite?: boolean,
+  alt?: string,
 }> = (props) => {
 
   const media = useMediaContext();
@@ -32,6 +66,9 @@ const Avatar: Component<{
   let searchParams = new URLSearchParams(queryString);
 
   const [isCached, setIsCached] = createSignal(false);
+  const [isVisible, setIsVisible] = createSignal(!isClient);
+
+  let containerRef: HTMLDivElement | undefined;
 
   const selectedSize = props.size || 'sm';
 
@@ -221,14 +258,47 @@ const Avatar: Component<{
     return `${app?.actions.profileLink(props.user?.pubkey || stream.pubkey)}/live/${stream.id}`;
   }
 
+  const beginObserving = () => {
+    if (!isClient || isVisible()) {
+      setIsVisible(true);
+      return;
+    }
+
+    const observer = getAvatarObserver();
+    if (!observer || !containerRef) {
+      setIsVisible(true);
+      return;
+    }
+
+    avatarCallbacks.set(containerRef, () => setIsVisible(true));
+    observer.observe(containerRef);
+  };
+
+  onMount(() => {
+    beginObserving();
+  });
+
+  onCleanup(() => {
+    if (containerRef && avatarObserver) {
+      avatarObserver.unobserve(containerRef);
+      avatarCallbacks.delete(containerRef);
+    }
+  });
+
   return (
     <div
+      ref={el => {
+        containerRef = el;
+        if (containerRef) {
+          beginObserving();
+        }
+      }}
       id={props.id}
       class={`${avatarClass[selectedSize]} ${legendClass()} ${highlightClass()} ${props.showBorderRing ? styles.borderRing : ''}`}
       data-user={props.user?.pubkey}
     >
       <Show
-        when={imageSrc()}
+        when={isVisible() && imageSrc()}
         fallback={
           <div class={styles.missingBack}>
             <div class={missingClass[selectedSize]}></div>
@@ -237,7 +307,13 @@ const Avatar: Component<{
       >
         <div class={`${styles.missingBack} ${notCachedFlag()}`}>
           <Show when={props.zoomable} fallback={
-            <img src={imageSrc()} alt="avatar" onerror={imgError}/>
+            <img
+              src={imageSrc()}
+              alt={props.alt || (props.user ? `${userName(props.user)}'s avatar` : 'avatar')}
+              onerror={imgError}
+              loading="lazy"
+              decoding="async"
+            />
           }>
             <NoteImage
               class={props.zoomable ? 'profile_image' : ''}
@@ -248,6 +324,8 @@ const Avatar: Component<{
               mediaThumb={imageThumb()}
               ignoreRatio={true}
               authorPk={props.user?.pubkey}
+              loading="lazy"
+              alt={props.alt || (props.user ? `${userName(props.user)}'s avatar` : 'avatar')}
             />
           </Show>
         </div>

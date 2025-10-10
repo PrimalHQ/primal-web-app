@@ -1,6 +1,7 @@
 import { createStore } from "solid-js/store";
 import { Kind } from "../constants";
 import {
+  batch,
   createContext,
   createEffect,
   on,
@@ -168,15 +169,17 @@ const setDmContacts = (contacts: DMContact[], relation: UserRelation, opts?: { u
       sort((a, b) => b.dmInfo.latest_at - a.dmInfo.latest_at);
   }
 
-  updateStore('dmContacts', relation, () => [ ...sorted ]);
-
   const selected = contacts.find(c => c.pubkey === store.lastConversationContact?.pubkey);
 
-  if (selected) {
-    updateStore('lastConversationContact', 'dmInfo', 'cnt', () => selected.dmInfo.cnt);
-    updateStore('lastConversationContact', 'dmInfo', 'latest_at', () => selected.dmInfo.latest_at);
-    updateStore('lastConversationContact', 'dmInfo', 'latest_event_id', () => selected.dmInfo.latest_event_id);
-  }
+  batch(() => {
+    updateStore('dmContacts', relation, () => [ ...sorted ]);
+
+    if (selected) {
+      updateStore('lastConversationContact', 'dmInfo', 'cnt', () => selected.dmInfo.cnt);
+      updateStore('lastConversationContact', 'dmInfo', 'latest_at', () => selected.dmInfo.latest_at);
+      updateStore('lastConversationContact', 'dmInfo', 'latest_event_id', () => selected.dmInfo.latest_event_id);
+    }
+  });
 }
 
 const resetRelation = () => {
@@ -186,8 +189,10 @@ const resetRelation = () => {
 const setDmRelation = async (relation: UserRelation) => {
   if (!account?.publicKey) return;
 
-  updateStore('contactsPaging', () => ({ ...emptyPaging() }))
-  updateStore('lastConversationRelation', () => relation);
+  batch(() => {
+    updateStore('contactsPaging', () => ({ ...emptyPaging() }));
+    updateStore('lastConversationRelation', () => relation);
+  });
   saveLastDMRelation(account.publicKey, relation);
 
 
@@ -197,8 +202,10 @@ const setDmRelation = async (relation: UserRelation) => {
 const setDmRelation2 = (relation: UserRelation) => {
   if (!account?.publicKey) return;
 
-  updateStore('contactsPaging', () => ({ ...emptyPaging() }))
-  updateStore('lastConversationRelation', () => relation);
+  batch(() => {
+    updateStore('contactsPaging', () => ({ ...emptyPaging() }));
+    updateStore('lastConversationRelation', () => relation);
+  });
   saveLastDMRelation(account.publicKey, relation);
 
 
@@ -218,8 +225,10 @@ const replaceContacts = async (relation: UserRelation) => {
     }
   );
 
-  updateStore('contactsPaging', () => ({ ...paging }));
-  setDmContacts(dmContacts, relation, { update: 'clear' });
+  batch(() => {
+    updateStore('contactsPaging', () => ({ ...paging }));
+    setDmContacts(dmContacts, relation, { update: 'clear' });
+  });
 }
 
 const refreshContacts = async (relation: UserRelation) => {
@@ -235,8 +244,10 @@ const refreshContacts = async (relation: UserRelation) => {
     }
   );
 
-  updateStore('contactsPaging', () => ({ ...paging }));
-  setDmContacts(dmContacts, relation, { update: 'replace' });
+  batch(() => {
+    updateStore('contactsPaging', () => ({ ...paging }));
+    setDmContacts(dmContacts, relation, { update: 'replace' });
+  });
 }
 
 const getContacts = async (relation: UserRelation) => {
@@ -257,8 +268,10 @@ const getContacts = async (relation: UserRelation) => {
     }
   );
 
-  updateStore('contactsPaging', () => ({ ...paging }));
-  return setDmContacts(dmContacts, relation, { update: 'replace' });
+  batch(() => {
+    updateStore('contactsPaging', () => ({ ...paging }));
+    setDmContacts(dmContacts, relation, { update: 'replace' });
+  });
 }
 
 const getContactsNextPage = async (relation: UserRelation) => {
@@ -281,8 +294,10 @@ const getContactsNextPage = async (relation: UserRelation) => {
     }
   );
 
-  updateStore('contactsPaging', () => ({ ...paging }));
-  setDmContacts(dmContacts, relation);
+  batch(() => {
+    updateStore('contactsPaging', () => ({ ...paging }));
+    setDmContacts(dmContacts, relation);
+  });
 }
 
 let atemptToSelect: string = '';
@@ -328,12 +343,14 @@ const selectContact = async (pubkey: string) => {
 
   await resetContactMessages(contact.pubkey, relation);
 
-  updateStore('lastConversationContact', () => ({ ...contact }));
-  saveLastDMConversations(account.publicKey, pubkey);
+  batch(() => {
+    updateStore('lastConversationContact', () => ({ ...contact }));
+    updateStore('messages', () => []);
+    updateStore('conversationPaging', () => ({ ...emptyPaging() }));
+    updateStore('isFetchingMessages', () => true);
+  });
 
-  updateStore('messages', () => []);
-  updateStore('conversationPaging', () => ({ ...emptyPaging() }));
-  updateStore('isFetchingMessages', () => true);
+  saveLastDMConversations(account.publicKey, pubkey);
 
   await getConversation(pubkey);
 
@@ -531,12 +548,16 @@ const getConversation = async (contact: string | null | undefined) => {
     }
   );
 
-  updateStore('encryptedMessages', () => [...encryptedMessages]);
-  updateStore('conversationPaging', () => ({ ...paging }));
+  batch(() => {
+    updateStore('encryptedMessages', () => [...encryptedMessages]);
+    updateStore('conversationPaging', () => ({ ...paging }));
+  });
 
-  decryptMessages(contact, store.encryptedMessages, (newMessages) => {
-    updateStore('messages', (conv) => [ ...conv, ...newMessages ]);
-    updateStore('isFetchingMessages', () => false);
+  decryptMessages(contact, encryptedMessages, (newMessages) => {
+    batch(() => {
+      updateStore('messages', (conv) => [ ...conv, ...newMessages ]);
+      updateStore('isFetchingMessages', () => false);
+    });
   });
 };
 
@@ -567,15 +588,19 @@ const getConversationNewMessages = async (contact: string | null | undefined) =>
     }
   );
 
-  updateStore('encryptedMessages', () => [...encryptedMessages]);
-  updateStore('conversationPaging', () => ({ ...paging }));
+  batch(() => {
+    updateStore('encryptedMessages', () => [...encryptedMessages]);
+    updateStore('conversationPaging', () => ({ ...paging }));
+  });
 
-  decryptMessages(contact, store.encryptedMessages, (newMessages) => {
+  decryptMessages(contact, encryptedMessages, (newMessages) => {
     const existing = store.messages.map(m => m.id);
     const filtered = newMessages.filter(m => !existing.includes(m.id));
 
-    updateStore('messages', (conv) => [ ...filtered, ...conv ]);
-    updateStore('isFetchingMessages', () => false);
+    batch(() => {
+      updateStore('messages', (conv) => [ ...filtered, ...conv ]);
+      updateStore('isFetchingMessages', () => false);
+    });
 
     resetContactMessages(contact, store.lastConversationRelation);
   });
@@ -604,16 +629,23 @@ const updateRefNotes = () => {
 
 const addToConversation = (messagesToAdd: DirectMessage[], ignoreMy?: boolean) => {
 
+  let additions: DirectMessage[] = [];
+
   for (let i=0;i<messagesToAdd.length;i++) {
     const message = messagesToAdd[i];
 
     if (ignoreMy && message.sender === account?.publicKey) {
-      return;
+      break;
     }
 
-    updateStore('messages', (ms) => [{...message}, ...ms]);
+    additions = [{ ...message }, ...additions];
+  }
 
-  };
+  if (additions.length === 0) {
+    return;
+  }
+
+  updateStore('messages', (ms) => [...additions, ...ms]);
 };
 
 const sendMessage = async (receiver: string, message: DirectMessage) => {
@@ -665,10 +697,12 @@ const resetContactMessages = async (pubkey: string, relation: UserRelation) => {
   const success =  await resetMessageCount(pubkey, `dm_reset_msg_${pubkey}_${APP_ID}`);
 
   if (success) {
-    updateStore('dmContacts', relation, c => c.pubkey === pubkey, 'dmInfo', 'cnt', () => 0);
-    if (store.lastConversationContact) {
-      updateStore('lastConversationContact', 'dmInfo', 'cnt', () => 0);
-    }
+    batch(() => {
+      updateStore('dmContacts', relation, c => c.pubkey === pubkey, 'dmInfo', 'cnt', () => 0);
+      if (store.lastConversationContact) {
+        updateStore('lastConversationContact', 'dmInfo', 'cnt', () => 0);
+      }
+    });
   }
 
   return success;

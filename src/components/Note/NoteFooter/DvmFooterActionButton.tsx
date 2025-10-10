@@ -1,4 +1,4 @@
-import { Component, createEffect, onCleanup } from 'solid-js';
+import { Component } from 'solid-js';
 import { PrimalDVM, PrimalNote } from '../../../types/primal';
 
 import styles from './NoteFooter.module.scss';
@@ -24,6 +24,7 @@ const DvmFooterActionButton: Component<{
   hidden?: boolean,
   title?: string,
   large?: boolean,
+  ariaLabel?: string,
 }> = (props) => {
 
   return (
@@ -36,11 +37,15 @@ const DvmFooterActionButton: Component<{
       onTouchStart={props.onTouchStart ?? (() => {})}
       onTouchEnd={props.onTouchEnd ?? (() => {})}
       disabled={props.disabled}
+      type="button"
+      aria-label={props.ariaLabel}
+      title={props.title}
     >
       <div class={`${buttonTypeClasses[props.type]} ${props.large ? styles.large : ''}`}>
         <div
           class={`${styles.icon} ${props.large ? styles.large : ''}`}
           style={props.hidden ? 'visibility: hidden': 'visibility: visible'}
+          aria-hidden="true"
         ></div>
         <div class={styles.statNumber}>{props.label || ''}</div>
       </div>

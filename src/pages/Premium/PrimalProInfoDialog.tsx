@@ -9,8 +9,6 @@ import { hookForDev } from '../../lib/devTools';
 import { humanizeNumber } from '../../lib/stats';
 import { cashuInvoice } from '../../translations';
 import { LnbcInvoice } from '../../types/primal';
-import { getDecodedToken, Token } from "@cashu/cashu-ts";
-
 import styles from './Premium.module.scss';
 import { Dialog } from '@kobalte/core/dialog';
 
@@ -75,7 +73,7 @@ const PrimalProInfoDialog: Component<{
 
                   <div class={styles.proOverview}>
                     <div class={styles.proOverviewItem}>
-                      <img src={proLogo} />
+                      <img src={proLogo} alt="Primal Studio logo" loading="lazy" decoding="async" />
                       <div class={styles.proDescription}>
                         <h3>Primal Studio</h3>
                         <p>
@@ -89,7 +87,7 @@ const PrimalProInfoDialog: Component<{
                     </div>
 
                     <div class={styles.proOverviewItem}>
-                      <img src={preston} />
+                      <img src={preston} alt="Primal user Preston" loading="lazy" decoding="async" />
                       <div class={styles.proDescription}>
                         <h3>Legend Status</h3>
                         <p>

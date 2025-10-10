@@ -6,9 +6,8 @@ import { truncateNumber } from '../../lib/notifications';
 import { DVMMetadata, NoteActions, PrimalDVM, PrimalUser, ZapOption } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import DvmFooterActionButton from '../Note/NoteFooter/DvmFooterActionButton';
-import NoteFooterActionButton from '../Note/NoteFooter/NoteFooterActionButton';
 import { useToastContext } from '../Toaster/Toaster';
-import { toast as t } from '../../translations';
+import { toast as t, ariaLabels as tAria } from '../../translations';
 import styles from './FeedMarketPlace.module.scss';
 import { canUserReceiveZaps, zapDVM } from '../../lib/zap';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
@@ -348,6 +347,7 @@ const FeedMarketItem: Component<{
               highlighted={state.liked || account?.likes.includes(props.dvm?.id || '')}
               label={likes() === 0 ? '' : truncateNumber(likes(), 2)}
               title={likes().toLocaleString()}
+              ariaLabel={intl.formatMessage(tAria.noteFooter.like)}
             />
             <DvmFooterActionButton
               dvm={props.dvm}
@@ -360,6 +360,7 @@ const FeedMarketItem: Component<{
               highlighted={state.zapped || state.isZapping}
               label={satszapped() === 0 ? '' : truncateNumber(satszapped(), 2)}
               title={satszapped().toLocaleString()}
+              ariaLabel={intl.formatMessage(tAria.noteFooter.zap)}
             />
           </div>
         </div>

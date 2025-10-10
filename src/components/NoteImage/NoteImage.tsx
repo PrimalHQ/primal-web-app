@@ -25,6 +25,8 @@ const NoteImage: Component<{
   noPlaceholders?: boolean,
   seeMore?: number,
   isGallery?: boolean,
+  loading?: 'lazy' | 'eager' | 'auto',
+  alt?: string,
 }> = (props) => {
   const app = useAppContext();
   const imgId = generatePrivateKey();
@@ -110,24 +112,102 @@ const NoteImage: Component<{
 
   const width = () => props.width || 538;
 
-  const height = () => {
+  const computedHeight = () => {
     if (props.forceHeight) {
       return `${props.forceHeight}px`;
     }
 
     if (props.isGallery) return '250px';
 
-    if (!props.media || props.ignoreRatio) return '100%';
+    const currentRatio = ratio();
 
-    const img = props.media;
+    if (!Number.isFinite(currentRatio) || currentRatio <= 0) {
+      return `${width()}px`;
+    }
 
-    if (!img || ratio() <= 0.8) return '680px';
-    if (!img || ratio() <= 1.2) return 'auto';
+    if (props.media) {
+      if (currentRatio <= 0.8) return '680px';
+      if (currentRatio <= 1.2) return 'auto';
+    }
 
-    // width of the note over the ratio of the preview image
-    const h = width() / ratio();
+    const h = width() / currentRatio;
+    const clamped = Math.max(180, Math.min(h, 680));
 
-    return `${h}px`;
+    return `${clamped}px`;
+  };
+
+  const reservedHeight = () => {
+    if (props.ignoreRatio) return undefined;
+
+    const value = computedHeight();
+
+    if (value === 'auto') {
+      const currentRatio = ratio();
+      if (!Number.isFinite(currentRatio) || currentRatio <= 0) {
+        return `${width()}px`;
+      }
+
+      const h = width() / currentRatio;
+      const clamped = Math.max(180, Math.min(h, 680));
+      return `${clamped}px`;
+    }
+
+    return value;
+  };
+
+  const placeholderStyle = (): JSX.CSSProperties | undefined => {
+    if (props.ignoreRatio) {
+      return {
+        width: '100%',
+        height: '100%',
+      };
+    }
+
+    const value = reservedHeight();
+    if (!value) return undefined;
+
+    return {
+      'min-height': value,
+      height: value,
+    };
+  };
+
+  const wrapperStyle = (): JSX.CSSProperties | undefined => {
+    if (props.ignoreRatio) {
+      return {
+        width: '100%',
+        height: '100%',
+      };
+    }
+
+    const value = reservedHeight();
+    if (!value) return undefined;
+
+    return {
+      'min-height': value,
+    };
+  };
+
+  const imageStyle = (): JSX.CSSProperties | undefined => {
+    if (props.ignoreRatio) {
+      return {
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+      };
+    }
+
+    if (willBeTooBig() && !props.ignoreRatio) {
+      return {
+        width: '528px',
+        height: '680px',
+      };
+    }
+
+    const value = reservedHeight();
+    const widthValue = `${width()}px`;
+
+    return value ? { width: widthValue, height: value } : { width: widthValue };
   };
 
   const zoomW = () => {
@@ -174,6 +254,16 @@ const NoteImage: Component<{
 
   const klass = () => `${styles.noteImage} ${props.shortHeight ? styles.shortHeight : ''} ${isCached() ? '' : 'redBorder'}`;
 
+  const altText = () => {
+    if (props.alt) return props.alt;
+
+    if (typeof props.caption === 'string' && props.caption.trim().length > 0) {
+      return props.caption;
+    }
+
+    return 'Note image';
+  };
+
   onMount(() => {
     // if we have media info, shortcut image dimension calc
     if (props.media) {
@@ -200,7 +290,7 @@ const NoteImage: Component<{
   return (
     <Show
       when={props.noPlaceholders || isImageLoaded()}
-      fallback={<div class={styles.placeholderImage}></div>}
+      fallback={<div class={styles.placeholderImage} style={placeholderStyle()}></div>}
     >
       <a
         class={`${styles.noteImageHolder} ${props.class || ''} ${props.plainBorder ? '' : 'roundedImage'}`}
@@ -212,6 +302,7 @@ const NoteImage: Component<{
         data-thumb-src={thumbSrc()}
         data-ratio={ratio()}
         target="_blank"
+        style={wrapperStyle()}
       >
         <div class={props.seeMore ? styles.seeMore : styles.hidden}>
           <div>+{props.seeMore || '0'}</div>
@@ -222,7 +313,10 @@ const NoteImage: Component<{
           src={thumbSrc()}
           class={klass()}
           onerror={onError}
-          style={`${willBeTooBig() && !props.ignoreRatio ? `width: 528px; height: 680px` : `width: ${width()}px; height: ${height()}`}`}
+          style={imageStyle()}
+          loading={props.loading ?? 'lazy'}
+          decoding="async"
+          alt={altText()}
         />
         <div class="pswp-caption-content">{props.caption}</div>
       </a>

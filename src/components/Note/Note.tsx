@@ -59,6 +59,7 @@ export type NoteProps = {
   size?: 'xwide' | 'wide' | 'normal' | 'short',
   defaultParentAuthor?: PrimalUser,
   onRemove?: (id: string) => void,
+  priorityMedia?: boolean,
 }
 
 export const renderNote = (props: NoteProps) => (
@@ -339,6 +340,7 @@ const Note: Component<NoteProps> = (props) => {
                 <ParsedNote
                   note={props.note}
                   shorten={true}
+                  priorityMedia={props.priorityMedia}
                 />
               </div>
 
@@ -383,6 +385,7 @@ const Note: Component<NoteProps> = (props) => {
                 note={props.note}
                 width={Math.min(598, window.innerWidth)}
                 margins={isPhone() ? 42 : 1}
+                priorityMedia={props.priorityMedia}
               />
             </div>
 
@@ -521,6 +524,7 @@ const Note: Component<NoteProps> = (props) => {
               shorten={props.shorten}
               width={window.innerWidth}
               margins={45}
+              priorityMedia={props.priorityMedia}
             />
           </a>
 
@@ -597,6 +601,7 @@ const Note: Component<NoteProps> = (props) => {
                   width={Math.min(510, window.innerWidth - 72)}
                   margins={1}
                   footerSize="short"
+                  priorityMedia={props.priorityMedia}
                 />
               </a>
 
@@ -660,6 +665,7 @@ const Note: Component<NoteProps> = (props) => {
                   margins={12}
                   noLightbox={true}
                   altEmbeds={true}
+                  priorityMedia={props.priorityMedia}
                 />
               </div>
             </div>
@@ -710,6 +716,7 @@ const Note: Component<NoteProps> = (props) => {
                   width={Math.min(508, window.innerWidth - 72)}
                   margins={58}
                   footerSize="short"
+                  priorityMedia={props.priorityMedia}
                 />
               </div>
             </div>

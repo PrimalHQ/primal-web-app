@@ -159,8 +159,12 @@ const Search: Component<{
         onsubmit={onSearch}
         autocomplete="off"
       >
+        <label for="search-input" class="visually-hidden">
+          {props.placeholder ?? intl.formatMessage(placeholders.search)}
+        </label>
         <div class={styles.searchIcon}></div>
         <input
+          id="search-input"
           type='text'
           name='searchQuery'
           ref={input}
@@ -168,6 +172,7 @@ const Search: Component<{
             props.placeholder ??
             intl.formatMessage(placeholders.search)
           }
+          aria-label={props.placeholder ?? intl.formatMessage(placeholders.search)}
           value={query()}
           onInput={onInput}
           onFocus={onFocus}

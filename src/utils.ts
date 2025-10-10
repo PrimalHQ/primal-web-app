@@ -7,6 +7,73 @@ import { BlossomClient, SignedEvent, BlobDescriptor, fetchWithTimeout } from "bl
 import { signEvent } from './lib/nostrAPI';
 import { logWarning } from './lib/logger';
 
+type SubscriptionListener = {
+  onEvent?: (content: NostrEventContent) => void,
+  onEose?: () => void,
+};
+
+type SubscriptionEntry = {
+  listeners: Set<SubscriptionListener>,
+  unsubscribe: () => void,
+};
+
+const subscriptionRegistry = new Map<string, SubscriptionEntry>();
+
+const removeSubscriptionListener = (subId: string, listener: SubscriptionListener) => {
+  const entry = subscriptionRegistry.get(subId);
+
+  if (!entry) {
+    return;
+  }
+
+  entry.listeners.delete(listener);
+
+  if (entry.listeners.size === 0) {
+    entry.unsubscribe();
+    subscriptionRegistry.delete(subId);
+  }
+};
+
+const registerSubscriptionListener = (
+  subId: string,
+  fetcher: () => void,
+  listener: SubscriptionListener,
+) => {
+  let entry = subscriptionRegistry.get(subId);
+
+  if (!entry) {
+    const listeners = new Set<SubscriptionListener>();
+    const unsubscribe = subsTo(subId, {
+      onEvent: (_, content) => {
+        const current = Array.from(listeners);
+        for (let i = 0; i < current.length; i++) {
+          current[i].onEvent && current[i].onEvent(content);
+        }
+      },
+      onNotice: () => {},
+      onEose: () => {
+        const current = Array.from(listeners);
+        for (let i = 0; i < current.length; i++) {
+          current[i].onEose && current[i].onEose();
+        }
+        listeners.clear();
+        unsubscribe();
+        subscriptionRegistry.delete(subId);
+      },
+    });
+
+    entry = { listeners, unsubscribe };
+    subscriptionRegistry.set(subId, entry);
+    fetcher();
+  } else {
+    fetcher();
+  }
+
+  entry.listeners.add(listener);
+
+  return () => removeSubscriptionListener(subId, listener);
+};
+
 let debounceTimer: number = 0;
 
 export const areUrlsSame = (a: string, b: string) => {
@@ -235,17 +302,19 @@ export const handleSubscription = (
   onEventHandler?: (content: NostrEventContent) => void,
   onEoseHandler?: () => void,
 ) => {
-  const unsub = subsTo(subId, {
-    onEvent: (_, content) => {
+  let cleanup = () => {};
+
+  const listener: SubscriptionListener = {
+    onEvent: (content) => {
       onEventHandler && onEventHandler(content);
     },
     onEose: () => {
       onEoseHandler && onEoseHandler();
-      unsub();
+      cleanup();
     },
-  });
+  };
 
-  fetcher();
+  cleanup = registerSubscriptionListener(subId, fetcher, listener);
 }
 
 export const handleSubscriptionAsync =  (
@@ -255,19 +324,21 @@ export const handleSubscriptionAsync =  (
   onEoseHandler?: () => void,
 ) => {
   return new Promise((resolve) => {
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
+    let cleanup = () => {};
+
+    const listener: SubscriptionListener = {
+      onEvent: (content) => {
         onEventHandler && onEventHandler(content);
       },
       onEose: () => {
         onEoseHandler && onEoseHandler();
-        unsub();
+        cleanup();
         resolve(true);
       },
-    });
+    };
 
-    fetcher();
-  })
+    cleanup = registerSubscriptionListener(subId, fetcher, listener);
+  });
 }
 
 

@@ -4,6 +4,7 @@
   font-family: 'Nacelle';
   font-weight: 100;
   font-style: normal;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-Thin.otf) format('opentype');
 }
 
@@ -12,6 +13,7 @@
   font-family: 'Nacelle';
   font-weight: 100;
   font-style: italic;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-ThinItalic.otf) format('opentype');
 }
 
@@ -20,6 +22,7 @@
   font-family: 'Nacelle';
   font-weight: 200;
   font-style: normal;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-UltraLight.otf) format('opentype');
 }
 
@@ -28,6 +31,7 @@
   font-family: 'Nacelle';
   font-weight: 200;
   font-style: italic;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-UltraLightItalic.otf) format('opentype');
 }
 
@@ -36,6 +40,7 @@
   font-family: 'Nacelle';
   font-weight: 300;
   font-style: normal;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-Light.otf) format('opentype');
 }
 
@@ -44,6 +49,7 @@
   font-family: 'Nacelle';
   font-weight: 300;
   font-style: italic;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-LightItalic.otf) format('opentype');
 }
 
@@ -52,6 +58,7 @@
   font-family: 'Nacelle';
   font-weight: 400;
   font-style: normal;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-Regular.otf) format('opentype');
 }
 
@@ -60,6 +67,7 @@
   font-family: 'Nacelle';
   font-weight: 400;
   font-style: italic;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-Italic.otf) format('opentype');
 }
 
@@ -68,6 +76,7 @@
   font-family: 'Nacelle';
   font-weight: 600;
   font-style: normal;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-SemiBold.otf) format('opentype');
 }
 
@@ -76,6 +85,7 @@
   font-family: 'Nacelle';
   font-weight: 600;
   font-style: italic;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-SemiBoldItalic.otf) format('opentype');
 }
 
@@ -84,6 +94,7 @@
   font-family: 'Nacelle';
   font-weight: 700;
   font-style: normal;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-Bold.otf) format('opentype');
 }
 
@@ -92,6 +103,7 @@
   font-family: 'Nacelle';
   font-weight: 700;
   font-style: italic;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-BoldItalic.otf) format('opentype');
 }
 
@@ -100,6 +112,7 @@
   font-family: 'Nacelle';
   font-weight: 800;
   font-style: normal;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-Heavy.otf) format('opentype');
 }
 
@@ -108,6 +121,7 @@
   font-family: 'Nacelle';
   font-weight: 800;
   font-style: italic;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-HeavyItalic.otf) format('opentype');
 }
 
@@ -116,6 +130,7 @@
   font-family: 'Nacelle';
   font-weight: 900;
   font-style: normal;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-Black.otf) format('opentype');
 }
 
@@ -124,6 +139,7 @@
   font-family: 'Nacelle';
   font-weight: 900;
   font-style: italic;
+  font-display: swap;
   src: url(/public/Nacelle/Nacelle-BlackItalic.otf) format('opentype');
 }
 
@@ -132,6 +148,7 @@
   font-family: 'Roboto Condensed';
   font-weight: 500;
   font-style: normal;
+  font-display: swap;
   src: url(/public/RobotoCondensed/RobotoCondensed-Medium.ttf) format('truetype');
 }
 

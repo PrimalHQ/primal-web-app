@@ -1,4 +1,5 @@
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { useIntl } from '@cookbook/solid-intl';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { FeedType } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
@@ -6,6 +7,7 @@ import { PrimalArticleFeed } from '../../types/primal';
 import CheckBox2 from '../Checkbox/CheckBox';
 
 import styles from './FeedSorter.module.scss';
+import { ariaLabels as tAria } from '../../translations';
 
 const lockedFeeds = ['primal'];
 
@@ -26,10 +28,13 @@ const FeedSorter: Component<{
 
   let sorter: any;
   const account = useAccountContext();
+  const intl = useIntl();
 
   const [editMode, setEditMode] = createSignal('');
 
   const [newName, setNewName] = createSignal('');
+
+  const [statusMessage, setStatusMessage] = createSignal('');
 
   const constructId = (feed: PrimalArticleFeed) => {
     return feed.spec;
@@ -51,6 +56,24 @@ const FeedSorter: Component<{
     props.actions.rename && props.actions.rename(feed, newName(), props.feedType);
     setEditMode('');
   }
+
+  const moveItemUp = (index: number) => {
+    if (index > 0) {
+      props.actions.move && props.actions.move(index, index - 1, props.feedType);
+      const feed = props.feeds[index];
+      setStatusMessage(intl.formatMessage(tAria.feedSorter.movedUp, { name: feed.name }));
+      setTimeout(() => setStatusMessage(''), 1000);
+    }
+  };
+
+  const moveItemDown = (index: number) => {
+    if (index < props.feeds.length - 1) {
+      props.actions.move && props.actions.move(index, index + 1, props.feedType);
+      const feed = props.feeds[index];
+      setStatusMessage(intl.formatMessage(tAria.feedSorter.movedDown, { name: feed.name }));
+      setTimeout(() => setStatusMessage(''), 1000);
+    }
+  };
 
   const sortList = (target: any) => {
     // Get all items
@@ -127,10 +150,29 @@ const FeedSorter: Component<{
 
   return (
     <div id={props.id} class={styles.feedSorter} ref={sorter}>
+      <div class="sr-only" aria-live="polite" aria-atomic="true">
+        {statusMessage()}
+      </div>
       <Show when={props.feeds.length > 0}>
         <For each={props.feeds}>
           {(feed, index) => (
-            <div class={styles.feedItem} data-value={feed.spec} data-index={index()}>
+            <div
+              class={styles.feedItem}
+              data-value={feed.spec}
+              data-index={index()}
+              role="listitem"
+              tabIndex={0}
+              onKeyDown={(e: KeyboardEvent) => {
+                if (e.ctrlKey && e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  moveItemUp(index());
+                }
+                if (e.ctrlKey && e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  moveItemDown(index());
+                }
+              }}
+            >
               <Show
                 when={editMode() === constructId(feed)}
                 fallback={
@@ -155,25 +197,34 @@ const FeedSorter: Component<{
 
                           <Show when={!isLockedFeed(feed)}>
                             <button
+                              type="button"
                               class={styles.mngButton}
                               onClick={() => editFeed(feed)}
                               disabled={isLockedFeed(feed)}
+                              aria-label={intl.formatMessage(tAria.feedSorter.rename, { name: feed.name })}
+                              title={intl.formatMessage(tAria.feedSorter.rename, { name: feed.name })}
                             >
-                              <div class={styles.editButton}></div>
+                              <div class={styles.editButton} aria-hidden="true"></div>
                             </button>
                             <button
+                              type="button"
                               class={styles.mngButton}
                               onClick={() => removeFeed(feed)}
                               disabled={isLockedFeed(feed)}
+                              aria-label={intl.formatMessage(tAria.feedSorter.remove, { name: feed.name })}
+                              title={intl.formatMessage(tAria.feedSorter.remove, { name: feed.name })}
                             >
-                              <div class={styles.deleteButton}></div>
+                              <div class={styles.deleteButton} aria-hidden="true"></div>
                             </button>
                           </Show>
                           <button
+                            type="button"
                             class={styles.sortButton}
                             onClick={() => {}}
+                            aria-label={intl.formatMessage(tAria.feedSorter.reorder, { name: feed.name })}
+                            title={intl.formatMessage(tAria.feedSorter.reorder, { name: feed.name })}
                           >
-                            <div class={styles.dragIcon}></div>
+                            <div class={styles.dragIcon} aria-hidden="true"></div>
                           </button>
                         </div>
                       </div>
@@ -186,6 +237,7 @@ const FeedSorter: Component<{
                     id={`input_${constructId(feed)}`}
                     class={styles.feedNameInput}
                     value={newName()}
+                    aria-label={intl.formatMessage(tAria.feedSorter.inputLabel, { name: feed.name })}
                     // @ts-ignore
                     onInput={(e: InputEvent) => setNewName(() => e.target?.value)}
                     onKeyUp={(e: KeyboardEvent) => {
@@ -200,16 +252,20 @@ const FeedSorter: Component<{
                   />
                   <div class={styles.feedEditControl}>
                     <button
+                      type="button"
                       onClick={() => updateFeedName(feed)}
-                      title="Update"
+                      aria-label={intl.formatMessage(tAria.feedSorter.save, { name: feed.name })}
+                      title={intl.formatMessage(tAria.feedSorter.save, { name: feed.name })}
                     >
-                      <div class={styles.checkIcon}></div>
+                      <div class={styles.checkIcon} aria-hidden="true"></div>
                     </button>
                     <button
+                      type="button"
                       onClick={() => {setEditMode('')}}
-                      title="Cancel"
+                      aria-label={intl.formatMessage(tAria.feedSorter.cancel, { name: feed.name })}
+                      title={intl.formatMessage(tAria.feedSorter.cancel, { name: feed.name })}
                     >
-                      <div class={styles.closeIcon}></div>
+                      <div class={styles.closeIcon} aria-hidden="true"></div>
                     </button>
                   </div>
                 </div>

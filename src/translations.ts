@@ -2517,6 +2517,174 @@ export const bookmarks = {
   }
 }
 
+export const ariaLabels = {
+  homeHeader: {
+    newNote: {
+      id: 'aria.homeHeader.newNote',
+      defaultMessage: 'Create a new note',
+      description: 'Accessible label for new note button',
+    },
+    loadNewPosts: {
+      id: 'aria.homeHeader.loadNewPosts',
+      defaultMessage: 'Load {count, plural, one {# new post} other {# new posts}}',
+      description: 'Accessible label for loading new posts',
+    },
+    newPostsAvailable: {
+      id: 'aria.homeHeader.newPostsAvailable',
+      defaultMessage: '{count, plural, one {# new post} other {# new posts}} available',
+      description: 'Status message for new posts availability',
+    },
+  },
+  embeddedMedia: {
+    video: {
+      id: 'aria.embeddedMedia.video',
+      defaultMessage: 'Embedded video',
+      description: 'Accessible label for embedded video',
+    },
+    videoNotSupported: {
+      id: 'aria.embeddedMedia.videoNotSupported',
+      defaultMessage: 'Your browser does not support the video tag.',
+      description: 'Message shown when video is not supported',
+    },
+  },
+  navLink: {
+    unreadCount: {
+      id: 'aria.navLink.unreadCount',
+      defaultMessage: '{section}: {count, plural, one {# unread item} other {# unread items}}',
+      description: 'Accessible label for navigation badge showing unread count',
+    },
+  },
+  feedSorter: {
+    rename: {
+      id: 'aria.feedSorter.rename',
+      defaultMessage: 'Rename {name} feed',
+      description: 'Accessible label for feed rename button',
+    },
+    remove: {
+      id: 'aria.feedSorter.remove',
+      defaultMessage: 'Remove {name} feed',
+      description: 'Accessible label for feed removal button',
+    },
+    reorder: {
+      id: 'aria.feedSorter.reorder',
+      defaultMessage: 'Drag to reorder {name} feed. Press Ctrl+Up or Ctrl+Down to reorder with keyboard.',
+      description: 'Accessible label for feed drag handle',
+    },
+    save: {
+      id: 'aria.feedSorter.save',
+      defaultMessage: 'Save new name for {name} feed',
+      description: 'Accessible label for confirming feed rename',
+    },
+    cancel: {
+      id: 'aria.feedSorter.cancel',
+      defaultMessage: 'Cancel renaming {name} feed',
+      description: 'Accessible label for cancelling feed rename',
+    },
+    inputLabel: {
+      id: 'aria.feedSorter.inputLabel',
+      defaultMessage: 'New name for {name} feed',
+      description: 'Accessible label for feed rename input',
+    },
+    movedUp: {
+      id: 'aria.feedSorter.movedUp',
+      defaultMessage: '{name} feed moved up',
+      description: 'Status message when feed is moved up',
+    },
+    movedDown: {
+      id: 'aria.feedSorter.movedDown',
+      defaultMessage: '{name} feed moved down',
+      description: 'Status message when feed is moved down',
+    },
+  },
+  pageNav: {
+    back: {
+      id: 'aria.pageNav.back',
+      defaultMessage: 'Go back one page',
+      description: 'Accessible label for back navigation button',
+    },
+    forward: {
+      id: 'aria.pageNav.forward',
+      defaultMessage: 'Go forward one page',
+      description: 'Accessible label for forward navigation button',
+    },
+  },
+  noteFooter: {
+    reply: {
+      id: 'aria.noteFooter.reply',
+      defaultMessage: 'Reply to note',
+      description: 'Accessible label for reply button',
+    },
+    zap: {
+      id: 'aria.noteFooter.zap',
+      defaultMessage: 'Zap this note',
+      description: 'Accessible label for zap button',
+    },
+    like: {
+      id: 'aria.noteFooter.like',
+      defaultMessage: 'Like this note',
+      description: 'Accessible label for like button',
+    },
+    repost: {
+      id: 'aria.noteFooter.repost',
+      defaultMessage: 'Share this note',
+      description: 'Accessible label for repost button',
+    },
+  },
+  liveVideo: {
+    openQr: {
+      id: 'aria.liveVideo.openQr',
+      defaultMessage: 'Show {name} QR code',
+      description: 'Accessible label for showing QR code button',
+    },
+    sendZap: {
+      id: 'aria.liveVideo.sendZap',
+      defaultMessage: 'Zap {name}',
+      description: 'Accessible label for zapping a live chat participant',
+    },
+    openDm: {
+      id: 'aria.liveVideo.openDm',
+      defaultMessage: 'Message {name}',
+      description: 'Accessible label for opening direct messages',
+    },
+  },
+  editor: {
+    openEmojiPicker: {
+      id: 'aria.editor.openEmojiPicker',
+      defaultMessage: 'Show emoji picker',
+      description: 'Accessible label for opening the emoji picker',
+    },
+    closeEmojiPicker: {
+      id: 'aria.editor.closeEmojiPicker',
+      defaultMessage: 'Hide emoji picker',
+      description: 'Accessible label for closing the emoji picker',
+    },
+    noteInput: {
+      id: 'aria.editor.noteInput',
+      defaultMessage: 'Write a new note',
+      description: 'Accessible label for the main note editor textarea',
+    },
+  },
+  noteContext: {
+    open: {
+      id: 'aria.noteContext.open',
+      defaultMessage: 'Note options',
+      description: 'Accessible label for opening the note options menu',
+    },
+  },
+  bookmarks: {
+    add: {
+      id: 'aria.bookmarks.add',
+      defaultMessage: 'Bookmark this note',
+      description: 'Accessible label for bookmarking a note',
+    },
+    remove: {
+      id: 'aria.bookmarks.remove',
+      defaultMessage: 'Remove bookmark from this note',
+      description: 'Accessible label for removing a bookmarked note',
+    },
+  },
+};
+
 export const lnInvoice = {
   pay: {
     id: 'lnInvoice.pay',

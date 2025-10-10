@@ -1,4 +1,4 @@
-import { createContext, createEffect, useContext } from "solid-js";
+import { batch, createContext, createEffect, useContext } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
 import { APP_ID } from "../App";
 import { minKnownProfiles } from "../constants";
@@ -11,7 +11,7 @@ import {
   SelectionOption,
 } from "../types/primal";
 import { useAccountContext } from "./AccountContext";
-import { emptyPaging, fetchMegaFeed, fetchScoredContent, filterAndSortNotes, PaginationInfo } from "../megaFeeds";
+import { emptyPaging, fetchMegaFeed, fetchScoredContent, filterAndSortNotes, PaginationInfo, megaFeedCacheApi } from "../megaFeeds";
 import { saveStoredFeed } from "../lib/localStore";
 import { calculateNotesOffset } from "../utils";
 
@@ -121,6 +121,14 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
   const account = useAccountContext();
 
+  let currentSpec: string | undefined;
+
+  const invalidateCurrentFeedCache = () => {
+    if (!currentSpec) return;
+    const pubkey = account?.publicKey || minKnownProfiles.names['primal'];
+    megaFeedCacheApi.invalidate({ pubkey, specification: currentSpec });
+  };
+
 // ACTIONS --------------------------------------
 
   const removeEvent = (id: string, kind: 'notes') => {
@@ -139,18 +147,22 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       `home_sidebar_${APP_ID}`,
     );
 
-    updateStore('sidebarNotes', () => [ ...notes ]);
-    updateStore('paging', 'sidebar', () => ({ ...paging }));
-    updateStore('isFetchingSidebar', () => false);
+    batch(() => {
+      updateStore('sidebarNotes', () => [ ...notes ]);
+      updateStore('paging', 'sidebar', () => ({ ...paging }));
+      updateStore('isFetchingSidebar', () => false);
+    });
   }
 
   const clearFuture = () => {
-    updateStore('futureNotes', () => []);
-    updateStore('paging', 'future', () => ({
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    }));
+    batch(() => {
+      updateStore('futureNotes', () => []);
+      updateStore('paging', 'future', () => ({
+        since: 0,
+        until: 0,
+        sortBy: 'created_at',
+      }));
+    });
   }
 
   const checkForNewNotes = async (spec: string) => {
@@ -188,8 +200,10 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     const ids = lastPageNotes.map(n => n.id);
     const filtered = notes.filter(n => !ids.includes(n.id));
 
-    updateStore('paging', 'future', () => ({ ...paging }));
-    updateStore('futureNotes', (ns) => [ ...ns, ...filtered]);
+    batch(() => {
+      updateStore('paging', 'future', () => ({ ...paging }));
+      updateStore('futureNotes', (ns) => [ ...ns, ...filtered]);
+    });
   }
 
   const loadFutureContent = () => {
@@ -197,34 +211,69 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    updateStore('notes', (notes) => [...store.futureNotes, ...notes]);
-    clearFuture();
+    // Use batch to ensure atomic update - clear future before any effects can run
+    batch(() => {
+      const futureCopy = [...store.futureNotes];
+      updateStore('futureNotes', () => []);
+      updateStore('paging', 'future', () => ({
+        since: 0,
+        until: 0,
+        sortBy: 'created_at',
+      }));
+      updateStore('notes', (notes) => [...futureCopy, ...notes]);
+    });
   };
 
   const fetchNotes = async (spec: string, until = 0, includeIsFetching = true) => {
 
-    updateStore('isFetching' , () => includeIsFetching);
+    currentSpec = spec;
 
     const pubkey = account?.publicKey || minKnownProfiles.names['primal'];
 
     const offset = calculateNotesOffset(store.notes, store.paging.notes);
 
+    const pagingParams = {
+      until,
+      limit: 20,
+      offset,
+    };
+
+    const useCache = megaFeedCacheApi.shouldUseCache(pagingParams);
+    const cacheKey = useCache ? megaFeedCacheApi.buildKey(pubkey, spec, pagingParams) : undefined;
+    const cached = useCache && cacheKey ? megaFeedCacheApi.get(cacheKey) : undefined;
+
+    if (cached) {
+      const sortedNotes = filterAndSortNotes(cached.notes, cached.paging);
+
+      batch(() => {
+        updateStore('paging', 'notes', () => ({ ...cached.paging }));
+        updateStore('notes', (ns) => [ ...ns, ...sortedNotes]);
+        if (includeIsFetching) {
+          updateStore('isFetching', () => false);
+        }
+      });
+
+      return;
+    }
+
+    if (includeIsFetching) {
+      updateStore('isFetching' , () => true);
+    }
+
     const { notes, paging } = await fetchMegaFeed(
       pubkey,
       spec,
       `home_feed_${APP_ID}`,
-      {
-        until,
-        limit: 20,
-        offset,
-      },
+      pagingParams,
     );
 
     const sortedNotes = filterAndSortNotes(notes, paging);
 
-    updateStore('paging', 'notes', () => ({ ...paging }));
-    updateStore('notes', (ns) => [ ...ns, ...sortedNotes]);
-    updateStore('isFetching', () => false);
+    batch(() => {
+      updateStore('paging', 'notes', () => ({ ...paging }));
+      updateStore('notes', (ns) => [ ...ns, ...sortedNotes]);
+      updateStore('isFetching', () => false);
+    });
 
   };
 
@@ -232,14 +281,17 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     updateStore('scrollTop', () => 0);
     window.scrollTo({ top: 0 });
 
-    updateStore('notes', () => []);
-    updateStore('paging', 'notes', () => ({
-      since: 0,
-      until: 0,
-      sortBy: 'created_at',
-    }));
+    batch(() => {
+      updateStore('notes', () => []);
+      updateStore('paging', 'notes', () => ({
+        since: 0,
+        until: 0,
+        sortBy: 'created_at',
+      }));
+    });
 
     clearFuture();
+    invalidateCurrentFeedCache();
   };
 
   const fetchNextPage = (mainTopic?: string) => {

@@ -105,9 +105,10 @@ const Search: Component = () => {
             }
           >
             <For each={search?.notes} >
-              {note => <Note
+              {(note, index) => <Note
                 note={note}
                 shorten={true}
+                priorityMedia={index() === 0}
                 onRemove={(id: string) => {
                   search?.actions.removeEvent(id, 'notes');
                 }}

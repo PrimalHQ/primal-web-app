@@ -292,7 +292,7 @@
     .chevron {
       width: 12px;
       height: 20px;
-      background-color: var(--text-tertiary);
+      background-color: var(--surface-tertiary);
       -webkit-mask: url(../../assets/icons/chevron_right.svg) no-repeat 0 / 100%;
       mask: url(../../assets/icons/chevron_right.svg) no-repeat 0 / 100%;
     }
@@ -622,7 +622,7 @@
     }
 
     &:focus {
-      border-color: var(--text-tertiary);
+      border-color: var(--surface-tertiary);
     }
   }
 
@@ -913,7 +913,7 @@
     transition: color 0s linear;
 
     .removeIcon, .addIcon {
-      background-color: var(--text-tertiary-2);
+      background-color: var(--surface-tertiary-2);
     }
   }
 
@@ -992,7 +992,7 @@
     }
 
     &:focus {
-      border-color: var(--text-tertiary);
+      border-color: var(--surface-tertiary);
     }
   }
 
@@ -1014,7 +1014,7 @@
     align-items: center;
 
     >div {
-      background-color: var(--text-tertiary-2);
+      background-color: var(--surface-tertiary-2);
     }
 
     &:hover {

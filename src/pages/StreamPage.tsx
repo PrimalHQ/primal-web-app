@@ -1,4 +1,4 @@
-import { batch, Component, createEffect, createSignal, For, on, onCleanup, Show } from 'solid-js';
+import { batch, Component, createEffect, createSignal, For, lazy, on, onCleanup, Show, Suspense } from 'solid-js';
 
 import styles from './StreamPage.module.scss';
 import { toast as t } from '../translations';
@@ -29,7 +29,6 @@ import { isHashtag, isUrl, sendEvent, triggerImportEvents } from '../lib/notes';
 import { canUserReceiveZaps, convertToZap, zapStream } from '../lib/zap';
 import { readSecFromStorage } from '../lib/localStore';
 import { useToastContext } from '../components/Toaster/Toaster';
-import LiveVideo from '../components/LiveVideo/LiveVideo';
 import ChatMessage from '../components/LiveVideo/ChatMessage';
 import ChatMessageComposer from '../components/LiveVideo/ChatMessageComposer';
 import ChatMessageDetails, { ChatMessageConfig } from '../components/LiveVideo/ChatMessageDetails';
@@ -41,6 +40,9 @@ import CheckBox from '../components/Checkbox/CheckBox';
 import TopZapModal from '../components/TopZapsModal/TopZapModal';
 import Paginator from '../components/Paginator/Paginator';
 import { Kind } from '../constants';
+
+// Lazy load LiveVideo component with all its heavy video streaming dependencies (~740KB)
+const LiveVideo = lazy(() => import('../components/LiveVideo/LiveVideo'));
 
 const CHAT_PAGE_SIZE = 25;
 
@@ -1095,11 +1097,14 @@ const StreamPage: Component = () => {
         </div>
 
         <div ref={streamingContent} class={styles.streamContent}>
-          <LiveVideo
-            src={streamData.url || ''}
-            stream={streamData}
-            streamAuthor={host() || profile?.userProfile}
-          />
+          <Suspense fallback={<div class={styles.videoPlaceholder}>Loading video player...</div>}>
+            <LiveVideo
+              src={streamData.url || ''}
+              stream={streamData}
+              streamAuthor={host() || profile?.userProfile}
+              onRemove={() => {}}
+            />
+          </Suspense>
         </div>
 
 

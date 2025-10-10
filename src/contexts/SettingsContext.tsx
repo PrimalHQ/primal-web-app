@@ -2,6 +2,7 @@ import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
 import { Kind, NotificationType, andRD, andVersion, contentScope, defaultContentModeration, defaultFeeds, defaultNotificationAdditionalSettings, defaultNotificationSettings, defaultZap, defaultZapOptions, iosRD, iosVersion, nostrHighlights, themes, trendingFeed, trendingScope } from "../constants";
 import {
+  batch,
   createContext,
   createEffect,
   onCleanup,
@@ -207,8 +208,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           let options = settings.zapConfig;
           let amount = settings.zapDefault;
 
-          updateStore('availableZapOptions', () => options);
-          updateStore('defaultZap', () => amount);
+          batch(() => {
+            updateStore('availableZapOptions', () => options);
+            updateStore('defaultZap', () => amount);
+          });
 
 
           !temp && saveSettings();
@@ -700,21 +703,21 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           const notificationSettings = settings.notifications as Record<string, boolean>;
           const notificationAdditionalSettings = settings.notificationsAdditional as Record<string, boolean>;
 
-          updateStore('availableFeeds',
-            () => replaceAvailableFeeds(account?.publicKey, feeds),
-          );
-
-          updateStore('defaultFeed', () => store.availableFeeds.find(x => x.hex === nostrHighlights) || store.availableFeeds[0]);
-
-          updateStore('notificationSettings', () => ({ ...notificationSettings } || { ...defaultNotificationSettings }));
-          updateStore('notificationAdditionalSettings', () => ({ ...notificationAdditionalSettings } || { ...defaultNotificationAdditionalSettings }));
-          updateStore('applyContentModeration', () => true);
-
           let zapOptions = settings.zapConfig;
           let zapAmount = settings.zapDefault;
 
-          updateStore('defaultZap', () => zapAmount);
-          updateStore('availableZapOptions', () => zapOptions);
+          const nextFeeds = replaceAvailableFeeds(account?.publicKey, feeds);
+          const defaultFeed = nextFeeds.find(x => x.hex === nostrHighlights) || nextFeeds[0];
+
+          batch(() => {
+            updateStore('availableFeeds', () => nextFeeds);
+            updateStore('defaultFeed', () => defaultFeed);
+            updateStore('notificationSettings', () => ({ ...notificationSettings } || { ...defaultNotificationSettings }));
+            updateStore('notificationAdditionalSettings', () => ({ ...notificationAdditionalSettings } || { ...defaultNotificationAdditionalSettings }));
+            updateStore('applyContentModeration', () => true);
+            updateStore('defaultZap', () => zapAmount);
+            updateStore('availableZapOptions', () => zapOptions);
+          });
         }
         catch (e) {
           logError('Error parsing settings response: ', e);
@@ -744,8 +747,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    updateStore('homeFeeds', () => [ ...loadHomeFeeds(pubkey) ])
-    updateStore('readsFeeds', () => [ ...loadReadsFeeds(pubkey) ])
+    batch(() => {
+      updateStore('homeFeeds', () => [ ...loadHomeFeeds(pubkey) ])
+      updateStore('readsFeeds', () => [ ...loadReadsFeeds(pubkey) ])
+    });
 
     const settingsSubId = `load_settings_${APP_ID}`;
     const settingsHomeSubId = `load_home_settings_${APP_ID}`;

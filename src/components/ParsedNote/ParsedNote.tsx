@@ -32,9 +32,8 @@ import {
   linkPreviews,
 } from '../../lib/notes';
 import { convertToUser, truncateNpub, userName } from '../../stores/profile';
-import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component, createSignal, For, JSXElement, Match, onMount, Show, Switch,
+  Component, createSignal, For, JSXElement, Match, onCleanup, onMount, Show, Switch, Suspense,
 } from 'solid-js';
 import {
   NostrEventContent,
@@ -49,7 +48,6 @@ import {
 
 import styles from './ParsedNote.module.scss';
 import { nip19, generatePrivateKey } from '../../lib/nTools';
-import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
@@ -58,25 +56,20 @@ import NoteImage from '../NoteImage/NoteImage';
 import { createStore, unwrap } from 'solid-js/store';
 import { addrRegex, hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, primalUserRegex, profileRegex, shortMentionInWords, shortNoteChars, shortNoteWords, specialCharsRegex, urlExtractRegex, userMentionUrlRegex } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
-import { actions } from '../../translations';
+import { actions, ariaLabels as tAria } from '../../translations';
 
-import PhotoSwipeLightbox from 'photoswipe/lightbox';
-import Lnbc from '../Lnbc/Lnbc';
+import type PhotoSwipeLightbox from 'photoswipe/lightbox';
 import { logError } from '../../lib/logger';
 import { useAppContext } from '../../contexts/AppContext';
-import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
 import { fetchArticles } from '../../handleNotes';
 import { APP_ID } from '../../App';
 import { getEvents } from '../../lib/feed';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { subsTo } from '../../sockets';
-import ProfileNoteZap from '../ProfileNoteZap/ProfileNoteZap';
 import { parseBolt11 } from '../../utils';
-import SimpleArticlePreview from '../ArticlePreview/SimpleArticlePreview';
-import NostrImage from '../NostrImage/NostrImage';
 import { StreamingData } from '../../lib/streaming';
-import LiveEventPreview from '../LiveVideo/LiveEventPreview';
-import ExternalLiveEventPreview from '../LiveVideo/ExternalLiveEventPreview';
+import { loadPhotoSwipeLightbox, loadPhotoSwipeModule } from '../../lib/photoswipe';
+import * as LazyComponents from './lazyComponents';
 
 const groupGridLimit = 5;
 
@@ -179,6 +172,7 @@ const ParsedNote: Component<{
   rootNote?: PrimalNote,
   noPlaceholders?: boolean,
   footerSize?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'mini',
+  priorityMedia?: boolean,
 }> = (props) => {
 
   const intl = useIntl();
@@ -187,6 +181,8 @@ const ParsedNote: Component<{
   const account = useAccountContext();
 
   const dev = localStorage.getItem('devMode') === 'true';
+
+  let priorityImageAssigned = false;
 
   const id = () => {
     // if (props.id) return props.id;
@@ -198,21 +194,31 @@ const ParsedNote: Component<{
 
   let thisNote: HTMLDivElement | undefined;
 
-  const lightbox = new PhotoSwipeLightbox({
-    gallery: `#${id()}`,
-    children: `a.image_${props.note.noteId}`,
-    showHideAnimationType: 'zoom',
-    initialZoomLevel: 'fit',
-    secondaryZoomLevel: 2,
-    maxZoomLevel: 3,
-    thumbSelector: `a.image_${props.note.noteId}`,
-    pswpModule: () => import('photoswipe')
-  });
+  let lightbox: PhotoSwipeLightbox | undefined;
 
   onMount(() => {
     if (props.noLightbox) return;
+    (async () => {
+      if (!lightbox) {
+        const Lightbox = await loadPhotoSwipeLightbox();
+        lightbox = new Lightbox({
+          gallery: `#${id()}`,
+          children: `a.image_${props.note.noteId}`,
+          showHideAnimationType: 'zoom',
+          initialZoomLevel: 'fit',
+          secondaryZoomLevel: 2,
+          maxZoomLevel: 3,
+          thumbSelector: `a.image_${props.note.noteId}`,
+          pswpModule: loadPhotoSwipeModule,
+        });
+      }
+      lightbox?.init();
+    })();
+  });
 
-    lightbox.init();
+  onCleanup(() => {
+    lightbox?.destroy();
+    lightbox = undefined;
   });
 
   const [tokens, setTokens] = createStore<string[]>([]);
@@ -658,7 +664,9 @@ const ParsedNote: Component<{
       // Images tell a 100 words :)
       setWordsDisplayed(w => w + 100);
 
-      return <NoteImage
+      const shouldPrioritize = props.priorityMedia && !priorityImageAssigned;
+
+      const noteImage = <NoteImage
         class={`noteimage image_${props.note.noteId} ${lastClass}`}
         src={url}
         altSrc={token}
@@ -671,7 +679,14 @@ const ParsedNote: Component<{
         onError={imageError}
         authorPk={props.note.pubkey}
         noPlaceholders={props.noPlaceholders}
+        fetchPriority={shouldPrioritize ? 'high' : undefined}
       />
+
+      if (shouldPrioritize) {
+        priorityImageAssigned = true;
+      }
+
+      return noteImage;
     }
 
     const gridClass = groupCount < groupGridLimit ? `grid-${groupCount}` : 'grid-large';
@@ -699,7 +714,9 @@ const ParsedNote: Component<{
             return <></>;
           }
 
-          return <NoteImage
+          const shouldPrioritize = props.priorityMedia && !priorityImageAssigned && index() === 0;
+
+          const galleryImage = <NoteImage
             class={`noteimage_gallery image_${props.note.noteId} cell_${index()+1}`}
             src={url}
             altSrc={url}
@@ -715,7 +732,14 @@ const ParsedNote: Component<{
             noPlaceholders={props.noPlaceholders}
             seeMore={index() === 3 ? item.tokens.length - 4 : 0}
             isGallery={true}
+            fetchPriority={shouldPrioritize ? 'high' : undefined}
           />
+
+          if (shouldPrioritize) {
+            priorityImageAssigned = true;
+          }
+
+          return galleryImage;
         }}
       </For>
     </div>
@@ -771,8 +795,10 @@ const ParsedNote: Component<{
           loop={true}
           playsinline={true}
           data-ratio={`${ratio}`}
+          aria-label={intl.formatMessage(tAria.embeddedMedia.video)}
         >
           <source src={token} type={item.meta?.videoType} />
+          {intl.formatMessage(tAria.embeddedMedia.videoNotSupported)}
         </video>;
 
         video.addEventListener('click', (e: MouseEvent) => {
@@ -833,6 +859,7 @@ const ParsedNote: Component<{
           src={convertedUrl}
           width="100%"
           height="352"
+          title="Spotify player"
           // @ts-ignore no property
           frameBorder="0"
           allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
@@ -860,6 +887,7 @@ const ParsedNote: Component<{
         return <iframe
           class={`embeddedContent ${lastClass}`}
           src={`https://player.twitch.tv/${args}`}
+          title={`Twitch stream for ${channel}`}
           // @ts-ignore no property
           className="w-max"
           allowFullScreen
@@ -910,6 +938,7 @@ const ParsedNote: Component<{
           class={`embeddedContent ${lastClass}`}
           width="100%"
           height="166"
+          title="SoundCloud player"
           // @ts-ignore no property
           scrolling="no"
           allow="autoplay"
@@ -936,6 +965,7 @@ const ParsedNote: Component<{
         return <iframe
           class={`embeddedContent ${lastClass}`}
           allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+          title="Apple Music player"
           // @ts-ignore no property
           frameBorder="0"
           height={`${isSongLink ? 175 : 450}`}
@@ -1001,9 +1031,11 @@ const ParsedNote: Component<{
 
         setWordsDisplayed(w => w + shortMentionInWords);
 
-        return <ExternalLiveEventPreview
-          url={token}
-        />;
+        return <Suspense>
+          <LazyComponents.ExternalLiveEventPreview
+            url={token}
+          />
+        </Suspense>;
       }}
     </For>
   };
@@ -1067,11 +1099,13 @@ const ParsedNote: Component<{
         if (item.meta && item.meta.preview && (props.shorten ? totalLinks < 2 : true)) {
           setWordsDisplayed(w => w + shortMentionInWords);
           return (
-            <LinkPreview
-              preview={item.meta.preview}
-              bordered={props.isEmbeded}
-              isLast={index === content.length-1}
-            />
+            <Suspense>
+              <LazyComponents.LinkPreview
+                preview={item.meta.preview}
+                bordered={props.isEmbeded}
+                isLast={index === content.length-1}
+              />
+            </Suspense>
           );
         }
 
@@ -1134,14 +1168,18 @@ const ParsedNote: Component<{
           </Show>
         }>
           <Match when={unknownEvents[nid]?.kind === Kind.Image}>
-            <NostrImage
-              event={unknownEvents[nid] as NostrImageContent}
-            />
+            <Suspense>
+              <LazyComponents.NostrImage
+                event={unknownEvents[nid] as NostrImageContent}
+              />
+            </Suspense>
           </Match>
           <Match when={unknownEvents[nid]?.kind === Kind.LiveEvent && token.startsWith('https://')}>
-            <LinkPreview
-              preview={getLinkPreview(token)}
-            />
+            <Suspense>
+              <LazyComponents.LinkPreview
+                preview={getLinkPreview(token)}
+              />
+            </Suspense>
           </Match>
         </Switch>
       );
@@ -1182,9 +1220,11 @@ const ParsedNote: Component<{
           </Show>
         }>
           <Match when={unknownEvents[nid]?.kind === Kind.LiveEvent && token.startsWith('https://')}>
-            <LinkPreview
-              preview={getLinkPreview(token)}
-            />
+            <Suspense>
+              <LazyComponents.LinkPreview
+                preview={getLinkPreview(token)}
+              />
+            </Suspense>
           </Match>
         </Switch>
       )
@@ -1303,9 +1343,11 @@ const ParsedNote: Component<{
   }
 
   const renderLiveEvent = (mention: StreamingData, index?: number) => {
-    return <LiveEventPreview
-      stream={mention}
-    />;
+    return <Suspense>
+      <LazyComponents.LiveEventPreview
+        stream={mention}
+      />
+    </Suspense>;
   }
 
   const renderLongFormMention = (mention: PrimalArticle | undefined, index?: number) => {
@@ -1313,18 +1355,22 @@ const ParsedNote: Component<{
     if(!mention || props.veryShort) return <></>;
 
     if (props.noLinks === 'links') {
-      return <SimpleArticlePreview article={mention} noLink={true} />
+      return <Suspense>
+        <LazyComponents.SimpleArticlePreview article={mention} noLink={true} />
+      </Suspense>
     }
 
     return (
       <div class={styles.articlePreview}>
-        <ArticleCompactPreview
-          article={mention}
-          hideFooter={true}
-          hideContext={true}
-          bordered={(props.embedLevel || 0) > 0}
-          noLinks={props.noLinks}
-        />
+        <Suspense>
+          <LazyComponents.ArticleCompactPreview
+            article={mention}
+            hideFooter={true}
+            hideContext={true}
+            bordered={(props.embedLevel || 0) > 0}
+            noLinks={props.noLinks}
+          />
+        </Suspense>
       </div>);
   };
 
@@ -1435,16 +1481,18 @@ const ParsedNote: Component<{
                 }
                 else {
                   link = <div>
-                    <EmbeddedNote
-                      note={ment}
-                      mentionedUsers={mentionedUsers || {}}
-                      isLast={index === content.length-1}
-                      alternativeBackground={props.altEmbeds}
-                      footerSize={props.footerSize}
-                      hideFooter={true}
-                      embedLevel={props.embedLevel}
-                      rootNote={rn}
-                    />
+                    <Suspense>
+                      <LazyComponents.EmbeddedNote
+                        note={ment}
+                        mentionedUsers={mentionedUsers || {}}
+                        isLast={index === content.length-1}
+                        alternativeBackground={props.altEmbeds}
+                        footerSize={props.footerSize}
+                        hideFooter={true}
+                        embedLevel={props.embedLevel}
+                        rootNote={rn}
+                      />
+                    </Suspense>
                   </div>;
                 }
               }
@@ -1501,7 +1549,9 @@ const ParsedNote: Component<{
                 zapSubject = mentionedUsers[zapObject.zappedId!];
               }
 
-              link = <ProfileNoteZap zap={zapObject} subject={zapSubject} />
+              link = <Suspense>
+                <LazyComponents.ProfileNoteZap zap={zapObject} subject={zapSubject} />
+              </Suspense>
             } else {
               let zapContent = app?.events[Kind.Zap].find(e => e.id === hex) as NostrUserZaps | undefined;
 
@@ -1568,7 +1618,9 @@ const ParsedNote: Component<{
                 };
 
 
-                link = <ProfileNoteZap zap={zap} subject={zapSubject} />
+                link = <Suspense>
+                  <LazyComponents.ProfileNoteZap zap={zap} subject={zapSubject} />
+                </Suspense>
               }
 
             }
@@ -1764,12 +1816,14 @@ const ParsedNote: Component<{
               setWordsDisplayed(w => w + shortMentionInWords - 1);
 
               embeded = <div>
-                <EmbeddedNote
-                  note={ment}
-                  mentionedUsers={mentionedUsers}
-                  hideFooter={true}
-                  embedLevel={props.embedLevel}
-                />
+                <Suspense>
+                  <LazyComponents.EmbeddedNote
+                    note={ment}
+                    mentionedUsers={mentionedUsers}
+                    hideFooter={true}
+                    embedLevel={props.embedLevel}
+                  />
+                </Suspense>
                 {end}
               </div>;
             }
@@ -1892,7 +1946,7 @@ const ParsedNote: Component<{
         const image = tag[2];
 
         return image ?
-          <span><img height={15} width={15} src={image} alt={`emoji: ${emoji}`} /></span> :
+          <span><img height={15} width={15} src={image} alt={emoji} role="img" aria-label={`${emoji} emoji`} loading="lazy" decoding="async" /></span> :
           <>{token}</>;
       }}
     </For>
@@ -1905,7 +1959,9 @@ const ParsedNote: Component<{
 
         setWordsDisplayed(w => w + 100);
 
-        return <Lnbc lnbc={token} />
+        return <Suspense>
+          <LazyComponents.Lnbc lnbc={token} />
+        </Suspense>
       }}
     </For>
   }
@@ -1947,6 +2003,8 @@ const ParsedNote: Component<{
   onMount(() => {
     generateContent();
   });
+
+  priorityImageAssigned = false;
 
   return (
     <div ref={thisNote} id={id()} class={`${styles.parsedNote} ${props.veryShort ? styles.shortNote : ''}`} >

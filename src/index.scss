@@ -57,6 +57,19 @@
 }
 
 /* Common styles */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 :root {
   --missing-avatar-text: #FFFFFF;
 
@@ -527,14 +540,14 @@ body::after{
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-tertiary-2);
+  background: var(--surface-tertiary-2);
 }
 
 // Checkboxes
 
 [type="checkbox"]  {
   background-color: var(--background-card);
-  border-color: var(--text-tertiary-2);
+  border-color: var(--surface-tertiary-2);
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -555,7 +568,7 @@ body::after{
   &:checked:active,
   &:checked:focus {
     background-color: var(--background-card);
-    border-color: var(--text-tertiary-2);
+    border-color: var(--surface-tertiary-2);
     background-position: center;
     background-size: 12px auto;
     background-repeat: no-repeat;
@@ -564,7 +577,7 @@ body::after{
 
   &:focus {
     background-color: var(--background-card);
-    border-color: var(--text-tertiary-2);
+    border-color: var(--surface-tertiary-2);
   }
 
   & ~ label {
@@ -576,7 +589,7 @@ body::after{
 
   &:indeterminate {
     background-color: var(--background-site);
-    border-color: var(--text-tertiary-2);
+    border-color: var(--surface-tertiary-2);
     background-image: var(--icon-minus);
     background-position: center;
     background-size: 12px auto;
@@ -707,7 +720,7 @@ button:focus {
       background-color: var(--subtile-devider);
     }
     &[data-day-number-range-start-or-end="true"] {
-      background-color: var(--text-tertiary-2);
+      background-color: var(--surface-tertiary-2);
     }
     &[data-day-number-range-between="true"] {
       background-color: var(--subtile-devider);
@@ -725,7 +738,7 @@ button:focus {
     color: var(--text-primary);
 
     &[date-selector-option-selected="true"] {
-      background-color: var(--text-tertiary-2);
+      background-color: var(--surface-tertiary-2);
     }
   }
 }

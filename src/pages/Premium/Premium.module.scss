@@ -634,7 +634,7 @@
       height: 20px;
       width: 20px;
       border-radius: 10px;
-      border: 1px solid var(--text-tertiary-2);
+      border: 1px solid var(--surface-tertiary-2);
       background-color: var(--background-site);
 
       [data-checked] {
@@ -917,7 +917,7 @@
               width: 16px;
               height: 16px;
 
-              background-color: var(--text-tertiary);
+              background-color: var(--surface-tertiary);
               -webkit-mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
               mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
             }
@@ -2623,7 +2623,7 @@
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      background: var(--text-tertiary-2);
+      background: var(--surface-tertiary-2);
     }
 
     &.selected {
@@ -2631,7 +2631,7 @@
     }
     &[data-legend-style=""] {
       >div {
-        background-color: var(--text-tertiary-2);
+        background-color: var(--surface-tertiary-2);
         -webkit-mask: url(../../assets/icons/nothing.svg) 0 / 100% no-repeat;
         mask: url(../../assets/icons/nothing.svg) 0 / 100% no-repeat;
       }
@@ -2822,7 +2822,7 @@
   min-height: 108px;
   padding: 10px 22px;
   border-radius: 12px;
-  border: 1px solid var(--text-tertiary-2);
+  border: 1px solid var(--surface-tertiary-2);
 }
 
 .shoutoutEditActions {
@@ -3321,7 +3321,7 @@
               width: 16px;
               height: 16px;
 
-              background-color: var(--text-tertiary);
+              background-color: var(--surface-tertiary);
               -webkit-mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
               mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
             }

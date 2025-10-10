@@ -8,6 +8,7 @@ import {
   For,
   Match,
   on,
+  onCleanup,
   Show,
   Switch,
 } from 'solid-js';
@@ -39,8 +40,7 @@ import { APP_ID } from '../App';
 import ProfileTabs from '../components/ProfileTabs/ProfileTabs';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import VerificationCheck from '../components/VerificationCheck/VerificationCheck';
-
-import PhotoSwipeLightbox from 'photoswipe/lightbox';
+import type PhotoSwipeLightbox from 'photoswipe/lightbox';
 import NoteImage from '../components/NoteImage/NoteImage';
 import ProfileQrCodeModal from '../components/ProfileQrCodeModal/ProfileQrCodeModal';
 import { CustomZapInfo, useAppContext } from '../contexts/AppContext';
@@ -55,6 +55,7 @@ import ProfileFollowModal from '../components/ProfileFollowModal/ProfileFollowMo
 import ProfileCardSkeleton from '../components/Skeleton/ProfileCardSkeleton';
 import PremiumCohortInfo from './Premium/PremiumCohortInfo';
 import { ProfilePointer } from 'nostr-tools/lib/types/nip19';
+import { loadPhotoSwipeLightbox, loadPhotoSwipeModule } from '../lib/photoswipe';
 
 const ProfileDesktop: Component = () => {
 
@@ -78,15 +79,7 @@ const ProfileDesktop: Component = () => {
 
   const [hasTiers, setHasTiers] = createSignal(false);
 
-  const lightbox = new PhotoSwipeLightbox({
-    gallery: '#central_header',
-    children: 'a.profile_image',
-    showHideAnimationType: 'zoom',
-    initialZoomLevel: 'fit',
-    secondaryZoomLevel: 2,
-    maxZoomLevel: 3,
-    pswpModule: () => import('photoswipe')
-  });
+  let lightbox: PhotoSwipeLightbox | undefined;
 
 
   const tabHash = () => {
@@ -138,6 +131,30 @@ const ProfileDesktop: Component = () => {
   createEffect(() => {
     resolveHex(params.vanityName)
   })
+
+  const ensureLightbox = async () => {
+    if (!profile?.profile) return;
+
+    if (!lightbox) {
+      const Lightbox = await loadPhotoSwipeLightbox();
+      lightbox = new Lightbox({
+        gallery: '#central_header',
+        children: 'a.profile_image',
+        showHideAnimationType: 'zoom',
+        initialZoomLevel: 'fit',
+        secondaryZoomLevel: 2,
+        maxZoomLevel: 3,
+        pswpModule: loadPhotoSwipeModule,
+      });
+    }
+
+    lightbox?.init();
+  };
+
+  onCleanup(() => {
+    lightbox?.destroy();
+    lightbox = undefined;
+  });
 
   createEffect(on(() => profile?.profileKey, (v,p) => {
     if (!v || v === p) return;
@@ -522,10 +539,10 @@ const ProfileDesktop: Component = () => {
   })
 
   createEffect(() => {
-    if (isProfileLoaded()) {
-      lightbox.init();
-    }
-  })
+    if (!isProfileLoaded()) return;
+
+    ensureLightbox();
+  });
 
   const customZapInfo: () => CustomZapInfo = () => ({
     profile: profile?.userProfile,
@@ -762,7 +779,7 @@ const ProfileDesktop: Component = () => {
                 fallback={<div class={styles.bannerPlaceholder}></div>}
               >
                 <NoteImage
-                  class="profile_image"
+                  class="profile_banner_image"
                   src={banner()}
                   altSrc={profile?.userProfile?.banner}
                   onError={imgError}

@@ -290,14 +290,21 @@ const ArticleCompactPreview: Component<{
   };
 
   const countLines = (el: Element) => {
+    const divHeight = (el as HTMLElement).offsetHeight;
+    const computedStyle = window.getComputedStyle(el);
+    const lineHeightStr = computedStyle.getPropertyValue('line-height');
 
-    // @ts-ignore
-    var divHeight = el.offsetHeight
+    // Parse line-height (could be 'normal', a number with 'px', or a unitless multiplier)
+    let lineHeight: number;
+    if (lineHeightStr === 'normal') {
+      // Approximate 'normal' as 1.2 times font size
+      const fontSize = parseFloat(computedStyle.getPropertyValue('font-size'));
+      lineHeight = fontSize * 1.2;
+    } else {
+      lineHeight = parseFloat(lineHeightStr);
+    }
 
-    // @ts-ignore
-    var lineHeight = el.computedStyleMap().get('line-height').value;
-
-    var lines = divHeight / lineHeight;
+    const lines = divHeight / lineHeight;
 
     return lines;
   }
@@ -375,7 +382,14 @@ const ArticleCompactPreview: Component<{
               when={authorAvatar()}
               fallback={<div class={styles.placeholderImage}></div>}
             >
-              <img src={props.article.user.picture} onload={onImageLoaded} onerror={onImageError} />
+              <img
+                src={props.article.user.picture}
+                onload={onImageLoaded}
+                onerror={onImageError}
+                alt={`${userName(props.article.user)} profile picture`}
+                loading="lazy"
+                decoding="async"
+              />
             </Show>
           }
         >
@@ -384,6 +398,9 @@ const ArticleCompactPreview: Component<{
             onload={onImageLoaded}
             onerror={onImageError}
             class={isDev && missingCacheImage() ? 'redBorder' : ''}
+            alt={`${props.article.title || userName(props.article.user)} cover`}
+            loading="lazy"
+            decoding="async"
           />
         </Show>
       </div>

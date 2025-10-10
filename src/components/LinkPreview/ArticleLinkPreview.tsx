@@ -61,6 +61,8 @@ const ArticleLinkPreview: Component<{ preview: any, id?: string, bordered?: bool
     return true;
   };
 
+  const altText = () => props.preview.title || props.preview.description || props.preview.url || 'Article preview image';
+
   return (
     <A
       id={props.id}
@@ -73,6 +75,9 @@ const ArticleLinkPreview: Component<{ preview: any, id?: string, bordered?: bool
           src={image()?.media_url || props.preview.images[0]}
           style={`width: 100%; height: ${height()}`}
           onerror={onError}
+          loading="lazy"
+          decoding="async"
+          alt={altText()}
         />
       </Show>
 

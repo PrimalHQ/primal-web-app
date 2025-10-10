@@ -7,12 +7,13 @@ import { emptyInvoice } from '../../constants';
 import { date, dateFuture } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
 import { humanizeNumber } from '../../lib/stats';
+import { logError } from '../../lib/logger';
 import { cashuInvoice } from '../../translations';
 import { LnbcInvoice } from '../../types/primal';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import Modal from '../Modal/Modal';
 import QrCode from '../QrCode/QrCode';
-import { getDecodedToken, Token } from "@cashu/cashu-ts";
+import { decodeCashuToken, type CashuToken } from "../../lib/cashu";
 
 import styles from './CashuQrCodeModal.module.scss';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
@@ -26,15 +27,30 @@ const CashuQrCodeModal: Component<{
 }> = (props) => {
   const intl = useIntl();
 
-  const [invoice, setInvoice] = createStore<Token>({ token: []});
+  const [invoice, setInvoice] = createStore<CashuToken>({ token: [] } as CashuToken);
 
   createEffect(() => {
-    if (props.cashu) {
-      const dec: Token = getDecodedToken(props.cashu);
-      setInvoice(reconcile(dec));
-    } else {
-      setInvoice(reconcile({ token: [] }));
+    const token = props.cashu;
+
+    if (!token) {
+      setInvoice(reconcile({ token: [] } as CashuToken));
+      return;
     }
+
+    (async () => {
+      try {
+        const decoded = await decodeCashuToken(token);
+
+        if (token !== props.cashu) {
+          return;
+        }
+
+        setInvoice(reconcile(decoded));
+      } catch (error) {
+        logError('Failed to decode cashu QR token: ', error);
+        setInvoice(reconcile({ token: [] } as CashuToken));
+      }
+    })();
   });
 
   const amount = () =>

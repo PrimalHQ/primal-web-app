@@ -4,11 +4,9 @@ import styles from './Layout.module.scss';
 
 import { useBeforeLeave, useLocation, useParams} from '@solidjs/router';
 import { useAccountContext } from '../../contexts/AccountContext';
-import zapMD from '../../assets/lottie/zap_md.json';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { SendNoteResult } from '../../types/primal';
 import { useProfileContext } from '../../contexts/ProfileContext';
-import ZapAnimation from '../ZapAnimation/ZapAnimation';
 import ReactionsModal from '../ReactionsModal/ReactionsModal';
 import { useAppContext } from '../../contexts/AppContext';
 import CustomZap from '../CustomZap/CustomZap';
@@ -121,7 +119,6 @@ const Layout: Component<any> = (props) => {
           <div class="zap_icon_fill"></div>
           <div class="like_icon"></div>
           <div class="like_icon_fill"></div>
-          <ZapAnimation src={zapMD} />
         </div>
         <div id="modal" class={styles.modal}></div>
         <Show

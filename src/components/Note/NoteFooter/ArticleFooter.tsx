@@ -1,4 +1,4 @@
-import { batch, Component, createEffect, Show } from 'solid-js';
+import { batch, Component, createEffect, lazy, Show, Suspense } from 'solid-js';
 import { MenuItem, PrimalArticle, PrimalNote, ZapOption } from '../../../types/primal';
 import { sendArticleRepost } from '../../../lib/notes';
 
@@ -11,12 +11,10 @@ import { truncateNumber } from '../../../lib/notifications';
 import { canUserReceiveZaps, lastZapError, zapArticle } from '../../../lib/zap';
 import { useSettingsContext } from '../../../contexts/SettingsContext';
 
-import zapMD from '../../../assets/lottie/zap_md_2.json';
 import { toast as t } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { hookForDev } from '../../../lib/devTools';
 import { getScreenCordinates } from '../../../utils';
-import ZapAnimation from '../../ZapAnimation/ZapAnimation';
 import { CustomZapInfo, useAppContext } from '../../../contexts/AppContext';
 import ArticleFooterActionButton from './ArticleFooterActionButton';
 import { NoteReactionsState } from '../Note';
@@ -26,7 +24,25 @@ import BookmarkArticle from '../../BookmarkNote/BookmarkArticle';
 import { readSecFromStorage } from '../../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 
-export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
+// Lazy load ZapAnimation and lottie data (480KB) - only loaded when zap animation is triggered
+const ZapAnimation = lazy(() => import('../../ZapAnimation/ZapAnimation'));
+
+let zapMDData: any = null;
+let zapMDPromise: Promise<any> | null = null;
+
+const loadZapMD = async () => {
+  if (zapMDData) return zapMDData;
+  if (!zapMDPromise) {
+    zapMDPromise = import('../../../assets/lottie/zap_md_2.json').then(module => module.default);
+  }
+  zapMDData = await zapMDPromise;
+  return zapMDData;
+};
+
+export const lottieDuration = () => {
+  if (!zapMDData) return 0;
+  return zapMDData.op * 1_000 / zapMDData.fr;
+};
 
 const ArticleFooter: Component<{
   note: PrimalArticle,
@@ -244,7 +260,10 @@ const ArticleFooter: Component<{
     }
   };
 
-  const animateZap = () => {
+  const animateZap = async () => {
+    // Load lottie data if not already loaded
+    await loadZapMD();
+
     setTimeout(() => {
       props.updateState('hideZapIcon', () => true);
 
@@ -285,10 +304,23 @@ const ArticleFooter: Component<{
       medZapAnimation.addEventListener('complete', onAnimDone);
 
       try {
-        // @ts-ignore
-        medZapAnimation.seek(0);
-        // @ts-ignore
-        medZapAnimation.play();
+        const player = medZapAnimation as unknown as {
+          seek?: (value: number) => void,
+          stop?: () => void,
+          play?: () => void,
+        };
+
+        if (typeof player.seek === 'function') {
+          player.seek(0);
+        } else if (typeof player.stop === 'function') {
+          player.stop();
+        }
+
+        if (typeof player.play === 'function') {
+          player.play();
+        } else {
+          throw new Error('Zap animation player missing play method');
+        }
       } catch (e) {
         console.warn('Failed to animte zap:', e);
         onAnimDone();
@@ -378,13 +410,15 @@ const ArticleFooter: Component<{
       onClick={(e) => {e.preventDefault();}}
     >
 
-      <Show when={props.state.showZapAnim}>
-        <ZapAnimation
-          id={`note-med-zap-${props.note.id}`}
-          src={zapMD}
-          class={props.large ? styles.largeZapLottie : styles.mediumZapLottie}
-          ref={medZapAnimation}
-        />
+      <Show when={props.state.showZapAnim && zapMDData}>
+        <Suspense>
+          <ZapAnimation
+            id={`note-med-zap-${props.note.id}`}
+            src={zapMDData}
+            class={props.large ? styles.largeZapLottie : styles.mediumZapLottie}
+            ref={medZapAnimation}
+          />
+        </Suspense>
       </Show>
 
       <ArticleFooterActionButton
