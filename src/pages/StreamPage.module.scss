@@ -222,7 +222,7 @@
 .chatMessages {
   display: flex;
   flex-direction: column-reverse;
-  gap: 16px;
+  gap: 2px;
   padding: 8px;
   height: calc(100dvh - 154px);
   overflow: hidden;
@@ -237,6 +237,7 @@
 .liveMessage {
   display: flex;
   gap: 8px;
+  padding-block: 6px;
   padding-left: 9px;
 
   .leftSide {
