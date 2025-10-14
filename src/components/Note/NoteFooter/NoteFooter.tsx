@@ -15,7 +15,7 @@ import zapMD from '../../../assets/lottie/zap_md_2.json';
 import { toast as t } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { hookForDev } from '../../../lib/devTools';
-import { getScreenCordinates, isPhone } from '../../../utils';
+import { determineOrient, getScreenCordinates, isPhone } from '../../../utils';
 import ZapAnimation from '../../ZapAnimation/ZapAnimation';
 import { CustomZapInfo, useAppContext } from '../../../contexts/AppContext';
 import NoteFooterActionButton from './NoteFooterActionButton';
@@ -455,12 +455,6 @@ const NoteFooter: Component<{
     }
   });
 
-  const determineOrient = () => {
-    const coor = getScreenCordinates(repostMenu);
-    const height = 100;
-    return (coor.y || 0) + height < window.innerHeight + window.scrollY ? 'down' : 'up';
-  }
-
   return (
     <div
       id={props.id}
@@ -538,7 +532,7 @@ const NoteFooter: Component<{
             id={`repost_menu_${props.note.post.id}`}
             items={repostMenuItems()}
             position="note_footer"
-            orientation={determineOrient()}
+            orientation={determineOrient(repostMenu as HTMLElement)}
             hidden={!props.state.isRepostMenuVisible}
           />
         </div>

@@ -32,6 +32,7 @@ import ArticleDraftContextMenu from '../Note/ArticleDraftContextMenu';
 import LiveStreamContextMenu from '../Note/LiveStreamContextMenu';
 import ProfileQrCodeModal from '../ProfileQrCodeModal/ProfileQrCodeModal';
 import ReportContentModal from '../ReportContentModal/ReportContentModal';
+import NoteVideoContextMenu from '../Note/NoteVideoContextMenu';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -267,6 +268,12 @@ const Layout: Component<any> = (props) => {
           open={app?.showStreamContextMenu}
           onClose={app?.actions.closeStreamContextMenu}
           data={app?.streamContextMenuInfo}
+        />
+
+        <NoteVideoContextMenu
+          open={app?.showNoteVideoContextMenu}
+          onClose={app?.actions.closeNoteVideoContextMenu}
+          data={app?.noteVideoContextMenuInfo}
         />
 
         <ArticleOverviewContextMenu

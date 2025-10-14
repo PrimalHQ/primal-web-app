@@ -404,6 +404,13 @@ export const actions = {
       description: 'Label for reporting user from profile context menu',
     },
   },
+  noteVideoContext: {
+    downloadVideo: {
+      id: 'actions.noteVideoContext.downloadVideo',
+      defaultMessage: 'Download Video',
+      description: 'Label for downloading video from context menu',
+    }
+  },
   streamContext: {
     copyLink: {
       id: 'actions.streamContext.copyLink',

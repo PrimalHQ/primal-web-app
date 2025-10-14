@@ -575,3 +575,10 @@ export const findFirstDifference = (arr1: string[], arr2: string[]) => {
 
   return -1;
 }
+
+
+export const determineOrient = (element: HTMLElement) => {
+  const coor = getScreenCordinates(element);
+  const height = 100;
+  return (coor.y || 0) + height < window.innerHeight + window.scrollY ? 'down' : 'up';
+}

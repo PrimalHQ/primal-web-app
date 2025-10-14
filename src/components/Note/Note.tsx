@@ -329,7 +329,9 @@ const Note: Component<NoteProps> = (props) => {
           id={props.id}
           class={styles.noteNotificationLink}
           href={!props.onClick ? noteLinkId() : ''}
-          onClick={() => navToThread(props.note)}
+          onClick={() => {
+            navToThread(props.note)
+          }}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
         >
@@ -592,7 +594,13 @@ const Note: Component<NoteProps> = (props) => {
               <a
                 class={styles.message}
                 href={!props.onClick ? noteLinkId() : ''}
-                onClick={() => navToThread(props.note)}
+                onClick={(e) => {
+                  if (app?.showNoteVideoContextMenu) {
+                    e.preventDefault();
+                    return false;
+                  }
+                  navToThread(props.note)
+                }}
               >
                 <ParsedNote
                   note={props.note}

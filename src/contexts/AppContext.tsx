@@ -79,6 +79,12 @@ export type LiveStreamContextMenuInfo = {
   onDelete?: (id: string) => void,
 };
 
+export type NoteVideoContextMenuInfo = {
+  src: string,
+  position: DOMRect | undefined,
+  onDownload?: () => void,
+};
+
 export type AppContextStore = {
   events: Record<number, NostrEventContent[]>,
   isInactive: boolean,
@@ -91,6 +97,8 @@ export type AppContextStore = {
   noteContextMenuInfo: NoteContextMenuInfo | undefined,
   showStreamContextMenu: boolean,
   streamContextMenuInfo: LiveStreamContextMenuInfo | undefined,
+  noteVideoContextMenuInfo: NoteVideoContextMenuInfo | undefined,
+  showNoteVideoContextMenu: boolean,
   showArticleOverviewContextMenu: boolean,
   articleOverviewContextMenuInfo: NoteContextMenuInfo | undefined,
   showArticleDraftContextMenu: boolean,
@@ -123,6 +131,7 @@ export type AppContextStore = {
       openReaction: () => void,
       onDelete: (id: string) => void,
     ) => void,
+    closeContextMenu: () => void,
     openStreamContextMenu: (
       stream: StreamingData,
       streamAuthor: PrimalUser,
@@ -130,7 +139,12 @@ export type AppContextStore = {
       onDelete: (id: string) => void,
     ) => void,
     closeStreamContextMenu: () => void,
-    closeContextMenu: () => void,
+    openNoteVideoContextMenu: (
+      src: string,
+      position: DOMRect | undefined,
+      onDownload: () => void,
+    ) => void,
+    closeNoteVideoContextMenu: () => void,
     openArticleOverviewContextMenu: (
       note: PrimalArticle,
       position: DOMRect | undefined,
@@ -189,7 +203,9 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   showArticleDraftContextMenu: false,
   articleDraftContextMenuInfo: undefined,
   showStreamContextMenu: false,
+  showNoteVideoContextMenu: false,
   streamContextMenuInfo: undefined,
+  noteVideoContextMenuInfo: undefined,
   showLnInvoiceModal: false,
   lnbc: undefined,
   showCashuInvoiceModal: false,
@@ -285,6 +301,20 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('showStreamContextMenu', () => true);
   };
 
+
+  const openNoteVideoContextMenu = (
+    src: string,
+    position: DOMRect | undefined,
+    onDownload: () => void,
+  ) => {
+    updateStore('noteVideoContextMenuInfo', reconcile({
+      src,
+      position,
+      onDownload,
+    }))
+    updateStore('showNoteVideoContextMenu', () => true);
+  };
+
   const openArticleOverviewContextMenu = (
     note: PrimalArticle,
     position: DOMRect | undefined,
@@ -364,6 +394,11 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
   const closeStreamContextMenu = () => {
     updateStore('showStreamContextMenu', () => false);
+  };
+
+  const closeNoteVideoContextMenu = () => {
+    console.log('close video')
+    updateStore('showNoteVideoContextMenu', () => false);
   };
 
   const closeArticleOverviewContextMenu = () => {
@@ -607,9 +642,11 @@ const onSocketClose = (closeEvent: CloseEvent) => {
       closeCustomZapModal,
       resetCustomZap,
       openContextMenu,
-      openStreamContextMenu,
       closeContextMenu,
+      openStreamContextMenu,
       closeStreamContextMenu,
+      openNoteVideoContextMenu,
+      closeNoteVideoContextMenu,
       openArticleOverviewContextMenu,
       closeArticleOverviewContextMenu,
       openArticleDraftContextMenu,

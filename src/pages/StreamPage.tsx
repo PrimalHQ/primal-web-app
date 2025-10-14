@@ -382,6 +382,7 @@ const StreamPage: Component = () => {
         pubkey: content.pubkey,
         hosts: (content.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
         participants: (content.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
+        event: { ...content },
       });
 
       return;

@@ -1,9 +1,11 @@
-import { Component, createEffect, createSignal, Match, onMount, Show, Switch } from "solid-js";
+import { Component, createEffect, createSignal, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { useMediaContext } from "../../contexts/MediaContext";
-import { uuidv4 } from "../../utils";
+import { determineOrient, uuidv4 } from "../../utils";
 import Hls from 'hls.js';
 
 import styles from './NoteVideo.module.scss';
+import PrimalMenu from "../PrimalMenu/PrimalMenu";
+import { useAppContext } from "../../contexts/AppContext";
 
 const NoteVideo: Component<{
   class?: string,
@@ -13,6 +15,7 @@ const NoteVideo: Component<{
   src: string,
   type?: string,
 }> = (props) => {
+  const app =useAppContext();
   const media = useMediaContext();
 
   let videoEl: HTMLVideoElement | undefined;
@@ -54,50 +57,91 @@ const NoteVideo: Component<{
     });
   });
 
-  onMount(() => {
-    videoEl?.addEventListener('click', (e: MouseEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-    });
+  const onVideoClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
 
-    playButton?.addEventListener('click', (e: MouseEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-      if (!videoEl) return;
-
-      setUserPlayed(videoEl.paused ? 'pause' : 'play');
-
-      if (videoEl.paused || userMuted()) {
-        videoEl.muted = true;
-        return;
-      }
-
-      videoEl.muted = false;
-    });
-
-
-    muteButton?.addEventListener('click', (e: MouseEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-
-      setUserMuted(videoEl?.muted || false);
-    });
-
-    mediaController?.addEventListener('click', (e: MouseEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-    });
-
-    if (videoEl) {
-      observer.observe(videoEl);
+    if (app?.showNoteVideoContextMenu) {
+      app.actions.closeNoteVideoContextMenu();
     }
+
+  }
+
+  const onPlayClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    if (!videoEl) return;
+
+    setUserPlayed(videoEl.paused ? 'pause' : 'play');
+
+    if (videoEl.paused || userMuted()) {
+      videoEl.muted = true;
+      return;
+    }
+
+    videoEl.muted = false;
+  }
+
+  const onMuteClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    setUserMuted(videoEl?.muted || false);
+  }
+
+  const onContextClick = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    triggerContextMenu();
+  }
+
+  onMount(() => {
+    videoEl?.addEventListener('click', onVideoClick);
+
+    playButton?.addEventListener('click', onPlayClick);
+
+    muteButton?.addEventListener('click', onMuteClick);
+
+    mediaController?.addEventListener('click', onVideoClick);
+
+    streamContextMenu?.addEventListener('click', onContextClick);
+
+    if (mediaController) {
+      observer.observe(mediaController);
+    }
+  })
+
+  onCleanup(() => {
+    videoEl?.removeEventListener('click', onVideoClick);
+
+    playButton?.removeEventListener('click', onPlayClick);
+
+    muteButton?.removeEventListener('click', onMuteClick);
+
+    mediaController?.removeEventListener('click', onVideoClick);
+
+    streamContextMenu?.removeEventListener('click', onContextClick);
+
+    if (mediaController) {
+      observer.unobserve(mediaController);
+    }
+
   })
 
   const isHls = () => {
     return props.src.endsWith(".m3u8");
   }
 
+  const [openContextMenu, setOpenContextMenu] = createSignal(false);
+
   const triggerContextMenu = () => {
+    app?.actions.openNoteVideoContextMenu(
+      props.src,
+      streamContextMenu?.getBoundingClientRect(),
+      downloadVideo,
+    );
   }
 
   const checkMediaLoaded = () => {
@@ -116,6 +160,16 @@ const NoteVideo: Component<{
       s += `height: ${props.height}px;`;
     }
     return s;
+  }
+
+  const downloadVideo = async () => {
+    const sections = props.src.split('/');
+    const filename = sections[sections.length-1];
+
+    const a = document.createElement('a');
+    a.href = props.src;
+    a.download = filename;
+    a.click();
   }
 
   return (
@@ -189,13 +243,15 @@ const NoteVideo: Component<{
                 </div>
                 <div class={styles.buttonSection}>
                   <media-fullscreen-button></media-fullscreen-button>
-                  <buttton
+                  <button
+                    id={`context_button_${uuid}`}
                     role="button"
-                    onClick={triggerContextMenu}
                     ref={streamContextMenu}
+                    style={{ "margin-bottom": 0 }}
+                    onClick={onContextClick}
                   >
                     <div class={styles.contextIcon}></div>
-                  </buttton>
+                  </button>
                 </div>
               </div>
             </media-control-bar>
