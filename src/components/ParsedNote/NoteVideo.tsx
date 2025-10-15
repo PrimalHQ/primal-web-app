@@ -168,6 +168,7 @@ const NoteVideo: Component<{
 
     const a = document.createElement('a');
     a.href = props.src;
+    a.target = '__blank';
     a.download = filename;
     a.click();
   }
