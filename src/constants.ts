@@ -213,7 +213,7 @@ export enum NotificationType {
   YOUR_POST_WAS_BOOKMARKED=302,
   YOUR_POST_HAD_REACTION=303,
 
-  LIVE_EVENT_STARTED=501,
+  LIVE_EVENT_HAPPENING=501,
 };
 
 export const mentionedNotifTypes = [
@@ -224,7 +224,7 @@ export const mentionedNotifTypes = [
   NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED,
   NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED,
   NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED,
-  NotificationType.LIVE_EVENT_STARTED,
+  NotificationType.LIVE_EVENT_HAPPENING,
 ];
 
 
@@ -282,7 +282,7 @@ export const notificationTypeUserProps: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_BOOKMARKED]: 'who_bookmarked_it',
   [NotificationType.YOUR_POST_HAD_REACTION]: 'who_reacted',
 
-  [NotificationType.LIVE_EVENT_STARTED]: 'host',
+  [NotificationType.LIVE_EVENT_HAPPENING]: 'host',
 }
 
 export const notificationTypeNoteProps: Record<string, string> = {
@@ -311,7 +311,7 @@ export const notificationTypeNoteProps: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_BOOKMARKED]: 'your_post',
   [NotificationType.YOUR_POST_HAD_REACTION]: 'your_post',
 
-  [NotificationType.LIVE_EVENT_STARTED]: 'live_event_id',
+  [NotificationType.LIVE_EVENT_HAPPENING]: 'live_event_id',
 
 }
 
@@ -409,6 +409,8 @@ export const defaultNotificationSettings: Record<string, boolean> = {
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED: true,
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED: true,
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO: true,
+
+  LIVE_EVENT_HAPPENING: true,
 };
 
 export const defaultNotificationAdditionalSettings: Record<string, boolean> = {

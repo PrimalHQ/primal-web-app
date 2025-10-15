@@ -27,6 +27,9 @@ const CheckBox: Component<{
         </Checkbox.Indicator>
       </Checkbox.Control>
       <Checkbox.Label class={styles.label}>
+        <Show when={props.icon}>
+          <img class={styles.icon} src={props.icon} />
+        </Show>
         <Switch>
           <Match when={props.children}>
             {props.children}

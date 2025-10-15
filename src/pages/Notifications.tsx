@@ -579,7 +579,7 @@ const Notifications: Component = () => {
   };
 
   const liveEventStarted = () => {
-    const type = NotificationType.LIVE_EVENT_STARTED;
+    const type = NotificationType.LIVE_EVENT_HAPPENING;
     const notifs = sortedNotifications[type];
 
     if (!notifs) {

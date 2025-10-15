@@ -93,7 +93,7 @@ const typeIcons: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_BOOKMARKED]: postBookmarked,
   [NotificationType.YOUR_POST_HAD_REACTION]: postReacted,
 
-  [NotificationType.LIVE_EVENT_STARTED]: liveEventStarted,
+  [NotificationType.LIVE_EVENT_HAPPENING]: liveEventStarted,
 }
 
 const typeIconsLight: Record<string, string> = {
@@ -122,7 +122,7 @@ const typeIconsLight: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_BOOKMARKED]: postBookmarkedLight,
   [NotificationType.YOUR_POST_HAD_REACTION]: postReactedLight,
 
-  [NotificationType.LIVE_EVENT_STARTED]: liveEventStarted,
+  [NotificationType.LIVE_EVENT_HAPPENING]: liveEventStarted,
 }
 
 type NotificationItemProps = {
@@ -312,7 +312,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
           {props.iconInfo}
         </div>
 
-        <Show when={[NotificationType.LIVE_EVENT_STARTED].includes(props.notification.type)}>
+        <Show when={[NotificationType.LIVE_EVENT_HAPPENING].includes(props.notification.type)}>
           <div class={styles.iconLiveInfo}>
             LIVE
           </div>
@@ -357,7 +357,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
 
         <Switch>
           <Match
-            when={[NotificationType.LIVE_EVENT_STARTED].includes(props.type)}
+            when={[NotificationType.LIVE_EVENT_HAPPENING].includes(props.type)}
           >
             <div class={styles.liveEventNotif}>
               <div class={styles.liveTitle}>
