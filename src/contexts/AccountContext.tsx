@@ -1218,7 +1218,7 @@ export function AccountProvider(props: { children: JSXElement }) {
           if (success) {
             updateStore('mutedTags', () => tags);
             updateStore('mutedSince', () => date);
-            note && triggerImportEvents([note], `import_mute_list_remove_${APP_ID}`);
+            note && triggerImportEvents([note], `import_mute_list_word_add_${APP_ID}`);
           }
 
           then && then(success);
@@ -1294,7 +1294,7 @@ export function AccountProvider(props: { children: JSXElement }) {
           if (success) {
             updateStore('mutedTags', () => tags);
             updateStore('mutedSince', () => date);
-            note && triggerImportEvents([note], `import_mute_list_remove_${APP_ID}`);
+            note && triggerImportEvents([note], `import_mute_list_word_remove_${APP_ID}`);
           }
 
           then && then(success);
@@ -1349,7 +1349,7 @@ export function AccountProvider(props: { children: JSXElement }) {
           updateStore('streamMutedTags', () => tags);
           updateStore('streamMutedSince', () => date);
           saveStreamMuted(store.publicKey, muted, date);
-          note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`);
+          note && triggerImportEvents([note], `import_stream_mute_list_add_${APP_ID}`);
         }
 
         then && then(success);
@@ -1401,7 +1401,7 @@ export function AccountProvider(props: { children: JSXElement }) {
           updateStore('streamMutedTags', () => tags);
           updateStore('streamMutedSince', () => date);
           saveStreamMuted(store.publicKey, muted, date);
-          note && triggerImportEvents([note], `import_mute_list_remove_${APP_ID}`);
+          note && triggerImportEvents([note], `import_stream_mute_list_remove_${APP_ID}`);
         }
 
         then && then(success);
