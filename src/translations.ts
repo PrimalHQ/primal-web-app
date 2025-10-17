@@ -995,7 +995,7 @@ export const notificationTypeTranslations: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_REPOSTED]: 'reposted your',
   [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'replied to your',
 
-  [NotificationType.REPLY_TO_REPLY]: 'replied to your thread',
+  [NotificationType.REPLY_TO_REPLY]: 'replied in your thread',
 
   [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'mentioned you in a',
   [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'mentioned your',
