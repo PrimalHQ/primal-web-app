@@ -395,6 +395,10 @@ const Notifications: Component = () => {
         if (content.kind === Kind.Notification) {
           const notif = JSON.parse(content.content) as PrimalNotification;
 
+          // Ignore unsupported notification types
+          const isSupportedNotification = Object.values(NotificationType).includes(notif.type);
+          if (!isSupportedNotification) return;
+
           const isLastNotif =
             lastNotification()?.created_at === notif.created_at &&
             lastNotification()?.type === notif.type;
