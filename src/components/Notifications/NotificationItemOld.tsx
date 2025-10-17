@@ -74,6 +74,8 @@ const typeIcons: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_REPOSTED]: postReposted,
   [NotificationType.YOUR_POST_WAS_REPLIED_TO]: postReplied,
 
+  [NotificationType.REPLY_TO_REPLY]: postReplied,
+
   [NotificationType.YOU_WERE_MENTIONED_IN_POST]: mention,
   [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: mentionedPost,
 
@@ -103,6 +105,8 @@ const typeIconsLight: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_LIKED]: postLikedLight,
   [NotificationType.YOUR_POST_WAS_REPOSTED]: postRepostedLight,
   [NotificationType.YOUR_POST_WAS_REPLIED_TO]: postRepliedLight,
+
+  [NotificationType.REPLY_TO_REPLY]: postReplied,
 
   [NotificationType.YOU_WERE_MENTIONED_IN_POST]: mentionLight,
   [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: mentionedPostLight,
@@ -213,6 +217,7 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
     if ([
       NotificationType.NEW_USER_FOLLOWED_YOU,
       NotificationType.USER_UNFOLLOWED_YOU,
+      NotificationType.REPLY_TO_REPLY,
       ...mentionedNotifTypes,
     ]. includes(type())) {
       return label;
@@ -278,6 +283,7 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
       NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO,
       NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO,
       NotificationType.YOUR_POST_WAS_REPLIED_TO,
+      NotificationType.REPLY_TO_REPLY,
     ].includes(type())
   };
 
@@ -306,7 +312,7 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
 
   return (
     <div id={props.id} class={styles.notifItem} data-notif={props.notification.id}>
-      <div class={`${styles.notifType} ${props.notification.type === NotificationType.YOUR_POST_WAS_REPLIED_TO ? styles.replyAvatar : ''}`}>
+      <div class={`${styles.notifType} ${[NotificationType.YOUR_POST_WAS_REPLIED_TO, NotificationType.REPLY_TO_REPLY].includes(props.notification.type) ? styles.replyAvatar : ''}`}>
         <Switch fallback={
           <img src={typeIcon()} alt="notification icon" />
         }>
@@ -318,7 +324,7 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
             <div>{reactionIcon()}</div>
           </Match>
 
-          <Match when={props.notification.type === NotificationType.YOUR_POST_WAS_REPLIED_TO}>
+          <Match when={[NotificationType.YOUR_POST_WAS_REPLIED_TO, NotificationType.REPLY_TO_REPLY].includes(props.notification.type)}>
             <A
               href={app?.actions.profileLink(user()?.npub) || ''} class={styles.avatar}
               title={userName(user())}
@@ -346,7 +352,7 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
         </div>
         <div class={styles.notifHeader}>
           <Show
-            when={props.notification.type !== NotificationType.YOUR_POST_WAS_REPLIED_TO}
+            when={![NotificationType.YOUR_POST_WAS_REPLIED_TO, NotificationType.REPLY_TO_REPLY].includes(props.notification.type)}
           >
             <div class={styles.avatars}>
               <A

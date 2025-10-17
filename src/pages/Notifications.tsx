@@ -701,6 +701,31 @@ const Notifications: Component = () => {
     </For>
   };
 
+
+  const yourThreadWasRepliedTo = () => {
+    const type = NotificationType.REPLY_TO_REPLY;
+    const notifs = sortedNotifications[type] || [];
+
+    const grouped = groupBy(notifs, 'reply');
+
+    const keys = Object.keys(grouped);
+
+
+    return <For each={keys}>
+      {key => {
+        return (
+          <NotificationItem
+            type={type}
+            users={getUsers(grouped[key], type)}
+            note={relatedNotes.notes.find(n => n.post.id === key)}
+            read={relatedNotes.reads.find(n => n.id === key)}
+            notification={notifs[0]}
+          />
+        )}
+      }
+    </For>
+  };
+
   const yourPostWasZapped = () => {
     const type = NotificationType.YOUR_POST_WAS_ZAPPED;
     const notifs = sortedNotifications[type] || [];
@@ -1422,6 +1447,7 @@ const Notifications: Component = () => {
             {yourPostWasZapped()}
 
             {yourPostWasRepliedTo()}
+            {yourThreadWasRepliedTo()}
             {yourPostWasReposted()}
             {yourPostWasLiked()}
 
