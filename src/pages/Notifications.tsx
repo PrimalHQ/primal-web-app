@@ -206,6 +206,11 @@ const Notifications: Component = () => {
 
           const notif = JSON.parse(content.content) as PrimalNotification;
 
+          // Skip unknown notification types
+          if (!Object.values(NotificationType).includes(notif.type)) {
+            return;
+          }
+
           if (newNotifs[notif.type]) {
             newNotifs[notif.type].push(notif);
           }
