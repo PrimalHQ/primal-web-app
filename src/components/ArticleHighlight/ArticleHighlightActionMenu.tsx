@@ -1,29 +1,13 @@
-import { A } from '@solidjs/router';
 import { nip19 } from 'nostr-tools';
-import { batch, Component, createEffect, For, JSXElement, Match, onMount, Show, Switch } from 'solid-js';
-import { createStore } from 'solid-js/store';
-import { Portal } from 'solid-js/web';
+import { Component, Match, Show, Switch } from 'solid-js';
 import { Kind } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
-import { useThreadContext } from '../../contexts/ThreadContext';
-import { shortDate } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
 import { removeHighlight, sendHighlight } from '../../lib/highlights';
 import { generatePrivateKey } from '../../lib/nTools';
-import { userName } from '../../stores/profile';
-import { NostrRelaySignedEvent, PrimalArticle, SendNoteResult, ZapOption } from '../../types/primal';
-import { uuidv4 } from '../../utils';
-import Avatar from '../Avatar/Avatar';
-import { NoteReactionsState } from '../Note/Note';
-import NoteContextTrigger from '../Note/NoteContextTrigger';
-import ArticleFooter from '../Note/NoteFooter/ArticleFooter';
-import NoteFooter from '../Note/NoteFooter/NoteFooter';
-import NoteTopZaps from '../Note/NoteTopZaps';
-import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
-import VerificationCheck from '../VerificationCheck/VerificationCheck';
+import { NostrRelaySignedEvent, PrimalArticle, } from '../../types/primal';
 
 import styles from './ArticleHighlight.module.scss';
+import { accountStore, quoteNote, showNewNoteForm } from '../../stores/accountStore';
 
 const topOffset = 64 + 8;
 
@@ -46,7 +30,6 @@ const ArticleHighlightActionMenu: Component<{
   onCopy?: (id: string) => void,
   onQuote?: (event: NostrRelaySignedEvent) => void,
 }> = (props) => {
-  const account = useAccountContext();
 
   const topP = () => {
     return (props.position?.y || 0) - topOffset;
@@ -115,8 +98,6 @@ const ArticleHighlightActionMenu: Component<{
   }
 
   const createHighlight = async (content?: string, context?: string, selection?: Selection) => {
-    if (!account) return { success: false, reasons: ['Author missing'] };
-
     const generated = generateContentAndContext(selection);
 
     return await sendHighlight(
@@ -124,9 +105,9 @@ const ArticleHighlightActionMenu: Component<{
       context || generated.context,
       props.article.pubkey,
       `${Kind.LongForm}:${props.article.pubkey}:${(props.article.msg.tags.find(t => t[0] === 'd') || [])[1]}`,
-      account.proxyThroughPrimal,
-      account.activeRelays,
-      account.relaySettings,
+      accountStore.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
     );
   };
 
@@ -134,7 +115,7 @@ const ArticleHighlightActionMenu: Component<{
     e && e.preventDefault();
     e && e.stopPropagation();
 
-    if (!account) return;
+    if (!accountStore.publicKey) return;
 
     const naddr = `${Kind.LongForm}:${props.article.pubkey}:${(props.article.msg.tags.find(t => t[0] === 'd') || [])[1]}`;
 
@@ -142,19 +123,19 @@ const ArticleHighlightActionMenu: Component<{
       const { content, context } = generateContentAndContext(props.selection);
 
       const highlight = {
-        id: generatePrivateKey(),
+        id: `${generatePrivateKey()}`,
         kind: Kind.Highlight,
         context,
         content,
         tags: [
           ['p', props.article.pubkey],
-          ['p', account.publicKey],
+          ['p', accountStore.publicKey],
           ['a', naddr],
           ['context', context],
         ],
         created_at: (new Date()).getTime() / 1_000,
         sig: 'UNSIGNED',
-        pubkey: account.publicKey || '',
+        pubkey: accountStore.publicKey,
       };
 
       then && then(highlight);
@@ -173,14 +154,14 @@ const ArticleHighlightActionMenu: Component<{
       const context = (props.highlight.tags.find((t: string[]) => t[0] === 'context') || [])[1];
 
       const highlight = {
-        id: generatePrivateKey(),
+        id: `${generatePrivateKey()}`,
         kind: Kind.Highlight,
         context,
         content,
         tags: [ ...props.highlight.tags ],
         created_at: (new Date()).getTime() / 1_000,
         sig: 'UNSIGNED',
-        pubkey: account.publicKey || '',
+        pubkey: accountStore.publicKey,
       };
 
       then && then(highlight);
@@ -198,9 +179,9 @@ const ArticleHighlightActionMenu: Component<{
   }
 
   const onRemoveHighlight = async () => {
-    if (!props.highlight || !account) return;
+    if (!props.highlight || !accountStore.publicKey) return;
 
-    if (props.highlight.pubkey !== account.publicKey) return;
+    if (props.highlight.pubkey !== accountStore.publicKey) return;
 
     const highlight = { ...props.highlight };
 
@@ -208,13 +189,10 @@ const ArticleHighlightActionMenu: Component<{
 
     const { success } = await removeHighlight(
       highlight.id,
-      account.proxyThroughPrimal,
-      account.activeRelays, account?.relaySettings
+      accountStore.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings
     );
-
-    // if (!success) {
-    //   props.onCreate && props.onCreate(highlight)
-    // }
   }
 
   const onComment = async () => {
@@ -227,7 +205,7 @@ const ArticleHighlightActionMenu: Component<{
   }
 
   const onQuote = async () => {
-    if (!account || !account?.hasPublicKey()) {
+    if (!accountStore.publicKey) {
       return;
     }
 
@@ -239,13 +217,13 @@ const ArticleHighlightActionMenu: Component<{
 
       const highlightId = nip19.neventEncode({
         id: note.id,
-        relays: account.activeRelays.map(r => r.url).slice(0,3),
+        relays: accountStore.activeRelays.map(r => r.url).slice(0,3),
         author: note.pubkey,
         kind: Kind.Highlight,
       });
 
-      account?.actions?.quoteNote(`nostr:${highlightId} nostr:${props.article.naddr}`);
-      account?.actions?.showNewNoteForm();
+      quoteNote(`nostr:${highlightId} nostr:${props.article.naddr}`);
+      showNewNoteForm();
       props.onQuote && props.onQuote(note);
 
       return;
@@ -253,13 +231,13 @@ const ArticleHighlightActionMenu: Component<{
 
     const highlightId = nip19.neventEncode({
       id: props.highlight.id,
-      relays: account.activeRelays.map(r => r.url).slice(0,3),
+      relays: accountStore.activeRelays.map(r => r.url).slice(0,3),
       author: props.highlight.pubkey,
       kind: Kind.Highlight,
     });
 
-    account?.actions?.quoteNote(`nostr:${highlightId} nostr:${props.article.naddr}`);
-    account?.actions?.showNewNoteForm();
+    quoteNote(`nostr:${highlightId} nostr:${props.article.naddr}`);
+    showNewNoteForm();
     props.onQuote && props.onQuote(props.highlight);
 
   }
@@ -285,7 +263,7 @@ const ArticleHighlightActionMenu: Component<{
       style={`top: ${topP()}px; left: ${leftP()}px;`}
     >
       <Switch>
-        <Match when={account?.publicKey && props.highlight.pubkey === account?.publicKey}>
+        <Match when={accountStore.publicKey && props.highlight.pubkey === accountStore.publicKey}>
           <button
             data-highlight-menu-option="remove"
             onMouseDown={onRemoveHighlight}
@@ -295,7 +273,7 @@ const ArticleHighlightActionMenu: Component<{
           </button>
         </Match>
 
-        <Match when={account?.publicKey}>
+        <Match when={accountStore.publicKey}>
           <button
             data-highlight-menu-option="highlight"
             onMouseDown={onNewHighlight}
@@ -305,7 +283,7 @@ const ArticleHighlightActionMenu: Component<{
           </button>
         </Match>
       </Switch>
-      <Show when={account?.publicKey}>
+      <Show when={accountStore.publicKey}>
         <button
           data-highlight-menu-option="quote"
           onMouseDown={onQuote}

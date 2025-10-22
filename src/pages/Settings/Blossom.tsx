@@ -11,7 +11,6 @@ import {
 import PageCaption from '../../components/PageCaption/PageCaption';
 import { A } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { logError } from '../../lib/logger';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import { primalBlossom } from '../../constants';
@@ -21,10 +20,9 @@ import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { createStore } from 'solid-js/store';
 import { checkBlossomServer } from '../../utils';
+import { accountStore, addBlossomServers, appendBlossomServers, removeBlossomMirrors, removeBlossomServers } from '../../stores/accountStore';
 
 const Blossom: Component = () => {
-
-  const account = useAccountContext();
   const settings = useSettingsContext();
   const intl = useIntl();
 
@@ -37,14 +35,14 @@ const Blossom: Component = () => {
 
   const [serverAvailability, setServerAvailability] = createStore<Record<string, boolean>>({});
 
-  createEffect(on(() => account?.blossomServers, (bServers) => {
+  createEffect(on(() => accountStore.blossomServers, (bServers) => {
     if (!bServers || hasMirrors()) return;
 
     const list = bServers.slice(1) || [];
     setHasMirrors(() => list.length > 0);
   }))
 
-  createEffect(on(() => account?.blossomServers, (bServers) => {
+  createEffect(on(() => accountStore.blossomServers, (bServers) => {
     // Check server availability
     if (!bServers) return;
 
@@ -70,7 +68,7 @@ const Blossom: Component = () => {
       }
 
       switchSeverInput.value = '';
-      account?.actions.addBlossomServers(url.href);
+      addBlossomServers(url.href);
       setInvalidServerUrl(false);
     } catch (e) {
       logError('invalid caching service input', e);
@@ -90,7 +88,7 @@ const Blossom: Component = () => {
         }
 
         addMirrorInput.value = '';
-        account?.actions.appendBlossomServers(url.href);
+        appendBlossomServers(url.href);
         setInvalidServerUrl(false);
       } catch (e) {
         logError('invalid caching service input', e);
@@ -99,11 +97,11 @@ const Blossom: Component = () => {
     }
 
   const mirrorServers = () => {
-    return account?.blossomServers.slice(1) || [];
+    return accountStore.blossomServers.slice(1) || [];
   }
 
   const reommendedMirrors = () => {
-    const activeMirrors = account?.blossomServers || [];
+    const activeMirrors = accountStore.blossomServers || [];
 
     const recomended =  (settings?.recomendedBlossomServers || []).filter(s => !activeMirrors.includes(s));
 
@@ -127,12 +125,12 @@ const Blossom: Component = () => {
 
         <div class={`${styles.label} ${styles.blossomMainServer}`}>
           <Show
-            when={account?.blossomServers[0] || primalBlossom}
+            when={accountStore.blossomServers[0] || primalBlossom}
             fallback={<div class={styles.suspended}></div>}
           >
             <div class={styles.connected}></div>
           </Show>
-          {account?.blossomServers[0] || primalBlossom}
+          {accountStore.blossomServers[0] || primalBlossom}
         </div>
 
         <div class={`${styles.settingsCaption} ${styles.secondCaption}`}>
@@ -163,7 +161,7 @@ const Blossom: Component = () => {
         <div style="height: 20px"></div>
 
         <ButtonLink
-          onClick={() => account?.actions.addBlossomServers(primalBlossom)}
+          onClick={() => addBlossomServers(primalBlossom)}
         >
           {intl.formatMessage(tActions.restoreBlossomServer)}
         </ButtonLink>
@@ -208,13 +206,13 @@ const Blossom: Component = () => {
                 </div>
                 <div class={styles.actions}>
                   <ButtonSecondary
-                    onClick={() => account?.actions.addBlossomServers(mirror)}
+                    onClick={() => addBlossomServers(mirror)}
                     shrink={true}
                   >
                     set as media server
                   </ButtonSecondary>
                   <ButtonSecondary
-                    onClick={() => account?.actions.removeBlossomServers(mirror)}
+                    onClick={() => removeBlossomServers(mirror)}
                     shrink={true}
                   >
                     remove
@@ -261,7 +259,7 @@ const Blossom: Component = () => {
                 </div>
                 <div class={styles.actions}>
                   <ButtonSecondary
-                    onClick={() => account?.actions.appendBlossomServers(mirror)}
+                    onClick={() => appendBlossomServers(mirror)}
                     shrink={true}
                   >
                     add this media mirror server
@@ -279,7 +277,7 @@ const Blossom: Component = () => {
           confirmLabel="Yes"
           abortLabel="No"
           onConfirm={() => {
-            account?.actions.removeBlossomMirrors(() => {
+            removeBlossomMirrors(() => {
               setHasMirrors(false);
             });
             setConfirmNoMirrors(false);

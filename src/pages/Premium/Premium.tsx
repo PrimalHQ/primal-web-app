@@ -16,7 +16,6 @@ import { APP_ID } from '../../App';
 import { changePremiumName, getPremiumQRCode, getPremiumStatus, startListeningForPremiumPurchase, stopListeningForPremiumPurchase, isPremiumNameAvailable, fetchExchangeRate, stopListeningForLegendPurchase, startListeningForLegendPurchase, getLegendQRCode, getOrderListHistory, LegendCustomizationConfig, setLegendCutumization } from '../../lib/premium';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import PremiumSummary from './PremiumSummary';
-import { useAccountContext } from '../../contexts/AccountContext';
 import PremiumSubscriptionOptions, { PremiumOption } from './PremiumSubscriptionOptions';
 import PremiumProfile from './PremiumProfile';
 import PremiumSubscribeModal from './PremiumSubscribeModal';
@@ -41,8 +40,6 @@ import PremiumSidebarActive from './PremiumSidebarActive';
 import PremiumRenameDialog from './PremiumRenameDialog';
 import PremiumRenewModal from './PremiumRenewModal';
 import PremiumSupport from './PremiumSupport';
-import PremiumLegend from './PremiumLegend';
-import PremiumBecomeLegend from './PremiumBecomeLegend';
 import { Kind } from '../../constants';
 import PremiumLegendModal from './PremiumLegendModal';
 import PremiumRelay from './PremiumRelay';
@@ -62,6 +59,7 @@ import PremiumStripeModal from './PremiumStripeModal';
 import PrimalProInfoDialog from './PrimalProInfoDialog';
 import {loadStripe, Stripe} from '@stripe/stripe-js';
 import PremiumFailModal from './PremiumFailModal';
+import { accountStore, clearPremiumRemider, hasPublicKey, showGetStarted, updateAccountProfile } from '../../stores/accountStore';
 
 export const satsInBTC = 100_000_000;
 
@@ -164,7 +162,6 @@ const premiumOptions = (group?: string, paymentMethod?: string) => {
 
 const Premium: Component = () => {
   const intl = useIntl();
-  const account = useAccountContext();
   const params = useParams();
   const navigate = useNavigate();
   const toast = useToastContext();
@@ -181,6 +178,7 @@ const Premium: Component = () => {
 
   const initStripe = async () => {
     const stripe = await loadStripe('pk_live_51RVHYpFwkeNa1BHGECLthTjCyKDMtxQKCvIELbfjm1eE5yMMSwkJB44zcbioVWDCLhpKpkbL3wVhfWGvp6NTyHjf00TSUW1RVL');
+    // @ts-ignore
     setStripe(stripe);
   }
 
@@ -242,7 +240,7 @@ const Premium: Component = () => {
   const getRecipientUser = async (pubkey: string) => {
     const subId = `recipient_${APP_ID}`;
 
-    const user = await fetchUserProfile(account?.publicKey, premiumData.recipientPubkey, subId);
+    const user = await fetchUserProfile(accountStore.publicKey, premiumData.recipientPubkey, subId);
 
     if (user) {
       setPremiumData('recipient', () => ({ ...user }));
@@ -266,11 +264,11 @@ const Premium: Component = () => {
     setPremiumData('subOptions', premiumOptions(product, premiumData.paymentMethod));
     setPremiumData('selectedSubOption', premiumOptions(product, premiumData.paymentMethod)[0]);
 
-    if (!account?.publicKey) {
-      account?.actions.showGetStarted()
+    if (!accountStore.publicKey) {
+      showGetStarted();
       return;
     }
-    if (!account?.activeUser) {
+    if (!accountStore.activeUser) {
       navigate('/settings/profile');
       return;
     }
@@ -280,11 +278,11 @@ const Premium: Component = () => {
 
 
   const onBecomeLegendAction = () => {
-    if (!account?.publicKey) {
-      account?.actions.showGetStarted()
+    if (!accountStore.publicKey) {
+      showGetStarted()
       return;
     }
-    if (!account?.activeUser) {
+    if (!accountStore.activeUser) {
       navigate('/settings/profile');
       return;
     }
@@ -305,7 +303,7 @@ const Premium: Component = () => {
   const updateUserMetadata = async (option?: 'nip05' | 'lud16', force?: boolean) => {
     const user = premiumData.recipient;
 
-    if (!user || !account) return;
+    if (!user) return;
 
     const shouldUpdateNip05 = force || user.nip05.endsWith('@primal.net');
     const shouldUpdateLud16 = force || user.lud16.endsWith('@primal.net');
@@ -330,12 +328,12 @@ const Premium: Component = () => {
 
     if (metaUpdate.lud16 === user.lud16 && metaUpdate.nip05 === user.nip05) return;
 
-    const { success, note } = await sendProfile({ ...user, ...metaUpdate }, account.proxyThroughPrimal,  account.activeRelays, account.relaySettings);
+    const { success, note } = await sendProfile({ ...user, ...metaUpdate }, accountStore.proxyThroughPrimal,  accountStore.activeRelays, accountStore.relaySettings);
 
     if (success) {
       note && triggerImportEvents([note], `import_profile_${APP_ID}`, () => {
         const prof = JSON.parse(note.content)
-        premiumData.recipientPubkey && account.actions.updateAccountProfile(premiumData.recipientPubkey);
+        premiumData.recipientPubkey && updateAccountProfile(premiumData.recipientPubkey);
         setPremiumData('recipient', () => ({...prof}));
         toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
       });
@@ -356,7 +354,7 @@ const Premium: Component = () => {
     let isAvailable = false;
 
     try {
-      isAvailable = await isPremiumNameAvailable(premiumData.name, account?.publicKey, premiumSocket, subId);
+      isAvailable = await isPremiumNameAvailable(premiumData.name, accountStore.publicKey, premiumSocket, subId);
     } catch (e: any) {
       isAvailable = false;
       logError('ERROR while checking premium name availability: ', e);
@@ -428,6 +426,7 @@ const Premium: Component = () => {
           updateUserMetadata();
           setPremiumData('openSubscribe', () => false);
           setPremiumData('openSuccess', () => true);
+          // @ts-ignore
           setPremiumData('successMessage', () => intl.formatMessage(t.subOptions.success[premiumData.selectedSubOption.duration]));
         }
       }
@@ -462,6 +461,7 @@ const Premium: Component = () => {
             style: 'GOLD',
             custom_badge: true,
             avatar_glow: true,
+            in_leaderboard: true,
           })
           setPremiumData('openLegend', () => false);
           setPremiumData('openSuccess', () => true);
@@ -728,7 +728,7 @@ const Premium: Component = () => {
       }
     });
 
-    getOrderListHistory(account?.publicKey, until, offset, subId, premiumSocket)
+    getOrderListHistory(accountStore.publicKey, until, offset, subId, premiumSocket)
   }
 
   const getOrderHistoryNextPage = () => {
@@ -741,7 +741,7 @@ const Premium: Component = () => {
   };
 
   const updateLegendConfig = async (config: LegendCustomizationConfig) => {
-    if (!premiumSocket || !account?.publicKey) return;
+    if (!premiumSocket || !accountStore.publicKey) return;
 
     const subId = `premium_legend_config_${APP_ID}`;
 
@@ -771,15 +771,15 @@ const Premium: Component = () => {
       edited_shoutout: config.edited_shoutout || '',
     };
 
-    await setLegendCutumization(account.publicKey, configToSend, subId, premiumSocket);
+    await setLegendCutumization(accountStore.publicKey, configToSend, subId, premiumSocket);
 
-    app?.actions.setLegendCustomization(account.publicKey, config);
+    app?.actions.setLegendCustomization(accountStore.publicKey, config);
   }
 
   onMount(() => {
     keepSoceketOpen = true;
     openSocket();
-    account?.actions.clearPremiumRemider();
+    clearPremiumRemider();
   });
 
   onCleanup(() => {
@@ -788,7 +788,7 @@ const Premium: Component = () => {
   });
 
   createEffect(() => {
-    if (account?.isKeyLookupDone && account.hasPublicKey()) {
+    if (accountStore.isKeyLookupDone && hasPublicKey()) {
       checkPremiumStatus();
     }
   })
@@ -808,7 +808,7 @@ const Premium: Component = () => {
   createEffect(() => {
     if (premiumStep() === 'name') {
       nameInput?.focus();
-      setPremiumData('name', () => account?.activeUser?.name || '');
+      setPremiumData('name', () => accountStore.activeUser?.name || '');
     }
     else if (premiumStep() === 'rename') {
       renameInput?.focus();
@@ -840,8 +840,8 @@ const Premium: Component = () => {
   });
 
   createEffect(() => {
-    if (account?.isKeyLookupDone && account.activeUser !== undefined) {
-      const pubkey = account?.publicKey;
+    if (accountStore.isKeyLookupDone && accountStore.activeUser !== undefined) {
+      const pubkey = accountStore.publicKey;
       pubkey && setPremiumData('recipientPubkey', () => pubkey);
     }
   });
@@ -853,8 +853,8 @@ const Premium: Component = () => {
     if (pubkey) {
       // getSubscriptionInfo();
 
-      if (pubkey === account?.publicKey) {
-        const recipient = account.activeUser;
+      if (pubkey === accountStore.publicKey) {
+        const recipient = accountStore.activeUser;
         checkPremiumStatus();
         recipient && setPremiumData('recipient', () => ({ ...recipient }));
       }
@@ -1008,17 +1008,15 @@ const Premium: Component = () => {
           >
             <Match when={premiumStep() === 'legends'}>
               <PremiumLegendLeaderBoard
-                data={premiumData}
                 type="legend"
               />
             </Match>
 
             <Match when={premiumStep() === 'premiums'}>
-                <PremiumLegendLeaderBoard
-                  data={premiumData}
-                  type="premium"
-                />
-              </Match>
+              <PremiumLegendLeaderBoard
+                type="premium"
+              />
+            </Match>
 
             <Match when={premiumStep() === 'name'}>
               <div class={styles.nameStep}>
@@ -1068,7 +1066,7 @@ const Premium: Component = () => {
                 <div>{intl.formatMessage(t.title.subscriptionSubtitle)}</div>
               </div>
 
-              <PremiumProfile data={premiumData} profile={account?.activeUser} />
+              <PremiumProfile data={premiumData} profile={accountStore.activeUser} />
 
               <PremiumSummary
                 data={premiumData}
@@ -1212,7 +1210,7 @@ const Premium: Component = () => {
               <PremiumStatusOverview
                 data={premiumData}
                 setData={setPremiumData}
-                profile={account?.activeUser}
+                profile={accountStore.activeUser}
                 updateUserMetadata={updateUserMetadata}
                 onExtendPremium={() => handlePremiumAction('extendSubscription')}
                 onManagePremium={() => handlePremiumAction('managePremium')}
@@ -1222,13 +1220,13 @@ const Premium: Component = () => {
 
             <Match when={
               premiumData.membershipStatus?.tier === 'free' ||
-              (account?.isKeyLookupDone && (!account.publicKey || !account.activeUser))
+              (accountStore.isKeyLookupDone && (!accountStore.publicKey || !accountStore.activeUser))
             }>
               <PremiumHighlights
                 onStart={onStartAction}
                 onMore={() => setPremiumData('openPremiumProInfo', () => true)}
-                pubkey={account?.publicKey}
-                user={account?.activeUser}
+                pubkey={accountStore.publicKey}
+                user={accountStore.activeUser}
                 isOG={!!isOG()}
               />
             </Match>
@@ -1383,7 +1381,7 @@ const Premium: Component = () => {
               setPremiumData('openRename', () => false)
             }}
             name={premiumData.name}
-            checkNameAvailability={(name: string) => isPremiumNameAvailable(name, account?.publicKey, premiumSocket, `rename_check_${APP_ID}`)}
+            checkNameAvailability={(name: string) => isPremiumNameAvailable(name, accountStore.publicKey, premiumSocket, `rename_check_${APP_ID}`)}
           />
 
           <PremiumRenewModal

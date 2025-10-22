@@ -5,8 +5,7 @@ import styles from './ChatMessage.module.scss';
 import Avatar from '../Avatar/Avatar';
 import { nip05Verification, userName } from '../../stores/profile';
 import { NostrLiveChat, PrimalUser, ZapOption } from '../../types/primal';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { A, useNavigate } from '@solidjs/router';
+import { useNavigate } from '@solidjs/router';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { humanizeNumber } from '../../lib/stats';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
@@ -15,6 +14,7 @@ import FollowButtonChat from '../FollowButton/FollowButtonChat';
 import { actions as tActions, toastZapProfile } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import { useToastContext } from '../Toaster/Toaster';
+import { accountStore, addToMuteList, removeFromMuteList } from '../../stores/accountStore';
 
 
 export type ChatMessageConfig = {
@@ -30,7 +30,6 @@ const ChatMessageDetails: Component<{
   onClose: () => void,
   onMute: (pubkey: string, unmute?: boolean) => void,
 }> = (props) => {
-  const account = useAccountContext();
   const app = useAppContext();
   const navigate = useNavigate()
   const intl = useIntl();
@@ -73,8 +72,8 @@ const ChatMessageDetails: Component<{
     const pubkey = props.config?.message.pubkey;
 
     // Unmute if already muted
-    if (account?.muted.includes(pubkey)) {
-      account.actions.removeFromMuteList(pubkey);
+    if (accountStore.muted.includes(pubkey)) {
+      removeFromMuteList(pubkey);
       props.onMute(pubkey, true);
       return;
     }
@@ -83,7 +82,7 @@ const ChatMessageDetails: Component<{
       title: intl.formatMessage(tActions.muteUserConfirmTitle, { name: userName(props.config?.author) }),
       description: intl.formatMessage(tActions.muteUserConfirm, { name: userName(props.config?.author) }),
       onConfirm: async () => {
-        account?.actions.addToMuteList(pubkey);
+        addToMuteList(pubkey);
         props.onMute(pubkey);
         app.actions.closeConfirmModal();
       },
@@ -179,7 +178,7 @@ const ChatMessageDetails: Component<{
             onClick={doMute}
           >
             <div class={styles.iconMute}></div>
-            { account?.muted.includes(props.config?.message.pubkey || '') ? 'Unmute' : 'Mute'}
+            { accountStore.muted.includes(props.config?.message.pubkey || '') ? 'Unmute' : 'Mute'}
           </button>
           <button
             class={styles.controlButton}

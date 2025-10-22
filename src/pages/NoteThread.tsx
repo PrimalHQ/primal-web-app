@@ -6,10 +6,8 @@ import { PrimalArticle, PrimalNote, PrimalUser, SendNoteResult } from '../types/
 import PeopleList from '../components/PeopleList/PeopleList';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
-import { nip19 } from '../lib/nTools';
 import { useThreadContext } from '../contexts/ThreadContext';
 import Wormhole from '../components/Wormhole/Wormhole';
-import { useAccountContext } from '../contexts/AccountContext';
 import { sortByRecency } from '../stores/note';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
@@ -23,14 +21,13 @@ import ThreadNoteSkeleton from '../components/Skeleton/ThreadNoteSkeleton';
 import { Transition } from 'solid-transition-group';
 import { APP_ID } from '../App';
 import { fetchNotes } from '../handleNotes';
-import { isIOS, isPhone } from '../utils';
-import { logWarning } from '../lib/logger';
+import { isPhone } from '../utils';
 import { noteIdToHex } from '../lib/keys';
 import { useToastContext } from '../components/Toaster/Toaster';
+import { accountStore, hasPublicKey } from '../stores/accountStore';
 
 
 const NoteThread: Component<{ noteId: string }> = (props) => {
-  const account = useAccountContext();
   const intl = useIntl();
   const navigate = useNavigate();
   const toast = useToastContext();
@@ -164,7 +161,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     relayHints: Record<string, string>,
   }) => {
     const pNote = primaryNote();
-    if (!meta || !result.note || !account?.activeUser || !pNote ) return;
+    if (!meta || !result.note || !accountStore.activeUser || !pNote ) return;
 
     const modifiedMeta = {
       ...meta,
@@ -173,15 +170,9 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
 
     const subId = `posted_note_${APP_ID}`;
 
-    const notes = await fetchNotes(account.publicKey, [result.note.id], subId);
-
-    // const note = generateNote(result.note, account?.activeUser, modifiedMeta);
+    const notes = await fetchNotes(accountStore.publicKey, [result.note.id], subId);
 
     threadContext?.actions.insertNote(notes[0]);
-
-    // setTimeout(() => {
-    //   threadContext?.actions.updateNotes(postId());
-    // }, 2_000)
   };
 
 
@@ -218,7 +209,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
 
       <NavHeader title="Thread" />
 
-      <Show when={account?.isKeyLookupDone}>
+      <Show when={accountStore.isKeyLookupDone}>
         <Transition name='slide-fade'>
           <Show
             when={!isFetching()}
@@ -275,7 +266,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                       navigate('/home');
                     }}
                   />
-                  <Show when={account?.hasPublicKey()}>
+                  <Show when={hasPublicKey()}>
                     <ReplyToNote
                       note={primaryNote() as PrimalNote}
                       onNotePosted={onNotePosted}

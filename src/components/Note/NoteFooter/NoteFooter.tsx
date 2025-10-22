@@ -1,9 +1,8 @@
-import { batch, Component, createEffect, createSignal, onMount, Show } from 'solid-js';
+import { batch, Component, createEffect, Show } from 'solid-js';
 import { MenuItem, PrimalNote, ZapOption } from '../../../types/primal';
 import { getMyRepostOfEvent, sendDeleteEvent, sendRepost, triggerImportEvents } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
-import { useAccountContext } from '../../../contexts/AccountContext';
 import { useToastContext } from '../../Toaster/Toaster';
 import { useIntl } from '@cookbook/solid-intl';
 
@@ -15,7 +14,7 @@ import zapMD from '../../../assets/lottie/zap_md_2.json';
 import { toast as t } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { hookForDev } from '../../../lib/devTools';
-import { determineOrient, getScreenCordinates, isPhone } from '../../../utils';
+import { determineOrient, isPhone } from '../../../utils';
 import ZapAnimation from '../../ZapAnimation/ZapAnimation';
 import { CustomZapInfo, useAppContext } from '../../../contexts/AppContext';
 import NoteFooterActionButton from './NoteFooterActionButton';
@@ -26,6 +25,15 @@ import { readSecFromStorage } from '../../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../../constants';
 import { APP_ID } from '../../../App';
+import {
+  accountStore,
+  addLike,
+  hasPublicKey,
+  quoteNote,
+  setShowPin,
+  showGetStarted,
+  showNewNoteForm,
+} from '../../../stores/accountStore';
 
 export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
@@ -42,7 +50,6 @@ const NoteFooter: Component<{
   noteType?: 'primary',
 }> = (props) => {
 
-  const account = useAccountContext();
   const toast = useToastContext();
   const intl = useIntl();
   const settings = useSettingsContext();
@@ -93,7 +100,7 @@ const NoteFooter: Component<{
   ];
 
   const doRepostDelete = async () => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     let noteToDelete = props.note.repost;
 
@@ -114,9 +121,9 @@ const NoteFooter: Component<{
       pubkey,
       id,
       Kind.Repost,
-      account.activeRelays,
-      account.relaySettings,
-      account.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+      accountStore.proxyThroughPrimal,
     );
 
     if (!success || !deleteEvent) return;
@@ -124,7 +131,7 @@ const NoteFooter: Component<{
     triggerImportEvents([deleteEvent], `delete_import_${APP_ID}`);
 
     // id of the note to remove from UI
-    let removeId = props.note.pubkey === account.publicKey ?
+    let removeId = props.note.pubkey === accountStore.publicKey ?
       id :
       props.note.noteId;
 
@@ -158,43 +165,37 @@ const NoteFooter: Component<{
   };
 
   const doQuote = () => {
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
     props.updateState && props.updateState('isRepostMenuVisible', () => false);
-    account?.actions?.quoteNote(`nostr:${props.note.post.noteId}`);
-    account?.actions?.showNewNoteForm();
+    quoteNote(`nostr:${props.note.post.noteId}`);
+    showNewNoteForm();
   };
 
   const doRepost = async () => {
-    if (!account) {
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.hasPublicKey()) {
-      account.actions.showGetStarted();
-      return;
-    }
-
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
 
-    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
-    //   toast?.sendWarning(
-    //     intl.formatMessage(t.noRelaysConnected),
-    //   );
-    //   return;
-    // }
-
     props.updateState && props.updateState('isRepostMenuVisible', () => false);
 
-    const { success } = await sendRepost(props.note, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
+    const { success } = await sendRepost(
+      props.note,
+      accountStore.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+    );
 
     if (success) {
       batch(() => {
@@ -224,31 +225,20 @@ const NoteFooter: Component<{
     e.preventDefault();
     e.stopPropagation();
 
-    if (!account) {
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.hasPublicKey()) {
-      account.actions.showGetStarted();
-      return;
-    }
-
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
 
-    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
-    //   toast?.sendWarning(
-    //     intl.formatMessage(t.noRelaysConnected),
-    //   );
-    //   return;
-    // }
-
-    const success = await account.actions.addLike(props.note);
+    const success = await addLike(props.note);
 
     if (success) {
       batch(() => {
@@ -262,26 +252,19 @@ const NoteFooter: Component<{
     e.preventDefault();
     e.stopPropagation();
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       props.updateState && props.updateState('isZapping', () => false);
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
-
-    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
-    //   toast?.sendWarning(
-    //     intl.formatMessage(t.noRelaysConnected),
-    //   );
-    //   return;
-    // }
 
     if (!canUserReceiveZaps(props.note.user)) {
       toast?.sendWarning(
@@ -303,22 +286,19 @@ const NoteFooter: Component<{
 
     clearTimeout(quickZapDelay);
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
 
-    // if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
-    //   return;
-    // }
     if (!canUserReceiveZaps(props.note.user)) {
       return;
     }
@@ -386,8 +366,8 @@ const NoteFooter: Component<{
   };
 
   const doQuickZap = async () => {
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
@@ -406,11 +386,11 @@ const NoteFooter: Component<{
     setTimeout(async () => {
       const success = await zapNote(
         props.note,
-        account.publicKey,
+        accountStore.publicKey,
         amount,
         message,
-        account.activeRelays,
-        account.activeNWC,
+        accountStore.activeRelays,
+        accountStore.activeNWC,
       );
 
       props.updateState && props.updateState('isZapping', () => false);

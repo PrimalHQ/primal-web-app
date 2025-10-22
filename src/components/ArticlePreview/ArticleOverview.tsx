@@ -1,31 +1,18 @@
-// import { A } from '@solidjs/router';
-import { batch, Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { Component, createSignal, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { wordsPerMinute } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
+import { useAppContext } from '../../contexts/AppContext';
 import { useMediaContext } from '../../contexts/MediaContext';
-import { useThreadContext } from '../../contexts/ThreadContext';
 import { shortDate } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
-import { userName } from '../../stores/profile';
-import { PrimalArticle, ZapOption } from '../../types/primal';
-import { urlEncode, uuidv4 } from '../../utils';
-import Avatar from '../Avatar/Avatar';
+import { PrimalArticle } from '../../types/primal';
+import { urlEncode } from '../../utils';
 import { NoteReactionsState } from '../Note/Note';
 import NoteContextTrigger from '../Note/NoteContextTrigger';
-import ArticleFooter from '../Note/NoteFooter/ArticleFooter';
-import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
-import VerificationCheck from '../VerificationCheck/VerificationCheck';
-
-import defaultAvatarDark from '../../assets/images/reads_image_dark.png';
-import defaultAvatarLight from '../../assets/images/reads_image_light.png';
 
 import styles from './ArticlePreview.module.scss';
-import { useSettingsContext } from '../../contexts/SettingsContext';
 import { nip19 } from 'nostr-tools';
-import ButtonLink from '../Buttons/ButtonLink';
 import { useNavigate } from '@solidjs/router';
+import { accountStore } from '../../stores/accountStore';
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
@@ -41,10 +28,7 @@ export type ArticleProps = {
 
 const ArticleOverview: Component<ArticleProps> = (props) => {
   const app = useAppContext();
-  const account = useAccountContext();
-  const thread = useThreadContext();
   const media = useMediaContext();
-  const settings = useSettingsContext();
   const navigate = useNavigate();
 
   let articleContextMenu: HTMLDivElement | undefined;
@@ -138,11 +122,7 @@ const ArticleOverview: Component<ArticleProps> = (props) => {
   const onImageError = (event: any) => {
     const image = event.target;
 
-    let src: string = account?.activeUser?.picture || '';
-
-    // if (image.src === src || image.src.endsWith(src)) {
-    //   src = ['sunrise_wave', 'ice_wave'].includes(settings?.theme || '') ? defaultAvatarLight : defaultAvatarDark;
-    // }
+    let src: string = accountStore.activeUser?.picture || '';
 
     image.onerror = "";
     image.src = src;

@@ -1,15 +1,11 @@
-import { Component, createSignal, For, JSXElement, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, For, JSXElement, onMount, Show, } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 
 import styles from './ChatMessage.module.scss';
 import { nip19 } from '../../lib/nTools';
-import Avatar from '../Avatar/Avatar';
-import { nip05Verification, truncateNpub, userName } from '../../stores/profile';
-import { DMContact } from '../../megaFeeds';
-import { date } from '../../lib/dates';
-import { DirectMessage, PrimalArticle, PrimalUser } from '../../types/primal';
+import { truncateNpub, userName } from '../../stores/profile';
+import { PrimalArticle, PrimalUser } from '../../types/primal';
 import { useDMContext } from '../../contexts/DMContext';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { A } from '@solidjs/router';
 import { useAppContext } from '../../contexts/AppContext';
 import { decodeIdentifier, hexToNpub } from '../../lib/keys';
@@ -22,12 +18,6 @@ import { generatePrivateKey } from '../../lib/nTools';
 import { useMediaContext } from '../../contexts/MediaContext';
 import NoteImage from '../NoteImage/NoteImage';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
-import LinkPreview from '../LinkPreview/LinkPreview';
-import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
-import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
-import { logError } from '../../lib/logger';
-import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
-import Lnbc from '../Lnbc/Lnbc';
 import NoteVideo from '../ParsedNote/NoteVideo';
 
 
@@ -43,7 +33,6 @@ const ChatMessage: Component<{
   mentionedUsers: PrimalUser[],
   event: any,
 }> = (props) => {
-  const account = useAccountContext();
   const app = useAppContext();
   const media = useMediaContext();
   const dms = useDMContext();

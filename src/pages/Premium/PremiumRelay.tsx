@@ -4,18 +4,16 @@ import styles from './Premium.module.scss';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import { PremiumStore } from './Premium';
 
-import { useAccountContext } from '../../contexts/AccountContext';
 import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
 import { createStore } from 'solid-js/store';
+import { accountStore, addRelay } from '../../stores/accountStore';
 
 const premiumRelay = 'wss://premium.primal.net/';
 
 const PremiumRelay: Component<{
   data: PremiumStore,
 }> = (props) => {
-  const account = useAccountContext();
-
-  const isConnected = () => account?.relays.find(r => r.url === premiumRelay);
+  const isConnected = () => accountStore.relays.find(r => r.url === premiumRelay);
 
   const [relayInfo, setRelayInfo] = createStore<any>({});
 
@@ -62,7 +60,7 @@ const PremiumRelay: Component<{
           when={isConnected()}
           fallback={
             <ButtonPremium
-              onClick={() => account?.actions.addRelay(premiumRelay)}
+              onClick={() => addRelay(premiumRelay)}
             >
               Connect to Premium Relay
             </ButtonPremium>

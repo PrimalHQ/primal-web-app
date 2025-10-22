@@ -1,7 +1,6 @@
 import { batch, Component, createEffect, For, Match, on, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, PaginationInfo } from '../../megaFeeds';
 import { DVMMetadata, NoteActions, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser } from '../../types/primal';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
@@ -10,6 +9,7 @@ import Paginator from '../Paginator/Paginator';
 import styles from './FeedMarketPlace.module.scss';
 import FeedMarketItem from './FeedMarketPlaceItem';
 import { useNavigate } from '@solidjs/router';
+import { accountStore } from '../../stores/accountStore';
 
 type FeedPreviewStore = {
   notes: PrimalNote[],
@@ -28,7 +28,6 @@ const FeedMarketPlacePreview: Component<{
   type?: 'notes' | 'reads',
   isInDialog?: boolean,
 }> = (props) => {
-  const account = useAccountContext();
   const navigate = useNavigate();
 
   const [store, updateStore] = createStore<FeedPreviewStore>({
@@ -66,7 +65,7 @@ const FeedMarketPlacePreview: Component<{
     }
 
     const { notes, reads, paging } = await fetchMegaFeed(
-      account?.publicKey,
+      accountStore.publicKey,
       spec,
       `dvm_preview_${APP_ID}`,
       {

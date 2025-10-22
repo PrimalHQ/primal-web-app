@@ -3,7 +3,6 @@ import AdvancedSearchDialog from '../../components/AdvancedSearch/AdvancedSearch
 import { OrderHistoryItem, PremiumStore } from './Premium';
 
 import styles from './Premium.module.scss';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { shortDate } from '../../lib/dates';
 import Paginator from '../../components/Paginator/Paginator';
 
@@ -16,8 +15,6 @@ const PremiumOrderHistoryModal: Component<{
   onClose?: () => void,
   onNextPage?: () => void,
 }> = (props) => {
-  const account = useAccountContext();
-
   createEffect(() => {
     if (props.open) {
       props.onOpen && props.onOpen();
@@ -48,36 +45,36 @@ const PremiumOrderHistoryModal: Component<{
       <div class={styles.orderHistoryModal}>
 
         <div class={styles.orderHistory}>
-              <table>
-                <thead>
+          <table>
+            <thead>
+              <tr>
+                <th>
+                  Date
+                </th>
+                <th>
+                  Purchase
+                </th>
+                <th>
+                  Amount
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={props.data.orderHistory}>
+                {historyItem => (
                   <tr>
-                    <th>
-                      Date
-                    </th>
-                    <th>
-                      Purchase
-                    </th>
-                    <th>
-                      Amount
-                    </th>
+                    <td>{shortDate(historyItem.purchased_at)}</td>
+                    <td>{historyItem.product_label}</td>
+                    <td>{getAmount(historyItem)}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  <For each={props.data.orderHistory}>
-                    {historyItem => (
-                      <tr>
-                        <td>{shortDate(historyItem.purchased_at)}</td>
-                        <td>{historyItem.product_label}</td>
-                        <td>{getAmount(historyItem)}</td>
-                      </tr>
-                    )}
-                  </For>
-                </tbody>
-              </table>
-              <Paginator
-                isSmall={true}
-                loadNextPage={props.onNextPage}
-              />
+                )}
+              </For>
+            </tbody>
+          </table>
+          <Paginator
+            isSmall={true}
+            loadNextPage={props.onNextPage}
+          />
         </div>
 
       </div>

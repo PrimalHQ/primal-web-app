@@ -1,13 +1,12 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, Show } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
-import { account as t, actions } from '../../translations';
+import { account as t } from '../../translations';
 import { PrimalUser } from '../../types/primal';
 import ButtonFlip from '../Buttons/ButtonFlip';
-import { useToastContext } from '../Toaster/Toaster';
 
 import styles from './FollowButton.module.scss';
+import { accountStore, addFollow, hasPublicKey, removeFollow, showGetStarted } from '../../stores/accountStore';
 
 
 const FollowButtonChat: Component<{
@@ -15,30 +14,26 @@ const FollowButtonChat: Component<{
   id?: string,
   postAction?: (remove: boolean, pubkey: string) => void,
 }> = (props) => {
-
-  const toast = useToastContext()
-  const account = useAccountContext();
   const intl = useIntl();
 
   const isFollowed = () => {
     return props.person &&
-      account?.publicKey &&
-      account?.following.includes(props.person.pubkey);
+      accountStore.publicKey &&
+      accountStore.following.includes(props.person.pubkey);
   }
 
   const onFollow = (e: MouseEvent) => {
     e.preventDefault();
-    if (account?.followInProgress !== '') return;
+    if (accountStore.followInProgress !== '') return;
 
-    if (!account || !account.hasPublicKey() || !props.person) {
-      account?.actions.showGetStarted();
-      // toast?.sendWarning(intl.formatMessage(t.needToLogin))
+    if (hasPublicKey() || !props.person) {
+      showGetStarted();
       return;
     }
 
     const action = isFollowed() ?
-      account.actions.removeFollow :
-      account.actions.addFollow;
+      removeFollow :
+      addFollow;
 
     action(props.person.pubkey, props.postAction);
   }
@@ -52,7 +47,7 @@ const FollowButtonChat: Component<{
       <div id={props.id} class={styles.followChat}>
         <ButtonFlip
           onClick={onFollow}
-          disabled={account?.followInProgress !== ''}
+          disabled={accountStore.followInProgress !== ''}
           when={isFollowed()}
           fallback={intl.formatMessage(t.follow)}
         >

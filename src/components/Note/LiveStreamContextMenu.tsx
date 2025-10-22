@@ -1,28 +1,32 @@
 import { Component, createEffect, createSignal } from 'solid-js';
-import { MenuItem, NostrNoteContent, NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from '../../types/primal';
+import { MenuItem, NostrNoteContent } from '../../types/primal';
 
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { authorName, userName } from '../../stores/profile';
-import { note as t, actions as tActions, toast as tToast, toast } from '../../translations';
+import { actions as tActions, toast as tToast } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import PrimalMenu from '../PrimalMenu/PrimalMenu';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { APP_ID } from '../../App';
 import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
-import { broadcastEvent, sendDeleteEvent, triggerImportEvents } from '../../lib/notes';
+import { sendDeleteEvent, triggerImportEvents } from '../../lib/notes';
 import { LiveStreamContextMenuInfo, useAppContext } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
-import { nip19 } from 'nostr-tools';
 import { readSecFromStorage } from '../../lib/localStore';
-import { useNavigate } from '@solidjs/router';
-import { Kind } from '../../constants';
 import ReportContentModal from '../ReportContentModal/ReportContentModal';
 import { encodeCoordinate } from '../../stores/megaFeed';
-import Longform from '../../pages/Longform';
-import { urlEncode } from '../../utils';
 import { StreamingData } from '../../lib/streaming';
+import {
+  accountStore,
+  addToMuteList,
+  hasPublicKey,
+  quoteNote,
+  removeFromMuteList,
+  setShowPin,
+  showGetStarted,
+  showNewNoteForm,
+} from '../../stores/accountStore';
 
 const LiveStreamContextMenu: Component<{
   data: LiveStreamContextMenuInfo,
@@ -30,16 +34,13 @@ const LiveStreamContextMenu: Component<{
   onClose: () => void,
   id?: string,
 }> = (props) => {
-  const account = useAccountContext();
   const toaster = useToastContext();
   const intl = useIntl();
   const app = useAppContext();
-  const navigate = useNavigate();
 
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmReportContent, setConfirmReportContent] = createSignal<StreamingData>();
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
-  const [confirmMuteThread, setConfirmMuteThread] = createSignal(false);
   const [confirmRequestDelete, setConfirmRequestDelete] = createSignal(false);
 
   const [orientation, setOrientation] = createSignal<'down' | 'up'>('up')
@@ -78,7 +79,7 @@ const LiveStreamContextMenu: Component<{
   const doMuteUser = () => {
     const pubkey = stream().pubkey;
     if (pubkey) {
-      account?.actions.addToMuteList(pubkey, 'user');
+      addToMuteList(pubkey, 'user');
     }
     props.onClose();
   };
@@ -86,21 +87,21 @@ const LiveStreamContextMenu: Component<{
   const doUnmuteUser = () => {
     const pubkey = stream().pubkey;
     if (pubkey) {
-      account?.actions.removeFromMuteList(pubkey);
+      removeFromMuteList(pubkey);
     }
     props.onClose();
   };
 
   const doReportUser = () => {
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
@@ -151,20 +152,20 @@ const LiveStreamContextMenu: Component<{
     const event = props.data?.stream.event;
     if (!event) return;
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
     const { naddr } = encodeCoordinate(event as NostrNoteContent);
 
-    account?.actions?.quoteNote(`nostr:${naddr}`);
-    account?.actions?.showNewNoteForm();
+    quoteNote(`nostr:${naddr}`);
+    showNewNoteForm();
     app?.actions.closeStreamContextMenu();
   };
 
   const doRequestDelete = async () => {
-    const user = account?.activeUser;
+    const user = accountStore.activeUser;
     const event = stream().event;
 
     if (!props.data || !user || !event) return;
@@ -176,9 +177,9 @@ const LiveStreamContextMenu: Component<{
       user.pubkey,
       coordinate,
       kind,
-      account.activeRelays,
-      account.relaySettings,
-      account.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+      accountStore.proxyThroughPrimal,
     );
 
     if (!success || !deleteEvent) return;
@@ -239,8 +240,8 @@ const LiveStreamContextMenu: Component<{
   };
 
   const streamContextForOtherPeople: () => MenuItem[] = () => {
-    const isMuted = account?.muted.includes(props.data?.streamAuthor.pubkey);
-    const isMutedThread = account?.mutedTags.find((t) => t[0] === 'e' && t[1] === stream()?.id);
+    const isMuted = accountStore.muted.includes(props.data?.streamAuthor.pubkey);
+    const isMutedThread = accountStore.mutedTags.find((t) => t[0] === 'e' && t[1] === stream()?.id);
 
     return [
       {
@@ -284,7 +285,7 @@ const LiveStreamContextMenu: Component<{
     ];
   };
 
-  const streamContext = () => account?.publicKey !== stream()?.pubkey ?
+  const streamContext = () => accountStore.publicKey !== stream()?.pubkey ?
       [ ...streamContextForEveryone(), ...streamContextForOtherPeople()] :
       [ ...streamContextForMe(), ...streamContextForEveryone(), ...requestDeleteContextMenu()];
 

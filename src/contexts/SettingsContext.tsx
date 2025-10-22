@@ -1,18 +1,14 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { Kind, NotificationType, andRD, andVersion, contentScope, defaultContentModeration, defaultFeeds, defaultNotificationAdditionalSettings, defaultNotificationSettings, defaultZap, defaultZapOptions, iosRD, iosVersion, nostrHighlights, themes, trendingFeed, trendingScope } from "../constants";
+import { NotificationType, andRD, andVersion, contentScope, defaultContentModeration, defaultFeeds, defaultNotificationAdditionalSettings, defaultNotificationSettings, defaultZap, defaultZapOptions, iosRD, iosVersion, nostrHighlights, themes, trendingScope } from "../constants";
 import {
   createContext,
   createEffect,
-  onCleanup,
   onMount,
   useContext
 } from "solid-js";
 import {
   isConnected,
-  refreshSocketListeners,
-  removeSocketListeners,
-  socket,
   subsTo
 } from "../sockets";
 import {
@@ -33,7 +29,6 @@ import {
   updateAvailableFeeds,
   updateAvailableFeedsTop
 } from "../lib/availableFeeds";
-import { useAccountContext } from "./AccountContext";
 import { readSystemDarkMode, saveAnimated, saveHomeFeeds, saveNWC, saveNWCActive, saveReadsFeeds, saveSystemDarkMode, saveTheme } from "../lib/localStore";
 import { getDefaultSettings, getHomeSettings, getNWCSettings, getReadsSettings, getSettings, sendSettings, setHomeSettings, setReadsSettings } from "../lib/settings";
 import { APP_ID } from "../App";
@@ -44,6 +39,7 @@ import { logError } from "../lib/logger";
 import { fetchDefaultArticleFeeds, fetchDefaultHomeFeeds } from "../lib/feed";
 import { getDefaultBlossomServers } from "../lib/relays";
 import { runColorMode } from "../utils";
+import { accountStore, hasPublicKey, setProxyThroughPrimal } from "../stores/accountStore";
 
 export type MobileReleases = {
   ios: { date: string, version: string },
@@ -145,14 +141,13 @@ export const SettingsContext = createContext<SettingsContextStore>();
 export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const toaster = useToastContext();
-  const account = useAccountContext();
   const intl = useIntl();
 
 // ACTIONS --------------------------------------
 
   const setUseSystemTheme = (flag: boolean) => {
     updateStore('useSystemTheme', () => flag);
-    saveSystemDarkMode(account?.publicKey, flag);
+    saveSystemDarkMode(accountStore.publicKey, flag);
 
     if (['sunrise', 'sunset'].includes(store.theme)) {
       setThemeByName(flag ? 'sunset' : 'sunrise', true);
@@ -177,8 +172,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     getDefaultBlossomServers(subId);
   };
 
-  const setProxyThroughPrimal = (shouldProxy: boolean, temp?: boolean) => {
-    account?.actions.setProxyThroughPrimal(shouldProxy);
+  const setTheProxyThroughPrimal = (shouldProxy: boolean, temp?: boolean) => {
+    setProxyThroughPrimal(shouldProxy);
 
     !temp && saveSettings();
   }
@@ -247,7 +242,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     updateStore('theme', () => theme.name);
     if (!temp) {
-      saveTheme(account?.publicKey, theme.name);
+      saveTheme(accountStore.publicKey, theme.name);
 
       saveSettings();
     }
@@ -258,13 +253,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    const availableTheme = store.themes.find(t => t.name === name);
+    const availableTheme = store.themes.find((t: PrimalTheme) => t.name === name);
     availableTheme && setTheme(availableTheme, temp);
   }
 
   const setAnimation = (isAnimated: boolean, temp?: boolean) => {
 
-    saveAnimated(account?.publicKey, isAnimated);
+    saveAnimated(accountStore.publicKey, isAnimated);
     updateStore('isAnimated', () => isAnimated);
 
     !temp && saveSettings();
@@ -281,10 +276,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     if (!feed) {
       return;
     }
-    if (account?.hasPublicKey()) {
+    if (hasPublicKey()) {
       const add = addToTop ? updateAvailableFeedsTop : updateAvailableFeeds;
 
-      updateStore('availableFeeds', (feeds) => add(account?.publicKey, feed, feeds));
+      updateStore('availableFeeds', (feeds) => add(accountStore.publicKey, feed, feeds));
 
 
       !temp && saveSettings();
@@ -296,9 +291,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    if (account?.hasPublicKey()) {
+    if (hasPublicKey()) {
       updateStore('availableFeeds',
-        (feeds) => removeFromAvailableFeeds(account?.publicKey, feed, feeds),
+        (feeds) => removeFromAvailableFeeds(accountStore.publicKey, feed, feeds),
       );
 
 
@@ -307,9 +302,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const setAvailableFeeds = (feedList: PrimalFeed[], temp?: boolean) => {
-    if (account?.hasPublicKey()) {
+    if (hasPublicKey()) {
       updateStore('availableFeeds',
-        () => replaceAvailableFeeds(account?.publicKey, feedList),
+        () => replaceAvailableFeeds(accountStore.publicKey, feedList),
       );
 
       !temp && saveSettings();
@@ -327,7 +322,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const renameAvailableFeed = (feed: PrimalFeed, newName: string) => {
-    const list = store.availableFeeds.map(af => {
+    const list = store.availableFeeds.map((af: PrimalFeed) => {
       return af.hex === feed.hex && af.includeReplies === feed.includeReplies ? { ...af, name: newName } : { ...af };
     });
     setAvailableFeeds(list);
@@ -356,7 +351,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     if (!pubkey) return;
 
     const spec = specifyUserFeed(pubkey);
-    const list = store.homeFeeds.filter(f => f.spec !== spec);
+    const list = store.homeFeeds.filter((f: PrimalArticleFeed) => f.spec !== spec);
 
     updateHomeFeeds(list);
   }
@@ -364,12 +359,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   const removeFeed = (feed: PrimalArticleFeed, feedType: FeedType) => {
 
     if (feedType === 'home') {
-      const updated = store.homeFeeds.filter(f => f.spec !== feed.spec);
+      const updated = store.homeFeeds.filter((f: PrimalArticleFeed) => f.spec !== feed.spec);
       updateHomeFeeds(updated);
     }
 
     if (feedType === 'reads') {
-      const updated = store.readsFeeds.filter(f => f.spec !== feed.spec);
+      const updated = store.readsFeeds.filter((f: PrimalArticleFeed) => f.spec !== feed.spec);
       updateReadsFeeds(updated);
     }
   }
@@ -420,7 +415,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     const spec = specifyUserFeed(pubkey);
 
-    return store.homeFeeds.find(f => f.spec === spec) !== undefined;
+    return store.homeFeeds.find((f: PrimalArticleFeed) => f.spec === spec) !== undefined;
   }
 
   const restoreHomeFeeds = () => {
@@ -465,7 +460,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const updateHomeFeeds = (feeds: PrimalArticleFeed[]) => {
     updateStore('homeFeeds', () => [...feeds]);
-    saveHomeFeeds(account?.publicKey, feeds);
+    saveHomeFeeds(accountStore.publicKey, feeds);
 
     const subId = `set_home_feeds_${APP_ID}`;
 
@@ -478,7 +473,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const updateReadsFeeds = (feeds: PrimalArticleFeed[]) => {
     updateStore('readsFeeds', () => [...feeds]);
-    saveHomeFeeds(account?.publicKey, feeds);
+    saveHomeFeeds(accountStore.publicKey, feeds);
 
     const subId = `set_home_feeds_${APP_ID}`;
 
@@ -508,21 +503,21 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const renameHomeFeed = (feed: PrimalArticleFeed, newName: string) => {
-    const list = store.homeFeeds.map(f => {
+    const list = store.homeFeeds.map((f: PrimalArticleFeed) => {
       return f.spec === feed.spec ? { ...f, name: newName } : { ...f };
     });
     updateHomeFeeds(list);
   };
 
   const renameReadsFeed = (feed: PrimalArticleFeed, newName: string) => {
-    const list = store.readsFeeds.map(f => {
+    const list = store.readsFeeds.map((f: PrimalArticleFeed) => {
       return f.spec === feed.spec ? { ...f, name: newName } : { ...f };
     });
     updateReadsFeeds(list);
   };
 
   const enableHomeFeed = (feed: PrimalArticleFeed, enabled: boolean) => {
-    const list = store.homeFeeds.map(f => {
+    const list = store.homeFeeds.map((f: PrimalArticleFeed) => {
       return f.spec === feed.spec ? { ...f, enabled } : { ...f };
     });
 
@@ -530,7 +525,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const enableReadsFeed = (feed: PrimalArticleFeed, enabled: boolean) => {
-    const list = store.readsFeeds.map(f => {
+    const list = store.readsFeeds.map((f: PrimalArticleFeed) => {
       return f.spec === feed.spec ? { ...f, enabled } : { ...f };
     });
 
@@ -539,9 +534,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const isFeedAdded: (f: PrimalArticleFeed, d: 'home' | 'reads') => boolean = (feed: PrimalArticleFeed, destination: 'home' | 'reads') => {
     if (destination === 'reads') {
-      return store.readsFeeds.find(f => f.spec === feed.spec) !== undefined;
+      return store.readsFeeds.find((f: PrimalArticleFeed) => f.spec === feed.spec) !== undefined;
     }
-    return store.homeFeeds.find(f => f.spec === feed.spec) !== undefined;
+    return store.homeFeeds.find((f: PrimalArticleFeed) => f.spec === feed.spec) !== undefined;
   }
 
   const addHomeFeed = (feed: PrimalArticleFeed) => {
@@ -591,22 +586,22 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     //       let feeds = settings.feeds as PrimalFeed[];
 
-    //       if (account?.hasPublicKey()) {
+    //       if (hasPublicKey()) {
     //         feeds.unshift({
     //           name: feedLatestWithRepliesLabel,
-    //           hex: account?.publicKey,
-    //           npub: hexToNpub(account?.publicKey),
+    //           hex: accountStore.publicKey,
+    //           npub: hexToNpub(accountStore.publicKey),
     //           includeReplies: true,
     //         });
     //         feeds.unshift({
     //           name: feedLatestLabel,
-    //           hex: account?.publicKey,
-    //           npub: hexToNpub(account?.publicKey),
+    //           hex: accountStore.publicKey,
+    //           npub: hexToNpub(accountStore.publicKey),
     //         });
     //       }
 
     //       updateStore('availableFeeds',
-    //         () => replaceAvailableFeeds(account?.publicKey, feeds),
+    //         () => replaceAvailableFeeds(accountStore.publicKey, feeds),
     //       );
 
     //       updateStore('defaultFeed', () => store.availableFeeds[0]);
@@ -664,7 +659,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       notificationsAdditional,
       applyContentModeration: store.applyContentModeration,
       contentModeration: store.contentModeration,
-      proxyThroughPrimal: account?.proxyThroughPrimal || false,
+      proxyThroughPrimal: accountStore.proxyThroughPrimal || false,
       animated: store.isAnimated,
     };
 
@@ -702,13 +697,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           const notificationAdditionalSettings = settings.notificationsAdditional as Record<string, boolean>;
 
           updateStore('availableFeeds',
-            () => replaceAvailableFeeds(account?.publicKey, feeds),
+            () => replaceAvailableFeeds(accountStore.publicKey, feeds),
           );
 
-          updateStore('defaultFeed', () => store.availableFeeds.find(x => x.hex === nostrHighlights) || store.availableFeeds[0]);
+          updateStore('defaultFeed', () => store.availableFeeds.find((x: PrimalFeed) => x.hex === nostrHighlights) || store.availableFeeds[0]);
 
-          updateStore('notificationSettings', () => ({ ...notificationSettings } || { ...defaultNotificationSettings }));
-          updateStore('notificationAdditionalSettings', () => ({ ...notificationAdditionalSettings } || { ...defaultNotificationAdditionalSettings }));
+          updateStore('notificationSettings', () => (Object.keys(notificationSettings).length > 0 ? { ...notificationSettings } : { ...defaultNotificationSettings }));
+          updateStore('notificationAdditionalSettings', () => (Object.keys(notificationAdditionalSettings) ? { ...notificationAdditionalSettings } : { ...defaultNotificationAdditionalSettings }));
           updateStore('applyContentModeration', () => true);
 
           let zapOptions = settings.zapConfig;
@@ -832,7 +827,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           else if (Array.isArray(contentModeration)) {
             for (let i=0; i < contentModeration.length; i++) {
               const m = contentModeration[i];
-              const index = store.contentModeration.findIndex(x => x.name === m.name);
+              const index = store.contentModeration.findIndex((x: ContentModeration) => x.name === m.name);
 
               updateStore(
                 'contentModeration',
@@ -842,7 +837,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             }
           }
 
-          account?.actions.setProxyThroughPrimal(proxyThroughPrimal);
+          setProxyThroughPrimal(proxyThroughPrimal);
         }
         catch (e) {
           logError('Error parsing settings response: ', e);
@@ -949,7 +944,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       },
       onEose: () => {
         unsub();
-        initReadsFeeds(account?.publicKey, store.readsFeeds);
+        initReadsFeeds(accountStore.publicKey, store.readsFeeds);
       },
     });
 
@@ -967,7 +962,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       },
       onEose: () => {
         unsub();
-        initHomeFeeds(account?.publicKey, store.homeFeeds)
+        initHomeFeeds(accountStore.publicKey, store.homeFeeds)
       },
     });
 
@@ -1021,12 +1016,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   // Initial setup for a user with a public key
   createEffect(() => {
-    if (!account?.hasPublicKey() && account?.isKeyLookupDone) {
+    if (!hasPublicKey() && accountStore.isKeyLookupDone) {
       loadDefaults();
       return;
     }
 
-    const publicKey = account?.publicKey;
+    const publicKey = accountStore.publicKey;
 
     if (!isConnected()) return;
 
@@ -1076,7 +1071,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       setApplyContentModeration,
       modifyContentModeration,
       refreshMobileReleases,
-      setProxyThroughPrimal,
+      setProxyThroughPrimal: setTheProxyThroughPrimal,
       getDefaultReadsFeeds,
       getDefaultHomeFeeds,
       restoreReadsFeeds,

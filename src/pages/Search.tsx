@@ -4,22 +4,19 @@ import {
   createSignal,
   For,
   on,
-  onMount,
   Show,
 } from 'solid-js';
 import Note from '../components/Note/Note';
 import Wormhole from '../components/Wormhole/Wormhole';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { useAccountContext } from '../contexts/AccountContext';
 import { useIntl } from '@cookbook/solid-intl';
-import { isConnected } from '../sockets';
 import { useParams } from '@solidjs/router';
 import styles from './Search.module.scss';
 import { useSearchContext } from '../contexts/SearchContext';
 import SearchSidebar from '../components/SearchSidebar/SearchSidebar';
 import Loader from '../components/Loader/Loader';
 import SearchComponent from '../components/Search/Search';
-import { toast as t, search as tSearch  } from '../translations';
+import { search as tSearch  } from '../translations';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import SaveFeedDialog from '../components/SaveFeedDialog/SaveFeedDialog';
@@ -30,7 +27,6 @@ const Search: Component = () => {
   const params = useParams();
   const basicSearch = useSearchContext();
   const search = useAdvancedSearchContext();
-  const account = useAccountContext();
   const intl = useIntl();
 
   const query = () => decodeURI(params.query).replaceAll('%23', '#');

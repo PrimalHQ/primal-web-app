@@ -8,12 +8,11 @@ import { A } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import { storageName } from '../../lib/localStore';
-import { useAccountContext } from '../../contexts/AccountContext';
 import CheckBox from '../../components/Checkbox/CheckBox';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
+import { accountStore, logout } from '../../stores/accountStore';
 
 const DevTools: Component = () => {
-  const account = useAccountContext();
   const intl = useIntl();
 
   const [isDevMode, setIsDevMode] = createSignal<boolean>(localStorage.getItem('devMode') === 'true');
@@ -32,9 +31,7 @@ const DevTools: Component = () => {
   })
 
   const checkLocalStorage = () => {
-    if (!account) return false;
-
-    const name = storageName(account.publicKey);
+    const name = storageName(accountStore.publicKey);
 
     const isAvailable = localStorage.getItem(name) !== null;
 
@@ -42,17 +39,13 @@ const DevTools: Component = () => {
   }
 
   const checkNsec = () => {
-    if (!account) return false;
-
     const isAvailable = localStorage.getItem('primalSec') !== null;
 
     setHasNsec(() => isAvailable);
   }
 
   const clearLocalStore = () => {
-    if (!account) return;
-
-    const name = storageName(account.publicKey);
+    const name = storageName(accountStore.publicKey);
 
     localStorage.removeItem(name);
 
@@ -137,7 +130,7 @@ const DevTools: Component = () => {
         consfirmLabel="Yes"
         abortLabel="No"
         onConfirm={() => {
-          account?.actions.logout();
+          logout();
           setHasNsec(() => false);
           setConfirmNsecReset(false);
           location.reload();

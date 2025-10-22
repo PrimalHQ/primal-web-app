@@ -1,5 +1,4 @@
 import { Component, onCleanup, onMount } from 'solid-js';
-import { AccountProvider } from './contexts/AccountContext';
 import { connect, disconnect } from './sockets';
 import Toaster from './components/Toaster/Toaster';
 import { HomeProvider } from './contexts/HomeContext';
@@ -47,7 +46,6 @@ const App: Component = () => {
       <TranslatorProvider>
         <Toaster>
           <MediaProvider>
-            <AccountProvider>
               <SearchProvider>
                 <AdvancedSearchProvider>
                   <SettingsProvider>
@@ -69,7 +67,6 @@ const App: Component = () => {
                   </SettingsProvider>
                 </AdvancedSearchProvider>
               </SearchProvider>
-            </AccountProvider>
           </MediaProvider>
         </Toaster>
       </TranslatorProvider>

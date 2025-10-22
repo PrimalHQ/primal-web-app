@@ -1,7 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, createEffect, createSignal, Match, Switch } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
-import Modal from '../Modal/Modal';
 
 import { login as tLogin, actions as tActions } from '../../translations';
 
@@ -13,6 +11,7 @@ import TextInput from '../TextInput/TextInput';
 import { nip19 } from '../../lib/nTools';
 import { storeSec } from '../../lib/localStore';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
+import { accountStore, setSec } from '../../stores/accountStore';
 
 const LoginModal: Component<{
   id?: string,
@@ -21,7 +20,6 @@ const LoginModal: Component<{
 }> = (props) => {
 
   const intl = useIntl();
-  const account = useAccountContext();
 
   const [step, setStep] = createSignal<'login' | 'pin' | 'none'>('login')
   const [enteredKey, setEnteredKey] = createSignal('');
@@ -33,7 +31,7 @@ const LoginModal: Component<{
 
     if (!isValidNsec()) return;
 
-    account?.actions.setSec(sec);
+    setSec(sec);
     setStep(() => 'pin');
   };
 
@@ -59,7 +57,7 @@ const LoginModal: Component<{
       try {
         const decoded = nip19.decode(key);
 
-        return decoded.type === 'nsec' && decoded.data;
+        return decoded.type === 'nsec' && decoded.data ? true : false;
       } catch(e) {
         return false;
       }
@@ -124,7 +122,7 @@ const LoginModal: Component<{
         <CreatePinModal
           open={step() === 'pin'}
           onAbort={() => {
-            onStoreSec(account?.sec);
+            onStoreSec(accountStore.sec);
           }}
           valueToEncrypt={enteredKey()}
           onPinApplied={onStoreSec}

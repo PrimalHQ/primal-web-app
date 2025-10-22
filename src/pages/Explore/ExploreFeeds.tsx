@@ -1,40 +1,40 @@
-import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect } from 'solid-js';
 import styles from './Explore.module.scss';
-import { useToastContext } from '../../components/Toaster/Toaster';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import StickySidebar from '../../components/StickySidebar/StickySidebar';
-import Wormhole from '../../components/Wormhole/Wormhole';
-import { toast as t, explore as tExplore, actions as tAction } from '../../translations';
+import { explore as tExplore } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
-import Search from '../../components/Search/Search';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import PageTitle from '../../components/PageTitle/PageTitle';
-import { Tabs } from '@kobalte/core/tabs';
 import { useExploreContext } from '../../contexts/ExploreContext';
-import { A, useLocation, useParams } from '@solidjs/router';
-import FeedMarketPlace from '../../components/FeedMarketplace/FeedMarketPlace';
+import { A, useParams } from '@solidjs/router';
 import FeedMarketPlacePreview from '../../components/FeedMarketplace/FeedMarketPlacePreview';
 import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
 import { Kind } from '../../constants';
-import { DVMMetadata, DVMStats, NostrNoteActionsContent, NostrUserContent, NoteActions, PrimalArticleFeed, PrimalDVM, PrimalUser } from '../../types/primal';
+import {
+  DVMMetadata,
+  DVMStats,
+  NostrNoteActionsContent,
+  NostrUserContent,
+  NoteActions,
+  PrimalArticleFeed,
+  PrimalDVM,
+  PrimalUser,
+} from '../../types/primal';
 import { createStore } from 'solid-js/store';
 import { convertToUser } from '../../stores/profile';
 import { fetchDVM } from '../../lib/feed';
-import { useAccountContext } from '../../contexts/AccountContext';
 import ButtonFlip from '../../components/Buttons/ButtonFlip';
 import ExploreHotTopics from '../../components/ExploreSidebar/ExploreHotTopics';
 import ExploreSidebar from '../../components/ExploreSidebar/ExploreSidebar';
 import NostrStats from '../../components/NostrStats/NostrStats';
+import { accountStore } from '../../stores/accountStore';
 
 const ExploreFeeds: Component = () => {
-
-  const account = useAccountContext();
   const settings = useSettingsContext();
-  const toaster = useToastContext();
   const intl = useIntl();
   const explore = useExploreContext();
-  const location = useLocation();
   const params = useParams();
 
   const [store, setStore] = createStore<{
@@ -150,7 +150,7 @@ const ExploreFeeds: Component = () => {
       }
     });
 
-    fetchDVM(account?.publicKey, subId, identifier, pubkey);
+    fetchDVM(accountStore.publicKey, subId, identifier, pubkey);
   }
 
   const dvm = () => store.dvm;

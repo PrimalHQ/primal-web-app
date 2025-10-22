@@ -1,10 +1,5 @@
-import { useBeforeLeave, useNavigate, useParams } from "@solidjs/router";
-import { Component, createEffect, For, on, onMount, Show } from "solid-js";
-import { createStore } from "solid-js/store";
-import { DMContact, fetchDMContacts } from "../megaFeeds";
-import { APP_ID } from "../App";
-import { useAccountContext } from "../contexts/AccountContext";
-import { userName } from "../stores/profile";
+import { useNavigate, useParams } from "@solidjs/router";
+import { Component, createEffect, For, on } from "solid-js";
 import { useDMContext } from "../contexts/DMContext";
 import DirectMessageContact from "../components/DirectMessages/DirectMessageContact";
 
@@ -15,21 +10,18 @@ import { placeholders, messages as tMessages } from "../translations";
 import PageTitle from "../components/PageTitle/PageTitle";
 import { useIntl } from "@cookbook/solid-intl";
 import PageCaption from "../components/PageCaption/PageCaption";
-import { loadLastDMConversations, loadLastDMRelation } from "../lib/localStore";
 import { PrimalUser, UserRelation } from "../types/primal";
 import Wormhole from "../components/Wormhole/Wormhole";
 import Search from "../components/Search/Search";
 import DirectMessageConversation from "../components/DirectMessages/DirectMessageConversation";
-import { TextField } from "@kobalte/core/text-field";
 import DirectMessagesComposer from "../components/DirectMessages/DirectMessagesComposer";
-import { Pagination } from "@kobalte/core/*";
 import Paginator from "../components/Paginator/Paginator";
 import { hexToNpub, npubToHex } from "../lib/keys";
 import { logError } from "../lib/logger";
+import { accountStore } from "../stores/accountStore";
 
 const DirectMessages: Component = () => {
   const params = useParams();
-  const account = useAccountContext();
   const dms = useDMContext();
   const intl = useIntl();
   const navigate = useNavigate();
@@ -39,8 +31,6 @@ const DirectMessages: Component = () => {
 
     return dms.dmContacts[relation] || [];
   };
-
-  let firstTime = true;
 
   const changeRelation = async (relation: string) => {
     if (!dms || !["any", "follows", "other"].includes(relation)) return;
@@ -82,13 +72,13 @@ const DirectMessages: Component = () => {
   };
 
   const isFollowing = (pubkey: string) => {
-    if (!account?.following) return false;
+    if (!accountStore.following) return false;
 
-    return account.following.includes(pubkey);
+    return accountStore.following.includes(pubkey);
   };
 
   const updateRelationOfContact = async (pubkey: string) => {
-    if (!dms || !account || !account.following) return;
+    if (!dms || !accountStore.following) return;
 
     if (isFollowing(pubkey)) {
       return await changeRelation("follows");
@@ -128,9 +118,9 @@ const DirectMessages: Component = () => {
   };
 
   const setupPageState = async (contact: string) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
-    if (!pubkey || !account.isKeyLookupDone) return;
+    if (!pubkey || !accountStore.isKeyLookupDone) return;
 
     if (!contact) {
       const lastContact = dms?.lastConversationContact?.pubkey;
@@ -160,7 +150,7 @@ const DirectMessages: Component = () => {
 
   createEffect(
     on(
-      () => [account?.isKeyLookupDone, params.contact],
+      () => [accountStore.isKeyLookupDone, params.contact],
       (next) => {
         const [isDone, contact] = next;
 

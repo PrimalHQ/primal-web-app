@@ -4,8 +4,6 @@ import { A, useLocation, useNavigate } from "@solidjs/router";
 import { Component, createEffect, createSignal, For, Match, on, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { imageOrVideoRegex, Kind, profileContactListPage } from "../../constants";
-import { useAccountContext } from "../../contexts/AccountContext";
-import { useMediaContext } from "../../contexts/MediaContext";
 import { useProfileContext } from "../../contexts/ProfileContext";
 import { hookForDev } from "../../lib/devTools";
 import { humanizeNumber } from "../../lib/stats";
@@ -27,7 +25,8 @@ import { TransitionGroup } from "solid-transition-group";
 import ZapSkeleton from "../Skeleton/ZapSkeleton";
 import ProfileGalleryImageSkeleton from "../Skeleton/ProfileGalleryImageSkeleton";
 import { scrollWindowTo } from "../../lib/scroll";
-import { nip19 } from "nostr-tools";
+
+import { accountStore, addToAllowlist, removeFromMuteList } from "../../stores/accountStore";
 
 
 const ProfileTabs: Component<{
@@ -38,8 +37,6 @@ const ProfileTabs: Component<{
 
   const intl = useIntl();
   const profile = useProfileContext();
-  const account = useAccountContext();
-  const media = useMediaContext();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -49,18 +46,18 @@ const ProfileTabs: Component<{
 
   const [currentTab, setCurrentTab] = createSignal<string>(hash());
 
-  const addToAllowlist = async () => {
+  const addPkToAllowlist = async () => {
     const pk = props.profileKey;
     if (pk) {
-      account?.actions.addToAllowlist(pk);
+      addToAllowlist(pk);
     }
   };
 
   const isMuted = (pk: string | undefined, ignoreContentCheck = false) => {
-    const isContentMuted = account?.mutelists.find(x => x.pubkey === account.publicKey)?.content;
+    const isContentMuted = accountStore.mutelists.find(x => x.pubkey === accountStore.publicKey)?.content;
 
     return pk &&
-      account?.muted.includes(pk) &&
+      accountStore.muted.includes(pk) &&
       (ignoreContentCheck ? true : isContentMuted);
   };
 
@@ -71,11 +68,11 @@ const ProfileTabs: Component<{
   const unMuteProfile = () => {
     const pk = props.profileKey;
 
-    if (!account || !pk) {
+    if (!pk) {
       return;
     }
 
-    account.actions.removeFromMuteList(pk, 'user', () => {
+    removeFromMuteList(pk, 'user', () => {
       props.setProfile && props.setProfile(pk);
       onChangeValue(currentTab());
     });
@@ -367,7 +364,7 @@ const ProfileTabs: Component<{
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(t.isFiltered)}
                   <button
-                    onClick={addToAllowlist}
+                    onClick={addPkToAllowlist}
                   >
                     {intl.formatMessage(tActions.addToAllowlist)}
                   </button>
@@ -448,7 +445,7 @@ const ProfileTabs: Component<{
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(t.isFiltered)}
                   <button
-                    onClick={addToAllowlist}
+                    onClick={addPkToAllowlist}
                   >
                     {intl.formatMessage(tActions.addToAllowlist)}
                   </button>
@@ -487,7 +484,7 @@ const ProfileTabs: Component<{
                               note={note}
                               shorten={true}
                               onRemove={(id: string, isRepost?: boolean) => {
-                                if (note.pubkey !== account?.publicKey) {
+                                if (note.pubkey !== accountStore.publicKey) {
                                   profile?.actions.removeEvent(id, 'notes');
                                   return;
                                 }
@@ -532,7 +529,7 @@ const ProfileTabs: Component<{
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(t.isFiltered)}
                   <button
-                    onClick={addToAllowlist}
+                    onClick={addPkToAllowlist}
                   >
                     {intl.formatMessage(tActions.addToAllowlist)}
                   </button>
@@ -612,7 +609,7 @@ const ProfileTabs: Component<{
                 <div class={styles.mutedProfile}>
                   {intl.formatMessage(t.isFiltered)}
                   <button
-                    onClick={addToAllowlist}
+                    onClick={addPkToAllowlist}
                   >
                     {intl.formatMessage(tActions.addToAllowlist)}
                   </button>

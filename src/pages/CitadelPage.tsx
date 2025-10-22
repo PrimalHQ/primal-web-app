@@ -4,20 +4,15 @@ import styles from './CitadelPage.module.scss';
 import { toast as t } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import { useSettingsContext } from '../contexts/SettingsContext';
-import { useNavigate, useParams, useSearchParams } from '@solidjs/router';
+import { useParams } from '@solidjs/router';
 import { findStreamByHost, getStreamingEvent, startLiveChat, stopLiveChat, StreamingData } from '../lib/streaming';
 
 import { useProfileContext } from '../contexts/ProfileContext';
-import { fetchKnownProfiles } from '../lib/profile';
 import { nip19 } from '../lib/nTools';
-import { ProfilePointer } from 'nostr-tools/lib/types/nip19';
-import { useAccountContext } from '../contexts/AccountContext';
 import Avatar from '../components/Avatar/Avatar';
 import { emptyUser, userName } from '../stores/profile';
 import { humanizeNumber } from '../lib/stats';
-import FollowButton from '../components/FollowButton/FollowButton';
 import { createStore } from 'solid-js/store';
-import { date } from '../lib/dates';
 import { APP_ID } from '../App';
 import { readData, refreshSocketListeners, removeSocketListeners, socket } from '../sockets';
 
@@ -29,21 +24,15 @@ import { isHashtag, isUrl, sendEvent, triggerImportEvents } from '../lib/notes';
 import { canUserReceiveZaps, convertToZap, zapStream } from '../lib/zap';
 import { readSecFromStorage } from '../lib/localStore';
 import { useToastContext } from '../components/Toaster/Toaster';
-import LiveVideo from '../components/LiveVideo/LiveVideo';
 import ChatMessage from '../components/LiveVideo/ChatMessage';
-import ChatMessageComposer from '../components/LiveVideo/ChatMessageComposer';
 import ChatMessageDetails, { ChatMessageConfig } from '../components/LiveVideo/ChatMessageDetails';
-import { Popover } from '@kobalte/core/popover';
-import { RadioBoxOption } from '../components/Checkbox/RadioBox';
-import RadioBoxWithDesc from '../components/Checkbox/RadioBoxWithDesc';
 import { TransitionGroup } from 'solid-transition-group';
-import CheckBox from '../components/Checkbox/CheckBox';
-import TopZapModal from '../components/TopZapsModal/TopZapModal';
 import Paginator from '../components/Paginator/Paginator';
 import { hashtagCharsRegex, Kind } from '../constants';
 
 import mempoolPlaceholder from '../assets/images/mempool_placeholder.png';
 import citadelLogo from '../assets/images/citadel_logo.png';
+import { accountStore, hasPublicKey, setShowPin, showGetStarted } from '../stores/accountStore';
 
 
 const QA_PUBKEY = '88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079';
@@ -53,17 +42,13 @@ const CHAT_PAGE_SIZE = 25;
 
 const CitadelPage: Component = () => {
   const profile = useProfileContext();
-  const account = useAccountContext();
   const params = useParams();
-  const navigate = useNavigate();
   const toast = useToastContext();
   const intl = useIntl();
   const app = useAppContext();
   const settings = useSettingsContext();
 
-  const [queryParams, setQueryParams] = useSearchParams();
-
-  const streamId = () => STREAM_ID//params.streamId;
+  const streamId = () => STREAM_ID;
 
   const [getHex, setHex] = createSignal<string>();
 
@@ -87,46 +72,46 @@ const CitadelPage: Component = () => {
   const resolveHex = async (vanityName: string | undefined) => {
     return QA_PUBKEY;
 
-    if (vanityName) {
-      let name = vanityName.toLowerCase();
+    // if (vanityName) {
+    //   let name = vanityName.toLowerCase();
 
-      if (name === 'gigi') {
-        name = 'dergigi';
-      }
+    //   if (name === 'gigi') {
+    //     name = 'dergigi';
+    //   }
 
-      const vanityProfile = await fetchKnownProfiles(name);
+    //   const vanityProfile = await fetchKnownProfiles(name);
 
-      const hex = vanityProfile.names[name];
+    //   const hex = vanityProfile.names[name];
 
-      if (hex) {
-        setHex(() => hex);
+    //   if (hex) {
+    //     setHex(() => hex);
 
-        profile?.profileKey !== hex && setProfile(hex);
-        return;
-      }
-    }
+    //     profile?.profileKey !== hex && setProfile(hex);
+    //     return;
+    //   }
+    // }
 
-    let hex = params.vanityName || account?.publicKey;
+    // let hex = params.vanityName || account?.publicKey;
 
-    if (!hex) {
-      hex = QA_PUBKEY;
-      // navigate('/404');
-      // return;
-    }
+    // if (!hex) {
+    //   hex = QA_PUBKEY;
+    //   // navigate('/404');
+    //   // return;
+    // }
 
-    if (params.vanityName?.startsWith('npub')) {
-      hex = nip19.decode(params.vanityName).data as string;
-    }
+    // if (params.vanityName?.startsWith('npub')) {
+    //   hex = nip19.decode(params.vanityName).data as string;
+    // }
 
-    if (params.vanityName?.startsWith('nprofile')) {
-      hex = (nip19.decode(params.vanityName).data as ProfilePointer).pubkey! as string;
-    }
+    // if (params.vanityName?.startsWith('nprofile')) {
+    //   hex = (nip19.decode(params.vanityName).data as ProfilePointer).pubkey! as string;
+    // }
 
-    setHex(() => hex);
+    // setHex(() => hex);
 
-    profile?.profileKey !== hex && setProfile(hex);
+    // profile?.profileKey !== hex && setProfile(hex);
 
-    return;
+    // return;
   }
 
   const host = () => {
@@ -614,13 +599,13 @@ const CitadelPage: Component = () => {
     return (
       <div class={`${styles.liveMessage} ${styles.zapMessage}`}>
         <div class={styles.leftSide}>
-          <Avatar user={account?.activeUser} size="xss" />
+          <Avatar user={accountStore.activeUser} size="xss" />
         </div>
         <div class={styles.rightSide}>
           <span class={styles.zapInfo}>
             <span class={styles.authorName}>
               <span>
-                {userName(account?.activeUser, account?.publicKey)}
+                {userName(accountStore.activeUser, accountStore.publicKey)}
               </span>
               <span class={styles.zapped}>
                 zapped
@@ -751,7 +736,7 @@ const CitadelPage: Component = () => {
             when={zap.id === 'NEW_USER_ZAP'}
             fallback={<Avatar user={author(zap?.sender as string)} size="s38" />}
           >
-            <Avatar user={account?.activeUser} size="s38" />
+            <Avatar user={accountStore.activeUser} size="s38" />
           </Show>
           <div class={styles.amount}>
             <div class={styles.zapIcon}></div>
@@ -783,7 +768,7 @@ const CitadelPage: Component = () => {
               when={zap.id === 'NEW_USER_ZAP'}
               fallback={<Avatar user={author(zap?.sender as string)} size="s38" />}
             >
-              <Avatar user={account?.activeUser} size="s38" />
+              <Avatar user={accountStore.activeUser} size="s38" />
             </Show>
             <div class={styles.zapAmount}>{humanizeNumber(zap?.amount, false)}</div>
           </div>
@@ -795,7 +780,7 @@ const CitadelPage: Component = () => {
 
 
   const sendMessage = async (content: string) => {
-    if (!account || content.length === 0) return;
+    if (content.length === 0) return;
 
     const eventCoodrinate = `${Kind.LiveEvent}:${streamData.pubkey}:${streamData.id}`;
 
@@ -804,10 +789,10 @@ const CitadelPage: Component = () => {
       content,
       created_at: Math.floor((new Date()).getTime() / 1_000),
       tags: [
-        ['a', eventCoodrinate, account.activeRelays[0].url, 'root'],
+        ['a', eventCoodrinate, accountStore.activeRelays[0].url, 'root'],
       ],
     }
-    const { success, note } = await sendEvent(messageEvent, account.activeRelays, account.relaySettings, account.proxyThroughPrimal || false);
+    const { success, note } = await sendEvent(messageEvent, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
 
     if (success && note) {
       setEvents((es) => [{ ...note }, ...es ]);
@@ -835,16 +820,16 @@ const CitadelPage: Component = () => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       setIsZapping(() => false);
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
@@ -899,8 +884,8 @@ const CitadelPage: Component = () => {
   };
 
   const doQuickZap = async () => {
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
@@ -916,11 +901,11 @@ const CitadelPage: Component = () => {
       const { success, event } = await zapStream(
         streamData,
         host() || profile?.userProfile,
-        account.publicKey,
+        accountStore.publicKey,
         amount,
         message,
-        account.activeRelays,
-        account.activeNWC,
+        accountStore.activeRelays,
+        accountStore.activeNWC,
       );
 
       setIsZapping(() => false);
@@ -959,7 +944,7 @@ const CitadelPage: Component = () => {
 
       const zap = {
         kind: -1,
-        sender: account?.publicKey,
+        sender: accountStore.publicKey,
         receiver: host()?.pubkey || profile?.profileKey || '',
         amount: zapOption.amount || 0,
         message: zapOption.message,
@@ -981,7 +966,7 @@ const CitadelPage: Component = () => {
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
 
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 

@@ -11,7 +11,6 @@ import { useProfileContext } from '../contexts/ProfileContext';
 import { fetchKnownProfiles } from '../lib/profile';
 import { nip19 } from '../lib/nTools';
 import { ProfilePointer } from 'nostr-tools/lib/types/nip19';
-import { useAccountContext } from '../contexts/AccountContext';
 import Avatar from '../components/Avatar/Avatar';
 import { emptyUser, userName } from '../stores/profile';
 import { humanizeNumber } from '../lib/stats';
@@ -40,13 +39,13 @@ import { TransitionGroup } from 'solid-transition-group';
 import CheckBox from '../components/Checkbox/CheckBox';
 import TopZapModal from '../components/TopZapsModal/TopZapModal';
 import Paginator from '../components/Paginator/Paginator';
-import { Kind } from '../constants';
+import { hashtagCharsRegex, Kind } from '../constants';
+import { accountStore, addToStreamMuteList, hasPublicKey, removeFromStreamMuteList, setShowPin, showGetStarted } from '../stores/accountStore';
 
 const CHAT_PAGE_SIZE = 25;
 
 const StreamPage: Component = () => {
   const profile = useProfileContext();
-  const account = useAccountContext();
   const params = useParams();
   const navigate = useNavigate();
   const toast = useToastContext();
@@ -97,7 +96,7 @@ const StreamPage: Component = () => {
       }
     }
 
-    let hex = params.vanityName || account?.publicKey;
+    let hex = params.vanityName || accountStore.publicKey;
 
     if (!hex) {
       navigate('/404');
@@ -181,7 +180,7 @@ const StreamPage: Component = () => {
         setEvents(() => []);
       }
 
-      startLiveChat(id, pubkey, account?.publicKey, subId, chatMode());
+      startLiveChat(id, pubkey, accountStore.publicKey, subId, chatMode());
 
       refreshSocketListeners(
         socket(),
@@ -435,9 +434,13 @@ const StreamPage: Component = () => {
       const zap = convertToZap(event);
 
       const r = events.find(e => {
+        // @ts-ignore
         return e.kind === -1 &&
+          // @ts-ignore
           e.message === zap.message &&
+          // @ts-ignore
           e.sender === zap.sender &&
+          // @ts-ignore
           Math.abs(e.created_at - (zap.created_at || 0)) < 10_000;
       });
 
@@ -596,13 +599,13 @@ const StreamPage: Component = () => {
     return (
       <div class={`${styles.liveMessage} ${styles.zapMessage}`}>
         <div class={styles.leftSide}>
-          <Avatar user={account?.activeUser} size="xss" />
+          <Avatar user={accountStore.activeUser} size="xss" />
         </div>
         <div class={styles.rightSide}>
           <span class={styles.zapInfo}>
             <span class={styles.authorName}>
               <span>
-                {userName(account?.activeUser, account?.publicKey)}
+                {userName(accountStore.activeUser, accountStore.publicKey)}
               </span>
               <span class={styles.zapped}>
                 zapped
@@ -733,7 +736,7 @@ const StreamPage: Component = () => {
             when={zap.id === 'NEW_USER_ZAP'}
             fallback={<Avatar user={author(zap?.sender as string)} size="s38" />}
           >
-            <Avatar user={account?.activeUser} size="s38" />
+            <Avatar user={accountStore.activeUser} size="s38" />
           </Show>
           <div class={styles.amount}>
             <div class={styles.zapIcon}></div>
@@ -765,7 +768,7 @@ const StreamPage: Component = () => {
               when={zap.id === 'NEW_USER_ZAP'}
               fallback={<Avatar user={author(zap?.sender as string)} size="s38" />}
             >
-              <Avatar user={account?.activeUser} size="s38" />
+              <Avatar user={accountStore.activeUser} size="s38" />
             </Show>
             <div class={styles.zapAmount}>{humanizeNumber(zap?.amount, false)}</div>
           </div>
@@ -777,7 +780,7 @@ const StreamPage: Component = () => {
 
 
   const sendMessage = async (content: string) => {
-    if (!account || content.length === 0) return;
+    if (content.length === 0) return;
 
     const eventCoodrinate = `${Kind.LiveEvent}:${streamData.pubkey}:${streamData.id}`;
 
@@ -786,10 +789,10 @@ const StreamPage: Component = () => {
       content,
       created_at: Math.floor((new Date()).getTime() / 1_000),
       tags: [
-        ['a', eventCoodrinate, account.activeRelays[0].url, 'root'],
+        ['a', eventCoodrinate, accountStore.activeRelays[0].url, 'root'],
       ],
     }
-    const { success, note } = await sendEvent(messageEvent, account.activeRelays, account.relaySettings, account.proxyThroughPrimal || false);
+    const { success, note } = await sendEvent(messageEvent, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
 
     if (success && note) {
       setEvents((es) => [{ ...note }, ...es ]);
@@ -817,16 +820,16 @@ const StreamPage: Component = () => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       setIsZapping(() => false);
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
@@ -854,35 +857,11 @@ const StreamPage: Component = () => {
     setIsZapping(() => true);
 
     return;
-
-    // if (!account?.hasPublicKey()) {
-    //   account?.actions.showGetStarted();
-    //   return;
-    // }
-
-    // if (!account.sec || account.sec.length === 0) {
-    //   const sec = readSecFromStorage();
-    //   if (sec) {
-    //     account.actions.setShowPin(sec);
-    //     return;
-    //   }
-    // }
-
-    // if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
-    //   return;
-    // }
-    // if (!canUserReceiveZaps(host() || profile?.userProfile)) {
-    //   return;
-    // }
-
-    // if (app?.customZap === undefined) {
-    //   doQuickZap();
-    // }
   };
 
   const doQuickZap = async () => {
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
@@ -898,11 +877,11 @@ const StreamPage: Component = () => {
       const { success, event } = await zapStream(
         streamData,
         host() || profile?.userProfile,
-        account.publicKey,
+        accountStore.publicKey,
         amount,
         message,
-        account.activeRelays,
-        account.activeNWC,
+        accountStore.activeRelays,
+        accountStore.activeNWC,
       );
 
       setIsZapping(() => false);
@@ -941,7 +920,7 @@ const StreamPage: Component = () => {
 
       const zap = {
         kind: -1,
-        sender: account?.publicKey,
+        sender: accountStore.publicKey,
         receiver: host()?.pubkey || profile?.profileKey || '',
         amount: zapOption.amount || 0,
         message: zapOption.message,
@@ -963,7 +942,7 @@ const StreamPage: Component = () => {
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
 
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -1253,13 +1232,13 @@ const StreamPage: Component = () => {
                           if (!pk) return;
 
                           if (!checked) {
-                            account?.actions.addToStreamMuteList(pk);
+                            addToStreamMuteList(pk);
                             return;
                           }
 
-                          account?.actions.removeFromStreamMuteList(pk);
+                          removeFromStreamMuteList(pk);
                         }}
-                        checked={!account?.streamMuted.includes(host()?.pubkey || '')}
+                        checked={!accountStore.streamMuted.includes(host()?.pubkey || '')}
                         label="Notify me about live streams from this account"
                       />
                     </div>

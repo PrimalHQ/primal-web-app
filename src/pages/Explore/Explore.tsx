@@ -1,10 +1,7 @@
 import { Component, createEffect, onCleanup, onMount, Show } from 'solid-js';
 import styles from './Explore.module.scss';
-import { useToastContext } from '../../components/Toaster/Toaster';
-import { useSettingsContext } from '../../contexts/SettingsContext';
 import StickySidebar from '../../components/StickySidebar/StickySidebar';
-import Wormhole from '../../components/Wormhole/Wormhole';
-import { toast as t, explore as tExplore, actions as tAction } from '../../translations';
+import { explore as tExplore } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../../components/Search/Search';
 import PageCaption from '../../components/PageCaption/PageCaption';
@@ -19,24 +16,17 @@ import ExploreMedia from './ExploreMedia';
 import ExploreTopics from './ExploreTopics';
 import NostrStats from '../../components/NostrStats/NostrStats';
 import { isConnected } from '../../sockets';
-import { useAccountContext } from '../../contexts/AccountContext';
 import ExploreSidebar from '../../components/ExploreSidebar/ExploreSidebar';
 import ExploreHotTopics from '../../components/ExploreSidebar/ExploreHotTopics';
 import { isPhone } from '../../utils';
-import SelectBox from '../../components/SelectBox/SelectBox';
 import SelectionBox2 from '../../components/SelectionBox/SelectionBox2';
 import { SelectionOption } from '../../types/primal';
-import SelectionBox from '../../components/SelectionBox/SelectionBox';
+import { accountStore } from '../../stores/accountStore';
 
 const Explore: Component = () => {
-
-  const settings = useSettingsContext();
-  const toaster = useToastContext();
   const intl = useIntl();
   const explore = useExploreContext();
   const location = useLocation();
-  const account = useAccountContext();
-
 
   const hash = () => {
     return (location.hash.length > 1) ? location.hash.substring(1) : 'feeds';
@@ -49,7 +39,7 @@ const Explore: Component = () => {
 
   createEffect(() => {
     if (isConnected()) {
-      explore?.actions.fetchLegendStats(account?.publicKey);
+      explore?.actions.fetchLegendStats(accountStore.publicKey);
       explore?.actions.openNetStatsStream();
     }
   });

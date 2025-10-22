@@ -3,10 +3,7 @@ import { hookForDev } from '../../lib/devTools';
 
 import styles from './ChatMessage.module.scss';
 import Avatar from '../Avatar/Avatar';
-import { nip05Verification, userName } from '../../stores/profile';
-import { DMContact } from '../../megaFeeds';
-import { date } from '../../lib/dates';
-import { TextField } from '@kobalte/core/text-field';
+import { userName } from '../../stores/profile';
 import { useSearchContext } from '../../contexts/SearchContext';
 import { editMentionRegex, emojiSearchLimit } from '../../constants';
 import { createStore } from 'solid-js/store';
@@ -14,18 +11,14 @@ import { getCaretCoordinates } from '../../lib/textArea';
 import { debounce, isVisibleInContainer, uuidv4 } from '../../utils';
 import emojiSearch from '@jukben/emoji-search';
 import { DirectMessage, PrimalUser, UserStats } from '../../types/primal';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { useProfileContext } from '../../contexts/ProfileContext';
 import SearchOption from '../Search/SearchOption';
 import DOMPurify from 'dompurify';
 import {
-  placeholders,
   messages as tMessages,
-  actions as tActions,
   search as tSearch,
 } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
-import { useDMContext } from '../../contexts/DMContext';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -39,10 +32,8 @@ const ChatMessageComposer: Component<{
   sendMessage: (message: string) => Promise<boolean>,
 }> = (props) => {
 
-  const account = useAccountContext();
   const profile = useProfileContext();
   const intl = useIntl();
-  const dms = useDMContext();
 
   const [message, setMessage] = createSignal('');
   const [inputFocused, setInputFocused] = createSignal(false);
@@ -103,36 +94,34 @@ const ChatMessageComposer: Component<{
   const onExpandableTextareaInput = () => {
     // Disable expanding the input
     return;
-    const maxHeight = 800;
+    // const maxHeight = 800;
 
-    const input = newMessageInput as AutoSizedTextArea;
+    // const input = newMessageInput as AutoSizedTextArea;
 
-    if(!input || input.nodeName !== 'TEXTAREA') {
-      return;
-    }
+    // if(!input || input.nodeName !== 'TEXTAREA') {
+    //   return;
+    // }
 
-    const minRows = parseInt(input.getAttribute('data-min-rows') || '0');
+    // const minRows = parseInt(input.getAttribute('data-min-rows') || '0');
 
-    !input._baseScrollHeight && getScrollHeight(input);
+    // !input._baseScrollHeight && getScrollHeight(input);
 
 
-    if (input.scrollHeight >= (maxHeight / 3)) {
-      return;
-    }
+    // if (input.scrollHeight >= (maxHeight / 3)) {
+    //   return;
+    // }
 
-    input.rows = minRows;
-    const rows = input.value === '' ? 0 : Math.ceil((input.scrollHeight - input._baseScrollHeight) / 20);
+    // input.rows = minRows;
+    // const rows = input.value === '' ? 0 : Math.ceil((input.scrollHeight - input._baseScrollHeight) / 20);
 
-    input.rows = minRows + rows;
-    input.style.height = `${40 + (20 * rows)}px`;
+    // input.rows = minRows + rows;
+    // input.style.height = `${40 + (20 * rows)}px`;
 
-    if (newMessageWrapper !== undefined) {
-      newMessageWrapper.style.height = `${64 + (20 * rows)}px`;
-    }
+    // if (newMessageWrapper !== undefined) {
+    //   newMessageWrapper.style.height = `${64 + (20 * rows)}px`;
+    // }
 
-    // debounce(() => {
-      setMessage(input.value)
-    // }, 300);
+    //   setMessage(input.value)
 
   }
 

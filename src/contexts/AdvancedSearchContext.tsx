@@ -18,11 +18,17 @@ import { searchFilteredUsers, searchUsers } from "../lib/search";
 import { convertToUser } from "../stores/profile";
 import { subsTo } from "../sockets";
 import { nip19 } from "../lib/nTools";
-import { useAccountContext } from "./AccountContext";
 import { npubToHex } from "../lib/keys";
-import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, PaginationInfo } from "../megaFeeds";
+import {
+  emptyPaging,
+  fetchMegaFeed,
+  filterAndSortNotes,
+  filterAndSortReads,
+  PaginationInfo,
+} from "../megaFeeds";
 import { logError } from "../lib/logger";
 import { calculateNotesOffset, calculateReadsOffset } from "../utils";
+import { accountStore } from "../stores/accountStore";
 
 const recomendedUsers = [
   '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2', // jack
@@ -90,18 +96,17 @@ export const AdvancedSearchContext = createContext<AdvancedSearchContextStore>()
 
 export function AdvancedSearchProvider(props: { children: JSX.Element }) {
 
-  const account = useAccountContext();
-
 // ACTIONS --------------------------------------
 
   const removeEvent = (id: string, kind: 'reads' | 'notes') => {
+    // @ts-ignore
     updateStore(kind, (drs) => drs.filter(d => d.id !== id));
   }
 
   const findUserByNupub = (npub: string) => {
     const subId = `find_npub_${APP_ID}`;
 
-    let decoded: nip19.DecodeResult | undefined;
+    let decoded: nip19.DecodedResult | undefined;
 
     try {
       decoded = nip19.decode(npub);
@@ -254,7 +259,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
       const spec = JSON.stringify({ id: 'advsearch', query: `kind:0 ${query}` });
 
       const { users } = await fetchMegaFeed(
-        account?.publicKey,
+        accountStore.publicKey,
         spec,
         subId,
         {
@@ -307,7 +312,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
       }
 
       const { notes, reads, paging } = await fetchMegaFeed(
-        account?.publicKey,
+        accountStore.publicKey,
         spec,
         `adv_search_${APP_ID}`,
         {
@@ -369,7 +374,7 @@ export function AdvancedSearchProvider(props: { children: JSX.Element }) {
         },
       });
 
-      searchFilteredUsers(pubkey, account?.publicKey, subId);
+      searchFilteredUsers(pubkey, accountStore.publicKey, subId);
     }
   }
 

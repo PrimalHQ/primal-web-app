@@ -4,7 +4,7 @@ import styles from './EmojiPickPopover.module.scss';
 import { EmojiOption } from '../../types/primal';
 import EmojiPicker from '../EmojiPicker/EmojiPicker';
 import EmojiPickHeader from './EmojiPickHeader';
-import { useAccountContext } from '../../contexts/AccountContext';
+import { accountStore } from '../../stores/accountStore';
 
 const defaultTerm = 'face';
 
@@ -14,9 +14,6 @@ const EmojiPickPopover: Component<{
   onSelect: (emoji: EmojiOption) => void,
   orientation?: 'up' | 'down',
 }> = (props) => {
-
-  const account = useAccountContext();
-
   const [emojiSearchTerm, setEmojiSearchTerm] = createSignal(defaultTerm);
   const [focusInput, setFocusInput] = createSignal(false);
   const [showPreset, setShowPreset] = createSignal(true);
@@ -88,7 +85,7 @@ const EmojiPickPopover: Component<{
 
         <EmojiPicker
           showPreset={showPreset()}
-          preset={account?.emojiHistory || []}
+          preset={accountStore.emojiHistory || []}
           filter={emojiSearchTerm()}
           onSelect={(emoji: EmojiOption) => {
             props.onSelect(emoji);

@@ -1,16 +1,10 @@
-import { useIntl } from '@cookbook/solid-intl';
-// import { A } from '@solidjs/router';
-import { nip19 } from '../../lib/nTools';
 import { batch, Component, createMemo, JSXElement, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
-import { useMediaContext } from '../../contexts/MediaContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { date } from '../../lib/dates';
 import { trimVerification } from '../../lib/profile';
 import { nip05Verification, userName } from '../../stores/profile';
-import { note as t } from '../../translations';
 import { PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import { NoteReactionsState } from '../Note/Note';
@@ -19,8 +13,8 @@ import ParsedNote from '../ParsedNote/ParsedNote';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './EmbeddedNote.module.scss';
-import { neventEncode } from 'nostr-tools/lib/types/nip19';
 import { TranslatorProvider } from '../../contexts/TranslatorContext';
+import { accountStore } from '../../stores/accountStore';
 
 export type EmbeddedNoteProps = {
   note: PrimalNote | undefined,
@@ -50,7 +44,6 @@ const EmbeddedNote: Component<EmbeddedNoteProps> = (props) => {
 
   const threadContext = useThreadContext();
   const app = useAppContext();
-  const account = useAccountContext();
 
   let noteContent: HTMLDivElement | undefined;
 
@@ -150,7 +143,7 @@ const EmbeddedNote: Component<EmbeddedNoteProps> = (props) => {
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
 
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 

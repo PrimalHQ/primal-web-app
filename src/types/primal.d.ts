@@ -980,6 +980,7 @@ export type PrimalDraft = {
   created_at: number,
   msg: NostrNoteContent,
   noteId: string,
+  repost?: PrimalRepost,
 }
 
 export type PrimalFeed = {

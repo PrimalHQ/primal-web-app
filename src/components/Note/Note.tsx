@@ -16,14 +16,12 @@ import { createStore } from 'solid-js/store';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import NoteContextTrigger from './NoteContextTrigger';
 import { date, veryLongDate } from '../../lib/dates';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { isPhone, uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
-import { addrRegexG, imageRegexG, Kind, linebreakRegex, noteRegex, urlRegexG } from '../../constants';
-import { nip19 } from 'nostr-tools';
-import AppRouter from '../../Router';
+import { addrRegexG, imageRegexG, linebreakRegex, noteRegex, urlRegexG } from '../../constants';
 import { TranslatorProvider } from '../../contexts/TranslatorContext';
+import { accountStore } from '../../stores/accountStore';
 
 export type NoteReactionsState = {
   bookmarks?: number,
@@ -73,7 +71,6 @@ const Note: Component<NoteProps> = (props) => {
 
   const threadContext = useThreadContext();
   const app = useAppContext();
-  const account = useAccountContext();
 
   createEffect(() => {
     if (props.quoteCount) {
@@ -135,7 +132,7 @@ const Note: Component<NoteProps> = (props) => {
   })
 
   const addTopZapFeed = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -161,7 +158,7 @@ const Note: Component<NoteProps> = (props) => {
   };
 
   const addTopZap = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -194,7 +191,7 @@ const Note: Component<NoteProps> = (props) => {
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
 
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 

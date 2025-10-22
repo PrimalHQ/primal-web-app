@@ -1,19 +1,15 @@
-import { Component, createSignal, For, JSXElement, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, For, JSXElement, onMount } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 
 import styles from './DirectMessages.module.scss';
 import { nip19 } from '../../lib/nTools';
-import Avatar from '../Avatar/Avatar';
-import { nip05Verification, truncateNpub, userName } from '../../stores/profile';
-import { DMContact } from '../../megaFeeds';
-import { date } from '../../lib/dates';
-import { DirectMessage, PrimalArticle } from '../../types/primal';
+import { truncateNpub, userName } from '../../stores/profile';
+import { PrimalArticle } from '../../types/primal';
 import { useDMContext } from '../../contexts/DMContext';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { A } from '@solidjs/router';
 import { useAppContext } from '../../contexts/AppContext';
 import { decodeIdentifier, hexToNpub } from '../../lib/keys';
-import { isDev, msgHasCashu, msgHasInvoice } from '../../utils';
+import { isDev } from '../../utils';
 import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { createStore } from 'solid-js/store';
 import { NoteContent } from '../ParsedNote/ParsedNote';
@@ -41,7 +37,6 @@ const DirectMessageParsedContent: Component<{
   noLinks?: string,
   noPreviews?: boolean,
 }> = (props) => {
-  const account = useAccountContext();
   const app = useAppContext();
   const media = useMediaContext();
   const dms = useDMContext();

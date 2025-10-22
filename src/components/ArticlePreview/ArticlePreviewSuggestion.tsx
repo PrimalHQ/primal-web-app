@@ -2,20 +2,18 @@
 import { batch, Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { wordsPerMinute } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { shortDate } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
 import { userName } from '../../stores/profile';
-import { PrimalArticle, ZapOption } from '../../types/primal';
+import { ZapOption } from '../../types/primal';
 import { urlEncode, uuidv4 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
 import { NoteReactionsState } from '../Note/Note';
 import NoteContextTrigger from '../Note/NoteContextTrigger';
 import ArticleFooter from '../Note/NoteFooter/ArticleFooter';
-import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import defaultAvatarDark from '../../assets/images/reads_image_dark.png';
@@ -25,6 +23,7 @@ import styles from './ArticlePreview.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { nip19 } from 'nostr-tools';
 import { ArticleProps } from './ArticlePreview';
+import { accountStore } from '../../stores/accountStore';
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
@@ -36,7 +35,6 @@ export const renderArticlePreview = (props: ArticleProps) => (
 
 const ArticlePreviewSuggestion: Component<ArticleProps> = (props) => {
   const app = useAppContext();
-  const account = useAccountContext();
   const thread = useThreadContext();
   const media = useMediaContext();
   const settings = useSettingsContext();
@@ -84,7 +82,7 @@ const ArticlePreviewSuggestion: Component<ArticleProps> = (props) => {
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
 
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -130,7 +128,7 @@ const ArticlePreviewSuggestion: Component<ArticleProps> = (props) => {
   };
 
   const addTopZap = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -161,7 +159,7 @@ const ArticlePreviewSuggestion: Component<ArticleProps> = (props) => {
 
 
   const addTopZapFeed = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 

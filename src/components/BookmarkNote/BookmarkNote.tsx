@@ -2,35 +2,31 @@ import { useIntl } from '@cookbook/solid-intl';
 import { Component, createEffect, createSignal, Show } from 'solid-js';
 import { APP_ID } from '../../App';
 import { Kind } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { useAppContext } from '../../contexts/AppContext';
 import { logWarning } from '../../lib/logger';
 import { getBookmarks, sendBookmarks } from '../../lib/profile';
 import { subsTo } from '../../sockets';
 import { PrimalNote } from '../../types/primal';
 import ButtonGhost from '../Buttons/ButtonGhost';
-import { bookmarks as tBookmarks, toast } from '../../translations';
+import { bookmarks as tBookmarks } from '../../translations';
 
 import styles from './BookmarkNote.module.scss';
 import { readSecFromStorage, saveBookmarks } from '../../lib/localStore';
 import { triggerImportEvents } from '../../lib/notes';
-import { useToastContext } from '../Toaster/Toaster';
+import { accountStore, hasPublicKey, setShowPin, showGetStarted, updateBookmarks } from '../../stores/accountStore';
 
 const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boolean }> = (props) => {
-  const account = useAccountContext();
   const app = useAppContext();
   const intl = useIntl();
-  const toaster = useToastContext();
 
   const [isBookmarked, setIsBookmarked] = createSignal(false);
   const [bookmarkInProgress, setBookmarkInProgress] = createSignal(false);
 
   createEffect(() => {
-    setIsBookmarked(() => account?.bookmarks.includes(props.note.post.id) || false);
+    setIsBookmarked(() => accountStore.bookmarks.includes(props.note.post.id) || false);
   })
 
-  const updateBookmarks = async (bookmarkTags: string[][]) => {
-    if (!account) return;
+  const updateTheBookmarks = async (bookmarkTags: string[][]) => {
 
     const bookmarks = bookmarkTags.reduce((acc, t) =>
       t[0] === 'e' ? [...acc, t[1]] : [...acc]
@@ -38,9 +34,9 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
 
     const date = Math.floor((new Date()).getTime() / 1000);
 
-    account.actions.updateBookmarks(bookmarks)
-    saveBookmarks(account.publicKey, bookmarks);
-    const { success, note} = await sendBookmarks([...bookmarkTags], date, '', account?.proxyThroughPrimal || false, account.activeRelays, account?.relaySettings);
+    updateBookmarks(bookmarks)
+    saveBookmarks(accountStore.publicKey, bookmarks);
+    const { success, note} = await sendBookmarks([...bookmarkTags], date, '', accountStore.proxyThroughPrimal || false, accountStore.activeRelays, accountStore.relaySettings);
 
     if (success && note) {
       triggerImportEvents([note], `bookmark_import_${APP_ID}`)
@@ -48,28 +44,20 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
   };
 
   const addBookmark = async (bookmarkTags: string[][]) => {
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
 
-    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
-    //   toaster?.sendWarning(
-    //     intl.formatMessage(toast.noRelaysConnected),
-    //   );
-    //   return;
-    // }
-
-
-    if (account && !bookmarkTags.find(b => b[0] === 'e' && b[1] === props.note.post.id)) {
+    if (!bookmarkTags.find(b => b[0] === 'e' && b[1] === props.note.post.id)) {
       const bookmarksToAdd = [...bookmarkTags, ['e', props.note.post.id]];
 
       if (bookmarksToAdd.length < 2) {
@@ -81,7 +69,7 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
           confirmLabel: intl.formatMessage(tBookmarks.confirm.confirm),
           abortLabel: intl.formatMessage(tBookmarks.confirm.abort),
           onConfirm: async () => {
-            await updateBookmarks(bookmarksToAdd);
+            await updateTheBookmarks(bookmarksToAdd);
             app.actions.closeConfirmModal();
           },
           onAbort: app.actions.closeConfirmModal,
@@ -90,12 +78,12 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
         return;
       }
 
-      await updateBookmarks(bookmarksToAdd);
+      await updateTheBookmarks(bookmarksToAdd);
     }
   }
 
   const removeBookmark = async (bookmarks: string[][]) => {
-    if (account && bookmarks.find(b => b[0] === 'e' && b[1] === props.note.post.id)) {
+    if (bookmarks.find(b => b[0] === 'e' && b[1] === props.note.post.id)) {
       const bookmarksToAdd = bookmarks.filter(b => b[0] !== 'e' || b[1] !== props.note.post.id);
 
       if (bookmarksToAdd.length < 1) {
@@ -107,7 +95,7 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
           confirmLabel: intl.formatMessage(tBookmarks.confirm.confirmZero),
           abortLabel: intl.formatMessage(tBookmarks.confirm.abortZero),
           onConfirm: async () => {
-            await updateBookmarks(bookmarksToAdd);
+            await updateTheBookmarks(bookmarksToAdd);
             app.actions.closeConfirmModal();
           },
           onAbort: app.actions.closeConfirmModal,
@@ -116,16 +104,11 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
         return;
       }
 
-      await updateBookmarks(bookmarksToAdd);
+      await updateTheBookmarks(bookmarksToAdd);
     }
   }
 
   const doBookmark = (remove: boolean, then?: () => void) => {
-
-    if (!account?.publicKey) {
-      return;
-    }
-
     let bookmarks: string[][] = []
 
     const unsub = subsTo(`before_bookmark_${APP_ID}`, {
@@ -149,7 +132,7 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
     });
 
     setBookmarkInProgress(() => true);
-    getBookmarks(account.publicKey, `before_bookmark_${APP_ID}`);
+    getBookmarks(accountStore.publicKey, `before_bookmark_${APP_ID}`);
   }
 
   return (

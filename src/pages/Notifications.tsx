@@ -13,7 +13,6 @@ import Search from '../components/Search/Search';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { Kind, minKnownProfiles, NotificationType, notificationTypeUserProps } from '../constants';
-import { useAccountContext } from '../contexts/AccountContext';
 import { notifSince, setNotifSince, useNotificationsContext } from '../contexts/NotificationsContext';
 import { getNotifications, getOldNotifications, setLastSeen, truncateNumber } from '../lib/notifications';
 import { subsTo } from '../sockets';
@@ -29,12 +28,11 @@ import PageTitle from '../components/PageTitle/PageTitle';
 import { isPhone, timeNow } from '../utils';
 import { logError } from '../lib/logger';
 import { StreamingData } from '../lib/streaming';
+import { accountStore, hasPublicKey } from '../stores/accountStore';
 
 
 
 const Notifications: Component = () => {
-
-  const account = useAccountContext();
   const notifications = useNotificationsContext();
   const intl = useIntl();
 
@@ -133,7 +131,11 @@ const Notifications: Component = () => {
   });
 
   const publicKey = () => {
-    const user = queryParams.user;
+    let user = queryParams.user;
+    if (Array.isArray(user)) {
+      user = user[0];
+    }
+
     if (user) {
       if (minKnownProfiles.names[user]) {
         return minKnownProfiles.names[user];
@@ -146,11 +148,11 @@ const Notifications: Component = () => {
       return user;
     }
 
-    return account?.publicKey;
+    return accountStore.publicKey;
   }
 
   createEffect(() => {
-    if (account?.hasPublicKey() && publicKey() === account.publicKey) {
+    if (hasPublicKey() && publicKey() === accountStore.publicKey) {
       const subid = `notif_sls_${APP_ID}`;
 
       const unsub = subsTo(subid, {
@@ -323,7 +325,7 @@ const Notifications: Component = () => {
 
     newNotifs = {};
     setSortedNotifications(reconcile({}));
-    getNotifications(account?.publicKey, pk as string, subid, group, since);
+    getNotifications(accountStore.publicKey, pk as string, subid, group, since);
 
   };
 
@@ -531,14 +533,14 @@ const Notifications: Component = () => {
 
     if (pk) {
       setfetchingOldNotifs(true);
-      getOldNotifications(account?.publicKey, pk as string, subid, group, until);
+      getOldNotifications(accountStore.publicKey, pk as string, subid, group, until);
     }
 
   }
 
   // Fetch old notifications
   createEffect(() => {
-    if (account?.hasPublicKey() && !queryParams.ignoreLastSeen) {
+    if (hasPublicKey() && !queryParams.ignoreLastSeen) {
       const notifGroup = notificationGroup();
       setTimeout(() => {
         fetchOldNotifications(notifSince || 0, notifGroup);
@@ -1285,7 +1287,7 @@ const Notifications: Component = () => {
     const knownUsers = Object.keys(users);
 
     const rUsers: Record<string, PrimalNotifUser[]> = notifs.reduce((acc, notif) => {
-      const pk: string = notif.who_bookmarked_it;
+      const pk = notif.who_bookmarked_it;
 
       if (!pk) return acc;
 
@@ -1392,7 +1394,7 @@ const Notifications: Component = () => {
 
       <PageCaption title={intl.formatMessage(t.title)} />
 
-      <Show when={newNotifCount() > 0 && !account?.showNewNoteForm}>
+      <Show when={newNotifCount() > 0 && !accountStore.showNewNoteForm}>
         <div class={styles.newContentNotification}>
           <button
             onClick={loadNewContent}

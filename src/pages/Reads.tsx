@@ -11,22 +11,13 @@ import {
   Switch
 } from 'solid-js';
 import styles from './Home.module.scss';
-import HomeHeader from '../components/HomeHeader/HomeHeader';
-import Loader from '../components/Loader/Loader';
 import Paginator from '../components/Paginator/Paginator';
-import HomeSidebar from '../components/HomeSidebar/HomeSidebar';
-import Branding from '../components/Branding/Branding';
-import HomeHeaderPhone from '../components/HomeHeaderPhone/HomeHeaderPhone';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { scrollWindowTo } from '../lib/scroll';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { useHomeContext } from '../contexts/HomeContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { createStore } from 'solid-js/store';
 import { PrimalArticle, PrimalUser } from '../types/primal';
-import Avatar from '../components/Avatar/Avatar';
-import { userName } from '../stores/profile';
-import { useAccountContext } from '../contexts/AccountContext';
 import { reads, branding } from '../translations';
 import Search from '../components/Search/Search';
 import { setIsHome } from '../components/Layout/Layout';
@@ -36,23 +27,19 @@ import { useReadsContext } from '../contexts/ReadsContext';
 import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
 import PageCaption from '../components/PageCaption/PageCaption';
 import ReadsSidebar from '../components/HomeSidebar/ReadsSidebar';
-import ReedSelect from '../components/FeedSelect/ReedSelect';
 import ReadsHeader from '../components/HomeHeader/ReadsHeader';
 import { A, useNavigate, useParams } from '@solidjs/router';
-import { APP_ID } from '../App';
-import ButtonGhost from '../components/Buttons/ButtonGhost';
 import ArticlePreviewSkeleton from '../components/Skeleton/ArticlePreviewSkeleton';
 import { Transition } from 'solid-transition-group';
-import { ToggleButton } from '@kobalte/core/toggle-button';
-import { isDev, isPhone } from '../utils';
+import { isPhone } from '../utils';
 import ArticlePreviewPhone from '../components/ArticlePreview/ArticlePreviewPhone';
 import ArticlePreviewPhoneSkeleton from '../components/Skeleton/ArticlePreviewPhoneSkeleton';
+import { accountStore } from '../stores/accountStore';
 
 
 const Reads: Component = () => {
 
   const context = useReadsContext();
-  const account = useAccountContext();
   const intl = useIntl();
   const app = useAppContext();
   const params = useParams();
@@ -149,9 +136,9 @@ const Reads: Component = () => {
     }
   }));
 
-  createEffect(on(() => account?.isKeyLookupDone, (v, p) => {
+  createEffect(on(() => accountStore.isKeyLookupDone, (v, p) => {
 
-    if (v && v !== p && account?.publicKey && !params.topic) {
+    if (v && v !== p && accountStore.publicKey && !params.topic) {
       const selected = context?.selectedFeed;;
 
       // context?.actions.resetSelectedFeed();

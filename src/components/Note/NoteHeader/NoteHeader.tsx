@@ -2,7 +2,6 @@ import { Component, createEffect, createSignal, Show } from 'solid-js';
 import { MenuItem, NostrRelaySignedEvent, PrimalNote } from '../../../types/primal';
 
 import styles from './NoteHeader.module.scss';
-import { date, longDate, shortDate } from '../../../lib/dates';
 import { nip05Verification, truncateNpub, userName } from '../../../stores/profile';
 import { useIntl } from '@cookbook/solid-intl';
 import { useToastContext } from '../../Toaster/Toaster';
@@ -10,17 +9,13 @@ import VerificationCheck from '../../VerificationCheck/VerificationCheck';
 import Avatar from '../../Avatar/Avatar';
 import { A } from '@solidjs/router';
 import { toast as tToast, actions as tActions } from '../../../translations';
-import PrimalMenu from '../../PrimalMenu/PrimalMenu';
-import CustomZap from '../../CustomZap/CustomZap';
 import { broadcastEvent } from '../../../lib/notes';
-import { useAccountContext } from '../../../contexts/AccountContext';
-import { isAccountVerified, reportUser } from '../../../lib/profile';
+import { reportUser } from '../../../lib/profile';
 import { APP_ID } from '../../../App';
-import ConfirmModal from '../../ConfirmModal/ConfirmModal';
 import { hexToNpub } from '../../../lib/keys';
 import { hookForDev } from '../../../lib/devTools';
 import { useAppContext } from '../../../contexts/AppContext';
-import { nip19 } from 'nostr-tools';
+import { accountStore, addToMuteList, removeFromMuteList } from '../../../stores/accountStore';
 
 const NoteHeader: Component<{
   note: PrimalNote,
@@ -31,7 +26,6 @@ const NoteHeader: Component<{
 
   const intl = useIntl();
   const toaster = useToastContext();
-  const account = useAccountContext();
   const app = useAppContext();
 
   const [showContext, setContext] = createSignal(false);
@@ -53,11 +47,11 @@ const NoteHeader: Component<{
   };
 
   const doMuteUser = () => {
-    account?.actions.addToMuteList(props.note.post.pubkey);
+    addToMuteList(props.note.post.pubkey);
   };
 
   const doUnmuteUser = () => {
-    account?.actions.removeFromMuteList(props.note.post.pubkey);
+    removeFromMuteList(props.note.post.pubkey);
   };
 
   const doReportUser = () => {
@@ -105,11 +99,12 @@ const NoteHeader: Component<{
   };
 
   const broadcastNote = async () => {
-    if (!account) {
-      return;
-    }
-
-    const { success } = await broadcastEvent(props.note.msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
+    const { success } = await broadcastEvent(
+      props.note.msg as NostrRelaySignedEvent,
+      accountStore.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+    );
     setContext(false);
 
     if (success) {
@@ -203,7 +198,7 @@ const NoteHeader: Component<{
     },
   ];
 
-  const noteContext = account?.publicKey !== props.note.post.pubkey ?
+  const noteContext = accountStore.publicKey !== props.note.post.pubkey ?
       [ ...noteContextForEveryone, ...noteContextForOtherPeople] :
       noteContextForEveryone;
 

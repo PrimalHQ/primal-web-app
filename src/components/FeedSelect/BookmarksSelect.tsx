@@ -1,12 +1,7 @@
 import { Component } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { useHomeContext } from '../../contexts/HomeContext';
 import { useReadsContext } from '../../contexts/ReadsContext';
-import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
-import { fetchStoredFeed } from '../../lib/localStore';
-import { FeedOption, PrimalFeed, SelectionOption } from '../../types/primal';
-import SelectBox from '../SelectBox/SelectBox';
+import { FeedOption, SelectionOption } from '../../types/primal';
 import SelectionBox from '../SelectionBox/SelectionBox';
 
 const BookmarksSelect: Component<{

@@ -1,12 +1,7 @@
-import { A } from '@solidjs/router';
 import { Component, For, Show } from 'solid-js';
 import { Transition } from 'solid-transition-group';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
-import { authorName, nip05Verification, truncateNpub } from '../../stores/profile';
-import { PrimalNote, PrimalUser } from '../../types/primal';
-import Avatar from '../Avatar/Avatar';
-import FollowButton from '../FollowButton/FollowButton';
+import { PrimalUser } from '../../types/primal';
 import ThreadPeopleSkeleton from '../Skeleton/ThreadPeopleSkeleton';
 import MentionedPerson from './MentionedPerson';
 
@@ -19,8 +14,6 @@ const MentionedPeople: Component<{
   id?: string,
   author: PrimalUser,
 }> = (props) => {
-  const account = useAccountContext();
-
   const author = () => props.author;
   const mentioned = () => props.mentioned;
 

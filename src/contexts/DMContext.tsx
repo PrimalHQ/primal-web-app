@@ -29,7 +29,6 @@ import {
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { markAllAsRead, resetMessageCount, subscribeToMessagesStats, unsubscribeToMessagesStats } from "../lib/messages";
-import { useAccountContext } from "./AccountContext";
 import { convertToUser, emptyUser } from "../stores/profile";
 import { getUserProfiles } from "../lib/profile";
 import { getEvents } from "../lib/feed";
@@ -43,7 +42,7 @@ import { calculateDMContactsOffset, calculateDMConversationOffset, handleSubscri
 import { DMContact, emptyPaging, fetchDMContacts, fetchDMConversation, fetchDMConversationNew, PaginationInfo } from "../megaFeeds";
 import { logError, logWarning } from "../lib/logger";
 import { fetchUserProfile } from "../handleNotes";
-import { hexToNpub } from "../lib/keys";
+import { accountStore, hasPublicKey } from "../stores/accountStore";
 
 
 export type DMCount = {
@@ -128,8 +127,6 @@ export const emptyDMStore: () => Omit<DMStore, 'actions'> = () => ({
 export const DMContext = createContext<DMStore>();
 
 export const DMProvider = (props: { children: ContextChildren }) => {
-
-  const account = useAccountContext();
   const app = useAppContext();
 
   let unsubFromDMCount: (() => void) | undefined;
@@ -184,22 +181,22 @@ const resetRelation = () => {
 }
 
 const setDmRelation = async (relation: UserRelation) => {
-  if (!account?.publicKey) return;
+  if (!accountStore.publicKey) return;
 
   updateStore('contactsPaging', () => ({ ...emptyPaging() }))
   updateStore('lastConversationRelation', () => relation);
-  saveLastDMRelation(account.publicKey, relation);
+  saveLastDMRelation(accountStore.publicKey, relation);
 
 
   return await getContacts(relation);
 }
 
 const setDmRelation2 = (relation: UserRelation) => {
-  if (!account?.publicKey) return;
+  if (!accountStore.publicKey) return;
 
   updateStore('contactsPaging', () => ({ ...emptyPaging() }))
   updateStore('lastConversationRelation', () => relation);
-  saveLastDMRelation(account.publicKey, relation);
+  saveLastDMRelation(accountStore.publicKey, relation);
 
 
   replaceContacts(relation);
@@ -210,7 +207,7 @@ const replaceContacts = async (relation: UserRelation) => {
   const existing = store.dmContacts[relation] || [];
 
   const { dmContacts, paging } = await fetchDMContacts(
-    account?.publicKey,
+    accountStore.publicKey,
     relation,
     `dm_contacts_${relation}_${APP_ID}`,
     {
@@ -227,7 +224,7 @@ const refreshContacts = async (relation: UserRelation) => {
   const existing = store.dmContacts[relation] || [];
 
   const { dmContacts, paging } = await fetchDMContacts(
-    account?.publicKey,
+    accountStore.publicKey,
     relation,
     `dm_contacts_${relation}_${APP_ID}`,
     {
@@ -247,7 +244,7 @@ const getContacts = async (relation: UserRelation) => {
   const offset = calculateDMContactsOffset(existing, store.conversationPaging)
 
   const { dmContacts, paging } = await fetchDMContacts(
-    account?.publicKey,
+    accountStore.publicKey,
     relation,
     `dm_contacts_${relation}_${APP_ID}`,
     {
@@ -271,7 +268,7 @@ const getContactsNextPage = async (relation: UserRelation) => {
   if (since === 0) return;
 
   const { dmContacts, paging } = await fetchDMContacts(
-    account?.publicKey,
+    accountStore.publicKey,
     relation,
     `dm_contacts_${relation}_${APP_ID}`,
     {
@@ -289,7 +286,7 @@ let atemptToSelect: string = '';
 
 const selectContact = async (pubkey: string) => {
   if (store.isFetchingMessages) return;
-  if (!account?.publicKey) return;
+  if (!accountStore.publicKey) return;
   if (atemptToSelect === pubkey) return;
 
   atemptToSelect = pubkey;
@@ -299,7 +296,7 @@ const selectContact = async (pubkey: string) => {
 
   if (!contact) {
     try {
-      let user = await fetchUserProfile(account?.publicKey, pubkey, `dm_contact_info_${APP_ID}`);
+      let user = await fetchUserProfile(accountStore.publicKey, pubkey, `dm_contact_info_${APP_ID}`);
 
       addContact(user);
 
@@ -329,7 +326,7 @@ const selectContact = async (pubkey: string) => {
   await resetContactMessages(contact.pubkey, relation);
 
   updateStore('lastConversationContact', () => ({ ...contact }));
-  saveLastDMConversations(account.publicKey, pubkey);
+  saveLastDMConversations(accountStore.publicKey, pubkey);
 
   updateStore('messages', () => []);
   updateStore('conversationPaging', () => ({ ...emptyPaging() }));
@@ -342,7 +339,7 @@ const selectContact = async (pubkey: string) => {
 }
 
 const addContact = async (user: PrimalUser) => {
-  const isFollowing = account?.following.includes(user.pubkey);
+  const isFollowing = accountStore.following.includes(user.pubkey);
 
   const contact: DMContact =  {
     pubkey: user.pubkey,
@@ -502,14 +499,14 @@ const parseForMentions = async (messages: DirectMessage[]) => {
 
   await handleSubscriptionAsync(
     subidNoteRef,
-    () => getEvents(account?.publicKey, noteIds, subidNoteRef, true),
+    () => getEvents(accountStore.publicKey, noteIds, subidNoteRef, true),
     handleNoteRefEvent,
     handleNoteRefEose,
   );
 };
 
 const getConversation = async (contact: string | null | undefined) => {
-  if (!account?.isKeyLookupDone || !account.hasPublicKey() || !contact) {
+  if (!accountStore.isKeyLookupDone || !hasPublicKey() || !contact) {
     return;
   }
 
@@ -521,7 +518,7 @@ const getConversation = async (contact: string | null | undefined) => {
   const offset = calculateDMConversationOffset(store.messages, store.conversationPaging)
 
   const { encryptedMessages, paging } = await fetchDMConversation(
-    account.publicKey,
+    accountStore.publicKey,
     contact,
     subId,
     {
@@ -557,7 +554,7 @@ const getConversationNewMessages = async (contact: string | null | undefined) =>
   // const offset = calculateDMConversationOffset(store.messages, store.conversationPaging)
 
   const { encryptedMessages, paging } = await fetchDMConversationNew(
-    account?.publicKey,
+    accountStore.publicKey,
     contact,
     subId,
     {
@@ -607,7 +604,7 @@ const addToConversation = (messagesToAdd: DirectMessage[], ignoreMy?: boolean) =
   for (let i=0;i<messagesToAdd.length;i++) {
     const message = messagesToAdd[i];
 
-    if (ignoreMy && message.sender === account?.publicKey) {
+    if (ignoreMy && message.sender === accountStore.publicKey) {
       return;
     }
 
@@ -617,11 +614,6 @@ const addToConversation = (messagesToAdd: DirectMessage[], ignoreMy?: boolean) =
 };
 
 const sendMessage = async (receiver: string, message: DirectMessage) => {
-
-  if (!account) {
-    return false;
-  }
-
   try {
     const content = await encrypt(receiver, message.content);
 
@@ -632,7 +624,7 @@ const sendMessage = async (receiver: string, message: DirectMessage) => {
       created_at: Math.floor((new Date).getTime() / 1000),
     };
 
-    const { success, note } = await sendEvent(event, account.activeRelays, account?.relaySettings, account?.proxyThroughPrimal || false);
+    const { success, note } = await sendEvent(event, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
 
     if (success && note) {
       const subId = `import_dm_${APP_ID}`;
@@ -744,7 +736,7 @@ const handleNoteRefEose = () => {
 }
 
 const subToMessagesStats = () => {
-  if (!account?.publicKey || unsubFromDMCount !== undefined) return;
+  if (!accountStore.publicKey || unsubFromDMCount !== undefined) return;
 
   subIdMsgCount = subidMsgCount();
 
@@ -760,13 +752,13 @@ const subToMessagesStats = () => {
     },
   });
 
-  subscribeToMessagesStats(account.publicKey, subIdMsgCount);
+  subscribeToMessagesStats(accountStore.publicKey, subIdMsgCount);
 }
 
 // EFFECTS --------------------------------------
 
 createEffect(() => {
-  if (isConnected() && account?.isKeyLookupDone && account?.hasPublicKey() && !app?.isInactive) {
+  if (isConnected() && accountStore.isKeyLookupDone && hasPublicKey() && !app?.isInactive) {
     subToMessagesStats();
   } else if (app?.isInactive) {
     unsubscribeToMessagesStats(subIdMsgCount);

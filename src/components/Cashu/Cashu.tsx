@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 
 import styles from './Cashu.module.scss';
@@ -11,12 +11,11 @@ import { logError } from '../../lib/logger';
 import { useIntl } from '@cookbook/solid-intl';
 import { cashuInvoice } from '../../translations';
 import { getDecodedToken, Token, TokenEntry } from "@cashu/cashu-ts";
-import { useAccountContext } from '../../contexts/AccountContext';
+import { accountStore } from '../../stores/accountStore';
 
 
 const Cashu: Component< { id?: string, token: string, alternative?: boolean, noBack?: boolean } > = (props) => {
 
-  const account = useAccountContext();
   const app = useAppContext();
   const intl = useIntl();
 
@@ -85,7 +84,7 @@ const Cashu: Component< { id?: string, token: string, alternative?: boolean, noB
   });
 
   const redeemCashu = () => {
-    const lnurl = account?.activeUser?.lud16 ?? '';
+    const lnurl = accountStore.activeUser?.lud16 ?? '';
     const url = `https://redeem.cashu.me?token=${encodeURIComponent(props.token)}&lightning=${encodeURIComponent(
       lnurl,
     )}&autopay=yes`;

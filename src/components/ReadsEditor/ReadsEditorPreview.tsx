@@ -1,51 +1,24 @@
-import { useIntl } from "@cookbook/solid-intl";
-import { A, useParams } from "@solidjs/router";
-import { batch, Component, createEffect, createSignal, For, Match, on, onMount, Show, Switch } from "solid-js";
+import { A } from "@solidjs/router";
+import { Component, createEffect, createSignal, For, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import { APP_ID } from "../../App";
-import { Kind, eventAddresRegex } from "../../constants";
-import { useAccountContext } from "../../contexts/AccountContext";
-import { decodeIdentifier } from "../../lib/keys";
-import { getHighlights, parseLinkPreviews, sendEvent, setLinkPreviews } from "../../lib/notes";
-import { subsTo } from "../../sockets";
+import { eventAddresRegex } from "../../constants";
 
 import styles from './ReadsEditorPreview.module.scss';
-import { FeedPage, NostrEventContent, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrTier, NostrUserContent, NoteActions, PrimalArticle, PrimalNote, PrimalUser, SendNoteResult, TopZap, ZapOption } from "../../types/primal";
-import { getUserProfiles } from "../../lib/profile";
-import { convertToUser, nip05Verification, userName } from "../../stores/profile";
+import { FeedPage, PrimalArticle, PrimalNote, PrimalUser, TopZap } from "../../types/primal";
+import { nip05Verification, userName } from "../../stores/profile";
 import Avatar from "../../components/Avatar/Avatar";
 import { shortDate } from "../../lib/dates";
 
-
 import PrimalMarkdown from "../../components/PrimalMarkdown/PrimalMarkdown";
-import NoteTopZaps from "../../components/Note/NoteTopZaps";
-import { isPhone, parseBolt11, uuidv4 } from "../../utils";
 import { NoteReactionsState } from "../../components/Note/Note";
-import { getAuthorSubscriptionTiers } from "../../lib/feed";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import NoteImage from "../../components/NoteImage/NoteImage";
-import { nip19 } from "../../lib/nTools";
-import { sortByRecency, convertToNotes, convertToArticles } from "../../stores/note";
 import VerificationCheck from "../../components/VerificationCheck/VerificationCheck";
 import BookmarkArticle from "../../components/BookmarkNote/BookmarkArticle";
 import NoteContextTrigger from "../../components/Note/NoteContextTrigger";
 import { CustomZapInfo, useAppContext } from "../../contexts/AppContext";
 import ArticleFooter from "../../components/Note/NoteFooter/ArticleFooter";
-import Wormhole from "../../components/Wormhole/Wormhole";
-import Search from "../../components/Search/Search";
-import ArticleSidebar from "../../components/HomeSidebar/ArticleSidebar";
-import ReplyToNote from "../../components/ReplyToNote/ReplyToNote";
-import { fetchNotes } from "../../handleNotes";
-import { Tier, TierCost } from "../../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
-import { zapSubscription } from "../../lib/zap";
-import { useSettingsContext } from "../../contexts/SettingsContext";
-import ArticleHighlightComments from "../../components/ArticleHighlight/ArticleHighlightComments";
-import ReplyToHighlight from "../../components/ReplyToNote/ReplyToHighlight";
-import PageCaption from "../../components/PageCaption/PageCaption";
-import ArticleSkeleton from "../../components/Skeleton/ArticleSkeleton";
 import { useMediaContext } from "../../contexts/MediaContext";
-import { Transition } from "solid-transition-group";
-import { fetchReadThread } from "../../megaFeeds";
 
 export type LongFormData = {
   title: string,

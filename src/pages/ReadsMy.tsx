@@ -3,7 +3,6 @@ import { Component, createSignal, For, Match, onMount, Show, Switch } from 'soli
 import styles from './ReadsMy.module.scss'
 import Wormhole from '../components/Wormhole/Wormhole';
 import { PrimalArticle } from '../types/primal';
-import { useAccountContext } from '../contexts/AccountContext';
 import { wordsPerMinute } from '../constants';
 import { nip19 } from '../lib/nTools';
 import { useNavigate, useParams } from '@solidjs/router';
@@ -27,10 +26,10 @@ import { shortDate } from '../lib/dates';
 import { useAppContext } from '../contexts/AppContext';
 
 import noEditorPhone from '../assets/images/editor-phone-message.png';
+import { accountStore, showGetStarted } from '../stores/accountStore';
 
 
 const ReadsMy: Component = () => {
-  const account = useAccountContext();
   const profile = useProfileContext();
   const app = useAppContext();
   const intl = useIntl();
@@ -61,7 +60,7 @@ const ReadsMy: Component = () => {
   });
 
   const getTopArticles = async () => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
     if (!pubkey) return;
 
     const topZapped = await fetchTopArticle(pubkey, 'satszapped', `top_zapped_${APP_ID}`);
@@ -72,7 +71,7 @@ const ReadsMy: Component = () => {
   };
 
   const getCounts = async () => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
     if (!pubkey) return;
     setIsFetchingStats(true);
     const stats = await fetchArticlesStats(pubkey, `article_stats_${APP_ID}`)
@@ -99,22 +98,22 @@ const ReadsMy: Component = () => {
   });
 
   const updateTabContent = (value: string) => {
-    if (!profile || !account) return;
+    if (!profile) return;
 
     switch(value) {
       case 'published':
         profile.actions.clearArticles();
-        profile.actions.getProfileMegaFeed(account.publicKey, 'reads', 0, 20, 0, 0);
+        profile.actions.getProfileMegaFeed(accountStore.publicKey, 'reads', 0, 20, 0, 0);
         break;
         case 'drafts':
         profile.actions.clearDrafts();
-        profile.actions.getProfileMegaFeed(account.publicKey, 'drafts', 0, 20, 0, 0);
+        profile.actions.getProfileMegaFeed(accountStore.publicKey, 'drafts', 0, 20, 0, 0);
         break;
     }
   }
 
   const processedDrafts = () => {
-    if (!account || !account.activeUser || !account.publicKey) return [];
+    if (!accountStore.activeUser || !accountStore.publicKey) return [];
 
     const drafts = profile?.drafts || [];
 
@@ -135,11 +134,12 @@ const ReadsMy: Component = () => {
         tags: tgs.filter((t: string[]) => t[0] === 't').map((t: string[]) => t[1]),
         published: 0,
         content: cont.content || '',
-        user: account.activeUser,
+        user: accountStore.activeUser,
         topZaps: [],
-        pubkey: account.publicKey,
+        pubkey: accountStore.publicKey,
         noteId: `ndraft1${draft.id || 'none'}`,
         naddr: `ndraft1${draft.id || 'none'}`,
+        noteIdShort: `ndraft1${draft.id || 'none'}`,
         coordinate: '',
         wordCount: Math.floor((cont.content || '').split(' ').length / wordsPerMinute),
         noteActions: {
@@ -185,7 +185,7 @@ const ReadsMy: Component = () => {
   const onImageError = (event: any) => {
     const image = event.target;
 
-    let src: string = account?.activeUser?.picture || '';
+    let src: string = accountStore.activeUser?.picture || '';
 
     image.onerror = "";
     image.src = src;
@@ -209,7 +209,7 @@ const ReadsMy: Component = () => {
           <div>
             {intl.formatMessage(readsMy.pageCaption)}
           </div>
-          <Show when={!isPhone() && account?.publicKey}>
+          <Show when={!isPhone() && accountStore.publicKey}>
             <ButtonPrimary
               onClick={() => navigate('/reads/edit')}
             >
@@ -219,7 +219,7 @@ const ReadsMy: Component = () => {
         </div>
       </PageCaption>
 
-      <Show when={!isPhone() && account?.publicKey}>
+      <Show when={!isPhone() && accountStore.publicKey}>
         <StickySidebar>
           <div class={styles.sidebarSection}>
             <Show when={articleStats().satszapped > 0}>
@@ -309,12 +309,12 @@ const ReadsMy: Component = () => {
             </div>
           </Match>
 
-          <Match when={!account?.publicKey}>
+          <Match when={!accountStore.publicKey}>
             <div class={styles.noArticleGuest}>
               <p>
                 You must be logged in to use Article Editor
               </p>
-              <ButtonPrimary onClick={account?.actions.showGetStarted}>
+              <ButtonPrimary onClick={showGetStarted}>
                 {intl.formatMessage(tActions.getStarted)}
               </ButtonPrimary>
             </div>
@@ -392,7 +392,7 @@ const ReadsMy: Component = () => {
                             </For>
                             <Paginator
                               loadNextPage={() => {
-                                profile?.actions.getProfileMegaFeedNextPage(account?.publicKey, 'reads');
+                                profile?.actions.getProfileMegaFeedNextPage(accountStore.publicKey, 'reads');
                               }}
                               isSmall={true}
                             />
@@ -450,7 +450,7 @@ const ReadsMy: Component = () => {
                             </For>
                             <Paginator
                               loadNextPage={() => {
-                                profile?.actions.getProfileMegaFeedNextPage(account?.publicKey, 'drafts');
+                                profile?.actions.getProfileMegaFeedNextPage(accountStore.publicKey, 'drafts');
                               }}
                               isSmall={true}
                             />

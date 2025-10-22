@@ -15,7 +15,6 @@ import { authorName, nip05Verification, truncateNpub, userName } from '../stores
 import { useToastContext } from '../components/Toaster/Toaster';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { useProfileContext } from '../contexts/ProfileContext';
-import { useAccountContext } from '../contexts/AccountContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { sanitize, sendEvent } from '../lib/notes';
 import { shortDate } from '../lib/dates';
@@ -44,17 +43,16 @@ import { getAuthorSubscriptionTiers } from '../lib/feed';
 import { zapSubscription } from '../lib/zap';
 import { subsTo } from '../sockets';
 import ProfileFollowModal from '../components/ProfileFollowModal/ProfileFollowModal';
-import ProfileCardSkeleton from '../components/Skeleton/ProfileCardSkeleton';
 import PremiumCohortInfo from './Premium/PremiumCohortInfo';
 import ProfileCardPhoneSkeleton from '../components/Skeleton/Phone/ProfileCardPhoneSkeleton';
 import { isIOS } from '../utils';
+import { accountStore, addFilterList, addToAllowlist, addToMuteList, removeFilterList, removeFromMuteList } from '../stores/accountStore';
 
 const ProfileMobile: Component = () => {
 
   const settings = useSettingsContext();
   const toaster = useToastContext();
   const profile = useProfileContext();
-  const account = useAccountContext();
   const media = useMediaContext();
   const app = useAppContext();
 
@@ -109,7 +107,7 @@ const ProfileMobile: Component = () => {
       return;
     }
 
-    let hex = params.npub || account?.publicKey;
+    let hex = params.npub || accountStore.publicKey;
 
     if (params.npub?.startsWith('npub') || params.npub?.startsWith('nprofile')) {
       const decode = nip19.decode(params.npub);
@@ -246,10 +244,10 @@ const ProfileMobile: Component = () => {
   }
 
   const isCurrentUser = () => {
-    if (!account || !profile || !account.isKeyLookupDone) {
+    if (!profile || !accountStore.isKeyLookupDone) {
       return false;
     }
-    return account?.publicKey === profile?.profileKey;
+    return accountStore.publicKey === profile?.profileKey;
   };
 
   createEffect(() => {
@@ -259,16 +257,16 @@ const ProfileMobile: Component = () => {
       return;
     }
 
-    if (account?.muted.includes(pk)) {
+    if (accountStore.muted.includes(pk)) {
       profile?.actions.clearNotes();
     }
   });
 
   const isMuted = (pk: string | undefined, ignoreContentCheck = false) => {
-    const isContentMuted = account?.mutelists.find(x => x.pubkey === account.publicKey)?.content;
+    const isContentMuted = accountStore.mutelists.find(x => x.pubkey === accountStore.publicKey)?.content;
 
     return pk &&
-      account?.muted.includes(pk) &&
+      accountStore.muted.includes(pk) &&
       (ignoreContentCheck ? true : isContentMuted);
   };
 
@@ -277,25 +275,25 @@ const ProfileMobile: Component = () => {
   };
 
   const unMuteProfile = () => {
-    if (!account || !profile?.profileKey) {
+    if (!profile?.profileKey) {
       return;
     }
 
-    account.actions.removeFromMuteList(profile.profileKey, 'user', () => setProfile(profile.profileKey));
+    removeFromMuteList(profile.profileKey, 'user', () => setProfile(profile.profileKey));
   };
 
   const isFollowingMute = (pk: string | undefined) => {
     if (!pk) return false;
 
-    return account?.mutelists.find(l => l.pubkey === pk);
+    return accountStore.mutelists.find(l => l.pubkey === pk);
   };
 
   const followMute = () => {
-    account?.actions.addFilterList(profile?.profileKey);
+    addFilterList(profile?.profileKey);
   };
 
   const unfollowMute = () => {
-    account?.actions.removeFilterList(profile?.profileKey);
+    removeFilterList(profile?.profileKey);
   };
 
   const openContextMenu = (e: MouseEvent) => {
@@ -414,13 +412,13 @@ const ProfileMobile: Component = () => {
     ];
   };
 
-  const profileContext = () => account?.publicKey !== getHex() ?
+  const profileContext = () => accountStore.publicKey !== getHex() ?
       [ ...profileContextForEveryone(), ...profileContextForOtherPeople()] :
       profileContextForEveryone();
 
   const doMuteUser = () => {
     const pk = getHex();
-    pk && account?.actions.addToMuteList(pk);
+    pk && addToMuteList(pk);
   };
 
   const doReportUser = () => {
@@ -435,10 +433,10 @@ const ProfileMobile: Component = () => {
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(profile?.userProfile)}));
   };
 
-  const addToAllowlist = async () => {
+  const addToTheAllowlist = async () => {
     const pk = getHex();
     if (pk) {
-      account?.actions.addToAllowlist(pk, () => { setProfile(pk) });
+      addToAllowlist(pk, () => { setProfile(pk) });
     }
   };
 
@@ -578,7 +576,7 @@ const ProfileMobile: Component = () => {
   const doSubscription = async (tier: Tier, cost: TierCost, exchangeRate?: Record<string, Record<string, number>>) => {
     const a = profile?.userProfile;
 
-    if (!a || !account || !cost) return;
+    if (!a || !cost) return;
 
     const subEvent = {
       kind: Kind.Subscribe,
@@ -594,16 +592,16 @@ const ProfileMobile: Component = () => {
       ],
     }
 
-    const { success, note } = await sendEvent(subEvent, account.activeRelays, account.relaySettings, account?.proxyThroughPrimal || false);
+    const { success, note } = await sendEvent(subEvent, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
 
     if (success && note) {
       const isZapped = await zapSubscription(
         note,
         a,
-        account.publicKey,
-        account.activeRelays,
+        accountStore.publicKey,
+        accountStore.activeRelays,
         exchangeRate,
-        account.activeNWC,
+        accountStore.activeNWC,
       );
 
       if (!isZapped) {
@@ -615,7 +613,7 @@ const ProfileMobile: Component = () => {
   const unsubscribe = async (eventId: string) => {
     const a = profile?.userProfile;;
 
-    if (!a || !account) return;
+    if (!a) return;
 
     const unsubEvent = {
       kind: Kind.Unsubscribe,
@@ -628,7 +626,7 @@ const ProfileMobile: Component = () => {
       ],
     };
 
-    await sendEvent(unsubEvent, account.activeRelays, account.relaySettings, account?.proxyThroughPrimal || false);
+    await sendEvent(unsubEvent, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
 
   }
 
@@ -784,7 +782,7 @@ const ProfileMobile: Component = () => {
               </ButtonSecondary>
             </Show>
 
-            <Show when={account?.publicKey}>
+            <Show when={accountStore.publicKey}>
               <ButtonSecondary
                 onClick={() => navigate(`/dms/${profile?.userProfile?.npub}`)}
                 shrink={true}
@@ -793,7 +791,7 @@ const ProfileMobile: Component = () => {
               </ButtonSecondary>
             </Show>
 
-            <Show when={!isCurrentUser() || !account?.following.includes(profile?.profileKey || '')}>
+            <Show when={!isCurrentUser() || !accountStore.following.includes(profile?.profileKey || '')}>
               <FollowButton person={profile?.userProfile} large={true} />
             </Show>
 

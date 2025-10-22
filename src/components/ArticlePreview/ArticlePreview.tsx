@@ -2,7 +2,6 @@
 import { batch, Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { wordsPerMinute } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
@@ -24,6 +23,7 @@ import defaultAvatarLight from '../../assets/images/reads_image_light.png';
 import styles from './ArticlePreview.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { nip19 } from 'nostr-tools';
+import { accountStore } from '../../stores/accountStore';
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
@@ -49,7 +49,6 @@ export const renderArticlePreview = (props: ArticleProps) => (
 
 const ArticlePreview: Component<ArticleProps> = (props) => {
   const app = useAppContext();
-  const account = useAccountContext();
   const thread = useThreadContext();
   const media = useMediaContext();
   const settings = useSettingsContext();
@@ -97,7 +96,7 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
 
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -143,7 +142,7 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
   };
 
   const addTopZap = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -174,7 +173,7 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
 
 
   const addTopZapFeed = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 

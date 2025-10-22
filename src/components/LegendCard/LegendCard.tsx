@@ -1,14 +1,9 @@
-import { useIntl } from '@cookbook/solid-intl';
-import { useLocation, useNavigate } from '@solidjs/router';
+import { useNavigate } from '@solidjs/router';
 import { Component, JSXElement, Show, createEffect, createSignal } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { useNotificationsContext } from '../../contexts/NotificationsContext';
 
 import styles from './LegendCard.module.scss';
 import { hookForDev } from '../../lib/devTools';
-import { useMediaContext } from '../../contexts/MediaContext';
 import { CohortInfo, useAppContext } from '../../contexts/AppContext';
-import { useDMContext } from '../../contexts/DMContext';
 
 import { Dialog } from '@kobalte/core/dialog';
 import Avatar from '../Avatar/Avatar';
@@ -17,8 +12,8 @@ import { nip05Verification, userName } from '../../stores/profile';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import PremiumCohortInfo from '../../pages/Premium/PremiumCohortInfo';
 import { LegendCustomizationConfig } from '../../lib/premium';
-import { createStore } from 'solid-js/store';
-import { date, longDate, veryLongDate } from '../../lib/dates';
+import { veryLongDate } from '../../lib/dates';
+import { accountStore } from '../../stores/accountStore';
 
 
 const styleOptions: Record<string, string> = {
@@ -45,12 +40,6 @@ const LegendCard: Component< {
   cohortInfo: CohortInfo,
   legendConfig?: LegendCustomizationConfig | undefined,
 } > = (props) => {
-  const account = useAccountContext();
-  const notifications = useNotificationsContext();
-  const dms = useDMContext();
-  const intl = useIntl();
-  const loc = useLocation();
-  const media = useMediaContext();
   const app = useAppContext();
 
   const navigate = useNavigate();
@@ -68,10 +57,10 @@ const LegendCard: Component< {
   })
 
   const isProfileLegend = () => props.cohortInfo.tier === 'premium-legend';
-  const isUserLegend = () => account?.publicKey &&
+  const isUserLegend = () => accountStore.publicKey &&
     app?.memberCohortInfo &&
-    app?.memberCohortInfo[account?.publicKey] &&
-    app?.memberCohortInfo[account?.publicKey].tier === 'premium-legend';
+    app?.memberCohortInfo[accountStore.publicKey] &&
+    app?.memberCohortInfo[accountStore.publicKey].tier === 'premium-legend';
 
   return (
     <Dialog open={props.open} onOpenChange={props.setOpen} preventScroll={false}>

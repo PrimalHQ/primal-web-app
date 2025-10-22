@@ -10,7 +10,6 @@ import PageCaption from '../../components/PageCaption/PageCaption';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
 import { contentScope, Kind, specialAlgos, trendingScope } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { useAppContext } from '../../contexts/AppContext';
 import { useSearchContext } from '../../contexts/SearchContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
@@ -22,11 +21,10 @@ import { settings as t, actions as tActions, placeholders as tPlaceholders } fro
 import { NostrUserContent, PrimalUser } from '../../types/primal';
 
 import styles from './Settings.module.scss';
+import { accountStore, addToAllowlist, removeFromAllowlist, updateFilterList } from '../../stores/accountStore';
 
 const Moderation: Component = () => {
   const intl = useIntl();
-
-  const account = useAccountContext();
   const settings = useSettingsContext();
   const search = useSearchContext();
   const app = useAppContext();
@@ -52,18 +50,18 @@ const Moderation: Component = () => {
     const value = allowlistInput?.value || '';
 
     if (value.startsWith('npub') || value.startsWith('nprofile')) {
-      account?.actions.addToAllowlist(npubToHex(value));
+      addToAllowlist(npubToHex(value));
     }
   };
 
   const onRemoveFromAllowlist = (pubkey: string) => {
-    account?.actions.removeFromAllowlist(pubkey);
+    removeFromAllowlist(pubkey);
   };
 
-  const pubkey = () => account?.publicKey;
+  const pubkey = () => accountStore.publicKey;
 
   const mutelists = () => {
-    return account?.mutelists.filter(m => m.pubkey && m.pubkey !== pubkey());
+    return accountStore.mutelists.filter(m => m.pubkey && m.pubkey !== pubkey());
   };
 
   const algorithms = () => settings?.contentModeration.filter(x => x.name !== 'my').map(x => ({
@@ -72,14 +70,14 @@ const Moderation: Component = () => {
     trending: x.scopes.includes(trendingScope),
   }));
 
-  const my = () => account?.mutelists.find(x => x.pubkey === pubkey());
+  const my = () => accountStore.mutelists.find(x => x.pubkey === pubkey());
 
   const [users, setUsers] = createStore<Record<string, PrimalUser>>({});
 
   const reasons = () => search?.filteringReasons || [];
 
   createEffect(() => {
-    const userMutelists = account?.mutelists || [];
+    const userMutelists = accountStore.mutelists || [];
 
     const rand = Math.floor(Math.random()*10_000);
 
@@ -104,7 +102,7 @@ const Moderation: Component = () => {
   });
 
   createEffect(() => {
-    const allowList = account?.allowlist || [];
+    const allowList = accountStore.allowlist || [];
     const rand = Math.floor(Math.random()*10_000);
 
     if (allowList.length > 0) {
@@ -216,7 +214,7 @@ const Moderation: Component = () => {
             <div class={styles.filterListName} title={my()?.pubkey}>
               <A href='/p' class={styles.avatar}>
                 <Avatar
-                  user={account?.activeUser}
+                  user={accountStore.activeUser}
                   size='xs'
                 />
               </A>
@@ -227,7 +225,7 @@ const Moderation: Component = () => {
             <div class={styles.filterListCheck}>
               <CheckBox
                 id={`${my()?.pubkey}_content`}
-                onChange={() => account?.actions.updateFilterList(my()?.pubkey, !my()?.content, my()?.trending)}
+                onChange={() => updateFilterList(my()?.pubkey, !my()?.content, my()?.trending)}
                 checked={my()?.content}
                 disabled={true}
               />
@@ -235,7 +233,7 @@ const Moderation: Component = () => {
             <div class={styles.filterListCheck}>
               <CheckBox
                 id={`${my()?.pubkey}_trending`}
-                onChange={() => account?.actions.updateFilterList(my()?.pubkey, my()?.content, !my()?.trending)}
+                onChange={() => updateFilterList(my()?.pubkey, my()?.content, !my()?.trending)}
                 checked={my()?.trending}
                 disabled={true}
               />
@@ -259,14 +257,14 @@ const Moderation: Component = () => {
                 <div class={styles.filterListCheck}>
                   <CheckBox
                     id={`${mutelist.pubkey}_content`}
-                    onChange={() => account?.actions.updateFilterList(mutelist.pubkey, !mutelist.content, mutelist.trending)}
+                    onChange={() => updateFilterList(mutelist.pubkey, !mutelist.content, mutelist.trending)}
                     checked={mutelist.content}
                   />
                 </div>
                 <div class={styles.filterListCheck}>
                   <CheckBox
                     id={`${mutelist.pubkey}_trending`}
-                    onChange={() => account?.actions.updateFilterList(mutelist.pubkey, mutelist.content, !mutelist.trending)}
+                    onChange={() => updateFilterList(mutelist.pubkey, mutelist.content, !mutelist.trending)}
                     checked={mutelist.trending}
                   />
                 </div>
@@ -379,7 +377,7 @@ const Moderation: Component = () => {
                           />
                         </A>
                         <span>
-                          <Show when={reason !== account?.publicKey} fallback={intl.formatMessage(t.moderation.algos.my)}>
+                          <Show when={reason !== accountStore.publicKey} fallback={intl.formatMessage(t.moderation.algos.my)}>
                             {intl.formatMessage(t.moderation.moderationItem, { name: userName(users[reason || '']) })}
                           </Show>
                         </span>
@@ -428,7 +426,7 @@ const Moderation: Component = () => {
         </div>
 
         <div>
-          <For each={account?.allowlist}>
+          <For each={accountStore.allowlist}>
             {pubkey => (
               <button class={styles.allowlistItem} onClick={() => onRemoveFromAllowlist(pubkey)}>
                 <div class={styles.allowlistEntry}>

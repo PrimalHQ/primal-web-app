@@ -1,9 +1,8 @@
 import { batch, Component, createEffect, Show } from 'solid-js';
-import { MenuItem, PrimalArticle, PrimalNote, ZapOption } from '../../../types/primal';
+import { MenuItem, PrimalArticle, ZapOption } from '../../../types/primal';
 import { sendArticleRepost } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
-import { useAccountContext } from '../../../contexts/AccountContext';
 import { useToastContext } from '../../Toaster/Toaster';
 import { useIntl } from '@cookbook/solid-intl';
 
@@ -21,10 +20,18 @@ import { CustomZapInfo, useAppContext } from '../../../contexts/AppContext';
 import ArticleFooterActionButton from './ArticleFooterActionButton';
 import { NoteReactionsState } from '../Note';
 import { SetStoreFunction } from 'solid-js/store';
-import BookmarkNote from '../../BookmarkNote/BookmarkNote';
 import BookmarkArticle from '../../BookmarkNote/BookmarkArticle';
 import { readSecFromStorage } from '../../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
+import {
+  accountStore,
+  addLike,
+  hasPublicKey,
+  quoteNote,
+  setShowPin,
+  showGetStarted,
+  showNewNoteForm,
+} from '../../../stores/accountStore';
 
 export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
@@ -40,7 +47,6 @@ const ArticleFooter: Component<{
   isPhoneView?: boolean,
 }> = (props) => {
 
-  const account = useAccountContext();
   const toast = useToastContext();
   const intl = useIntl();
   const settings = useSettingsContext();
@@ -92,36 +98,37 @@ const ArticleFooter: Component<{
   };
 
   const doQuote = () => {
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
     props.updateState('isRepostMenuVisible', () => false);
-    account?.actions?.quoteNote(`nostr:${props.note.naddr}`);
-    account?.actions?.showNewNoteForm();
+    quoteNote(`nostr:${props.note.naddr}`);
+    showNewNoteForm();
   };
 
   const doRepost = async () => {
-    if (!account) {
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.hasPublicKey()) {
-      account.actions.showGetStarted();
-      return;
-    }
-
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
 
     props.updateState('isRepostMenuVisible', () => false);
 
-    const { success } = await sendArticleRepost(props.note, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
+    const { success } = await sendArticleRepost(
+      props.note,
+      accountStore.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+    );
 
     if (success) {
       batch(() => {
@@ -150,24 +157,20 @@ const ArticleFooter: Component<{
     e.preventDefault();
     e.stopPropagation();
 
-    if (!account) {
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.hasPublicKey()) {
-      account.actions.showGetStarted();
-      return;
-    }
-
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
 
-    const success = await account.actions.addLike(props.note);
+    const success = await addLike(props.note);
 
     if (success) {
       batch(() => {
@@ -181,26 +184,19 @@ const ArticleFooter: Component<{
     e.preventDefault();
     e.stopPropagation();
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       props.updateState('isZapping', () => false);
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
-
-    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
-    //   toast?.sendWarning(
-    //     intl.formatMessage(t.noRelaysConnected),
-    //   );
-    //   return;
-    // }
 
     if (!canUserReceiveZaps(props.note.user)) {
       toast?.sendWarning(
@@ -222,22 +218,18 @@ const ArticleFooter: Component<{
 
     clearTimeout(quickZapDelay);
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
-
-    // if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
-    //   return;
-    // }
 
     if (app?.customZap === undefined) {
       doQuickZap();
@@ -297,8 +289,8 @@ const ArticleFooter: Component<{
   };
 
   const doQuickZap = async () => {
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
@@ -317,11 +309,11 @@ const ArticleFooter: Component<{
     setTimeout(async () => {
       const success = await zapArticle(
         props.note,
-        account.publicKey,
+        accountStore.publicKey,
         amount,
         message,
-        account.activeRelays,
-        account.activeNWC,
+        accountStore.activeRelays,
+        accountStore.activeNWC,
       );
 
       props.updateState('isZapping', () => false);

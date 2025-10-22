@@ -1,14 +1,9 @@
-import { useIntl } from '@cookbook/solid-intl';
-import { Component, createSignal } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { useAppContext } from '../../contexts/AppContext';
+import { Component } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 import styles from './ReadsMentionDialog.module.scss';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
-import { useSearchContext } from '../../contexts/SearchContext';
-import { useProfileContext } from '../../contexts/ProfileContext';
 
 
 const ReadsPublishSuccessDialog: Component<{
@@ -16,17 +11,6 @@ const ReadsPublishSuccessDialog: Component<{
   open: boolean,
   onClose: (v: boolean) => void,
 }> = (props) => {
-
-  const intl = useIntl();
-  const account = useAccountContext();
-  const app = useAppContext();
-  const search = useSearchContext();
-  const profile = useProfileContext();
-
-  const [promotion, setPromotion] = createSignal('');
-  const [showPromotion, setShowPromotion] = createSignal(false);
-
-
   return (
     <AdvancedSearchDialog
       triggerClass="hidden"

@@ -8,7 +8,6 @@ import ButtonPrimary from '../Buttons/ButtonPrimary';
 import styles from './ReportContentModal.module.scss';
 import { APP_ID } from '../../App';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
-import { useAccountContext } from '../../contexts/AccountContext';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 import { actions as tActions } from '../../translations';
@@ -16,6 +15,7 @@ import { sendContentReport, triggerImportEvents } from '../../lib/notes';
 import { useToastContext } from '../Toaster/Toaster';
 import RadioBox, { RadioBoxOption } from '../Checkbox/RadioBox';
 import { titleCase } from '../../utils';
+import { accountStore } from '../../stores/accountStore';
 
 const reportReasons = ['nudity', 'profanity', 'illegal', 'spam', 'impersonation'];
 
@@ -25,8 +25,6 @@ const ReportContentModal: Component<{
   onClose: () => void,
   onReport?: () => void,
 }> = (props) => {
-
-  const account = useAccountContext();
   const intl = useIntl();
   const toast = useToastContext();
 
@@ -66,21 +64,20 @@ const ReportContentModal: Component<{
             <ButtonPrimary
               disabled={selectedReason() === undefined}
               onClick={async () => {
-                if (account) {
-                  const { success, note: event } = await sendContentReport(
-                    props.note.id,
-                    props.note.pubkey,
-                    selectedReason() || '',
-                    account.proxyThroughPrimal,
-                    account.activeRelays,
-                    account.relaySettings,
-                  );
+                const { success, note: event } = await sendContentReport(
+                  props.note.id,
+                  props.note.pubkey,
+                  selectedReason() || '',
+                  accountStore.proxyThroughPrimal,
+                  accountStore.activeRelays,
+                  accountStore.relaySettings,
+                );
 
-                  if (success && event) {
-                    triggerImportEvents([event], `import_report_${APP_ID}`);
-                    toast?.sendSuccess(`Content reported as ${selectedReason()}`)
-                  }
+                if (success && event) {
+                  triggerImportEvents([event], `import_report_${APP_ID}`);
+                  toast?.sendSuccess(`Content reported as ${selectedReason()}`)
                 }
+
                 props.onClose();
               }}
             >

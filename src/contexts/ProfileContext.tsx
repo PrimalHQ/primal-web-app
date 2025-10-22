@@ -1,4 +1,3 @@
-import { nip19 } from "../lib/nTools";
 import { createStore, reconcile } from "solid-js/store";
 import { getFutureUserFeed, } from "../lib/feed";
 import { convertToArticles, convertToNotes, sortByScore } from "../stores/note";
@@ -9,24 +8,15 @@ import {
   createEffect,
   JSXElement,
   on,
-  onCleanup,
   useContext
 } from "solid-js";
 import {
-  isConnected,
-  readData,
-  refreshSocketListeners,
-  removeSocketListeners,
-  socket,
   subsTo
 } from "../sockets";
 import {
   ContextChildren,
   FeedPage,
-  NostrEOSE,
-  NostrEvent,
   NostrEventContent,
-  NostrEvents,
   NostrMentionContent,
   NostrNoteActionsContent,
   NostrNoteContent,
@@ -55,19 +45,21 @@ import {
   getUserProfiles,
   isUserFollowing,
 } from "../lib/profile";
-import { useAccountContext } from "./AccountContext";
 import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
 import { fetchUserZaps } from "../handleFeeds";
 import { convertToUser } from "../stores/profile";
 import ProfileAbout from "../components/ProfileAbout/ProfileAbout";
-import { emptyPaging, fetchMegaFeed, filterAndSortDrafts, filterAndSortNotes, filterAndSortReads, filterAndSortZaps, MegaFeedResults, PaginationInfo } from "../megaFeeds";
+import {
+  emptyPaging,
+  fetchMegaFeed,
+  filterAndSortNotes,
+  filterAndSortReads,
+  filterAndSortZaps,
+  PaginationInfo,
+} from "../megaFeeds";
 import { calculateReadsOffset, handleSubscription } from "../utils";
 import { decrypt44 } from "../lib/nostrAPI";
-import { updatePage } from "../services/StoreService";
-
-let startTime = 0;
-let midTime = 0;
-let endTime = 0
+import { accountStore, hasPublicKey } from "../stores/accountStore";
 
 export type ProfileContextStore = {
   profileKey: string | undefined,
@@ -185,9 +177,6 @@ export const emptyStats = {
 export const ProfileContext = createContext<ProfileContextStore>();
 
 export const ProfileProvider = (props: { children: ContextChildren }) => {
-
-  const account = useAccountContext();
-
   let commonFollowers: PrimalUser[] = [];
 
   const initialData = {
@@ -311,7 +300,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('isFetching', () => true);
 
       const { notes, paging } = await fetchMegaFeed(
-        account?.publicKey,
+        accountStore.publicKey,
         JSON.stringify(specification),
         `profile_notes_${APP_ID}`,
         {
@@ -340,7 +329,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('isFetchingReplies', () => true);
 
       const { notes, paging } = await fetchMegaFeed(
-        account?.publicKey,
+        accountStore.publicKey,
         JSON.stringify(specification),
         `profile_replies_${APP_ID}`,
         {
@@ -372,7 +361,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const off = offset || calculateReadsOffset(store.articles, store.paging['reads']);
 
       const { reads, paging } = await fetchMegaFeed(
-        account?.publicKey,
+        accountStore.publicKey,
         JSON.stringify(specification),
         `profile_reads_${APP_ID}`,
         {
@@ -403,7 +392,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const off = offset || calculateReadsOffset(store.articles, store.paging['drafts']);
 
       const { drafts, paging } = await fetchMegaFeed(
-        account?.publicKey,
+        accountStore.publicKey,
         JSON.stringify(specification),
         `profile_drafts_${APP_ID}`,
         {
@@ -439,7 +428,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('isFetchingGallery', () => true);
 
       const { notes, paging } = await fetchMegaFeed(
-        account?.publicKey,
+        accountStore.publicKey,
         JSON.stringify(specification),
         `profile_media_${APP_ID}`,
         {
@@ -465,6 +454,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       return;
     }
+    // @ts-ignore
     updateStore(kind, (drs) => drs.filter(d => d.noteId !== id));
   }
 
@@ -757,7 +747,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     clearFuture();
 
     getFutureUserFeed(
-      account?.publicKey,
+      accountStore.publicKey,
       pubkey,
       `profile_future_${APP_ID}`,
       since,
@@ -882,21 +872,21 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       handleSubscription(
         profileInfoId,
-        () => getUserProfileInfo(profileKey, account?.publicKey, profileInfoId),
+        () => getUserProfileInfo(profileKey, accountStore.publicKey, profileInfoId),
         handleProfileInfoEvent,
         handleProfileInfoEose,
       );
 
       handleSubscription(
         profileScoredId,
-        () => getProfileScoredNotes(profileKey, account?.publicKey, profileScoredId, 8),
+        () => getProfileScoredNotes(profileKey, accountStore.publicKey, profileScoredId, 8),
         handleProfileScoredEvent,
         handleProfileScoredEose,
       );
 
       handleSubscription(
         profileCommonFollowersId,
-        () => getCommonFollowers(profileKey, account?.publicKey, profileCommonFollowersId, 6),
+        () => getCommonFollowers(profileKey, accountStore.publicKey, profileCommonFollowersId, 6),
         handleProfileCommonFollowersEvent,
         handleProfileCommonFollowersEose,
       );
@@ -908,7 +898,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         pubkey: profileKey,
       };
 
-      const { reads, paging } = await fetchMegaFeed(account?.publicKey, JSON.stringify(readsSidebarSpec), `profile_reads_latest_${APP_ID}`, { until: 0, limit: 2 });
+      const { reads, paging } = await fetchMegaFeed(accountStore.publicKey, JSON.stringify(readsSidebarSpec), `profile_reads_latest_${APP_ID}`, { until: 0, limit: 2 });
 
       const sortedReads = filterAndSortReads(reads, paging);
 
@@ -919,7 +909,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       handleSubscription(
         isProfileFollowingId,
-        () => isUserFollowing(profileKey, account?.publicKey, isProfileFollowingId),
+        () => isUserFollowing(profileKey, accountStore.publicKey, isProfileFollowingId),
         handleProfileFollowingEvent,
       );
     }
@@ -973,7 +963,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       list.splice(index, 1);
 
       updateStore('profileHistory', 'profiles', () => [user, ...list]);
-      saveRecomendedUsers(account?.publicKey, { ...store.profileHistory });
+      saveRecomendedUsers(accountStore.publicKey, { ...store.profileHistory });
 
       if (user.userStats) {
         addStatsToHistory(user.userStats);
@@ -991,13 +981,13 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       delete stats[last];
 
       updateStore('profileHistory', 'stats', reconcile(stats));
-      saveRecomendedUsers(account?.publicKey, { ...store.profileHistory });
+      saveRecomendedUsers(accountStore.publicKey, { ...store.profileHistory });
 
       list.pop()
     }
 
     updateStore('profileHistory', 'profiles', () => [...list]);
-    saveRecomendedUsers(account?.publicKey, { ...store.profileHistory });
+    saveRecomendedUsers(accountStore.publicKey, { ...store.profileHistory });
 
     if (user.userStats) {
       addStatsToHistory(user.userStats);
@@ -1006,7 +996,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
   const addStatsToHistory = (stats: UserStats) => {
     updateStore('profileHistory', 'stats', () => ({ [stats.pubkey]: stats }));
-    saveRecomendedUsers(account?.publicKey, { ...store.profileHistory });
+    saveRecomendedUsers(accountStore.publicKey, { ...store.profileHistory });
   };
 
 // SOCKET HANDLERS ------------------------------
@@ -1073,8 +1063,8 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 // EFFECTS --------------------------------------
 
   createEffect(() => {
-    if (account && account.hasPublicKey()) {
-      const history = readRecomendedUsers(account.publicKey);
+    if (hasPublicKey()) {
+      const history = readRecomendedUsers(accountStore.publicKey);
 
       history && updateStore('profileHistory', reconcile(history));
     }

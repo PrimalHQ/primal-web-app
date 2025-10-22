@@ -55,8 +55,21 @@ import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
-import { createStore, unwrap } from 'solid-js/store';
-import { addrRegex, hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, primalUserRegex, profileRegex, shortMentionInWords, shortNoteChars, shortNoteWords, specialCharsRegex, urlExtractRegex, userMentionUrlRegex } from '../../constants';
+import { createStore } from 'solid-js/store';
+import {
+  addrRegex,
+  hashtagCharsRegex,
+  Kind,
+  linebreakRegex,
+  lnUnifiedRegex,
+  noteRegex,
+  profileRegex,
+  shortMentionInWords,
+  shortNoteChars,
+  shortNoteWords,
+  specialCharsRegex,
+  urlExtractRegex,
+} from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
@@ -65,10 +78,8 @@ import Lnbc from '../Lnbc/Lnbc';
 import { logError } from '../../lib/logger';
 import { useAppContext } from '../../contexts/AppContext';
 import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
-import { fetchArticles } from '../../handleNotes';
 import { APP_ID } from '../../App';
 import { getEvents } from '../../lib/feed';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { subsTo } from '../../sockets';
 import ProfileNoteZap from '../ProfileNoteZap/ProfileNoteZap';
 import { parseBolt11 } from '../../utils';
@@ -78,6 +89,7 @@ import { StreamingData } from '../../lib/streaming';
 import LiveEventPreview from '../LiveVideo/LiveEventPreview';
 import ExternalLiveEventPreview from '../LiveVideo/ExternalLiveEventPreview';
 import NoteVideo from './NoteVideo';
+import { accountStore } from '../../stores/accountStore';
 
 const groupGridLimit = 5;
 
@@ -185,7 +197,6 @@ const ParsedNote: Component<{
   const intl = useIntl();
   const media = useMediaContext();
   const app = useAppContext();
-  const account = useAccountContext();
 
   const dev = localStorage.getItem('devMode') === 'true';
 
@@ -1137,7 +1148,7 @@ const ParsedNote: Component<{
         }
       })
 
-      getEvents(account?.publicKey, [data.id], subId, true);
+      getEvents(accountStore.publicKey, [data.id], subId, true);
 
       return (
         <Switch fallback={

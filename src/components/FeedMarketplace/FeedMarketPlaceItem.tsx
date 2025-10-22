@@ -1,12 +1,10 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { batch, Component, createEffect, For, Show } from 'solid-js';
+import { Component, createEffect, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { truncateNumber } from '../../lib/notifications';
 import { DVMMetadata, NoteActions, PrimalDVM, PrimalUser, ZapOption } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import DvmFooterActionButton from '../Note/NoteFooter/DvmFooterActionButton';
-import NoteFooterActionButton from '../Note/NoteFooter/NoteFooterActionButton';
 import { useToastContext } from '../Toaster/Toaster';
 import { toast as t } from '../../translations';
 import styles from './FeedMarketPlace.module.scss';
@@ -15,6 +13,7 @@ import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { lottieDuration } from '../Note/NoteFooter/NoteFooter';
 import { A } from '@solidjs/router';
+import { accountStore, addLike, hasPublicKey, showGetStarted } from '../../stores/accountStore';
 
 
 const FeedMarketItem: Component<{
@@ -27,7 +26,6 @@ const FeedMarketItem: Component<{
   commonUsers?: PrimalUser[],
   onClick?: (dvm: PrimalDVM | undefined) => void,
 }> = (props) => {
-  const account = useAccountContext();
   const toast = useToastContext();
   const intl = useIntl();
   const app = useAppContext();
@@ -74,12 +72,12 @@ const FeedMarketItem: Component<{
     e.preventDefault();
     e.stopPropagation();
 
-    if (!account || !props.dvm) {
+    if (!accountStore || !props.dvm) {
       return;
     }
 
-    if (!account.hasPublicKey()) {
-      account.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
@@ -90,7 +88,7 @@ const FeedMarketItem: Component<{
     //   return;
     // }
 
-    const success = await account.actions.addLike(props.dvm);
+    const success = await addLike(props.dvm);
 
     if (success) {
       setState((state) => ({
@@ -190,8 +188,8 @@ const FeedMarketItem: Component<{
     e.preventDefault();
     e.stopPropagation();
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       setState('isZapping', () => false);
       return;
     }
@@ -229,8 +227,8 @@ const FeedMarketItem: Component<{
       return;
     }
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
@@ -244,8 +242,8 @@ const FeedMarketItem: Component<{
   };
 
   const doQuickZap = async () => {
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
@@ -266,7 +264,15 @@ const FeedMarketItem: Component<{
 
     setTimeout(async () => {
       if (!props.dvm || !props.author) return;
-      const success = await zapDVM(props.dvm, props.author, account.publicKey, amount, message, account.activeRelays);
+
+      const success = await zapDVM(
+        props.dvm,
+        props.author,
+        accountStore.publicKey,
+        amount,
+        message,
+        accountStore.activeRelays,
+      );
 
       setState('isZapping', () => false);
 
@@ -345,7 +351,7 @@ const FeedMarketItem: Component<{
               dvm={props.dvm}
               onClick={doLike}
               type="like"
-              highlighted={state.liked || account?.likes.includes(props.dvm?.id || '')}
+              highlighted={state.liked || accountStore.likes.includes(props.dvm?.id || '')}
               label={likes() === 0 ? '' : truncateNumber(likes(), 2)}
               title={likes().toLocaleString()}
             />

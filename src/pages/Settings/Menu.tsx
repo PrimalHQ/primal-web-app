@@ -5,13 +5,12 @@ import { useIntl } from '@cookbook/solid-intl';
 import { settings as t, actions as tActions } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import { A, useNavigate } from '@solidjs/router';
-import { useAccountContext } from '../../contexts/AccountContext';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
+import { accountStore, hasPublicKey, logout } from '../../stores/accountStore';
 
 const Menu: Component = () => {
 
   const intl = useIntl();
-  const account = useAccountContext();
   const navigate = useNavigate();
 
   const version = import.meta.env.PRIMAL_VERSION;
@@ -21,7 +20,7 @@ const Menu: Component = () => {
       <PageCaption title={intl.formatMessage(t.title)} />
 
       <div class={styles.subpageLinks}>
-        <Show when={account?.sec != undefined}>
+        <Show when={accountStore.sec != undefined}>
           <A href="/settings/account">
             <div class={styles.caption}>
               {intl.formatMessage(t.account.title)}
@@ -48,14 +47,14 @@ const Menu: Component = () => {
           <div class={styles.chevron}></div>
         </A>
 
-        <Show when={account?.hasPublicKey()}>
+        <Show when={hasPublicKey()}>
           <A href="/settings/uploads">
             {intl.formatMessage(t.blossom)}
             <div class={styles.chevron}></div>
           </A>
         </Show>
 
-        <Show when={account?.hasPublicKey()}>
+        <Show when={hasPublicKey()}>
           <A href="/settings/muted">
             {intl.formatMessage(t.muted.title)}
             <div class={styles.chevron}></div>
@@ -84,7 +83,7 @@ const Menu: Component = () => {
           <div class={styles.chevron}></div>
         </A>
 
-        <Show when={account?.hasPublicKey()}>
+        <Show when={hasPublicKey()}>
           <A href="/settings/zaps">
             {intl.formatMessage(t.zaps)}
             <div class={styles.chevron}></div>
@@ -92,10 +91,10 @@ const Menu: Component = () => {
         </Show>
       </div>
 
-      <Show when={account?.sec}>
+      <Show when={accountStore.sec}>
         <div class={styles.webVersion}>
           <ButtonPrimary onClick={() => {
-            account?.actions.logout();
+            logout();
             navigate('/home');
           }}>
             {intl.formatMessage(tActions.logout)}

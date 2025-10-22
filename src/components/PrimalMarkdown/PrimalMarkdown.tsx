@@ -11,12 +11,19 @@ import {
 } from '@milkdown/preset-gfm';
 
 import { callCommand } from '@milkdown/utils';
-import { history, undoCommand, redoCommand } from '@milkdown/plugin-history';
+import { redoCommand } from '@milkdown/plugin-history';
 import  styles from './PrimalMarkdown.module.scss';
 import ButtonGhost from '../Buttons/ButtonGhost';
 import { hexToNpub, noteIdToHex, npubToHex } from '../../lib/keys';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { eventRegexG, eventRegexLocal, eventRegexNostrless, Kind, mdImageRegex, profileRegex, profileRegexG, specialCharsRegex } from '../../constants';
+import {
+  eventRegexLocal,
+  eventRegexNostrless,
+  Kind,
+  mdImageRegex,
+  profileRegex,
+  profileRegexG,
+  specialCharsRegex,
+} from '../../constants';
 import { NostrRelaySignedEvent, PrimalArticle } from '../../types/primal';
 import { userName } from '../../stores/profile';
 import { A, useNavigate } from '@solidjs/router';
@@ -88,7 +95,6 @@ const PrimalMarkdown: Component<{
   onHighlightReply?: (id: string) => void,
   onHighlightDeselected?: () => void,
 }> = (props) => {
-  const account = useAccountContext();
   const toast = useToastContext();
   const navigate = useNavigate();
   const media = useMediaContext();

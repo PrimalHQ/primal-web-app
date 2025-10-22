@@ -1,10 +1,32 @@
 import { useIntl } from "@cookbook/solid-intl";
-import { Router, useLocation } from "@solidjs/router";
+import { useLocation } from "@solidjs/router";
 import { nip19 } from "../../../lib/nTools";
 import { Component, createEffect, createSignal, For, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import { createStore, reconcile, unwrap } from "solid-js/store";
-import { noteRegex, profileRegex, Kind, editMentionRegex, emojiSearchLimit, profileRegexG, linebreakRegex, addrRegex, addrRegexG, eventRegexG, profileRegexEdit, profileRegexEditG } from "../../../constants";
-import { useAccountContext } from "../../../contexts/AccountContext";
+import {
+  noteRegex,
+  Kind,
+  editMentionRegex,
+  emojiSearchLimit,
+  linebreakRegex,
+  addrRegex,
+  addrRegexG,
+  eventRegexG,
+  profileRegexEdit,
+  profileRegexEditG,
+} from "../../../constants";
+import {
+  EmojiOption,
+  FeedPage,
+  NostrMentionContent,
+  NostrNoteContent,
+  NostrStatsContent,
+  NostrUserContent,
+  PrimalArticle,
+  PrimalNote,
+  PrimalUser,
+  SendNoteResult,
+} from "../../../types/primal";
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
 import { getEvents } from "../../../lib/feed";
@@ -12,8 +34,7 @@ import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents, getP
 import { getUserProfiles, getUsersRelayInfo } from "../../../lib/profile";
 import { subsTo } from "../../../sockets";
 import { convertToArticles, convertToLiveEvents, convertToNotes, referencesToTags } from "../../../stores/note";
-import { convertToUser, emptyUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
-import { EmojiOption, FeedPage, NostrMentionContent, NostrNoteContent, NostrStatsContent, NostrUserContent, PrimalArticle, PrimalNote, PrimalUser, SendNoteResult } from "../../../types/primal";
+import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
 import { debounce, getScreenCordinates, isVisibleInContainer, replaceAsync, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
@@ -32,6 +53,13 @@ import {
   actions as tActions,
   upload as tUpload,
 } from "../../../translations";
+import {
+  readNoteDraft,
+  readNoteDraftUserRefs,
+  readSecFromStorage,
+  saveNoteDraft,
+  saveNoteDraftUserRefs,
+} from "../../../lib/localStore";
 import { useMediaContext } from "../../../contexts/MediaContext";
 import { hookForDev } from "../../../lib/devTools";
 import ButtonPrimary from "../../Buttons/ButtonPrimary";
@@ -40,21 +68,18 @@ import { useProfileContext } from "../../../contexts/ProfileContext";
 import ButtonGhost from "../../Buttons/ButtonGhost";
 import EmojiPickPopover from "../../EmojiPickModal/EmojiPickPopover";
 import ConfirmAlternativeModal from "../../ConfirmModal/ConfirmAlternativeModal";
-import { readNoteDraft, readNoteDraftUserRefs, readSecFromStorage, saveNoteDraft, saveNoteDraftUserRefs } from "../../../lib/localStore";
-import Uploader from "../../Uploader/Uploader";
 import { logError } from "../../../lib/logger";
 import Lnbc from "../../Lnbc/Lnbc";
 import { decodeIdentifier } from "../../../lib/keys";
-import { useSettingsContext } from "../../../contexts/SettingsContext";
 import SimpleArticlePreview from "../../ArticlePreview/SimpleArticlePreview";
 import ArticleHighlight from "../../ArticleHighlight/ArticleHighlight";
 import DOMPurify from "dompurify";
 import { useAppContext } from "../../../contexts/AppContext";
 import UploaderBlossom from "../../Uploader/UploaderBlossom";
-import ParsedNote from "../../ParsedNote/ParsedNote";
 import LiveEventPreview from "../../LiveVideo/LiveEventPreview";
 import { StreamingData, getStreamingEvent } from "../../../lib/streaming";
 import { fetchUserProfile } from "../../../handleFeeds";
+import { accountStore, hasPublicKey, quoteNote, saveEmoji, setShowPin } from "../../../stores/accountStore";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -76,10 +101,8 @@ const EditBox: Component<{
   const instanceId = uuidv4();
 
   const search = useSearchContext();
-  const account = useAccountContext();
   const toast = useToastContext();
   const profile = useProfileContext();
-  const settings = useSettingsContext();
 
   let textArea: HTMLTextAreaElement | undefined;
   let textPreview: HTMLDivElement | undefined;
@@ -591,7 +614,7 @@ const EditBox: Component<{
       position = isEmptyMessage ? 0 : position + quote.length + 1;
 
       textArea.value = newMsg;
-      account?.actions.quoteNote(undefined);
+      quoteNote(undefined);
 
       onExpandableTextareaInput(new InputEvent('input'));
 
@@ -604,8 +627,8 @@ const EditBox: Component<{
 
   createEffect(() => {
     if (props.open) {
-      const draft = readNoteDraft(account?.publicKey, props.replyToNote?.noteId);
-      const draftUserRefs = readNoteDraftUserRefs(account?.publicKey, props.replyToNote?.noteId);
+      const draft = readNoteDraft(accountStore.publicKey, props.replyToNote?.noteId);
+      const draftUserRefs = readNoteDraftUserRefs(accountStore.publicKey, props.replyToNote?.noteId);
 
       setUserRefs(reconcile(draftUserRefs));
 
@@ -622,12 +645,12 @@ const EditBox: Component<{
         return newMsg;
       });
 
-      if (account?.quotedNote) {
-        addQuote(account.quotedNote);
+      if (accountStore.quotedNote) {
+        addQuote(accountStore.quotedNote);
       }
 
     } else {
-      account?.actions.quoteNote(undefined);
+      quoteNote(undefined);
     }
   })
 
@@ -635,8 +658,8 @@ const EditBox: Component<{
     if (message().length === 0) return;
 
     // save draft just in case there is an unintended interuption
-    saveNoteDraft(account?.publicKey, message(), props.replyToNote?.noteId);
-    saveNoteDraftUserRefs(account?.publicKey, userRefs, props.replyToNote?.noteId);
+    saveNoteDraft(accountStore.publicKey, message(), props.replyToNote?.noteId);
+    saveNoteDraftUserRefs(accountStore.publicKey, userRefs, props.replyToNote?.noteId);
   });
 
   const onEscape = (e: KeyboardEvent) => {
@@ -684,8 +707,8 @@ const EditBox: Component<{
       return;
     }
 
-    saveNoteDraft(account?.publicKey, '', props.replyToNote?.noteId);
-    saveNoteDraftUserRefs(account?.publicKey, {}, props.replyToNote?.noteId);
+    saveNoteDraft(accountStore.publicKey, '', props.replyToNote?.noteId);
+    saveNoteDraftUserRefs(accountStore.publicKey, {}, props.replyToNote?.noteId);
     clearEditor();
   };
 
@@ -697,32 +720,25 @@ const EditBox: Component<{
   };
 
   const persistNote = (note: string) => {
-    saveNoteDraft(account?.publicKey, note, props.replyToNote?.noteId);
-    saveNoteDraftUserRefs(account?.publicKey, userRefs, props.replyToNote?.noteId);
+    saveNoteDraft(accountStore.publicKey, note, props.replyToNote?.noteId);
+    saveNoteDraftUserRefs(accountStore.publicKey, userRefs, props.replyToNote?.noteId);
     clearEditor();
   };
 
   const [isPostingInProgress, setIsPostingInProgress] = createSignal(false);
 
   const postNote = async () => {
-    if (!account || !account.hasPublicKey() || fileToUpload()) {
+    if (hasPublicKey() || fileToUpload()) {
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
-
-    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
-    //   toast?.sendWarning(
-    //     intl.formatMessage(tToast.noRelaysConnected),
-    //   );
-    //   return;
-    // }
 
     const value = message();
 
@@ -788,7 +804,7 @@ const EditBox: Component<{
       return `${anythingBefore}nostr:${nprofile}`;
     });
 
-    if (account) {
+    if (accountStore) {
       let tags = referencesToTags(messageToSend, relayHints);
       const rep = props.replyToNote;
 
@@ -877,10 +893,10 @@ const EditBox: Component<{
         }
       }
 
-      const relayTags = account.relays.map(r => {
+      const relayTags = accountStore.relays.map(r => {
         let t = ['r', r.url];
 
-        const settings = account.relaySettings[r.url];
+        const settings = accountStore.relaySettings[r.url];
         if (settings && settings.read && !settings.write) {
           t = [...t, 'read'];
         }
@@ -894,7 +910,13 @@ const EditBox: Component<{
 
       setIsPostingInProgress(true);
 
-      const { success, reasons, note } = await sendNote(messageToSend, account?.proxyThroughPrimal || false, account.activeRelays, tags, account.relaySettings);
+      const { success, reasons, note } = await sendNote(
+        messageToSend,
+        accountStore.proxyThroughPrimal || false,
+        accountStore.activeRelays,
+        tags,
+        accountStore.relaySettings,
+      );
 
       if (success) {
 
@@ -906,7 +928,7 @@ const EditBox: Component<{
               toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
               props.onSuccess && props.onSuccess({ success, reasons, note }, { noteRefs, userRefs, articleRefs, highlightRefs, relayHints });
               setIsPostingInProgress(false);
-              saveNoteDraft(account.publicKey, '', rep?.noteId)
+              saveNoteDraft(accountStore.publicKey, '', rep?.noteId)
               clearEditor();
             }
             unsub();
@@ -1175,7 +1197,7 @@ const EditBox: Component<{
       });
 
       getParametrizedEvent(pubkey, identifier, kind, subId);
-      // getEvents(account?.publicKey, [hex], `nn_${id}`, true);
+      // getEvents(accountStore.publicKey, [hex], `nn_${id}`, true);
 
     });
 
@@ -1215,7 +1237,7 @@ const EditBox: Component<{
 
           const hostPubkey = stream.hosts?.[0] || stream.pubkey;
 
-          const user = await fetchUserProfile(account?.publicKey, hostPubkey, `missing_user_${APP_ID}`);
+          const user = await fetchUserProfile(accountStore.publicKey, hostPubkey, `missing_user_${APP_ID}`);
 
           const link = stream ?
             <div>
@@ -1417,7 +1439,7 @@ const EditBox: Component<{
         },
       });
 
-      getEvents(account?.publicKey, [hex], subId, true);
+      getEvents(accountStore.publicKey, [hex], subId, true);
 
     });
 
@@ -1516,7 +1538,7 @@ const EditBox: Component<{
         const { identifier, pubkey } = decoded.data;
 
         const stream = await getStreamingEvent(identifier, pubkey);
-        const user = await fetchUserProfile(account?.publicKey, stream.hosts?.[0] || pubkey, `missing_user_${APP_ID}`);
+        const user = await fetchUserProfile(accountStore.publicKey, stream.hosts?.[0] || pubkey, `missing_user_${APP_ID}`);
 
         rec[url] = (<div>
           <LiveEventPreview stream={stream} user={user} />
@@ -1615,7 +1637,7 @@ const EditBox: Component<{
       return;
     }
 
-    account?.actions.saveEmoji(emoji);
+    saveEmoji(emoji);
     const msg = message();
 
     // Get cursor position to determine insertion point
@@ -1734,7 +1756,7 @@ const EditBox: Component<{
       return;
     }
 
-    account?.actions.saveEmoji(emoji);
+    saveEmoji(emoji);
 
     const msg = message();
 
@@ -1762,13 +1784,13 @@ const EditBox: Component<{
   let progressFill: HTMLDivElement | undefined;
 
   const notePreview = () => {
-    if (!account?.activeUser || !account?.publicKey) return;
+    if (!accountStore.activeUser || !accountStore.publicKey) return;
 
     const created_at = Math.floor((new Date()).getTime() / 1_000);
 
     const post = {
       id: 'new note',
-      pubkey: account.publicKey,
+      pubkey: accountStore.publicKey,
       created_at,
       tags: [],
       content: message(),
@@ -1798,13 +1820,13 @@ const EditBox: Component<{
       content: message(),
       id: 'new note',
       created_at,
-      pubkey: account.publicKey,
+      pubkey: accountStore.publicKey,
       sig: 'signature',
       tags: [],
     };
 
     const n: PrimalNote = {
-      user: account.activeUser,
+      user: accountStore.activeUser,
       post,
       msg,
       mentionedNotes: noteRefs,
@@ -1870,8 +1892,8 @@ const EditBox: Component<{
           {renderMessage()}
           <div class={styles.uploader}>
             <UploaderBlossom
-              publicKey={account?.publicKey}
-              nip05={account?.activeUser?.nip05}
+              publicKey={accountStore.publicKey}
+              nip05={accountStore.activeUser?.nip05}
               file={fileToUpload()}
               onFail={() => {
                 toast?.sendWarning(intl.formatMessage(tUpload.fail, {
@@ -1905,8 +1927,8 @@ const EditBox: Component<{
               }}
             />
             {/* <Uploader
-              publicKey={account?.publicKey}
-              nip05={account?.activeUser?.nip05}
+              publicKey={accountStore.publicKey}
+              nip05={accountStore.activeUser?.nip05}
               openSockets={props.open}
               file={fileToUpload()}
               onFail={() => {

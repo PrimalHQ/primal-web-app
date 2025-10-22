@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, onCleanup, Show } from 'solid-js';
 import { Progress } from '@kobalte/core/progress';
 
 import styles from './Uploader.module.scss';
@@ -10,7 +10,7 @@ import { startTimes, uploadMediaCancel, uploadMediaChunk, uploadMediaConfirm } f
 import { sha256, uuidv4 } from '../../utils';
 import { Kind, uploadLimit } from '../../constants';
 import ButtonGhost from '../Buttons/ButtonGhost';
-import { useAccountContext } from '../../contexts/AccountContext';
+import { accountStore } from '../../stores/accountStore';
 
 const MB = 1024 * 1024;
 const maxParallelChunks = 5;
@@ -45,8 +45,6 @@ const Uploader: Component<{
   onCancel?: (uploadId?: string) => void,
   onSuccsess?: (url: string, uploadId?: string) => void,
 }> = (props) => {
-  const account = useAccountContext();
-
   const [uploadState, setUploadState] = createStore<UploadState>({
     isUploading: false,
     progress: 0,
@@ -115,7 +113,7 @@ const Uploader: Component<{
   });
 
   createEffect(() => {
-    calcUploadLimit(account?.membershipStatus.tier);
+    calcUploadLimit(accountStore.membershipStatus.tier);
   });
 
   onCleanup(() => {

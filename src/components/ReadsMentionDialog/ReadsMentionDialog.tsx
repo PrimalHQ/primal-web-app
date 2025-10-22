@@ -1,47 +1,29 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Tabs } from '@kobalte/core/tabs';
 import { Search } from '@kobalte/core/search';
-import { A } from '@solidjs/router';
-import { Component, createEffect, createSignal, For, Match, on, onMount, Show, Switch } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { Component, createEffect, createSignal, For, on, Show } from 'solid-js';
 import { APP_ID } from '../../App';
-import { Kind, urlRegexG } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { ReactionStats, useAppContext } from '../../contexts/AppContext';
+import { Kind } from '../../constants';
 import { hookForDev } from '../../lib/devTools';
-import { hexToNpub } from '../../lib/keys';
-import { getEventQuotes, getEventQuoteStats, getEventReactions, getEventZaps, parseLinkPreviews, setLinkPreviews } from '../../lib/notes';
-import { truncateNumber2 } from '../../lib/notifications';
 import { subsTo } from '../../sockets';
-import { convertToNotes } from '../../stores/note';
 import { nip05Verification, userName } from '../../stores/profile';
 import {
-  actions as tActions,
-  placeholders as tPlaceholders,
-  reactionsModal,
   search as tSearch,
 } from '../../translations';
-import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalArticle, PrimalArticleFeed, PrimalNote, PrimalUser } from '../../types/primal';
-import { debounce, parseBolt11, previousWord } from '../../utils';
+import { PrimalArticle, PrimalNote, PrimalUser } from '../../types/primal';
+import { previousWord } from '../../utils';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import Avatar from '../Avatar/Avatar';
-import Loader from '../Loader/Loader';
 import Note from '../Note/Note';
-import Paginator from '../Paginator/Paginator';
-import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './ReadsMentionDialog.module.scss';
 import DOMPurify from 'dompurify';
-import ButtonPrimary from '../Buttons/ButtonPrimary';
 import { useSearchContext } from '../../contexts/SearchContext';
 import SearchOption from '../Search/SearchOption';
 import { useProfileContext } from '../../contexts/ProfileContext';
 import { getUsersRelayInfo } from '../../lib/profile';
 import { useAdvancedSearchContext } from '../../contexts/AdvancedSearchContext';
 import tippy, { Instance } from 'tippy.js';
-import { nip19 } from '../../lib/nTools';
-import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
-import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import ArticlePreviewSuggestion from '../ArticlePreview/ArticlePreviewSuggestion';
 import ArticlePreviewSuggestionSkeleton from '../Skeleton/ArticlePreviewSuggestionSkeleton';
 import NoteSuggestionSkeleton from '../Skeleton/NoteSuggestionSkeleton';
@@ -67,8 +49,6 @@ const ReadsMentionDialog: Component<{
 }> = (props) => {
 
   const intl = useIntl();
-  const account = useAccountContext();
-  const app = useAppContext();
   const search = useSearchContext();
   const advsearch = useAdvancedSearchContext();
   const profile = useProfileContext();

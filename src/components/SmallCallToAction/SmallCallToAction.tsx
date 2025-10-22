@@ -2,20 +2,14 @@ import { Component } from 'solid-js';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './SmallCallToAction.module.scss';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { PrimalUser } from '../../types/primal';
 import { placeholders } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import { hookForDev } from '../../lib/devTools';
+import { showNewNoteForm } from '../../stores/accountStore';
 
 const SmallCallToAction: Component<{ activeUser: PrimalUser | undefined, id?: string }> = (props) => {
-
-  const account = useAccountContext();
   const intl = useIntl();
-
-  const showNewNoteForm = () => {
-    account?.actions?.showNewNoteForm();
-  };
 
   return (
     <button id={props.id} class={styles.callToAction} onClick={showNewNoteForm}>

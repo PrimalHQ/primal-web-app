@@ -1,6 +1,5 @@
 import { Component, Show } from 'solid-js';
 import { Transition } from 'solid-transition-group';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
 import { PrimalNote, PrimalUser } from '../../types/primal';
 import MentionedPeople from './MentionedPeople';

@@ -1,23 +1,31 @@
 import { Component, createEffect, createSignal } from 'solid-js';
-import { MenuItem, NostrRelaySignedEvent, PrimalArticle } from '../../types/primal';
+import { MenuItem, PrimalArticle } from '../../types/primal';
 
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { authorName, userName } from '../../stores/profile';
-import { note as t, actions as tActions, toast as tToast, toast } from '../../translations';
+import { actions as tActions, toast as tToast } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import PrimalMenu from '../PrimalMenu/PrimalMenu';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { APP_ID } from '../../App';
 import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
-import { broadcastEvent, sendDeleteEvent, sendDraft, triggerImportEvents } from '../../lib/notes';
-import { NoteContextMenuInfo, useAppContext } from '../../contexts/AppContext';
+import { sendDeleteEvent, triggerImportEvents } from '../../lib/notes';
+import { NoteContextMenuInfo } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
-import { nip19 } from 'nostr-tools';
 import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
+import {
+  accountStore,
+  addToMuteList,
+  hasPublicKey,
+  quoteNote,
+  removeFromMuteList,
+  setShowPin,
+  showGetStarted,
+  showNewNoteForm,
+} from '../../stores/accountStore';
 
 const ArticleDraftContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -25,13 +33,10 @@ const ArticleDraftContextMenu: Component<{
   onClose: () => void,
   id?: string,
 }> = (props) => {
-  const account = useAccountContext();
   const toaster = useToastContext();
   const intl = useIntl();
-  const app = useAppContext();
   const navigate = useNavigate();
 
-  const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [confirmDeleteDraft, setConfirmDeleteDraft] = createSignal(false);
@@ -69,26 +74,26 @@ const ArticleDraftContextMenu: Component<{
 
 
   const doMuteUser = () => {
-    account?.actions.addToMuteList(note()?.pubkey);
+    addToMuteList(note()?.pubkey);
     props.onClose();
   };
 
   const doUnmuteUser = () => {
-    account?.actions.removeFromMuteList(note()?.pubkey);
+    removeFromMuteList(note()?.pubkey);
     props.onClose();
   };
 
   const doReportUser = () => {
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
@@ -112,12 +117,12 @@ const ArticleDraftContextMenu: Component<{
   };
 
   const quoteArticle = () => {
-    account?.actions?.quoteNote(`nostr:${note().noteId}`);
-    account?.actions?.showNewNoteForm();
+    quoteNote(`nostr:${note().noteId}`);
+    showNewNoteForm();
   }
 
   const deleteDraft = async () => {
-    const user = account?.activeUser;
+    const user = accountStore.activeUser;
     if (!props.data || !user) return;
     const article = props.data.note as PrimalArticle;
 
@@ -125,9 +130,9 @@ const ArticleDraftContextMenu: Component<{
       user.pubkey,
       article.id,
       Kind.Draft,
-      account.activeRelays,
-      account.relaySettings,
-      account.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+      accountStore.proxyThroughPrimal,
     );
 
     if (!success || !note) return;
@@ -200,7 +205,7 @@ const ArticleDraftContextMenu: Component<{
   ];
 
   const noteContextForOtherPeople: () => MenuItem[] = () => {
-    const isMuted = account?.muted.includes(note()?.user.pubkey);
+    const isMuted = accountStore.muted.includes(note()?.user.pubkey);
 
     return [
       {
@@ -224,7 +229,7 @@ const ArticleDraftContextMenu: Component<{
     ];
   };
 
-  const noteContext = () => account?.publicKey !== note()?.pubkey ?
+  const noteContext = () => accountStore.publicKey !== note()?.pubkey ?
       [ ...noteContextForEveryone, ...noteContextForOtherPeople()] :
       noteContextForEveryone;
 

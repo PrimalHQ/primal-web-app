@@ -2,19 +2,13 @@ import { Component, createEffect, createSignal, JSXElement, onCleanup, onMount, 
 
 import styles from './Layout.module.scss';
 
-import { useLocation, useParams, useSearchParams } from '@solidjs/router';
+import { useLocation, useSearchParams } from '@solidjs/router';
 import NewNote from '../NewNote/NewNote';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { useHomeContext } from '../../contexts/HomeContext';
 import { SendNoteResult } from '../../types/primal';
-import { useProfileContext } from '../../contexts/ProfileContext';
-import BannerIOS from '../BannerIOS/BannerIOS';
-import { useAppContext } from '../../contexts/AppContext';
-import NoteContextMenu from '../Note/NoteContextMenu';
 import { useSettingsContext } from '../../contexts/SettingsContext';
-import { useIntl } from '@cookbook/solid-intl';
 import NavPhone from '../NavMenu/NavPhone';
 import { isIOS } from '../../utils';
+import { accountStore, checkNostrKey } from '../../stores/accountStore';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -23,14 +17,8 @@ const LayoutPhone: Component<{
   onNewNotePosted: (result: SendNoteResult) => void,
 }> = (props) => {
 
-  const account = useAccountContext();
-  const home = useHomeContext();
-  const profile = useProfileContext();
   const location = useLocation();
-  const params = useParams();
-  const app = useAppContext();
   const settings = useSettingsContext();
-  const intl = useIntl();
 
   let container: HTMLDivElement | undefined;
 
@@ -61,8 +49,8 @@ const LayoutPhone: Component<{
   createEffect(() => {
     if (location.pathname === '/') return;
 
-    if (!account?.publicKey) {
-      account?.actions.checkNostrKey();
+    if (!accountStore.publicKey) {
+      checkNostrKey();
     }
   });
 
@@ -86,7 +74,7 @@ const LayoutPhone: Component<{
     >
       <>
         <div id="container" ref={container} class={containerClass()}>
-          <Show when={account?.isKeyLookupDone}>
+          <Show when={accountStore.isKeyLookupDone}>
             <div class={styles.phoneContent}>
               <div id="new_note_input" class={styles.headerFloater}>
                 <NewNote onSuccess={props.onNewNotePosted}/>

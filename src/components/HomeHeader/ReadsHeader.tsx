@@ -2,7 +2,6 @@ import { Component, For, onCleanup, onMount, Show } from 'solid-js';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './HomeHeader.module.scss';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { feedNewPosts } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
@@ -11,6 +10,7 @@ import { PrimalUser } from '../../types/primal';
 import ReedSelect from '../FeedSelect/ReedSelect';
 import { useReadsContext } from '../../contexts/ReadsContext';
 import { isPhone } from '../../utils';
+import { accountStore } from '../../stores/accountStore';
 
 const ReadsHeader: Component< {
   id?: string,
@@ -21,7 +21,6 @@ const ReadsHeader: Component< {
 } > = (props) => {
 
   const reads = useReadsContext();
-  const account = useAccountContext();
   const intl = useIntl();
 
   let lastScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
@@ -90,7 +89,7 @@ const ReadsHeader: Component< {
       </div>
 
       <Show
-        when={props.hasNewPosts() && !account?.showNewNoteForm && !((reads?.scrollTop || 0) < 85)}
+        when={props.hasNewPosts() && !accountStore.showNewNoteForm && !((reads?.scrollTop || 0) < 85)}
       >
         <div class={styles.newArticleContentNotification}>
           <button

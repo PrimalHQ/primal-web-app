@@ -1,24 +1,17 @@
-import { Component, createEffect, createSignal, JSXElement, on, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, JSXElement, on, Show } from 'solid-js';
 import { Progress } from '@kobalte/core/progress';
 
 import styles from './Uploader.module.scss';
-import { uploadServer } from '../../uploadSocket';
 import { createStore } from 'solid-js/store';
-import { NostrEOSE, NostrEvent, NostrEventContent, NostrEventType, NostrMediaUploaded } from '../../types/primal';
-import { readUploadTime, saveUploadTime } from '../../lib/localStore';
-import { startTimes, uploadMediaCancel, uploadMediaChunk, uploadMediaConfirm } from '../../lib/media';
 import { encodeAuthorizationHeader, sha256, uuidv4 } from '../../utils';
-import { Kind, primalBlossom, uploadLimit } from '../../constants';
+import { primalBlossom, uploadLimit } from '../../constants';
 import ButtonGhost from '../Buttons/ButtonGhost';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { APP_ID } from '../../App';
-import { subsTo } from '../../sockets';
-import { getReplacableEvent } from '../../lib/notes';
 
 import { BlossomClient, SignedEvent, BlobDescriptor, fetchWithTimeout } from "blossom-client-sdk";
 import { signEvent } from '../../lib/nostrAPI';
 import { logInfo, logWarning } from '../../lib/logger';
 import { useToastContext } from '../Toaster/Toaster';
+import { accountStore } from '../../stores/accountStore';
 
 const MB = 1024 * 1024;
 
@@ -45,7 +38,6 @@ const UploaderBlossom: Component<{
   onStart?: (uploadId: string | undefined, cancelUpload: () => void) => void,
   progressBar?: (state: UploadState, resetUpload: () => void) => JSXElement,
 }> = (props) => {
-  const account = useAccountContext();
   const toaster = useToastContext();
 
   let progressFill: HTMLDivElement | undefined;
@@ -57,7 +49,7 @@ const UploaderBlossom: Component<{
   });
 
   const mainServer = () => {
-    return account?.blossomServers[0] || primalBlossom;
+    return accountStore.blossomServers[0] || primalBlossom;
   }
 
 
@@ -106,7 +98,7 @@ const UploaderBlossom: Component<{
   };
 
   const mirrorUpload = async (blob: BlobDescriptor) => {
-    const mirrors = account?.blossomServers.slice(1) || [];
+    const mirrors = accountStore.blossomServers.slice(1) || [];
     if (mirrors.length === 0) return;
 
     let auth = await BlossomClient.createUploadAuth(signEvent, blob.sha256, { message: 'media upload mirroring'});
@@ -166,7 +158,7 @@ const UploaderBlossom: Component<{
     let allow = true;
 
     if (url === primalBlossom) {
-      allow = calcUploadLimit(account?.membershipStatus.tier, file.size);
+      allow = calcUploadLimit(accountStore.membershipStatus.tier, file.size);
     }
 
     if (!allow) {

@@ -1,20 +1,18 @@
 import { Component, createSignal, Show } from 'solid-js';
 import styles from './Settings.module.scss';
 
-import ThemeChooser from '../../components/ThemeChooser/ThemeChooser';
 import { useIntl } from '@cookbook/solid-intl';
 import { settings as t, actions as tActions } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import { A } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
-import { useAccountContext } from '../../contexts/AccountContext';
 import Avatar from '../../components/Avatar/Avatar';
 import { hexToNpub } from '../../lib/keys';
+import { accountStore } from '../../stores/accountStore';
 
 const Account: Component = () => {
 
   const intl = useIntl();
-  const account = useAccountContext();
 
   const [isCoppied, setIsCoppied] = createSignal('');
 
@@ -50,9 +48,9 @@ const Account: Component = () => {
           </div>
           <button
             class={styles.copy}
-            onClick={() => onCopy(hexToNpub(account?.publicKey) || '')}
+            onClick={() => onCopy(hexToNpub(accountStore.publicKey) || '')}
           >
-            <Show when={isCoppied() === hexToNpub(account?.publicKey)}>
+            <Show when={isCoppied() === hexToNpub(accountStore.publicKey)}>
               <div class={styles.checkIcon}></div>
             </Show>
             {intl.formatMessage(tActions.copyPubkey)}
@@ -61,11 +59,11 @@ const Account: Component = () => {
 
         <div class={styles.settingsKeyArea}>
           <Avatar
-            src={account?.activeUser?.picture}
+            src={accountStore.activeUser?.picture}
             size="vs"
           />
           <div class={styles.key}>
-            {hexToNpub(account?.publicKey)}
+            {hexToNpub(accountStore.publicKey)}
           </div>
         </div>
 
@@ -80,9 +78,9 @@ const Account: Component = () => {
           </div>
           <button
             class={styles.copy}
-            onClick={() => onCopy(account?.sec || '')}
+            onClick={() => onCopy(accountStore.sec || '')}
           >
-            <Show when={isCoppied() === account?.sec}>
+            <Show when={isCoppied() === accountStore.sec}>
               <div class={styles.checkIcon}></div>
             </Show>
             {intl.formatMessage(tActions.copyPrivkey)}
@@ -95,7 +93,7 @@ const Account: Component = () => {
           </div>
           <input
             class={styles.key}
-            value={account?.sec || ''}
+            value={accountStore.sec || ''}
             readOnly={true}
             type="password"
           />

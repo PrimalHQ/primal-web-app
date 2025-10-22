@@ -1,8 +1,7 @@
 import { A, useNavigate } from '@solidjs/router';
-import { batch, Component, createEffect, createSignal, For, JSXElement, Show } from 'solid-js';
+import { batch, Component, createEffect, createSignal, JSXElement, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { wordsPerMinute } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
@@ -20,9 +19,9 @@ import defaultAvatarLight from '../../assets/images/reads_image_light.png';
 
 import styles from './ArticlePreview.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
-import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
 import NoteTopZapsTiny from '../Note/NoteTopZapsTiny';
 import { nip19 } from 'nostr-tools';
+import { accountStore } from '../../stores/accountStore';
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
@@ -40,7 +39,6 @@ const ArticleCompactPreview: Component<{
 }> = (props) => {
 
   const app = useAppContext();
-  const account = useAccountContext();
   const thread = useThreadContext();
   const media = useMediaContext();
   const settings = useSettingsContext();
@@ -89,7 +87,7 @@ const ArticleCompactPreview: Component<{
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
 
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -135,7 +133,7 @@ const ArticleCompactPreview: Component<{
   };
 
   const addTopZap = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -166,7 +164,7 @@ const ArticleCompactPreview: Component<{
 
 
   const addTopZapFeed = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 

@@ -1,49 +1,24 @@
-import { batch, Component, createEffect, createSignal, JSXElement, Match, onMount, Resource, Switch } from 'solid-js';
-import Branding from '../components/Branding/Branding';
-import Wormhole from '../components/Wormhole/Wormhole';
-import Search from '../components/Search/Search';
-
-import appstoreImg from '../assets/images/appstore_download.svg';
-import playstoreImg from '../assets/images/playstore_download.svg';
-
-import gitHubLight from '../assets/icons/github_light.svg';
-import gitHubDark from '../assets/icons/github.svg';
-
-import primalDownloads from '../assets/images/primal_downloads.png';
-
-import styles from './Downloads.module.scss';
-import { downloads as t } from '../translations';
-import { useIntl } from '@cookbook/solid-intl';
-import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { appStoreLink, playstoreLink, apkLink, Kind, contentScope } from '../constants';
-import ExternalLink from '../components/ExternalLink/ExternalLink';
-import PageCaption from '../components/PageCaption/PageCaption';
-import PageTitle from '../components/PageTitle/PageTitle';
-import { useSettingsContext } from '../contexts/SettingsContext';
-import { useLocation, useNavigate, useParams } from '@solidjs/router';
+import { batch, Component, createEffect, createSignal, Match, Switch } from 'solid-js';
+import { Kind } from '../constants';
+import { useNavigate, useParams } from '@solidjs/router';
 import NotFound from './NotFound';
 import NoteThread from './NoteThread';
 import { nip19 } from '../lib/nTools';
 import Longform from './Longform';
-import { VanityProfiles } from '../types/primal';
 import { logError, logWarning } from '../lib/logger';
 import { APP_ID } from '../App';
 import { subsTo } from '../sockets';
 import { getEvents } from '../lib/feed';
-import { useAccountContext } from '../contexts/AccountContext';
-import { hexToNpub } from '../lib/keys';
 import { fetchKnownProfiles } from '../lib/profile';
-import { fetchUserProfile } from '../handleNotes';
 import { useAppContext } from '../contexts/AppContext';
 import { getStreamingEvent } from '../lib/streaming';
+import { accountStore } from '../stores/accountStore';
 
 const EventPage: Component = () => {
 
-  const account = useAccountContext();
   const params = useParams();
   const app = useAppContext();
   const navigate = useNavigate();
-  const loc = useLocation();
 
   const [evId, setEvId] = createSignal<string>('');
 
@@ -99,7 +74,7 @@ const EventPage: Component = () => {
       }
     });
 
-    getEvents(account?.publicKey, [id], subId, false);
+    getEvents(accountStore.publicKey, [id], subId, false);
   }
 
 

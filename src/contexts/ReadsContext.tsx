@@ -1,34 +1,26 @@
-import { createContext, createEffect, on, onCleanup, useContext } from "solid-js";
+import { createContext, useContext } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { APP_ID } from "../App";
-import { Kind, minKnownProfiles } from "../constants";
-import { getEvents } from "../lib/feed";
-import { setLinkPreviews } from "../lib/notes";
-import { getRecomendedArticleIds } from "../lib/search";
-import { emptyPaging, fetchMegaFeed, fetchRecomendedReads, filterAndSortReads, PaginationInfo } from "../megaFeeds";
-import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
-import { parseEmptyReposts, isRepostInCollection, convertToArticles } from "../stores/note";
+import { minKnownProfiles } from "../constants";
+import {
+  emptyPaging,
+  fetchMegaFeed,
+  fetchRecomendedReads,
+  filterAndSortReads,
+  PaginationInfo,
+} from "../megaFeeds";
 import {
   ContextChildren,
   FeedPage,
-  NostrEOSE,
-  NostrEvent,
-  NostrEventContent,
-  NostrMentionContent,
-  NostrNoteActionsContent,
   NostrNoteContent,
-  NostrStatsContent,
-  NostrUserContent,
-  NoteActions,
   PrimalArticle,
   PrimalArticleFeed,
   PrimalUser,
   SelectionOption,
-  TopZap,
 } from "../types/primal";
-import { calculateReadsOffset, parseBolt11 } from "../utils";
-import { useAccountContext } from "./AccountContext";
-import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
+import { calculateReadsOffset } from "../utils";
+import { saveStoredFeed } from "../lib/localStore";
+import { accountStore } from "../stores/accountStore";
 
 
 type ReadsContextStore = {
@@ -148,8 +140,6 @@ export const ReadsContext = createContext<ReadsContextStore>();
 
 export const ReadsProvider = (props: { children: ContextChildren }) => {
 
-  const account = useAccountContext();
-
 // ACTIONS --------------------------------------
 
 const removeEvent = (id: string) => {
@@ -208,7 +198,7 @@ const removeEvent = (id: string) => {
     );
 
     const { reads, paging } = await fetchMegaFeed(
-      account?.publicKey,
+      accountStore.publicKey,
       spec,
       `home_future_${APP_ID}`,
       {
@@ -242,7 +232,7 @@ const removeEvent = (id: string) => {
 
     updateStore('isFetching' , () => includeIsFetching);
 
-    const pubkey = account?.publicKey || minKnownProfiles.names['primal'];
+    const pubkey = accountStore.publicKey || minKnownProfiles.names['primal'];
 
     const offset = calculateReadsOffset(store.notes, store.paging.notes);
 
@@ -301,7 +291,7 @@ const removeEvent = (id: string) => {
   const selectFeed = (feed: PrimalArticleFeed | undefined) => {
     if (feed?.spec !== undefined && (feed.spec !== currentFeed?.spec)) {
       currentFeed = { ...feed };
-      saveStoredFeed(account?.publicKey, 'reads', currentFeed);
+      saveStoredFeed(accountStore.publicKey, 'reads', currentFeed);
       updateStore('selectedFeed', reconcile({...feed}));
       clearNotes();
       fetchNotes(feed.spec, 0);

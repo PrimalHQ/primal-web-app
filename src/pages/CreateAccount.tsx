@@ -7,10 +7,8 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { usernameRegex, Kind } from '../constants';
-import { useAccountContext } from '../contexts/AccountContext';
 import { useMediaContext } from '../contexts/MediaContext';
-import { useProfileContext } from '../contexts/ProfileContext';
-import { getProfileContactList, getRelays, getSuggestions, getUserProfiles, sendProfile, sendRelays } from '../lib/profile';
+import { getSuggestions, sendProfile, sendRelays } from '../lib/profile';
 import {
   actions as tActions,
   account as tAccount,
@@ -26,26 +24,21 @@ import { generateKeys, setTempNsec } from '../lib/PrimalNostr';
 import { hexToNsec } from '../lib/keys';
 import { storeSec } from '../lib/localStore';
 import CreatePinModal from '../components/CreatePinModal/CreatePinModal';
-import { useSearchContext } from '../contexts/SearchContext';
 import { sendContacts, triggerImportEvents } from '../lib/notes';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import { convertToUser, nip05Verification, userName } from '../stores/profile';
 import { subsTo } from '../sockets';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import ButtonFlip from '../components/Buttons/ButtonFlip';
-import Uploader from '../components/Uploader/Uploader';
-import { useSettingsContext } from '../contexts/SettingsContext';
 import UploaderBlossom from '../components/Uploader/UploaderBlossom';
+import { accountStore, setSec, updateAccountProfile, updateContactsList, updateRelays } from '../stores/accountStore';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
-const CreateAccount: Component = () => {  const intl = useIntl();
-  const profile = useProfileContext();
+const CreateAccount: Component = () => {
+  const intl = useIntl();
   const media = useMediaContext();
-  const account = useAccountContext();
-  const search = useSearchContext();
   const toast = useToastContext();
-  const settings = useSettingsContext();
   const navigate = useNavigate();
 
   let textArea: HTMLTextAreaElement | undefined;
@@ -166,11 +159,11 @@ const CreateAccount: Component = () => {  const intl = useIntl();
   const onSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
 
-    if (!e.target || !account) {
+    if (!e.target) {
       return false;
     }
 
-    const pubkey = account.publicKey;
+    const pubkey = accountStore.publicKey;
 
     const form = e.target as HTMLFormElement;
 
@@ -183,7 +176,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       return false;
     }
 
-    let relaySettings = account.defaultRelays.reduce<NostrRelays>((acc, r) => ({ ...acc, [r]: { write: true, read: true }}), {});
+    let relaySettings = accountStore.defaultRelays.reduce<NostrRelays>((acc, r) => ({ ...acc, [r]: { write: true, read: true }}), {});
 
     let metadata: Record<string, string> = {};
 
@@ -205,13 +198,18 @@ const CreateAccount: Component = () => {  const intl = useIntl();
       }
     });
 
-    const { success } = await sendProfile({ ...metadata }, account?.proxyThroughPrimal || false, account.relays, relaySettings);
+    const { success } = await sendProfile(
+      { ...metadata },
+      accountStore.proxyThroughPrimal || false,
+      accountStore.relays,
+      relaySettings,
+    );
 
     if (success) {
       await (new Promise((res) => setTimeout(() => res(true), 100)));
 
       toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
-      pubkey && account.actions.updateAccountProfile(pubkey);
+      pubkey && updateAccountProfile(pubkey);
       // pubkey && getUserProfiles([pubkey], `user_profile_${APP_ID}`);
 
       let tags = followed.map(pk => ['p', pk]);
@@ -222,21 +220,28 @@ const CreateAccount: Component = () => {  const intl = useIntl();
         tags.push(['p', pubkey]);
       }
 
-      const sendResult = await sendContacts(tags, date, '', account.proxyThroughPrimal, account.relays, relaySettings);
+      const sendResult = await sendContacts(
+        tags,
+        date,
+        '',
+        accountStore.proxyThroughPrimal,
+        accountStore.relays,
+        relaySettings,
+      );
 
       if (sendResult.success && sendResult.note) {
         triggerImportEvents([sendResult.note], `import_contacts_${APP_ID}`, () => {
-          account.actions.updateContactsList()
+          updateContactsList()
           // getProfileContactList(pubkey, `user_contacts_${APP_ID}`);
         });
       }
 
-      const relayResult = await sendRelays(account.relays, relaySettings, account.proxyThroughPrimal);
+      const relayResult = await sendRelays(accountStore.relays, relaySettings, accountStore.proxyThroughPrimal);
 
       if (relayResult.success && relayResult.note) {
         triggerImportEvents([relayResult.note], `import_relays_${APP_ID}`, () => {
           // getRelays(pubkey, `user_relays_${APP_ID}`);
-          account.actions.updateRelays()
+          updateRelays()
         });
       }
 
@@ -341,7 +346,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
     // @ts-ignore
     const nsec = hexToNsec(sec);
 
-    account?.actions.setSec(nsec);
+    setSec(nsec);
     setTempNsec(nsec);
 
     setCreatedAccount(() => ({ sec: nsec, pubkey }));
@@ -362,7 +367,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
   }
 
   const clearNewAccount = () => {
-    account?.actions.setSec(undefined);
+    setSec(undefined);
     setTempNsec(undefined);
     setCreatedAccount(reconcile({}));
     navigate('/home');
@@ -502,7 +507,7 @@ const CreateAccount: Component = () => {  const intl = useIntl();
                 <div class={styles.uploader}>
                   <UploaderBlossom
                     hideLabel={true}
-                    publicKey={account?.publicKey}
+                    publicKey={accountStore.publicKey}
                     file={fileToUpload()}
                     onFail={() => {
                       toast?.sendWarning(intl.formatMessage(tUpload.fail, {

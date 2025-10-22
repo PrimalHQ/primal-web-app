@@ -1,29 +1,17 @@
-import { Component, createEffect, For, onCleanup, onMount, Show } from 'solid-js';
+import { Component, For, onMount } from 'solid-js';
 import styles from './Explore.module.scss';
-import { useToastContext } from '../../components/Toaster/Toaster';
-import { useSettingsContext } from '../../contexts/SettingsContext';
-import { useIntl } from '@cookbook/solid-intl';
 import { useExploreContext } from '../../contexts/ExploreContext';
-import { useLocation } from '@solidjs/router';
-import { fetchExplorePeople, fetchExploreZaps } from '../../megaFeeds';
+import { fetchExploreZaps } from '../../megaFeeds';
 import { APP_ID } from '../../App';
-import { userName } from '../../stores/profile';
-import Avatar from '../../components/Avatar/Avatar';
 import Paginator from '../../components/Paginator/Paginator';
 import ProfileNoteZap from '../../components/ProfileNoteZap/ProfileNoteZap';
 import { PrimalZap } from '../../types/primal';
 import { Kind } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { calculatePagingOffset, calculateZapsOffset } from '../../utils';
+import { calculateZapsOffset } from '../../utils';
+import { accountStore } from '../../stores/accountStore';
 
 const ExploreZaps: Component<{ open?: boolean }> = (props) => {
-
-  const settings = useSettingsContext();
-  const toaster = useToastContext();
-  const intl = useIntl();
   const explore = useExploreContext();
-  const location = useLocation();
-  const account = useAccountContext();
 
   onMount(() => {
     if (explore?.exploreZaps.length === 0) {
@@ -32,7 +20,7 @@ const ExploreZaps: Component<{ open?: boolean }> = (props) => {
   });
 
   const getZaps = async () => {
-    const { notes, reads, users, zaps, paging } = await fetchExploreZaps(account?.publicKey, `explore_zaps_${APP_ID}`, { limit: 20 });
+    const { notes, reads, users, zaps, paging } = await fetchExploreZaps(accountStore.publicKey, `explore_zaps_${APP_ID}`, { limit: 20 });
 
     explore?.actions.setExploreZaps(zaps, paging, { notes, users, reads });
   }
@@ -48,7 +36,7 @@ const ExploreZaps: Component<{ open?: boolean }> = (props) => {
       offset,
     }
 
-    const { notes, reads, users, zaps, paging } = await fetchExploreZaps(account?.publicKey, `explore_zaps_${APP_ID}` , page);
+    const { notes, reads, users, zaps, paging } = await fetchExploreZaps(accountStore.publicKey, `explore_zaps_${APP_ID}` , page);
 
     explore?.actions.setExploreZaps(zaps, paging, { notes, users, reads });
   }

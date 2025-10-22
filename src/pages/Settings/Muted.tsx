@@ -4,14 +4,13 @@ import styles from './Settings.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { settings as t, actions as tActions } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
-import { A, useLocation, useNavigate } from '@solidjs/router';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { getProfileMuteList, getUserProfiles } from '../../lib/profile';
+import { A, useLocation } from '@solidjs/router';
+import { getProfileMuteList } from '../../lib/profile';
 import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
-import { convertToUser, nip05Verification, userName } from '../../stores/profile';
+import { nip05Verification, userName } from '../../stores/profile';
 import { Kind } from '../../constants';
-import { createStore, unwrap } from 'solid-js/store';
+import { createStore } from 'solid-js/store';
 import { MegaFeedPage, PrimalNote, PrimalUser } from '../../types/primal';
 import Avatar from '../../components/Avatar/Avatar';
 import { hexToNpub } from '../../lib/keys';
@@ -20,12 +19,13 @@ import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
 import { useAppContext } from '../../contexts/AppContext';
 import { Tabs } from '@kobalte/core/tabs';
 import { emptyMegaFeedPage, emptyPaging, fetchMegaFeed, filterAndSortNotes, PaginationInfo, updateFeedPage } from '../../megaFeeds';
-import { convertToNotesMega, convertToUsersMega } from '../../stores/megaFeed';
+import { convertToUsersMega } from '../../stores/megaFeed';
 import Note from '../../components/Note/Note';
 import { calculateNotesOffset } from '../../utils';
 import Paginator from '../../components/Paginator/Paginator';
 import TextInput from '../../components/TextInput/TextInput';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
+import { accountStore, addToMuteList, removeFromMuteList } from '../../stores/accountStore';
 
 const MUTED_THREADS_SPEC = JSON.stringify({
   id: 'muted-threads',
@@ -36,10 +36,8 @@ const MUTED_THREADS_SPEC = JSON.stringify({
 const Muted: Component = () => {
 
   const intl = useIntl();
-  const account = useAccountContext();
   const app = useAppContext();
   const location = useLocation();
-  const navigate = useNavigate();
 
   let hashtagInput: HTMLInputElement | undefined;
   let wordInput: HTMLInputElement | undefined;
@@ -100,14 +98,14 @@ const Muted: Component = () => {
       },
     });
 
-    getProfileMuteList(account?.publicKey, mutedMetadataSubId);
+    getProfileMuteList(accountStore.publicKey, mutedMetadataSubId);
   });
 
   const fetchMutedThreads = async (until = 0) => {
     const offset = calculateNotesOffset(mutedThreads, threadPaging());
 
     const { notes, paging } = await fetchMegaFeed(
-      account?.publicKey,
+      accountStore.publicKey,
       MUTED_THREADS_SPEC,
       `muted_threads_${APP_ID}`,
       {
@@ -138,7 +136,7 @@ const Muted: Component = () => {
   };
 
   const unMuteUser = (user: PrimalUser) => {
-    account?.actions.removeFromMuteList(user.pubkey, 'user', (success) => {
+    removeFromMuteList(user.pubkey, 'user', (success) => {
       if (!success) return;
 
       setMutedUsers((users) => users.filter(u => u.pubkey !== user.pubkey));
@@ -146,7 +144,7 @@ const Muted: Component = () => {
   };
 
   const unMuteWord = (word: string) => {
-    account?.actions.removeFromMuteList(word, 'word', (success) => {
+    removeFromMuteList(word, 'word', (success) => {
       if (!success) return;
 
       setMutedWords((words) => words.filter(w => w !== word));
@@ -154,7 +152,7 @@ const Muted: Component = () => {
   };
 
   const unMuteHashtags = (hashtag: string) => {
-    account?.actions.removeFromMuteList(hashtag, 'hashtag', (success) => {
+    removeFromMuteList(hashtag, 'hashtag', (success) => {
       if (!success) return;
 
       setMutedHashtags((hashtags) => hashtags.filter(h => h !== hashtag));
@@ -162,7 +160,7 @@ const Muted: Component = () => {
   };
 
   const unMuteThread = (id: string) => {
-    account?.actions.removeFromMuteList(id, 'thread', (success) => {
+    removeFromMuteList(id, 'thread', (success) => {
       if (!success) return;
       setMutedThreads((threads) => threads.filter(n => n.id !== id));
     });
@@ -301,7 +299,7 @@ const Muted: Component = () => {
                 const word = wordInput?.value.trim();
                 if (!word || word.length === 0) return;
 
-                account?.actions.addToMuteList(word, 'word', (success) => {
+                addToMuteList(word, 'word', (success) => {
                   if (!success) return;
                   setMutedWords((hashtags) => [word, ...hashtags]);
                   if (wordInput) wordInput.value = '';
@@ -354,7 +352,7 @@ const Muted: Component = () => {
                 const hashtag = hashtagInput?.value.trim();
                 if (!hashtag || hashtag.length === 0) return;
 
-                account?.actions.addToMuteList(hashtag, 'hashtag', (success) => {
+                addToMuteList(hashtag, 'hashtag', (success) => {
                   if (!success) return;
                   setMutedHashtags((hashtags) => [hashtag, ...hashtags]);
                   if (hashtagInput) hashtagInput.value = '';

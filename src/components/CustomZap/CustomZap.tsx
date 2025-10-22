@@ -1,17 +1,14 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, createEffect, createSignal, For } from 'solid-js';
-import { defaultZap, defaultZapOptions, Kind } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
+import { defaultZapOptions, Kind } from '../../constants';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
 import { zapArticle, zapDVM, zapNote, zapProfile, zapStream } from '../../lib/zap';
 import { userName } from '../../stores/profile';
-import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount, toast as toastText } from '../../translations';
+import { toastZapFail, zapCustomOption, actions as tActions, placeholders as tPlaceholders, zapCustomAmount } from '../../translations';
 import { PrimalDVM, PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
-import { debounce } from '../../utils';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
-import Modal from '../Modal/Modal';
 import { lottieDuration } from '../Note/NoteFooter/NoteFooter';
 import TextInput from '../TextInput/TextInput';
 import { useToastContext } from '../Toaster/Toaster';
@@ -19,6 +16,7 @@ import { useToastContext } from '../Toaster/Toaster';
 import styles from './CustomZap.module.scss';
 import { readSecFromStorage } from '../../lib/localStore';
 import { StreamingData } from '../../lib/streaming';
+import { accountStore, hasPublicKey, setShowPin, showGetStarted } from '../../stores/accountStore';
 
 const CustomZap: Component<{
   id?: string,
@@ -35,7 +33,6 @@ const CustomZap: Component<{
 }> = (props) => {
 
   const toast = useToastContext();
-  const account = useAccountContext();
   const intl = useIntl();
   const settings = useSettingsContext();
 
@@ -99,25 +96,18 @@ const CustomZap: Component<{
   };
 
   const submit = async () => {
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
-
-    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
-    //   toast?.sendWarning(
-    //     intl.formatMessage(toastText.noRelaysConnected),
-    //   );
-    //   return;
-    // }
 
     props.onConfirm(selectedValue());
 
@@ -134,11 +124,11 @@ const CustomZap: Component<{
 
         const success = await zappers[note.msg.kind](
           note,
-          account.publicKey,
+          accountStore.publicKey,
           selectedValue().amount || 0,
           selectedValue().message,
-          account.activeRelays,
-          account.activeNWC,
+          accountStore.activeRelays,
+          accountStore.activeNWC,
         );
 
         handleZap(success);
@@ -149,11 +139,11 @@ const CustomZap: Component<{
     if (props.profile) {
       const success = await zapProfile(
         props.profile,
-        account.publicKey,
+        accountStore.publicKey,
         selectedValue().amount || 0,
         selectedValue().message,
-        account.activeRelays,
-        account.activeNWC,
+        accountStore.activeRelays,
+        accountStore.activeNWC,
       );
 
       handleZap(success);
@@ -169,10 +159,10 @@ const CustomZap: Component<{
         const success = await zapDVM(
           dvm,
           dvmUser,
-          account.publicKey,
+          accountStore.publicKey,
           selectedValue().amount || 0,
           selectedValue().message,
-          account.activeRelays,
+          accountStore.activeRelays,
           );
 
           handleZap(success);
@@ -188,11 +178,11 @@ const CustomZap: Component<{
         const { success, event } = await zapStream(
           s,
           a,
-          account.publicKey,
+          accountStore.publicKey,
           selectedValue().amount || 0,
           selectedValue().message,
-          account.activeRelays,
-          account.activeNWC,
+          accountStore.activeRelays,
+          accountStore.activeNWC,
         );
 
         if (success && event) {

@@ -7,7 +7,6 @@ import { fetchKnownProfiles } from './lib/profile';
 import { useHomeContext } from './contexts/HomeContext';
 import { useExploreContext } from './contexts/ExploreContext';
 import { useThreadContext } from './contexts/ThreadContext';
-import { useAccountContext } from './contexts/AccountContext';
 import { useProfileContext } from './contexts/ProfileContext';
 import { useSettingsContext } from './contexts/SettingsContext';
 import { useMediaContext } from './contexts/MediaContext';
@@ -16,6 +15,7 @@ import { useSearchContext } from './contexts/SearchContext';
 import { useDMContext } from './contexts/DMContext';
 import { generateNsec, nip19 } from './lib/nTools';
 import Blossom from './pages/Settings/Blossom';
+import { accountStore } from './stores/accountStore';
 
 const Home = lazy(() => import('./pages/Home'));
 const Reads = lazy(() => import('./pages/Reads'));
@@ -71,7 +71,7 @@ const ReadsMy = lazy(() => import('./pages/ReadsMy'));
 
 const Streaming = lazy(() => import('./pages/StreamPage'));
 
-const CitadelPage = lazy(() => import(`./pages/CitadelPage`));
+// const CitadelPage = lazy(() => import(`./pages/CitadelPage`));
 
 const primalWindow = window as PrimalWindow;
 
@@ -89,7 +89,6 @@ export const getKnownProfiles = cache(({ params }: any) => {
 
 const AppRouter: Component = () => {
 
-  const account = useAccountContext();
   const profile = useProfileContext();
   const settings = useSettingsContext();
   const home = useHomeContext();
@@ -104,7 +103,7 @@ const AppRouter: Component = () => {
 
   if (isDev) {
     primalWindow.primal = {
-      account,
+      account: { ...accountStore },
       explore,
       home,
       media,
@@ -195,7 +194,7 @@ const AppRouter: Component = () => {
             <Route path="/:identifier" component={Thread} preload={getKnownProfiles} />
           </Route>
           <Route path="/rc/:code?" component={() => <Navigate href='/app-download-qr' />}/>
-          <Route path="/citadel_stream" component={CitadelPage} />
+          {/* <Route path="/citadel_stream" component={CitadelPage} /> */}
           <Route path="/404" component={NotFound} />
         </Route>
       </Router>

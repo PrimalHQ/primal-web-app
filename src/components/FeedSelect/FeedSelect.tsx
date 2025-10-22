@@ -1,19 +1,16 @@
 import { A } from '@solidjs/router';
 import { Component, Show } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
 import { fetchStoredFeed } from '../../lib/localStore';
-import { FeedOption, PrimalFeed, SelectionOption } from '../../types/primal';
-import SelectBox from '../SelectBox/SelectBox';
-import SelectionBox from '../SelectionBox/SelectionBox';
+import { FeedOption, SelectionOption } from '../../types/primal';
 import SelectionBox2 from '../SelectionBox/SelectionBox2';
 import { isDev } from '../../utils';
+import { accountStore } from '../../stores/accountStore';
 
 const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = (props) => {
 
-  const account = useAccountContext();
   const home = useHomeContext();
   const settings = useSettingsContext();
 
@@ -75,7 +72,7 @@ const FeedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
     const selected = home?.selectedFeed;
 
     if (!selected) {
-      let feed = fetchStoredFeed(account?.publicKey, 'home');
+      let feed = fetchStoredFeed(accountStore.publicKey, 'home');
 
       if (feed) {
         return {

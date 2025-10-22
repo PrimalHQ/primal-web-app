@@ -15,22 +15,20 @@ import { TextField } from '@kobalte/core/text-field';
 import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
 import { logInfo } from '../../lib/logger';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { checkPrimalWalletActive, connectPrimalWalletActive, decodeNWCUri, sendNWCInfoEvent } from '../../lib/wallet';
 import { createStore } from 'solid-js/store';
 import { encrypt, decrypt } from '../../lib/nostrAPI';
 import { loadNWC, loadNWCActive, saveNWC, saveNWCActive } from '../../lib/localStore';
-import { updatePage } from '../../services/StoreService';
 import { setNWCSettings } from '../../lib/settings';
 import { APP_ID } from '../../App';
 import { subsTo } from '../../sockets';
+import { accountStore, insertIntoNWCList, setActiveNWC, updateNWCList } from '../../stores/accountStore';
 
 export type WalletStatus = 'inactive' | 'active' | 'connected';
 
 const NostrWalletConnect: Component = () => {
 
   const intl = useIntl();
-  const account = useAccountContext();
 
   const [openNewWallet, setOpenNewWallet] = createSignal(false);
   const [newNWC, setNewNWC] = createSignal('');
@@ -41,27 +39,27 @@ const NostrWalletConnect: Component = () => {
   });
 
   createEffect(() => {
-    if (!account?.publicKey) return;
+    if (!accountStore.publicKey) return;
 
-    const nwcs = loadNWC(account.publicKey);
-    account.actions.updateNWCList(nwcs);
+    const nwcs = loadNWC(accountStore.publicKey);
+    updateNWCList(nwcs);
 
-    const active = loadNWCActive(account.publicKey);
+    const active = loadNWCActive(accountStore.publicKey);
     if (active && active.length > 0) {
       applyActiveWallet(active);
     }
   });
 
   createEffect(() => {
-    if (account?.publicKey) {
-      checkActiveWallet(account.publicKey);
+    if (accountStore.publicKey) {
+      checkActiveWallet(accountStore.publicKey);
     }
   })
 
   const applyActiveWallet = (wallet: string[]) => {
-    if (!account?.publicKey) return;
+    const pubkey = accountStore.publicKey;
 
-    const pubkey = account.publicKey;
+    if (!pubkey) return;
 
     const [walletName, enc] = wallet;
 
@@ -98,7 +96,7 @@ const NostrWalletConnect: Component = () => {
   }
 
   const connectToPrimalWallet = () => {
-    if (!account?.publicKey) return;
+    if (!accountStore.publicKey) return;
 
     const walletSocket = new WebSocket('wss://wallet.primal.net/v1');
 
@@ -118,9 +116,9 @@ const NostrWalletConnect: Component = () => {
   };
 
   const connectToNWCWallet = async (walletName: string, url: string) => {
-    if (!account?.publicKey) return;
+    const pubkey = accountStore.publicKey;
 
-    const pubkey = account.publicKey;
+    if (!pubkey) return;
 
     let uri = `${url}`;
 
@@ -143,7 +141,7 @@ const NostrWalletConnect: Component = () => {
     }
 
     saveNWCActive(pubkey, walletName, enc);
-    account.actions.setActiveNWC([walletName, enc]);
+    setActiveNWC([walletName, enc]);
 
     setWalletStatus(walletName, () => 'connected');
 
@@ -155,46 +153,46 @@ const NostrWalletConnect: Component = () => {
   };
 
   const addNWC = async (walletName: string, url: string) => {
-    if (!account?.publicKey) return;
-    const index = account.nwcList.findIndex(n => n[0] === walletName);
+    if (!accountStore.publicKey) return;
+    const index = accountStore.nwcList.findIndex(n => n[0] === walletName);
 
     let uri = encodeURIComponent(url);
 
-    const enc = await encrypt(account.publicKey, uri);
+    const enc = await encrypt(accountStore.publicKey, uri);
 
     if (index > -1) {
-      account.actions.insertIntoNWCList([walletName, enc], index);
+      insertIntoNWCList([walletName, enc], index);
 
-      saveNWC(account.publicKey, account.nwcList);
+      saveNWC(accountStore.publicKey, accountStore.nwcList);
       updateNWCSettings();
       return;
     }
 
-    account.actions.insertIntoNWCList([walletName, enc]);
-    saveNWC(account.publicKey, account.nwcList);
+    insertIntoNWCList([walletName, enc]);
+    saveNWC(accountStore.publicKey, accountStore.nwcList);
     updateNWCSettings();
   };
 
   const removeNWC = (walletName: string) => {
-    if (!account?.publicKey) return;
+    if (!accountStore?.publicKey) return;
 
-    account.actions.updateNWCList(account.nwcList.filter(l => l[0] !== walletName));
+    updateNWCList(accountStore.nwcList.filter(l => l[0] !== walletName));
 
-    account.actions.setActiveNWC([]);
+    setActiveNWC([]);
 
-    saveNWC(account.publicKey, account.nwcList);
-    saveNWCActive(account.publicKey);
+    saveNWC(accountStore.publicKey, accountStore.nwcList);
+    saveNWCActive(accountStore.publicKey);
 
     updateNWCSettings();
   };
 
   const disconnectNWC = (walletName: string) => {
-    if (!account?.publicKey) return;
+    if (!accountStore?.publicKey) return;
 
     setWalletStatus(walletName, () => 'active')
 
-    account.actions.setActiveNWC([]);
-    saveNWCActive(account.publicKey);
+    setActiveNWC([]);
+    saveNWCActive(accountStore.publicKey);
 
     updateNWCSettings();
   };
@@ -212,8 +210,8 @@ const NostrWalletConnect: Component = () => {
     })
 
     setNWCSettings(subId, {
-      nwcList: account?.nwcList || [],
-      nwcActive: account?.activeNWC || [],
+      nwcList: accountStore.nwcList || [],
+      nwcActive: accountStore.activeNWC || [],
     });
   }
 
@@ -253,7 +251,7 @@ const NostrWalletConnect: Component = () => {
             onConnect={() => connectToPrimalWallet()}
             onDisconnect={() => disconnectNWC('primal')}
           />
-          <For each={account?.nwcList}>
+          <For each={accountStore.nwcList}>
             {([name, uri]) => (
               <NWCItem
                 logo={nwc}

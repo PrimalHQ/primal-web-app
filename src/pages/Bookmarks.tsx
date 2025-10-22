@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, For, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, For, Match, on, onCleanup, Show, Switch } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Transition } from 'solid-transition-group';
 import { APP_ID } from '../App';
@@ -10,18 +10,14 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import Paginator from '../components/Paginator/Paginator';
 import { Kind } from '../constants';
-import { useAccountContext } from '../contexts/AccountContext';
-import { getEvents, getUserFeed } from '../lib/feed';
-import { setLinkPreviews } from '../lib/notes';
-import { subsTo } from '../sockets';
-import { convertToArticles, convertToNotes, parseEmptyReposts } from '../stores/note';
 import { bookmarks as tBookmarks } from '../translations';
-import { NostrEventContent, NostrUserContent, NostrNoteContent, NostrStatsContent, NostrMentionContent, NostrNoteActionsContent, NoteActions, FeedPage, PrimalNote, NostrFeedRange, PageRange, TopZap, PrimalArticle } from '../types/primal';
-import { calculateNotesOffset, calculateReadsOffset, parseBolt11 } from '../utils';
+import { PrimalNote, PrimalArticle } from '../types/primal';
+import { calculateNotesOffset, calculateReadsOffset } from '../utils';
 import styles from './Bookmarks.module.scss';
 import { fetchBookmarksFeed, saveBookmarksFeed } from '../lib/localStore';
 import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, PaginationInfo } from '../megaFeeds';
 import { useNavigate } from '@solidjs/router';
+import { accountStore } from '../stores/accountStore';
 
 export type BookmarkStore = {
   fetchingInProgress: boolean,
@@ -39,10 +35,7 @@ const emptyStore: BookmarkStore = {
   kind: 'notes',
 };
 
-let since: number = 0;
-
 const Bookmarks: Component = () => {
-  const account = useAccountContext();
   const intl = useIntl();
   const navigate = useNavigate();
 
@@ -50,9 +43,9 @@ const Bookmarks: Component = () => {
 
   const [store, updateStore] = createStore<BookmarkStore>({ ...emptyStore });
 
-  createEffect(on(() => account?.isKeyLookupDone, (v) => {
-    if (v && account?.publicKey) {
-      const k = fetchBookmarksFeed(account?.publicKey);
+  createEffect(on(() => accountStore.isKeyLookupDone, (v) => {
+    if (v && accountStore.publicKey) {
+      const k = fetchBookmarksFeed(accountStore.publicKey);
 
       if (k && k !== store.kind) {
         updateStore('kind', () => k);
@@ -63,7 +56,7 @@ const Bookmarks: Component = () => {
         (k==='reads' && store.reads.length === 0)
       )
         updateStore('fetchingInProgress', () => true);
-        fetchBookmarks(account?.publicKey);
+        fetchBookmarks(accountStore.publicKey);
       }
   }));
 
@@ -99,7 +92,7 @@ const Bookmarks: Component = () => {
     updateStore('fetchingInProgress', () => true);
 
     const { notes, reads, paging } = await fetchMegaFeed(
-      account?.publicKey,
+      accountStore.publicKey,
       spec,
       subId,
       {
@@ -128,7 +121,7 @@ const Bookmarks: Component = () => {
     const until = store.paging.since || 0;
 
     if (until > 0) {
-      fetchBookmarks(account?.publicKey, until)
+      fetchBookmarks(accountStore.publicKey, until)
     }
   };
 
@@ -136,8 +129,8 @@ const Bookmarks: Component = () => {
     updateStore(() => ({ ...emptyStore }));
     updateStore('fetchingInProgress', () => true);
     updateStore('kind', () => newKind);
-    saveBookmarksFeed(account?.publicKey, newKind);
-    fetchBookmarks(account?.publicKey);
+    saveBookmarksFeed(accountStore.publicKey, newKind);
+    fetchBookmarks(accountStore.publicKey);
   }
 
   return (

@@ -1,40 +1,27 @@
-import { A, useNavigate } from '@solidjs/router';
-import { batch, Component, createEffect, createSignal, For, JSXElement, onMount, Show } from 'solid-js';
-import { createStore } from 'solid-js/store';
+import { A } from '@solidjs/router';
+import { Component, Show } from 'solid-js';
 import { Transition } from 'solid-transition-group';
-import { APP_ID } from '../../App';
 import { Kind } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
-import { useSettingsContext } from '../../contexts/SettingsContext';
-import { useThreadContext } from '../../contexts/ThreadContext';
-import { fetchUserProfile } from '../../handleNotes';
-import { date, shortDate } from '../../lib/dates';
+import { useAppContext } from '../../contexts/AppContext';
 import { hookForDev } from '../../lib/devTools';
 import { sendEvent } from '../../lib/notes';
 import { humanizeNumber } from '../../lib/stats';
 import { zapSubscription } from '../../lib/zap';
 import { nip05Verification, userName } from '../../stores/profile';
-import { PrimalArticle, PrimalUser, ZapOption } from '../../types/primal';
-import { isDev, uuidv4 } from '../../utils';
-import Avatar from '../Avatar/Avatar';
-import ButtonPrimary from '../Buttons/ButtonPrimary';
-import ButtonSecondary from '../Buttons/ButtonSecondary';
-import Loader from '../Loader/Loader';
+import { PrimalUser } from '../../types/primal';
+import { isDev } from '../../utils';
 import AuthorSubscribeSkeleton from '../Skeleton/AuthorSubscribeSkeleton';
 import { Tier, TierCost } from '../SubscribeToAuthorModal/SubscribeToAuthorModal';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './AuthorSubscribe.module.scss';
+import { accountStore } from '../../stores/accountStore';
 
 const AuthorSubscribe: Component<{
   id?: string,
   author: PrimalUser | undefined,
 }> = (props) => {
-  const account = useAccountContext();
   const app = useAppContext();
-  const navigate = useNavigate();
-  const settings = useSettingsContext();
 
   // const [isFetching, setIsFetching] = createSignal(false);
   // const [author, setAuthor] = createSignal<PrimalUser>();
@@ -60,7 +47,7 @@ const AuthorSubscribe: Component<{
   const doSubscription = async (tier: Tier, cost: TierCost, exchangeRate?: Record<string, Record<string, number>>) => {
     const a = props.author;
 
-    if (!a || !account || !cost) return;
+    if (!a || !accountStore || !cost) return;
 
     if (cost.unit === 'USD' && (!exchangeRate || !exchangeRate['USD'])) return;
 
@@ -79,16 +66,16 @@ const AuthorSubscribe: Component<{
     }
 
 
-    const { success, note } = await sendEvent(subEvent, account.activeRelays, account.relaySettings, account?.proxyThroughPrimal || false);
+    const { success, note } = await sendEvent(subEvent, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
 
     if (success && note) {
       const isZapped = await zapSubscription(
         note,
         a,
-        account.publicKey,
-        account.activeRelays,
+        accountStore.publicKey,
+        accountStore.activeRelays,
         exchangeRate,
-        account.activeNWC,
+        accountStore.activeNWC,
       );
 
       if (!isZapped) {
@@ -100,7 +87,7 @@ const AuthorSubscribe: Component<{
   const unsubscribe = async (eventId: string) => {
     const a = props.author;
 
-    if (!a || !account) return;
+    if (!a) return;
 
     const unsubEvent = {
       kind: Kind.Unsubscribe,
@@ -113,7 +100,7 @@ const AuthorSubscribe: Component<{
       ],
     };
 
-    await sendEvent(unsubEvent, account.activeRelays, account.relaySettings, account?.proxyThroughPrimal || false);
+    await sendEvent(unsubEvent, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
 
   }
 

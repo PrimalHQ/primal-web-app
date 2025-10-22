@@ -1,5 +1,5 @@
-import { createContext, createEffect, useContext } from "solid-js";
-import { createStore, reconcile, unwrap } from "solid-js/store";
+import { createContext, useContext } from "solid-js";
+import { createStore, reconcile } from "solid-js/store";
 import { APP_ID } from "../App";
 import { minKnownProfiles } from "../constants";
 import {
@@ -10,10 +10,10 @@ import {
   PrimalNote,
   SelectionOption,
 } from "../types/primal";
-import { useAccountContext } from "./AccountContext";
 import { emptyPaging, fetchMegaFeed, fetchScoredContent, filterAndSortNotes, PaginationInfo } from "../megaFeeds";
 import { saveStoredFeed } from "../lib/localStore";
 import { calculateNotesOffset } from "../utils";
+import { accountStore } from "../stores/accountStore";
 
 type HomeContextStore = {
   notes: PrimalNote[],
@@ -119,8 +119,6 @@ export const HomeContext = createContext<HomeContextStore>();
 
 export const HomeProvider = (props: { children: ContextChildren }) => {
 
-  const account = useAccountContext();
-
 // ACTIONS --------------------------------------
 
   const removeEvent = (id: string, kind: 'notes') => {
@@ -134,7 +132,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   const doSidebarSearch = async (query: string) => {
     updateStore('isFetchingSidebar', () => true);
     const { notes, paging } = await fetchScoredContent(
-      account?.publicKey,
+      accountStore.publicKey,
       query,
       `home_sidebar_${APP_ID}`,
     );
@@ -173,7 +171,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     );
 
     const { notes, paging } = await fetchMegaFeed(
-      account?.publicKey,
+      accountStore.publicKey,
       spec,
       `home_future_${APP_ID}`,
       {
@@ -205,7 +203,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     updateStore('isFetching' , () => includeIsFetching);
 
-    const pubkey = account?.publicKey || minKnownProfiles.names['primal'];
+    const pubkey = accountStore.publicKey || minKnownProfiles.names['primal'];
 
     const offset = calculateNotesOffset(store.notes, store.paging.notes);
 
@@ -266,7 +264,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     if (feed?.spec !== undefined && (feed.spec !== currentFeed?.spec)) {
       currentFeed = { ...feed };
       updateStore('selectedFeed', reconcile({...feed}));
-      saveStoredFeed(account?.publicKey, 'home', feed);
+      saveStoredFeed(accountStore.publicKey, 'home', feed);
       clearNotes();
       fetchNotes(feed.spec, 0);
     }

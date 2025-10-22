@@ -4,10 +4,9 @@ import { MenuItem, NostrRelaySignedEvent, PrimalArticle, PrimalNote } from '../.
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { authorName, userName } from '../../stores/profile';
-import { note as t, actions as tActions, toast as tToast, toast } from '../../translations';
+import { actions as tActions, toast as tToast } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import PrimalMenu from '../PrimalMenu/PrimalMenu';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { APP_ID } from '../../App';
 import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
@@ -19,9 +18,8 @@ import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
 import ReportContentModal from '../ReportContentModal/ReportContentModal';
-import { encodeCoordinate } from '../../stores/megaFeed';
-import Longform from '../../pages/Longform';
 import { urlEncode } from '../../utils';
+import { accountStore, addToMuteList, hasPublicKey, removeFromMuteList, setShowPin, showGetStarted } from '../../stores/accountStore';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -29,7 +27,6 @@ const NoteContextMenu: Component<{
   onClose: () => void,
   id?: string,
 }> = (props) => {
-  const account = useAccountContext();
   const toaster = useToastContext();
   const intl = useIntl();
   const app = useAppContext();
@@ -75,36 +72,36 @@ const NoteContextMenu: Component<{
 
 
   const doMuteUser = () => {
-    account?.actions.addToMuteList(note()?.pubkey);
+    addToMuteList(note()?.pubkey);
     props.onClose();
   };
 
   const doUnmuteUser = () => {
-    account?.actions.removeFromMuteList(note()?.pubkey);
+    removeFromMuteList(note()?.pubkey);
     props.onClose();
   };
 
   const doMuteThread = () => {
-    account?.actions.addToMuteList(note()?.id, 'thread');
+    addToMuteList(note()?.id, 'thread');
     props.onClose();
   };
 
   const doUnmuteThread = () => {
-    account?.actions.removeFromMuteList(note()?.id, 'thread');
+    removeFromMuteList(note()?.id, 'thread');
     props.onClose();
   };
 
   const doReportUser = () => {
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
@@ -174,7 +171,7 @@ const NoteContextMenu: Component<{
   };
 
   const doRequestDelete = async () => {
-    const user = account?.activeUser;
+    const user = accountStore.activeUser;
     const noteToDelete = note();
 
     if (!props.data || !user || !noteToDelete) return;
@@ -189,9 +186,9 @@ const NoteContextMenu: Component<{
       user.pubkey,
       id,
       noteToDelete.msg.kind,
-      account.activeRelays,
-      account.relaySettings,
-      account.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+      accountStore.proxyThroughPrimal,
     );
 
     if (!success || !deleteEvent) return;
@@ -203,31 +200,29 @@ const NoteContextMenu: Component<{
   };
 
   const broadcastNote = async () => {
-    if (!account || !props.data) {
+    if (!props.data) {
       return;
     }
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
-        const sec = readSecFromStorage();
-        if (sec) {
-          account.actions.setShowPin(sec);
-          return;
-        }
+    if (!accountStore.sec || accountStore.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        setShowPin(sec);
+        return;
       }
+    }
 
-    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
-    //   toaster?.sendWarning(
-    //     intl.formatMessage(toast.noRelaysConnected),
-    //   );
-    //   return;
-    // }
-
-    const { success } = await broadcastEvent(note().msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
+    const { success } = await broadcastEvent(
+      note().msg as NostrRelaySignedEvent,
+      accountStore.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+    );
     props.onClose()
 
     if (success) {
@@ -313,8 +308,8 @@ const NoteContextMenu: Component<{
   };
 
   const noteContextForOtherPeople: () => MenuItem[] = () => {
-    const isMuted = account?.muted.includes(note()?.user.pubkey);
-    const isMutedThread = account?.mutedTags.find((t) => t[0] === 'e' && t[1] === note()?.id);
+    const isMuted = accountStore.muted.includes(note()?.user.pubkey);
+    const isMutedThread = accountStore.mutedTags.find((t) => t[0] === 'e' && t[1] === note()?.id);
 
     return [
       {
@@ -391,7 +386,7 @@ const NoteContextMenu: Component<{
     ];
   };
 
-  const noteContext = () => account?.publicKey !== note()?.pubkey ?
+  const noteContext = () => accountStore.publicKey !== note()?.pubkey ?
       [ ...noteContextForEveryone(), ...noteContextForOtherPeople()] :
       [ ...noteContextForMe(), ...noteContextForEveryone(), ...requestDeleteContextMenu()];
 

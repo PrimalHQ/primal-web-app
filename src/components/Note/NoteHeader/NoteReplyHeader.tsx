@@ -11,22 +11,19 @@ import Avatar from '../../Avatar/Avatar';
 import { A } from '@solidjs/router';
 import { toast as tToast, actions as tActions, note as tNote } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
-import CustomZap from '../../CustomZap/CustomZap';
 import { broadcastEvent } from '../../../lib/notes';
-import { useAccountContext } from '../../../contexts/AccountContext';
 import { reportUser } from '../../../lib/profile';
 import { APP_ID } from '../../../App';
 import ConfirmModal from '../../ConfirmModal/ConfirmModal';
 import { hexToNpub } from '../../../lib/keys';
 import { hookForDev } from '../../../lib/devTools';
 import { useAppContext } from '../../../contexts/AppContext';
-import { nip19 } from 'nostr-tools';
+import { accountStore, addToMuteList, removeFromMuteList } from '../../../stores/accountStore';
 
 const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void, id?: string }> = (props) => {
 
   const intl = useIntl();
   const toaster = useToastContext();
-  const account = useAccountContext();
   const app = useAppContext();
 
   const [showContext, setContext] = createSignal(false);
@@ -57,11 +54,11 @@ const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void,
   };
 
   const doMuteUser = () => {
-    account?.actions.addToMuteList(props.note.post.pubkey);
+    addToMuteList(props.note.post.pubkey);
   };
 
   const doUnmuteUser = () => {
-    account?.actions.removeFromMuteList(props.note.post.pubkey);
+    removeFromMuteList(props.note.post.pubkey);
   };
 
   const doReportUser = () => {
@@ -109,11 +106,12 @@ const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void,
   };
 
   const broadcastNote = async () => {
-    if (!account) {
-      return;
-    }
-
-    const { success } = await broadcastEvent(props.note.msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
+    const { success } = await broadcastEvent(
+      props.note.msg as NostrRelaySignedEvent,
+      accountStore.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+    );
     setContext(false);
 
     if (success) {
@@ -207,7 +205,7 @@ const NoteReplyHeader: Component<{ note: PrimalNote, openCustomZap?: () => void,
     },
   ];
 
-  const noteContext = account?.publicKey !== props.note.post.pubkey ?
+  const noteContext = accountStore.publicKey !== props.note.post.pubkey ?
       [ ...noteContextForEveryone, ...noteContextForOtherPeople] :
       noteContextForEveryone;
 

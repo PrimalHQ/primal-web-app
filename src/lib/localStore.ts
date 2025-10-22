@@ -109,6 +109,7 @@ export const emptyStorage: LocalStore = {
   nwcActive: undefined,
   useSystemDarkMode: false,
   liveStreams: undefined,
+  liveAuthors: undefined,
 }
 
 export const storageName = (pubkey?: string) => {

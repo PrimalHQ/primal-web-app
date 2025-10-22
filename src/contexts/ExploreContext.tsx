@@ -1,7 +1,5 @@
-import { nip19 } from "../lib/nTools";
 import { createStore } from "solid-js/store";
 import { getEvents, getExploreFeed } from "../lib/feed";
-import { useAccountContext } from "./AccountContext";
 import { sortingPlan, convertToNotes, parseEmptyReposts, paginationPlan } from "../stores/note";
 import { Kind } from "../constants";
 import {
@@ -18,7 +16,6 @@ import {
   stopListeningForNostrStats
 } from "../lib/stats";
 import {
-  decompressBlob,
   isConnected,
   readData,
   refreshSocketListeners,
@@ -53,6 +50,7 @@ import { APP_ID } from "../App";
 import { handleSubscription, parseBolt11 } from "../utils";
 import { filterAndSortNotes, filterAndSortUsers, filterAndSortZaps, PaginationInfo, TopicStat } from "../megaFeeds";
 import { loadHotTopics, loadNostrStats, saveHotTopics, saveNostrStats } from "../lib/localStore";
+import { accountStore } from "../stores/accountStore";
 
 export type ExploreContextStore = {
   previewDVM: PrimalDVM | undefined,
@@ -187,9 +185,6 @@ export const initialExploreData = {
 export const ExploreContext = createContext<ExploreContextStore>();
 
 export const ExploreProvider = (props: { children: ContextChildren }) => {
-
-  const account = useAccountContext();
-
   onMount(() => {
     const stats = loadNostrStats();
     const topics = loadHotTopics();
@@ -284,7 +279,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
       handleSubscription(
         exploreId,
         () => getExploreFeed(
-          account?.publicKey || '',
+          accountStore.publicKey || '',
           exploreId,
           scope,
           timeframe,
@@ -478,7 +473,7 @@ export const ExploreProvider = (props: { children: ContextChildren }) => {
 
     handleSubscription(
       exploreRepostsIds,
-      () => getEvents(account?.publicKey, ids, exploreRepostsIds),
+      () => getEvents(accountStore.publicKey, ids, exploreRepostsIds),
       handleExploreRepostEvent,
       handleExploreRepostEose,
     );

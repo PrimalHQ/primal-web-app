@@ -1,21 +1,19 @@
 import { Component, createEffect, For, onCleanup, onMount, Show } from 'solid-js';
 
 import styles from './Premium.module.scss';
-import { useIntl } from '@cookbook/solid-intl';
 
 import { Kind } from '../../constants';
-import { useNavigate } from '@solidjs/router';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import { PremiumStore } from './Premium';
-import { isConnected, socket, subsTo, subTo } from '../../sockets';
+import { isConnected, socket, subsTo } from '../../sockets';
 import { startListeningForContentBroadcastStaus, getContentDownloadData, getContentListHistory, startContentBroadcast, stopListeningForContentBroadcastStaus, cancelContentBroadcast } from '../../lib/premium';
 import { APP_ID } from '../../App';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { createStore } from 'solid-js/store';
 import pako from 'pako';
 import { useToastContext } from '../../components/Toaster/Toaster';
 import { Progress } from '@kobalte/core/progress';
 import ButtonGhost from '../../components/Buttons/ButtonGhost';
+import { accountStore } from '../../stores/accountStore';
 
 export type ContentItem = {
   cnt: number,
@@ -79,9 +77,6 @@ export const emptyBroadcastStatus = () => ({
 const PremiumContentBackup: Component<{
   data: PremiumStore,
 }> = (props) => {
-  const intl = useIntl()
-  const navigate = useNavigate();
-  const account = useAccountContext();
   const toast = useToastContext();
 
   const [store, updateStore] = createStore<ContentStore>({
@@ -100,7 +95,7 @@ const PremiumContentBackup: Component<{
 
   onCleanup(() => {
     const ws = socket();
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
     const subId = store.statusSubId;
 
     if (!ws || !pubkey) return;
@@ -110,8 +105,8 @@ const PremiumContentBackup: Component<{
   });
 
   createEffect(() => {
-    if (isConnected() &&  account?.isKeyLookupDone && account.publicKey) {
-      getContentList(account.publicKey)
+    if (isConnected() &&  accountStore.isKeyLookupDone && accountStore.publicKey) {
+      getContentList(accountStore.publicKey)
     }
   });
 
@@ -169,7 +164,7 @@ const PremiumContentBackup: Component<{
 
   const onDownload = (kind: number) => {
     const ws = socket();
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!ws || !pubkey) return;
 
@@ -193,11 +188,12 @@ const PremiumContentBackup: Component<{
         }
 
         const kindName = kind >= 0 ? `${kind}` : 'all';
-        const userId = account.activeUser?.nip05 || account.publicKey;
+        const userId = accountStore.activeUser?.nip05 || accountStore.publicKey;
         const date = (new Date()).toISOString().split('T')[0];
 
         var a = window.document.createElement('a');
         const content = pako.gzip(data);
+        // @ts-ignore
         a.href = window.URL.createObjectURL(new Blob([content], {type: 'application/x-gzip-compressed'}));
         a.download = `nostr-content-${kindName}-${userId}-${date}.txt.gz`;
 
@@ -217,7 +213,7 @@ const PremiumContentBackup: Component<{
 
   const onBroadcast = (kind: number) => {
     const ws = socket();
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!ws || !pubkey) return;
 
@@ -241,7 +237,7 @@ const PremiumContentBackup: Component<{
 
   const startListeningForBroadcastStatus = () => {
     const ws = socket();
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!ws || !pubkey) return;
 
@@ -282,7 +278,7 @@ const PremiumContentBackup: Component<{
 
   const cancelBroadcast = () => {
     const ws = socket();
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!ws || !pubkey) return;
 

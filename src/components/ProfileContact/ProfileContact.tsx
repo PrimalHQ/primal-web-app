@@ -1,11 +1,9 @@
-import { Component, For, Show } from 'solid-js';
+import { Component, Show } from 'solid-js';
 import {
-  PrimalNote,
   PrimalUser
 } from '../../types/primal';
 
 import styles from './ProfileContact.module.scss';
-import SmallNote from '../SmallNote/SmallNote';
 import { useIntl } from '@cookbook/solid-intl';
 import { nip05Verification, userName } from '../../stores/profile';
 import { profile as t } from '../../translations';
@@ -14,8 +12,8 @@ import Avatar from '../Avatar/Avatar';
 import FollowButton from '../FollowButton/FollowButton';
 import { A } from '@solidjs/router';
 import { humanizeNumber } from '../../lib/stats';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { useAppContext } from '../../contexts/AppContext';
+import { accountStore } from '../../stores/accountStore';
 
 
 const ProfileContact: Component<{
@@ -27,7 +25,6 @@ const ProfileContact: Component<{
 }> = (props) => {
 
   const intl = useIntl();
-  const account = useAccountContext();
   const app = useAppContext();
 
   return (
@@ -63,7 +60,7 @@ const ProfileContact: Component<{
           </div>
         </Show>
         <Show
-          when={account?.publicKey !== props.profile?.pubkey || !account?.following.includes(props.profile?.pubkey || '')}
+          when={accountStore.publicKey !== props.profile?.pubkey || !accountStore.following.includes(props.profile?.pubkey || '')}
           fallback={<div class={styles.placeholderDiv}></div>}
         >
           <FollowButton person={props.profile} postAction={props.postAction} light={props.light} />

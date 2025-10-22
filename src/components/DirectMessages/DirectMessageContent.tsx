@@ -1,14 +1,11 @@
-import { Component, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
+import { Component, For, Match, Show, Switch } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 
 import styles from './DirectMessages.module.scss';
 import Avatar from '../Avatar/Avatar';
-import { nip05Verification, userName } from '../../stores/profile';
 import { DMContact } from '../../megaFeeds';
 import { date } from '../../lib/dates';
 import { DirectMessage } from '../../types/primal';
-import { useDMContext } from '../../contexts/DMContext';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { A } from '@solidjs/router';
 import { useAppContext } from '../../contexts/AppContext';
 import { hexToNpub } from '../../lib/keys';
@@ -17,6 +14,7 @@ import DirectMessageParsedContent from './DirectMessageParsedContent';
 import { linebreakRegex } from '../../constants';
 import Lnbc from '../Lnbc/Lnbc';
 import Cashu from '../Cashu/Cashu';
+import { accountStore } from '../../stores/accountStore';
 
 const recentTime = 900;
 
@@ -27,9 +25,7 @@ const DirectMessageConversation: Component<{
   contact: DMContact,
   message: DirectMessage,
 }> = (props) => {
-  const account = useAccountContext();
   const app = useAppContext();
-  const dms = useDMContext();
 
   const isFromPreviusSender = () => props.message.sender === props.previousMessage?.sender;
   const isLastRecent = () => props.message.created_at - (props.nextMessage?.created_at || 0) > recentTime;
@@ -37,7 +33,7 @@ const DirectMessageConversation: Component<{
   const isRecent = () => (props.previousMessage?.created_at || 0) - props.message.created_at < recentTime;
   const isNextFromDifferentSender = () => props.message.sender !== props.nextMessage?.sender;
 
-  const isMe = () => props.message.sender === account?.publicKey;
+  const isMe = () => props.message.sender === accountStore.publicKey;
 
   const getThreadStatus = () => {
     if (isFromPreviusSender() && isRecent()) return 'old';
@@ -155,7 +151,7 @@ const DirectMessageConversation: Component<{
                 href={app?.actions.profileLink(hexToNpub(props.message.sender)) || ''}
                 class={styles.avatar}
               >
-                <Avatar user={account?.activeUser} size="xxs" />
+                <Avatar user={accountStore.activeUser} size="xxs" />
               </A>
             </Show>
 

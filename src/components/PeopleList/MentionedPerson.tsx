@@ -1,14 +1,14 @@
 import { A } from '@solidjs/router';
-import { Component, For, Show } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
+import { Component, Show } from 'solid-js';
 import { useAppContext } from '../../contexts/AppContext';
 import { hookForDev } from '../../lib/devTools';
-import { authorName, nip05Verification, truncateNpub } from '../../stores/profile';
-import { PrimalNote, PrimalUser } from '../../types/primal';
+import { authorName, nip05Verification } from '../../stores/profile';
+import { PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 import FollowButton from '../FollowButton/FollowButton';
 
 import styles from './PeopleList.module.scss';
+import { accountStore } from '../../stores/accountStore';
 
 
 const MentionedPerson: Component<{
@@ -16,7 +16,6 @@ const MentionedPerson: Component<{
   id?: string,
   noAbout?: boolean,
 }> = (props) => {
-  const account = useAccountContext();
   const app = useAppContext();
 
   return (
@@ -42,7 +41,7 @@ const MentionedPerson: Component<{
           </div>
         </div>
 
-        <Show when={account?.publicKey !== props.person?.pubkey || !account?.following.includes(props.person?.pubkey || '')}>
+        <Show when={accountStore.publicKey !== props.person?.pubkey || !accountStore.following.includes(props.person?.pubkey || '')}>
           <FollowButton person={props.person} />
         </Show>
       </div>

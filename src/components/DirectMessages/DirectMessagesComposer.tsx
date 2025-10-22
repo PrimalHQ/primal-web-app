@@ -3,10 +3,7 @@ import { hookForDev } from '../../lib/devTools';
 
 import styles from './DirectMessages.module.scss';
 import Avatar from '../Avatar/Avatar';
-import { nip05Verification, userName } from '../../stores/profile';
-import { DMContact } from '../../megaFeeds';
-import { date } from '../../lib/dates';
-import { TextField } from '@kobalte/core/text-field';
+import { userName } from '../../stores/profile';
 import { useSearchContext } from '../../contexts/SearchContext';
 import { editMentionRegex, emojiSearchLimit } from '../../constants';
 import { createStore } from 'solid-js/store';
@@ -14,17 +11,14 @@ import { getCaretCoordinates } from '../../lib/textArea';
 import { debounce, isVisibleInContainer, uuidv4 } from '../../utils';
 import emojiSearch from '@jukben/emoji-search';
 import { DirectMessage, PrimalUser } from '../../types/primal';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { useProfileContext } from '../../contexts/ProfileContext';
 import SearchOption from '../Search/SearchOption';
 import {
-  placeholders,
-  messages as tMessages,
-  actions as tActions,
   search as tSearch,
 } from '../../translations';
 import { useIntl } from '@cookbook/solid-intl';
 import { useDMContext } from '../../contexts/DMContext';
+import { accountStore } from '../../stores/accountStore';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -38,8 +32,6 @@ const DirectMessageComposer: Component<{
   pubkey: string | undefined,
   messageCount: number,
 }> = (props) => {
-
-  const account = useAccountContext();
   const profile = useProfileContext();
   const intl = useIntl();
   const dms = useDMContext();
@@ -79,7 +71,7 @@ const DirectMessageComposer: Component<{
 
     const msg = {
       id: `N_M_${props.messageCount}`,
-      sender: account?.publicKey || '',
+      sender: accountStore.publicKey || '',
       content,
       created_at: Math.floor((new Date()).getTime() / 1000),
     };

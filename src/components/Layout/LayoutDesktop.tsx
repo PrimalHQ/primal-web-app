@@ -6,12 +6,10 @@ import { useLocation } from '@solidjs/router';
 import NavMenu from '../NavMenu/NavMenu';
 import ProfileWidget from '../ProfileWidget/ProfileWidget';
 import NewNote from '../NewNote/NewNote';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { SendNoteResult } from '../../types/primal';
 import Branding from '../Branding/Branding';
-import { useAppContext } from '../../contexts/AppContext';
-import NoteContextMenu from '../Note/NoteContextMenu';
 import LiveNavMenu from '../NavMenu/LiveNavMenu';
+import { accountStore } from '../../stores/accountStore';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -19,10 +17,7 @@ const LayoutDesktop: Component<{
   children: JSXElement,
   onNewNotePosted: (result: SendNoteResult) => void,
 }> = (props) => {
-
-  const account = useAccountContext();
   const location = useLocation();
-  const app = useAppContext();
 
   let container: HTMLDivElement | undefined;
 
@@ -106,7 +101,7 @@ const LayoutDesktop: Component<{
             </Match>
           </Switch>
 
-          <Show when={account?.isKeyLookupDone}>
+          <Show when={accountStore.isKeyLookupDone}>
             <Switch>
               <Match when={location.pathname.includes('/citadel_stream')}>
                 <></>

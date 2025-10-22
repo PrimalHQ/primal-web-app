@@ -1,18 +1,11 @@
-import { Component, Match, Switch, createSignal } from 'solid-js';
+import { Component, createSignal } from 'solid-js';
 
 import styles from './Premium.module.scss';
-import { useIntl } from '@cookbook/solid-intl';
-import { A, useNavigate } from '@solidjs/router';
-import { PremiumStore } from './Premium';
-import Avatar from '../../components/Avatar/Avatar';
-import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
-import { shortDate } from '../../lib/dates';
-import { userName } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
 import { LegendCustomizationConfig } from '../../lib/premium';
 import { CohortInfo } from '../../contexts/AppContext';
-import { useAccountContext } from '../../contexts/AccountContext';
 import LegendCard from '../../components/LegendCard/LegendCard';
+import { accountStore } from '../../stores/accountStore';
 
 
 const PremiumCohortInfo: Component<{
@@ -21,13 +14,9 @@ const PremiumCohortInfo: Component<{
   cohortInfo: CohortInfo,
   legendConfig?: LegendCustomizationConfig | undefined,
 }> = (props) => {
-  const intl = useIntl()
-  const navigate = useNavigate();
-  const account = useAccountContext();
-
   const [showLegendCard, setShowLegendCard] = createSignal(false);
 
-  const tier = () => props.userTier || account?.membershipStatus.tier || '';
+  const tier = () => props.userTier || accountStore.membershipStatus.tier || '';
 
   const destination = () => {
     if (

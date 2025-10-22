@@ -1,27 +1,23 @@
 import { Component, Show } from 'solid-js';
 import { A } from '@solidjs/router';
 import Avatar from '../Avatar/Avatar';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { trimVerification } from '../../lib/profile';
-import { hexToNpub } from '../../lib/keys';
 
 import styles from './ProfileWidget.module.scss';
 import { hookForDev } from '../../lib/devTools';
 import { userName } from '../../stores/profile';
 import { useAppContext } from '../../contexts/AppContext';
+import { accountStore, hasPublicKey } from '../../stores/accountStore';
 
 const ProfileWidget: Component<{ id?: string, hideName?: boolean }> = (props) => {
-
-  const account = useAccountContext();
   const app = useAppContext();
-
-  const activeUser = () => account?.activeUser;
+  const activeUser = () => accountStore.activeUser;
 
   return (
     <div id={props.id}>
-      <Show when={account?.hasPublicKey()}>
+      <Show when={hasPublicKey()}>
         <A
-          href={app?.actions.profileLink(account?.publicKey) || ''}
+          href={app?.actions.profileLink(accountStore.publicKey) || ''}
           class={`${styles.userProfile} ${props.hideName ? styles.hiddenName : ''}`}
         >
           <div class={styles.avatar}>

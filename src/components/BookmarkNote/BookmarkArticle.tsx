@@ -2,7 +2,6 @@ import { useIntl } from '@cookbook/solid-intl';
 import { Component, createEffect, createSignal, Show } from 'solid-js';
 import { APP_ID } from '../../App';
 import { Kind, supportedBookmarkTypes } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { useAppContext } from '../../contexts/AppContext';
 import { logWarning } from '../../lib/logger';
 import { getBookmarks, sendBookmarks } from '../../lib/profile';
@@ -14,9 +13,9 @@ import { bookmarks as tBookmarks } from '../../translations';
 import styles from './BookmarkNote.module.scss';
 import { saveBookmarks } from '../../lib/localStore';
 import { triggerImportEvents } from '../../lib/notes';
+import { accountStore, updateBookmarks as updateAccountBookmarks } from '../../stores/accountStore';
 
 const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: boolean }> = (props) => {
-  const account = useAccountContext();
   const app = useAppContext();
   const intl = useIntl();
 
@@ -29,30 +28,36 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
     if (note) {
       const coor = `${note.msg.kind}:${note.pubkey}:${(note.msg.tags.find(t => t[0] === 'd') || [])[1]}`;
 
-      setIsBookmarked(() => account?.bookmarks.includes(coor) || false);
+      setIsBookmarked(() => accountStore.bookmarks.includes(coor) || false);
     }
   })
 
   const updateBookmarks = async (bookmarkTags: string[][]) => {
-    if (!account) return;
-
     const bookmarks = bookmarkTags.reduce((acc, t) =>
       supportedBookmarkTypes.includes(t[0]) ? [...acc, t[1]] : [...acc]
     , []);
 
     const date = Math.floor((new Date()).getTime() / 1000);
 
-    account.actions.updateBookmarks(bookmarks)
-    saveBookmarks(account.publicKey, bookmarks);
-    const { success, note} = await sendBookmarks([...bookmarkTags], date, '', account?.proxyThroughPrimal || false, account.activeRelays, account?.relaySettings);
+    updateAccountBookmarks(bookmarks);
+    saveBookmarks(accountStore.publicKey, bookmarks);
+
+    const { success, note} = await sendBookmarks(
+      [...bookmarkTags],
+      date,
+      '',
+      accountStore.proxyThroughPrimal || false,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+    );
 
     if (success && note) {
-      triggerImportEvents([note], `bookmark_import_${APP_ID}`)
+      triggerImportEvents([note], `bookmark_import_${APP_ID}`);
     }
   };
 
   const addBookmark = async (bookmarkTags: string[][]) => {
-    if (!account || !props.note) return;
+    if (!props.note) return;
 
     const aTag = ['a', `${props.note.msg.kind}:${props.note.pubkey}:${(props.note.msg.tags.find(t => t[0] === 'd') || [])[1]}`];
 
@@ -82,7 +87,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
   }
 
   const removeBookmark = async (bookmarks: string[][]) => {
-    if (!account || !props.note) return;
+    if (!props.note) return;
 
     const aTag = ['a', `${props.note.msg.kind}:${props.note.pubkey}:${(props.note.msg.tags.find(t => t[0] === 'd') || [])[1]}`];
 
@@ -113,7 +118,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
 
   const doBookmark = (remove: boolean, then?: () => void) => {
 
-    if (!account?.publicKey) {
+    if (!accountStore.publicKey) {
       return;
     }
 
@@ -140,7 +145,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
     });
 
     setBookmarkInProgress(() => true);
-    getBookmarks(account.publicKey, `before_bookmark_${APP_ID}`);
+    getBookmarks(accountStore.publicKey, `before_bookmark_${APP_ID}`);
   }
 
   return (

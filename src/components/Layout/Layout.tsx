@@ -1,9 +1,8 @@
-import { Component, createEffect, createSignal, on, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, on, Show } from 'solid-js';
 
 import styles from './Layout.module.scss';
 
-import { useBeforeLeave, useLocation, useParams} from '@solidjs/router';
-import { useAccountContext } from '../../contexts/AccountContext';
+import { useLocation, useParams} from '@solidjs/router';
 import zapMD from '../../assets/lottie/zap_md.json';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { SendNoteResult } from '../../types/primal';
@@ -33,12 +32,12 @@ import LiveStreamContextMenu from '../Note/LiveStreamContextMenu';
 import ProfileQrCodeModal from '../ProfileQrCodeModal/ProfileQrCodeModal';
 import ReportContentModal from '../ReportContentModal/ReportContentModal';
 import NoteVideoContextMenu from '../Note/NoteVideoContextMenu';
+import { accountStore, checkNostrKey, logout, resolveContacts, setFlag, setFollowData, setSec, setString } from '../../stores/accountStore';
 
 export const [isHome, setIsHome] = createSignal(false);
 
 const Layout: Component<any> = (props) => {
 
-  const account = useAccountContext();
   const home = useHomeContext();
   const profile = useProfileContext();
   const location = useLocation();
@@ -59,7 +58,7 @@ const Layout: Component<any> = (props) => {
     const newNote = document.getElementById('new_note_input');
     const newNoteTextArea = document.getElementById('new_note_text_area') as HTMLTextAreaElement;
 
-    if (account?.showNewNoteForm) {
+    if (accountStore.showNewNoteForm) {
       if (!newNote || !newNoteTextArea) {
         return;
       }
@@ -87,7 +86,7 @@ const Layout: Component<any> = (props) => {
     if (['p', 'profile'].includes(path[1]) && profile) {
       const pubkey = params.npub;
       // check for new notes on the profile feed
-      profile.actions.checkForNewNotes(pubkey || account?.publicKey);
+      profile.actions.checkForNewNotes(pubkey || accountStore.publicKey);
       return;
     }
   }
@@ -99,8 +98,8 @@ const Layout: Component<any> = (props) => {
   });
 
   createEffect(() => {
-    if (!account?.publicKey) {
-      account?.actions.checkNostrKey();
+    if (!accountStore.publicKey) {
+      checkNostrKey();
     }
   });
 
@@ -190,42 +189,42 @@ const Layout: Component<any> = (props) => {
         />
 
         <EnterPinModal
-          open={(account?.showPin || '').length > 0}
-          valueToDecrypt={account?.showPin}
+          open={(accountStore.showPin || '').length > 0}
+          valueToDecrypt={accountStore.showPin}
           onSuccess={(sec: string) => {
-            account?.actions.setSec(sec, true);
-            account?.actions.setString('showPin', '');
+            setSec(sec, true);
+            setString('showPin', '');
           }}
-          onAbort={() => account?.actions.setString('showPin', '')}
+          onAbort={() => setString('showPin', '')}
           onForgot={() => {
-            account?.actions.setString('showPin', '');
-            account?.actions.setFlag('showForgot', true);
+            setString('showPin', '');
+            setFlag('showForgot', true);
           }}
         />
         <CreateAccountModal
-          open={account?.showGettingStarted}
-          onAbort={() => account?.actions.setFlag('showGettingStarted', false)}
+          open={accountStore.showGettingStarted}
+          onAbort={() => setFlag('showGettingStarted', false)}
           onLogin={() => {
-            account?.actions.setFlag('showGettingStarted', false);
-            account?.actions.setFlag('showLogin', true);
+            setFlag('showGettingStarted', false);
+            setFlag('showLogin', true);
           }}
         />
         <LoginModal
-          open={account?.showLogin}
-          onAbort={() => account?.actions.setFlag('showLogin', false)}
+          open={accountStore.showLogin}
+          onAbort={() => setFlag('showLogin', false)}
         />
         <ConfirmModal
-          open={account?.followData.openDialog}
+          open={accountStore.followData.openDialog}
           title={intl.formatMessage(followWarning.title)}
           description={intl.formatMessage(followWarning.description)}
           confirmLabel={intl.formatMessage(followWarning.confirm)}
           abortLabel={intl.formatMessage(followWarning.abort)}
           onConfirm={async () => {
-            if (account?.publicKey) {
-              const data = unwrap(account?.followData)
-              await account.actions.resolveContacts(account?.publicKey, data.following, data.date, data.tags, data.relayInfo);
+            if (accountStore.publicKey) {
+              const data = unwrap(accountStore.followData)
+              await resolveContacts(accountStore.publicKey, data.following, data.date, data.tags, data.relayInfo);
             }
-            account?.actions.setFollowData({
+            setFollowData({
               tags: [],
               date: 0,
               relayInfo: '',
@@ -234,7 +233,7 @@ const Layout: Component<any> = (props) => {
             });
           }}
           onAbort={() => {
-            account?.actions.setFollowData({
+            setFollowData({
               tags: [],
               date: 0,
               relayInfo: '',
@@ -244,17 +243,17 @@ const Layout: Component<any> = (props) => {
           }}
         />
         <ConfirmModal
-          open={account?.showForgot}
+          open={accountStore.showForgot}
           title={intl.formatMessage(forgotPin.title)}
           description={intl.formatMessage(forgotPin.description)}
           confirmLabel={intl.formatMessage(forgotPin.confirm)}
           abortLabel={intl.formatMessage(forgotPin.abort)}
           onConfirm={async () => {
-            account?.actions.logout();
-            account?.actions.setFlag('showForgot', false);
+            logout();
+            setFlag('showForgot', false);
           }}
           onAbort={() => {
-            account?.actions.setFlag('showForgot', false);
+            setFlag('showForgot', false);
           }}
         />
 

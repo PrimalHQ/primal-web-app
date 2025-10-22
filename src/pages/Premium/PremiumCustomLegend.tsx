@@ -5,7 +5,6 @@ import styles from './Premium.module.scss';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import { PremiumStore } from './Premium';
 import PremiumUserInfo from './PremiumUserInfo';
-import { useAccountContext } from '../../contexts/AccountContext';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
 import { createStore } from 'solid-js/store';
 import { LegendCustomizationConfig, LegendCustomizationStyle } from '../../lib/premium';
@@ -13,6 +12,7 @@ import CheckBox from '../../components/Checkbox/CheckBox';
 import { useAppContext } from '../../contexts/AppContext';
 import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
 import { TextField } from '@kobalte/core/text-field';
+import { accountStore } from '../../stores/accountStore';
 
 const legendStyles: LegendCustomizationStyle[] = [
   '',
@@ -31,7 +31,6 @@ const PremiumCustomLegend: Component<{
   data: PremiumStore,
   onConfigSave?: (config: LegendCustomizationConfig) => void,
 }> = (props) => {
-  const account = useAccountContext();
   const app = useAppContext();
 
   const [editShoutout, setEditShoutout] = createSignal(false);
@@ -49,11 +48,9 @@ const PremiumCustomLegend: Component<{
     edited_shoutout: '',
   });
 
-  let shoutoutText: HTMLTextAreaElement | undefined;
-
   createEffect(() => {
-    if (account?.isKeyLookupDone && account?.publicKey) {
-      const cf = app?.legendCustomization[account.publicKey];
+    if (accountStore.isKeyLookupDone && accountStore.publicKey) {
+      const cf = app?.legendCustomization[accountStore.publicKey];
 
       setConfig(() => ({ ...cf }));
       setShoutout(() => config.current_shoutout || '');
@@ -61,10 +58,10 @@ const PremiumCustomLegend: Component<{
   });
 
   createEffect(() => {
-    if (!account?.publicKey) return;
+    if (!accountStore.publicKey) return;
     const mi = props.data.membershipStatus.edited_shoutout;
 
-    setIsUnderReview(() => mi !== undefined && mi.length > 0)
+    setIsUnderReview(() => mi !== undefined && mi !== null && mi.length > 0)
   });
 
   const styleOptions = () => {
@@ -90,7 +87,7 @@ const PremiumCustomLegend: Component<{
     <div class={styles.legendCustomizationLayout}>
       <PremiumUserInfo
         data={props.data}
-        profile={account?.activeUser}
+        profile={accountStore.activeUser}
         legendConfig={config}
       />
 

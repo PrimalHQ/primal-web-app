@@ -1,40 +1,23 @@
-import { Component, createEffect, For, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, For, Show } from 'solid-js';
 
 import styles from './Premium.module.scss';
-import PageCaption from '../../components/PageCaption/PageCaption';
-import PageTitle from '../../components/PageTitle/PageTitle';
-import StickySidebar from '../../components/StickySidebar/StickySidebar';
-import Wormhole from '../../components/Wormhole/Wormhole';
-import Search from '../Search';
-import PremiumSidebarActive from './PremiumSidebarActive';
-import PremiumSidebarInactve from './PremiumSidebarInactive';
-import { useIntl } from '@cookbook/solid-intl';
-import { premium as t } from '../../translations';
 
-import foreverPremium from '../../assets/images/premium_forever_small.png';
-import privateBetaBuilds from '../../assets/images/private_beta_builds.png';
-import customProfile from '../../assets/images/preston_small.png';
-import heart from '../../assets/images/heart.png';
-
-import { appStoreLink, Kind, playstoreLink } from '../../constants';
-import { A, useNavigate } from '@solidjs/router';
-import ButtonLink from '../../components/Buttons/ButtonLink';
-import ButtonPremium from '../../components/Buttons/ButtonPremium';
+import { Kind } from '../../constants';
 import { PremiumStore } from './Premium';
 import { APP_ID } from '../../App';
-import { isConnected, socket, subsTo, subTo } from '../../sockets';
+import { isConnected, socket, subsTo } from '../../sockets';
 import { deletePremiumMedia, getPremiumMediaList, getPremiumMediaStats } from '../../lib/premium';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { createStore } from 'solid-js/store';
 import { emptyPaging, PaginationInfo } from '../../megaFeeds';
-import { date, shortDate } from '../../lib/dates';
+import { shortDate } from '../../lib/dates';
 import ButtonCopy from '../../components/Buttons/ButtonCopy';
 import Paginator from '../../components/Paginator/Paginator';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 
 import missingVideo from '../../assets/icons/missing_video.svg';
 import missingImage from '../../assets/icons/missing_image.svg';
+import { accountStore } from '../../stores/accountStore';
 
 export type MediaListItem = {
   url: string,
@@ -57,9 +40,6 @@ export type MediaListStore = {
 const PremiumMediaManagment: Component<{
   data: PremiumStore,
 }> = (props) => {
-  const intl = useIntl()
-  const navigate = useNavigate();
-  const account = useAccountContext();
   const media = useMediaContext();
 
   const [store, updateStore] = createStore<MediaListStore>({
@@ -75,9 +55,9 @@ const PremiumMediaManagment: Component<{
 
 
   createEffect(() => {
-    if (isConnected() &&  account?.isKeyLookupDone && account.publicKey) {
-      getMediaStats(account.publicKey);
-      getMediaList(account.publicKey);
+    if (isConnected() &&  accountStore.isKeyLookupDone && accountStore.publicKey) {
+      getMediaStats(accountStore.publicKey);
+      getMediaList(accountStore.publicKey);
     }
   });
 
@@ -146,7 +126,7 @@ const PremiumMediaManagment: Component<{
   }
 
   const getMediaListNextPage = () => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
     if (!pubkey || store.mediaList.length === 0 || store.paging.since === 0) return;
 
     getMediaList(pubkey, store.paging.since, 1);
@@ -398,7 +378,7 @@ const PremiumMediaManagment: Component<{
           open={store.showConfirmDelete.length > 0}
           description="Are you sure you want to delete this media file? All notes referencing this media file will look broken."
           onConfirm={() => {
-            deleteMedia(account?.publicKey, store.showConfirmDelete);
+            deleteMedia(accountStore.publicKey, store.showConfirmDelete);
             updateStore('showConfirmDelete', () => '');
           }}
           onAbort={() => updateStore('showConfirmDelete', () => '')}

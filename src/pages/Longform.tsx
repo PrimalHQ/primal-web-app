@@ -1,12 +1,10 @@
-import { useIntl } from "@cookbook/solid-intl";
-import { A, useNavigate, useParams } from "@solidjs/router";
-import { batch, Component, createEffect, createSignal, For, Match, on, onMount, Show, Switch } from "solid-js";
+import { A, useNavigate } from "@solidjs/router";
+import { batch, Component, createEffect, createSignal, For, Match, on, Show, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { APP_ID } from "../App";
 import { Kind, eventAddresRegex } from "../constants";
-import { useAccountContext } from "../contexts/AccountContext";
 import { decodeIdentifier } from "../lib/keys";
-import { getHighlights, parseLinkPreviews, sendEvent, setLinkPreviews } from "../lib/notes";
+import { getHighlights, parseLinkPreviews, sendEvent } from "../lib/notes";
 import { subsTo } from "../sockets";
 
 import styles from './Longform.module.scss';
@@ -38,7 +36,6 @@ import ReplyToNote from "../components/ReplyToNote/ReplyToNote";
 import { fetchNotes } from "../handleNotes";
 import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
 import { zapSubscription } from "../lib/zap";
-import { useSettingsContext } from "../contexts/SettingsContext";
 import ArticleHighlightComments from "../components/ArticleHighlight/ArticleHighlightComments";
 import ReplyToHighlight from "../components/ReplyToNote/ReplyToHighlight";
 import PageCaption from "../components/PageCaption/PageCaption";
@@ -47,6 +44,7 @@ import { useMediaContext } from "../contexts/MediaContext";
 import { Transition } from "solid-transition-group";
 import { fetchReadThread } from "../megaFeeds";
 import { useToastContext } from "../components/Toaster/Toaster";
+import { accountStore } from "../stores/accountStore";
 
 export type LongFormData = {
   title: string,
@@ -123,12 +121,8 @@ const emptyStore: LongformThreadStore = {
 }
 
 const Longform: Component< { naddr: string } > = (props) => {
-  const account = useAccountContext();
   const app = useAppContext();
   const media = useMediaContext();
-  const settings = useSettingsContext();
-  const params = useParams();
-  const intl = useIntl();
   const toast = useToastContext();
   const navigate = useNavigate();
 
@@ -262,7 +256,7 @@ const Longform: Component< { naddr: string } > = (props) => {
   const doSubscription = async (tier: Tier, cost: TierCost, exchangeRate?: Record<string, Record<string, number>>) => {
     const a = store.article?.user;
 
-    if (!a || !account || !cost) return;
+    if (!a || !cost) return;
 
     const subEvent = {
       kind: Kind.Subscribe,
@@ -278,16 +272,16 @@ const Longform: Component< { naddr: string } > = (props) => {
       ],
     }
 
-    const { success, note } = await sendEvent(subEvent, account.activeRelays, account.relaySettings, account?.proxyThroughPrimal || false);
+    const { success, note } = await sendEvent(subEvent, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
 
     if (success && note) {
       const isZapped = await zapSubscription(
         note,
         a,
-        account.publicKey,
-        account.activeRelays,
+        accountStore.publicKey,
+        accountStore.activeRelays,
         exchangeRate,
-        account.activeNWC,
+        accountStore.activeNWC,
       );
 
       if (!isZapped) {
@@ -299,7 +293,7 @@ const Longform: Component< { naddr: string } > = (props) => {
   const unsubscribe = async (eventId: string) => {
     const a = store.article?.user;
 
-    if (!a || !account) return;
+    if (!a) return;
 
     const unsubEvent = {
       kind: Kind.Unsubscribe,
@@ -312,7 +306,7 @@ const Longform: Component< { naddr: string } > = (props) => {
       ],
     };
 
-    await sendEvent(unsubEvent, account.activeRelays, account.relaySettings, account?.proxyThroughPrimal || false);
+    await sendEvent(unsubEvent, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
 
   }
 
@@ -337,7 +331,7 @@ const Longform: Component< { naddr: string } > = (props) => {
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
 
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -383,7 +377,7 @@ const Longform: Component< { naddr: string } > = (props) => {
   };
 
   const addTopZap = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey || !store.article) return;
 
@@ -426,7 +420,7 @@ const Longform: Component< { naddr: string } > = (props) => {
 
 
   const addTopZapFeed = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey || !store.article) return;
 
@@ -465,20 +459,23 @@ const Longform: Component< { naddr: string } > = (props) => {
   };
 
   const fetchArticle = async () => {
+    const addr = naddr();
+
+    if (!addr) return;
 
     updateStore('isFetching', () => true);
 
     const { users, notes, reads } = await fetchReadThread(
-      account?.publicKey,
-      naddr() || '',
+      accountStore.publicKey,
+      addr,
       `thread_read_${naddr()}_${APP_ID}`,
     );
 
     const article = reads.find(a => {
-      if (a.noteId === naddr()) return true;
+      if (a.noteId === addr) return true;
 
-      const decode1 = decodeIdentifier(naddr());
-      const decode2 = decodeIdentifier(a.naddr);
+      const decode1 = decodeIdentifier(addr) as nip19.DecodedNaddr;
+      const decode2 = decodeIdentifier(a.naddr) as nip19.DecodedNaddr;
 
       const a1 = `${decode1.data.kind}_${decode1.data.pubkey}_${decode1.data.identifier}`;
       const a2 = `${decode2.data.kind}_${decode2.data.pubkey}_${decode2.data.identifier}`;
@@ -652,8 +649,8 @@ const Longform: Component< { naddr: string } > = (props) => {
       if (!addr) return false;
       if (a.noteId === addr) return true;
 
-      const decode1 = decodeIdentifier(addr);
-      const decode2 = decodeIdentifier(a.naddr);
+      const decode1 = decodeIdentifier(addr) as nip19.DecodedNaddr;
+      const decode2 = decodeIdentifier(a.naddr) as nip19.DecodedNaddr;
 
       const a1 = `${decode1.data.kind}_${decode1.data.pubkey}_${decode1.data.identifier}`;
       const a2 = `${decode2.data.kind}_${decode2.data.pubkey}_${decode2.data.identifier}`;
@@ -713,9 +710,9 @@ const Longform: Component< { naddr: string } > = (props) => {
   const onReplyPosted = async (result: SendNoteResult) => {
     const { success, note } = result;
 
-    if (!success || !note || !account) return;
+    if (!success || !note) return;
 
-    const replies = await fetchNotes(account.publicKey, [note.id], `reads_reply_${APP_ID}`);
+    const replies = await fetchNotes(accountStore.publicKey, [note.id], `reads_reply_${APP_ID}`);
 
     updateStore('replies', (reps) => [ ...replies, ...reps]);
   };
@@ -723,11 +720,11 @@ const Longform: Component< { naddr: string } > = (props) => {
   const onHighlightPosted = async (result: SendNoteResult) => {
     const { success, note } = result;
 
-    if (!success || !note || !account) return;
+    if (!success || !note) return;
 
     scrollToHighlight(store.replyToHighlight.id);
 
-    const replies = await fetchNotes(account.publicKey, [note.id], `reads_reply_${APP_ID}`);
+    const replies = await fetchNotes(accountStore.publicKey, [note.id], `reads_reply_${APP_ID}`);
 
     updateStore('heightlightReplies' , (reps) => [ ...replies, ...reps]);
 
@@ -745,7 +742,10 @@ const Longform: Component< { naddr: string } > = (props) => {
   }
 
   const fetchHighlights = () => {
-    const decoded = decodeIdentifier(naddr());
+    const addr = naddr();
+    if (!addr) return;
+
+    const decoded = decodeIdentifier(addr) as nip19.DecodedNaddr;
 
     const { pubkey, identifier, kind } = decoded.data;
 
@@ -893,7 +893,7 @@ const Longform: Component< { naddr: string } > = (props) => {
       }
     });
 
-    getHighlights(pubkey, identifier, kind, subId, account?.publicKey);
+    getHighlights(pubkey, identifier, kind, subId, accountStore.publicKey);
   }
 
 

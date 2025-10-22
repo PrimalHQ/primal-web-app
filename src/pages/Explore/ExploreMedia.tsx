@@ -1,30 +1,18 @@
-import { Component, createEffect, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { Component, For, onMount } from 'solid-js';
 import styles from './Explore.module.scss';
-import { useToastContext } from '../../components/Toaster/Toaster';
-import { useSettingsContext } from '../../contexts/SettingsContext';
-import { useIntl } from '@cookbook/solid-intl';
 import { useExploreContext } from '../../contexts/ExploreContext';
-import { A, useLocation } from '@solidjs/router';
-import { fetchExploreMedia, fetchExplorePeople, fetchExploreZaps } from '../../megaFeeds';
+import { A } from '@solidjs/router';
+import { fetchExploreMedia } from '../../megaFeeds';
 import { APP_ID } from '../../App';
-import { userName } from '../../stores/profile';
-import Avatar from '../../components/Avatar/Avatar';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { imageOrVideoRegex, imageRegex, videoRegex } from '../../constants';
+import { imageOrVideoRegex } from '../../constants';
 import { PrimalNote } from '../../types/primal';
 import NoteGallery from '../../components/Note/NoteGallery';
 import Paginator from '../../components/Paginator/Paginator';
-import { calculatePagingOffset } from '../../utils';
-import { nip19 } from 'nostr-tools';
+import { accountStore } from '../../stores/accountStore';
 
 const ExploreMedia: Component<{ open?: boolean }> = (props) => {
 
-  const settings = useSettingsContext();
-  const toaster = useToastContext();
-  const intl = useIntl();
   const explore = useExploreContext();
-  const location = useLocation();
-  const account = useAccountContext();
 
   onMount(() => {
     if (explore?.exploreMedia.length === 0) {
@@ -33,7 +21,7 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
   });
 
   const getMedia = async () => {
-    const { notes, paging } = await fetchExploreMedia(account?.publicKey, `explore_media_${APP_ID}` , { limit: 30 });
+    const { notes, paging } = await fetchExploreMedia(accountStore.publicKey, `explore_media_${APP_ID}` , { limit: 30 });
 
     explore?.actions.setExploreMedia(notes, paging);
   }
@@ -54,7 +42,7 @@ const ExploreMedia: Component<{ open?: boolean }> = (props) => {
       offset,
     }
 
-    const { notes, paging } = await fetchExploreMedia(account?.publicKey, `explore_media_${APP_ID}` , page);
+    const { notes, paging } = await fetchExploreMedia(accountStore.publicKey, `explore_media_${APP_ID}` , page);
 
     explore?.actions.setExploreMedia(notes, paging);
   }

@@ -1,37 +1,23 @@
-import { Component, For, JSXElement, Match, Setter, Show, Switch, batch, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { Component, For, Match, Setter, Show, Switch, batch, createEffect, createSignal, onCleanup, onMount } from 'solid-js';
 
 import styles from './ReadsEditor.module.scss';
 import { SetStoreFunction, createStore } from 'solid-js/store';
 import { Editor, Extension } from '@tiptap/core';
 import { PrimalUser } from '../../types/primal';
-import { nip19 } from '../../lib/nTools';
 import { useIntl } from '@cookbook/solid-intl';
-import { useNavigate } from '@solidjs/router';
 import { APP_ID } from '../../App';
 import { Kind } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { useProfileContext } from '../../contexts/ProfileContext';
-import { useSearchContext } from '../../contexts/SearchContext';
-import { readSecFromStorage } from '../../lib/localStore';
-import { sendArticle, importEvents } from '../../lib/notes';
 import { getUsersRelayInfo } from '../../lib/profile';
-import { fetchRecomendedUsersAsync, fetchUserSearch } from '../../lib/search';
 import { NAddrExtension } from '../../markdownPlugins/nAddrMention';
 import { NEventExtension } from '../../markdownPlugins/nEventMention';
 import { NProfileExtension } from '../../markdownPlugins/nProfileMention';
 import { subsTo } from '../../sockets';
-import { referencesToTags } from '../../stores/note';
-import { userName, nip05Verification } from '../../stores/profile';
-import Avatar from '../Avatar/Avatar';
-import SearchOption from '../Search/SearchOption';
 import { useToastContext } from '../Toaster/Toaster';
 import { TextField } from '@kobalte/core/text-field';
-import Uploader from '../Uploader/Uploader';
 
 
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
-import Mention from '@tiptap/extension-mention';
 import Image from '@tiptap/extension-image';
 import BubbleMenu from '@tiptap/extension-bubble-menu';
 import Underline from '@tiptap/extension-underline';
@@ -43,9 +29,6 @@ import Gapcursor from '@tiptap/extension-gapcursor';
 import CodeBlock from '@tiptap/extension-code-block';
 
 import { createTiptapEditor } from 'solid-tiptap';
-import { Markdown } from 'tiptap-markdown';
-
-import tippy, { Instance } from 'tippy.js';
 
 import {
   toast as tToast,
@@ -61,6 +44,7 @@ import { MarkdownPlugin, extendMarkdownEditor, mdToHtml } from '../../markdownPl
 import { useAppContext } from '../../contexts/AppContext';
 import { isRTL } from '@kobalte/core/i18n';
 import { getLang } from '../../utils';
+import { accountStore } from '../../stores/accountStore';
 
 export type FormatControls = {
   isBoldActive: boolean,
@@ -90,18 +74,11 @@ const ReadsEditorEditor: Component<{
   setEditor: (editor: Editor) => void,
   showTableOptions: (value: boolean, position: DOMRect) => void,
 }> = (props) => {
-  const account = useAccountContext();
-  const search = useSearchContext();
   const toast = useToastContext();
   const intl = useIntl();
-  const navigate = useNavigate();
-  const profile = useProfileContext();
   const app = useAppContext();
 
   const [editorMarkdown, setEditorMarkdown] = createSignal(false);
-  // const [markdownContent, setMarkdownContent] = createSignal<string>('')
-
-  // const [article, setArticle] = createStore<ArticleEdit>(emptyArticleEdit())
 
   const [openUploadSockets, setOpenUploadSockets] = createSignal(false);
   const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
@@ -639,7 +616,7 @@ const ReadsEditorEditor: Component<{
 
   const onImageError = async (event: any) => {
     const image = event.target;
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -803,8 +780,8 @@ const ReadsEditorEditor: Component<{
                 <UploaderBlossom
                   uploadId={fileUploadContext()}
                   hideLabel={true}
-                  publicKey={account?.publicKey}
-                  nip05={account?.activeUser?.nip05}
+                  publicKey={accountStore.publicKey}
+                  nip05={accountStore.activeUser?.nip05}
                   file={fileToUpload()}
                   onFail={(_, uploadId?: string) => {
                     toast?.sendWarning(intl.formatMessage(tUpload.fail, {

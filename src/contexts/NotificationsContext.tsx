@@ -23,10 +23,10 @@ import {
 } from "../types/primal";
 import { APP_ID } from "../App";
 import { getLastSeen, subscribeToNotificationStats, unsubscribeToNotificationStats } from "../lib/notifications";
-import { useAccountContext } from "./AccountContext";
 import { timeNow } from "../utils";
 import { useSettingsContext } from "./SettingsContext";
 import { useAppContext } from "./AppContext";
+import { accountStore, hasPublicKey } from "../stores/accountStore";
 
 export type NotificationsContextStore = {
   notificationCount: number,
@@ -50,8 +50,6 @@ export const setNotifSince = (val: number) => {
 export const NotificationsContext = createContext<NotificationsContextStore>();
 
 export const NotificationsProvider = (props: { children: ContextChildren }) => {
-
-  const account = useAccountContext();
   const settings = useSettingsContext();
   const app = useAppContext();
 
@@ -65,15 +63,15 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
 
   const subToNotificationStats = () => {
 
-    if (notifSubscribed !== account?.publicKey) {
+    if (notifSubscribed !== accountStore.publicKey) {
       unsubscribeToNotificationStats(notfiStatsSubId());
       notifSubscribed = '';
     }
 
-    if (!account?.publicKey) return;
+    if (!accountStore.publicKey) return;
 
-    notifSubscribed = account.publicKey;
-    subscribeToNotificationStats(account.publicKey, notfiStatsSubId());
+    notifSubscribed = accountStore.publicKey;
+    subscribeToNotificationStats(accountStore.publicKey, notfiStatsSubId());
   }
 
   const calculateDownloadCount = () => {
@@ -152,7 +150,7 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
 // EFFECTS --------------------------------------
 
   createEffect(() => {
-    if (isConnected() && account?.isKeyLookupDone && account?.hasPublicKey() && !app?.isInactive) {
+    if (isConnected() && accountStore.isKeyLookupDone && hasPublicKey() && !app?.isInactive) {
       subToNotificationStats();
     } else {
       unsubscribeToNotificationStats(notfiStatsSubId());
@@ -170,7 +168,7 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
 
 
   createEffect(() => {
-    const pk = account?.publicKey;
+    const pk = accountStore.publicKey;
 
     if (pk) {
       const subid = `notif_ls_${APP_ID}`

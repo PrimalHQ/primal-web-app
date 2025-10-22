@@ -7,7 +7,6 @@ import ReadsEditorEditor from '../components/ReadsEditor/ReadsEditorEditor';
 import { NostrNoteContent, NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser } from '../types/primal';
 import { createStore } from 'solid-js/store';
 import { referencesToTags } from '../stores/note';
-import { useAccountContext } from '../contexts/AccountContext';
 import { Kind, wordsPerMinute } from '../constants';
 import { nip19 } from '../lib/nTools';
 import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
@@ -15,7 +14,7 @@ import ArticlePreviewPhone from '../components/ArticlePreview/ArticlePreviewPhon
 import ArticleShort from '../components/ArticlePreview/ArticleShort';
 import ReadsEditorPreview from '../components/ReadsEditor/ReadsEditorPreview';
 import { decrypt44 } from '../lib/nostrAPI';
-import { importEvents, NostrEvent, sendArticle, sendDeleteEvent, sendDraft, triggerImportEvents } from '../lib/notes';
+import { importEvents, sendArticle, sendDeleteEvent, sendDraft, triggerImportEvents } from '../lib/notes';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { BeforeLeaveEventArgs, useBeforeLeave, useNavigate, useParams } from '@solidjs/router';
 import { fetchArticles, fetchDrafts } from '../handleNotes';
@@ -34,6 +33,7 @@ import { isIOS } from '../utils';
 import { isAndroid } from '@kobalte/utils';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import noEditorPhone from '../assets/images/editor-phone-message.png';
+import { accountStore, hasPublicKey, quoteNote, setShowPin, showGetStarted, showNewNoteForm } from '../stores/accountStore';
 
 
 export type EditorPreviewMode = 'editor' | 'browser' | 'phone' | 'feed';
@@ -71,7 +71,6 @@ export const emptyReadsMentions = () => ({
 export const [readMentions, setReadMentions] = createStore<ReadMentions>(emptyReadsMentions());
 
 const ReadsEditor: Component = () => {
-  const account = useAccountContext();
   const toast = useToastContext();
   const intl = useIntl();
   const params = useParams();
@@ -129,17 +128,17 @@ const ReadsEditor: Component = () => {
   }
 
   const genereatePreviewArticle = (): PrimalArticle | undefined => {
-    if (!account || !account.activeUser) return;
+    if (!accountStore.activeUser) return;
 
     const content = markdownContent();
 
     let relayHints = {}
     let tags: string[][] = referencesToTags(content, relayHints);;
 
-    const relayTags = account.relays.map(r => {
+    const relayTags = accountStore.relays.map(r => {
       let t = ['r', r.url];
 
-      const settings = account.relaySettings[r.url];
+      const settings = accountStore.relaySettings[r.url];
       if (settings && settings.read && !settings.write) {
         t = [...t, 'read'];
       }
@@ -155,10 +154,15 @@ const ReadsEditor: Component = () => {
     tags.push(['clent', 'Primal']);
 
     const now = Math.floor((new Date()).getTime() / 1_000);
-    const pubkey = account.publicKey || '';
+    const pubkey = accountStore.publicKey || '';
     const identifier = generateIdentifier();
-    const coordinate = `${Kind.LongForm}:${account.publicKey}:${identifier}`;
+    const coordinate = `${Kind.LongForm}:${accountStore.publicKey}:${identifier}`;
     const naddr = nip19.naddrEncode({
+      kind: Kind.LongForm,
+      pubkey,
+      identifier,
+    });
+    const noteIdShort = nip19.naddrEncode({
       kind: Kind.LongForm,
       pubkey,
       identifier,
@@ -169,13 +173,14 @@ const ReadsEditor: Component = () => {
       ...article,
       image: accordionSection().includes('hero_image') ? article.image : '',
       content,
-      user: account.activeUser,
+      user: accountStore.activeUser,
       published: now - 90,
       topZaps: [],
       id,
       pubkey,
       naddr,
       noteId: naddr,
+      noteIdShort,
       coordinate,
       wordCount: Math.ceil(content.split(' ').length / wordsPerMinute),
       noteActions: { event_id: id, liked: false, replied: false, reposted: false, zapped: false },
@@ -239,7 +244,7 @@ const ReadsEditor: Component = () => {
   const loadArticle = async () => {
     const id = params.id;
 
-    if (!id || !account?.publicKey) return;
+    if (!id || !accountStore.publicKey) return;
 
     if (id.startsWith('naddr1')) {
       const reads = await fetchArticles([id], `reads_edit_${APP_ID}`);
@@ -268,13 +273,13 @@ const ReadsEditor: Component = () => {
     if (id.startsWith(`ndraft1`)) {
       const eid = id.split('ndraft1')[1];
 
-      const events = await fetchDrafts(account?.publicKey, [eid], `drafts_edit+${APP_ID}`);
+      const events = await fetchDrafts(accountStore.publicKey, [eid], `drafts_edit+${APP_ID}`);
 
       let draft = events[0];
 
       if (!draft) return;
 
-      const rJson = await decrypt44(account?.publicKey, draft.content);
+      const rJson = await decrypt44(accountStore.publicKey, draft.content);
 
       const r = JSON.parse(rJson);
 
@@ -307,16 +312,16 @@ const ReadsEditor: Component = () => {
   }
 
   const postArticle = async (promote: boolean) => {
-    const user = account?.activeUser;
+    const user = accountStore.activeUser;
 
-    if (!account || !account.hasPublicKey() || !user) {
+    if (!hasPublicKey() || !user) {
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
@@ -334,10 +339,10 @@ const ReadsEditor: Component = () => {
     let relayHints = {}
     let tags: string[][] = referencesToTags(content, relayHints);;
 
-    const relayTags = account.relays.map(r => {
+    const relayTags = accountStore.relays.map(r => {
       let t = ['r', r.url];
 
-      const settings = account.relaySettings[r.url];
+      const settings = accountStore.relaySettings[r.url];
       if (settings && settings.read && !settings.write) {
         t = [...t, 'read'];
       }
@@ -372,7 +377,7 @@ const ReadsEditor: Component = () => {
 
     setIsPublishing(true);
 
-    const { success, reasons, note } = await sendArticle(articleToPost, account.proxyThroughPrimal || false, account.activeRelays, tags, account.relaySettings);
+    const { success, note } = await sendArticle(articleToPost, accountStore.proxyThroughPrimal || false, accountStore.activeRelays, tags, accountStore.relaySettings);
 
     if (success && note) {
 
@@ -403,9 +408,9 @@ const ReadsEditor: Component = () => {
           user.pubkey,
           lastDraft,
           Kind.Draft,
-          account.activeRelays,
-          account.relaySettings,
-          account.proxyThroughPrimal,
+          accountStore.activeRelays,
+          accountStore.relaySettings,
+          accountStore.proxyThroughPrimal,
         );
       }
 
@@ -414,16 +419,14 @@ const ReadsEditor: Component = () => {
   }
 
   const quoteArticle = (postedEvent: NostrRelaySignedEvent) => {
-    if (!account) return;
-
     const naddr = nip19.naddrEncode({
         pubkey: postedEvent.pubkey,
         kind: postedEvent.kind,
         identifier: (postedEvent.tags.find(t => t[0] === 'd') || [])[1] || '',
       });
 
-      account.actions.quoteNote(`nostr:${naddr}`);
-      account.actions.showNewNoteForm();
+      quoteNote(`nostr:${naddr}`);
+      showNewNoteForm();
   }
 
   createEffect(() => {
@@ -494,7 +497,7 @@ const ReadsEditor: Component = () => {
   });
 
   const saveDraft = async () => {
-    const user = account?.activeUser;
+    const user = accountStore.activeUser;
     if (!user) return;
 
     const lastDraft = lastSaved.draftId;
@@ -503,9 +506,9 @@ const ReadsEditor: Component = () => {
       user,
       article,
       markdownContent(),
-      account.activeRelays,
-      account.relaySettings,
-      account.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+      accountStore.proxyThroughPrimal,
     );
 
     if (success && note) {
@@ -525,9 +528,9 @@ const ReadsEditor: Component = () => {
           user.pubkey,
           lastDraft,
           Kind.Draft,
-          account.activeRelays,
-          account.relaySettings,
-          account.proxyThroughPrimal,
+          accountStore.activeRelays,
+          accountStore.relaySettings,
+          accountStore.proxyThroughPrimal,
         );
 
         if (delResponse.success && delResponse.note) {
@@ -554,12 +557,12 @@ const ReadsEditor: Component = () => {
           </div>
         </Match>
 
-        <Match when={!account?.publicKey}>
+        <Match when={!accountStore.publicKey}>
           <div class={styles.caption}>
             <p>
               You must be logged in to use Article Editor
             </p>
-            <ButtonPrimary onClick={account?.actions.showGetStarted}>
+            <ButtonPrimary onClick={showGetStarted}>
               {intl.formatMessage(tActions.getStarted)}
             </ButtonPrimary>
           </div>

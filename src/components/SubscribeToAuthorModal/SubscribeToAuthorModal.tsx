@@ -1,12 +1,9 @@
-import { useIntl } from '@cookbook/solid-intl';
-
 import { Component, createEffect, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Kind } from '../../constants';
 import { hookForDev } from '../../lib/devTools';
 import { NostrTier, PrimalUser } from '../../types/primal';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
-import Modal from '../Modal/Modal';
 
 import styles from './SubscribeToAuthorModal.module.scss';
 import { userName } from '../../stores/profile';
@@ -19,10 +16,9 @@ import ButtonSecondary from '../Buttons/ButtonSecondary';
 import { Select } from '@kobalte/core/select';
 import Loader from '../Loader/Loader';
 import { logInfo } from '../../lib/logger';
-import { getExchangeRate, getMembershipStatus } from '../../lib/membership';
-import { useAccountContext } from '../../contexts/AccountContext';
+import { getExchangeRate } from '../../lib/membership';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
-
+import { accountStore } from '../../stores/accountStore';
 
 export const satsInBTC = 100_000_000;
 
@@ -60,9 +56,6 @@ const SubscribeToAuthorModal: Component<{
   onClose: () => void,
   onSubscribe: (tier: Tier, cost: TierCost, exchangeRate?: Record<string, Record<string, number>>) => void,
 }> = (props) => {
-
-  const account = useAccountContext();
-
   const [store, updateStore] = createStore<TierStore>({
     tiers: [],
     selectedTier: undefined,
@@ -123,7 +116,7 @@ const SubscribeToAuthorModal: Component<{
           }
         });
 
-        getExchangeRate(account?.publicKey, subId, "USD", walletSocket);
+        getExchangeRate(accountStore.publicKey, subId, "USD", walletSocket);
       });
     } else {
       walletSocket?.close();

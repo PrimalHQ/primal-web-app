@@ -1,7 +1,6 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useLocation, useNavigate } from '@solidjs/router';
 import { Component, For, Match, Show, Switch } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { useNotificationsContext } from '../../contexts/NotificationsContext';
 import { navBar as t, actions as tActions, placeholders as tPlaceholders } from '../../translations';
 import NavLink from '../NavLink/NavLink';
@@ -13,9 +12,9 @@ import { useMediaContext } from '../../contexts/MediaContext';
 import { ConfirmInfo, useAppContext } from '../../contexts/AppContext';
 import { useDMContext } from '../../contexts/DMContext';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
+import { accountStore, hasPublicKey, showGetStarted, showNewNoteForm } from '../../stores/accountStore';
 
 const NavMenu: Component< { id?: string } > = (props) => {
-  const account = useAccountContext();
   const notifications = useNotificationsContext();
   const dms = useDMContext();
   const intl = useIntl();
@@ -69,14 +68,14 @@ const NavMenu: Component< { id?: string } > = (props) => {
       label: intl.formatMessage(t.premium),
       icon: 'premiumIcon',
       hiddenOnSmallScreens: true,
-      bubble: () => account?.premiumReminder ? 1 : 0,
+      bubble: () => accountStore.premiumReminder ? 1 : 0,
     },
     {
       to: '/settings',
       label: intl.formatMessage(t.settings),
       icon: 'settingsIcon',
       hiddenOnSmallScreens: true,
-      bubble: () => account?.sec ? 1 : 0,
+      bubble: () => accountStore.sec ? 1 : 0,
     },
   ];
 
@@ -111,7 +110,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
           }
         </For>
       </nav>
-      <Show when={account?.hasPublicKey() && !loc.pathname.startsWith('/messages') && !loc.pathname.startsWith('/premium')}>
+      <Show when={hasPublicKey() && !loc.pathname.startsWith('/messages') && !loc.pathname.startsWith('/premium')}>
         <div class={styles.callToAction}>
           <Switch
             fallback={
@@ -120,7 +119,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
                 fallback={
                   <ButtonPrimary
                     id={props.id}
-                    onClick={account?.actions?.showNewNoteForm}
+                    onClick={showNewNoteForm}
                   >
                     <div class={styles.postIcon}></div>
                   </ButtonPrimary>
@@ -128,7 +127,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
               >
                 <ButtonPrimary
                   id={props.id}
-                  onClick={account?.actions?.showNewNoteForm}
+                  onClick={showNewNoteForm}
                 >
                   {intl.formatMessage(tActions.newNote)}
                 </ButtonPrimary>
@@ -193,12 +192,12 @@ const NavMenu: Component< { id?: string } > = (props) => {
         </div>
       </Show>
 
-      <Show when={account?.isKeyLookupDone && !account?.hasPublicKey() && isBigScreen()}>
+      <Show when={accountStore.isKeyLookupDone && !hasPublicKey() && isBigScreen()}>
         <div class={styles.callToAction}>
           <div class={styles.message}>
             {intl.formatMessage(tPlaceholders.welcomeMessage)}
           </div>
-          <ButtonPrimary onClick={account?.actions.showGetStarted}>
+          <ButtonPrimary onClick={showGetStarted}>
             {intl.formatMessage(tActions.getStarted)}
           </ButtonPrimary>
         </div>

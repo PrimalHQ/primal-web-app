@@ -4,10 +4,9 @@ import { MenuItem, NostrRelaySignedEvent, PrimalArticle } from '../../types/prim
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { authorName, userName } from '../../stores/profile';
-import { note as t, actions as tActions, toast as tToast, toast } from '../../translations';
+import { actions as tActions, toast as tToast, } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import PrimalMenu from '../PrimalMenu/PrimalMenu';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { APP_ID } from '../../App';
 import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
@@ -19,6 +18,16 @@ import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
 import { urlEncode } from '../../utils';
+import {
+  accountStore,
+  addToMuteList,
+  hasPublicKey,
+  quoteNote,
+  removeFromMuteList,
+  setShowPin,
+  showGetStarted,
+  showNewNoteForm,
+} from '../../stores/accountStore';
 
 const ArticleOverviewContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -26,13 +35,11 @@ const ArticleOverviewContextMenu: Component<{
   onClose: () => void,
   id?: string,
 }> = (props) => {
-  const account = useAccountContext();
   const toaster = useToastContext();
   const intl = useIntl();
   const app = useAppContext();
   const navigate = useNavigate();
 
-  const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [confirmUnpublishArticle, setConfirmUnpublishArticle] = createSignal(false);
@@ -71,26 +78,26 @@ const ArticleOverviewContextMenu: Component<{
 
 
   const doMuteUser = () => {
-    account?.actions.addToMuteList(note()?.pubkey);
+    addToMuteList(note()?.pubkey);
     props.onClose();
   };
 
   const doUnmuteUser = () => {
-    account?.actions.removeFromMuteList(note()?.pubkey);
+    removeFromMuteList(note()?.pubkey);
     props.onClose();
   };
 
   const doReportUser = () => {
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
@@ -114,12 +121,12 @@ const ArticleOverviewContextMenu: Component<{
   };
 
   const quoteArticle = () => {
-    account?.actions?.quoteNote(`nostr:${note().noteId}`);
-    account?.actions?.showNewNoteForm();
+    quoteNote(`nostr:${note().noteId}`);
+    showNewNoteForm();
   }
 
   const unpublishArticle = async () => {
-    const user = account?.activeUser;
+    const user = accountStore.activeUser;
     if (!props.data || !user) return;
     const article = props.data.note as PrimalArticle;
 
@@ -127,9 +134,9 @@ const ArticleOverviewContextMenu: Component<{
       user.pubkey,
       article.coordinate,
       Kind.LongForm,
-      account.activeRelays,
-      account.relaySettings,
-      account.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+      accountStore.proxyThroughPrimal,
     );
 
     if (!deleted || !deletedArticle) return;
@@ -146,9 +153,9 @@ const ArticleOverviewContextMenu: Component<{
         tags: [...article.tags],
       },
       article.content,
-      account.activeRelays,
-      account.relaySettings,
-      account.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+      accountStore.proxyThroughPrimal,
     );
 
     if (success && draft) {
@@ -163,7 +170,7 @@ const ArticleOverviewContextMenu: Component<{
   };
 
   const deleteArticle = async () => {
-    const user = account?.activeUser;
+    const user = accountStore.activeUser;
     if (!props.data || !user) return;
     const article = props.data.note as PrimalArticle;
 
@@ -171,9 +178,9 @@ const ArticleOverviewContextMenu: Component<{
       user.pubkey,
       article.coordinate,
       Kind.LongForm,
-      account.activeRelays,
-      account.relaySettings,
-      account.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+      accountStore.proxyThroughPrimal,
     );
 
     if (!success || !note) return;
@@ -235,31 +242,29 @@ const ArticleOverviewContextMenu: Component<{
   };
 
   const broadcastNote = async () => {
-    if (!account || !props.data) {
+    if (!props.data) {
       return;
     }
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
         const sec = readSecFromStorage();
         if (sec) {
-          account.actions.setShowPin(sec);
+          setShowPin(sec);
           return;
         }
       }
 
-    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
-    //   toaster?.sendWarning(
-    //     intl.formatMessage(toast.noRelaysConnected),
-    //   );
-    //   return;
-    // }
-
-    const { success } = await broadcastEvent(note().msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
+    const { success } = await broadcastEvent(
+      note().msg as NostrRelaySignedEvent,
+      accountStore.proxyThroughPrimal,
+      accountStore.activeRelays,
+      accountStore.relaySettings,
+    );
     props.onClose()
 
     if (success) {
@@ -333,7 +338,7 @@ const ArticleOverviewContextMenu: Component<{
   ];
 
   const noteContextForOtherPeople: () => MenuItem[] = () => {
-    const isMuted = account?.muted.includes(note()?.user.pubkey);
+    const isMuted = accountStore.muted.includes(note()?.user.pubkey);
 
     return [
       {
@@ -357,7 +362,7 @@ const ArticleOverviewContextMenu: Component<{
     ];
   };
 
-  const noteContext = () => account?.publicKey !== note()?.pubkey ?
+  const noteContext = () => accountStore.publicKey !== note()?.pubkey ?
       [ ...noteContextForEveryone, ...noteContextForOtherPeople()] :
       noteContextForEveryone;
 

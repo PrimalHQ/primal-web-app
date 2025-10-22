@@ -1,16 +1,10 @@
-import { useIntl } from '@cookbook/solid-intl';
 import { Component, createSignal, Show } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { useAppContext } from '../../contexts/AppContext';
 import { hookForDev } from '../../lib/devTools';
 import { PrimalArticle } from '../../types/primal';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 import styles from './ReadsMentionDialog.module.scss';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
-import { useSearchContext } from '../../contexts/SearchContext';
-import { useProfileContext } from '../../contexts/ProfileContext';
-import { Editor } from '@tiptap/core';
 import { TextField } from '@kobalte/core/text-field';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import { ArticleEdit } from '../../pages/ReadsEditor';
@@ -25,13 +19,6 @@ const ReadsPublishDialog: Component<{
   articleData: ArticleEdit,
   onPublish: (promote: boolean) => void,
 }> = (props) => {
-
-  const intl = useIntl();
-  const account = useAccountContext();
-  const app = useAppContext();
-  const search = useSearchContext();
-  const profile = useProfileContext();
-
   const [promotion, setPromotion] = createSignal('');
   const [showPromotion, setShowPromotion] = createSignal(false);
 

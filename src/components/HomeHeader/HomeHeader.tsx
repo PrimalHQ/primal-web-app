@@ -1,9 +1,8 @@
-import { Component, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
+import { Component, For, onCleanup, onMount, Show } from 'solid-js';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './HomeHeader.module.scss';
 import FeedSelect from '../FeedSelect/FeedSelect';
-import { useAccountContext } from '../../contexts/AccountContext';
 import SmallCallToAction from '../SmallCallToAction/SmallCallToAction';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { useIntl } from '@cookbook/solid-intl';
@@ -11,10 +10,9 @@ import { useSettingsContext } from '../../contexts/SettingsContext';
 import { placeholders as t, actions as tActions, feedNewPosts } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
-import CreateAccountModal from '../CreateAccountModal/CreateAccountModal';
-import LoginModal from '../LoginModal/LoginModal';
 import { userName } from '../../stores/profile';
 import { PrimalUser } from '../../types/primal';
+import { accountStore, hasPublicKey, showGetStarted, showNewNoteForm } from '../../stores/accountStore';
 
 const HomeHeader: Component< {
   id?: string,
@@ -24,7 +22,6 @@ const HomeHeader: Component< {
   newPostAuthors: PrimalUser[],
 } > = (props) => {
 
-  const account = useAccountContext();
   const home = useHomeContext();
   const settings = useSettingsContext();
   const intl = useIntl();
@@ -74,7 +71,7 @@ const HomeHeader: Component< {
   }
 
   const onShowNewNoteinput = () => {
-    account?.actions?.showNewNoteForm();
+    showNewNoteForm();
   };
 
   onMount(() => {
@@ -85,19 +82,19 @@ const HomeHeader: Component< {
     window.removeEventListener('scroll', onScroll);
   });
 
-  const activeUser = () => account?.activeUser;
+  const activeUser = () => accountStore.activeUser;
 
   return (
     <div id={props.id} class={styles.fullHeader}>
       <Show
-        when={account?.hasPublicKey()}
+        when={hasPublicKey()}
         fallback={
-          <Show when={account?.isKeyLookupDone}>
+          <Show when={accountStore.isKeyLookupDone}>
             <div class={styles.welcomeMessage}>
               <div>
                 {intl.formatMessage(t.guestUserGreeting)}
               </div>
-              <ButtonPrimary onClick={account?.actions.showGetStarted}>
+              <ButtonPrimary onClick={showGetStarted}>
                 {intl.formatMessage(tActions.getStarted)}
               </ButtonPrimary>
             </div>
@@ -141,7 +138,7 @@ const HomeHeader: Component< {
       <div class={`${styles.smallHeader} ${styles.instaHide}`} ref={smallHeader}>
         <div class={styles.smallHeaderMain}>
           <Show
-            when={account?.hasPublicKey()}
+            when={hasPublicKey()}
             fallback={
               <div class={styles.smallLeft}>
                 <div class={styles.welcomeMessageSmall}>
@@ -170,7 +167,7 @@ const HomeHeader: Component< {
 
 
       <Show when={
-        props.hasNewPosts() && !account?.showNewNoteForm
+        props.hasNewPosts() && !accountStore.showNewNoteForm
       }>
         <div class={styles.newContentNotification}>
           <button

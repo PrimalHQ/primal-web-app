@@ -1,35 +1,13 @@
-import { A } from '@solidjs/router';
-import { batch, Component, createEffect, createSignal, For, JSXElement, onMount, Show } from 'solid-js';
-import { createStore } from 'solid-js/store';
-import { Portal } from 'solid-js/web';
-import { Kind } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
-import { useThreadContext } from '../../contexts/ThreadContext';
-import { date, shortDate } from '../../lib/dates';
+import { Component, createEffect, createSignal, For, Show } from 'solid-js';
+import { date } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
-import { removeHighlight, sendHighlight } from '../../lib/highlights';
 import { userName } from '../../stores/profile';
-import { NostrRelaySignedEvent, PrimalArticle, PrimalNote, PrimalUser, ZapOption } from '../../types/primal';
-import { uuidv4 } from '../../utils';
+import { PrimalNote, PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
-import { NoteReactionsState } from '../Note/Note';
-import NoteContextTrigger from '../Note/NoteContextTrigger';
-import ArticleFooter from '../Note/NoteFooter/ArticleFooter';
-import NoteFooter from '../Note/NoteFooter/NoteFooter';
-import NoteTopZaps from '../Note/NoteTopZaps';
-import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './ArticleHighlight.module.scss';
 import ParsedNote from '../ParsedNote/ParsedNote';
-
-const topOffset = 64 + 8;
-
-type Coord = {
-  x: number;
-  y: number;
-};
 
 const ArticleHighlightComments: Component<{
   id?: string,
@@ -38,7 +16,6 @@ const ArticleHighlightComments: Component<{
   author: PrimalUser,
   getCoAuthors: (highlight: any) => PrimalUser[],
 }> = (props) => {
-  const account = useAccountContext();
 
   const comms = () => {
     return props.comments.filter(c => c.replyTo === props.highlight.id);
