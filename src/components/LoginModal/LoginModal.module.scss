@@ -10,7 +10,7 @@
   width: 945px;
   color: var(--text-secondary);
   background-color: var(--background-input);
-  border-radius: 8px;
+  border-radius: 12px;
 
   display: flex;
   flex-direction: column;
@@ -28,6 +28,7 @@
   border-color: var(--subtile-devider);
   padding: 40px 60px;
   background: var(--background-header-input);
+  border-radius: 0 0 12px 12px;
 }
 
 .profileTabs {
@@ -75,6 +76,13 @@
 .extensionLogin {
   display: flex;
   gap: 48px;
+
+  .qrCode {
+    width: 234px;
+    height: 234px;
+    overflow: hidden;
+    border-radius: 12px;
+  }
 
   .extensionIcon {
     min-width: 234px;
@@ -219,4 +227,68 @@
       font-weight: 700;
     }
   }
+}
+
+.simpleDesc {
+  display: flex;
+  flex-direction: column;
+  gap: 50px;
+
+  .loginExplain {
+    color: var(--text-secondary);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 24px;
+  }
+
+  .loginList {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+
+    .loginListItem {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .number {
+        color: var(--accent-links);
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 24px;
+      }
+
+      .itemLabel {
+        color: var(--text-primary);
+        font-size: 24px;
+        font-weight: 400;
+        line-height: 24px;
+
+        button {
+          display: inline;
+          width: fit-content;
+          color: var(--accent-links);
+        }
+      }
+    }
+  }
+}
+
+button.copyButton {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  color: var(--accent-links);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 24px;
+}
+
+.copyIcon {
+  width: 16px;
+  height: 16px;
+  background-color: var(--accent-links);
+  -webkit-mask: url(../../assets/icons/copy_border.svg) no-repeat 0 / 100%;
+  mask: url(../../assets/icons/copy_border.svg) no-repeat 0 / 100%;
 }

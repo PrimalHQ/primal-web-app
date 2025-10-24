@@ -17,6 +17,7 @@ import { Tabs } from '@kobalte/core/tabs';
 import extensionIcon from '../../assets/images/extension.svg';
 import nsecIcon from '../../assets/images/nsec.svg';
 import { useToastContext } from '../Toaster/Toaster';
+import QrCode from '../QrCode/QrCode';
 
 const LoginModal: Component<{
   id?: string,
@@ -164,7 +165,40 @@ const LoginModal: Component<{
 
               <div class={styles.tabContent}>
                 <Tabs.Content value="simple" >
-                  <div class={styles.simpleLogin}></div>
+                  <div class={styles.extensionLogin}>
+                    <div class={styles.qrCode}>
+                      <QrCode
+                        data="https://primal.net"
+                        width={234}
+                        height={234}
+                      />
+                    </div>
+                    <div class={styles.simpleDesc}>
+                      <div class={styles.loginExplain}>
+                        The simplest way to login:
+                      </div>
+                      <div class={styles.loginList}>
+                        <div class={styles.loginListItem}>
+                          <div class={styles.number}>1</div>
+                          <div class={styles.itemLabel}>
+                            Open your Primal mobile app
+                          </div>
+                        </div>
+
+                        <div class={styles.loginListItem}>
+                          <div class={styles.number}>2</div>
+                          <div class={styles.itemLabel}>
+                            Select “Scan Code” from the side menu
+                          </div>
+                        </div>
+                      </div>
+
+                      <button class={styles.copyButton}>
+                        <div class={styles.copyIcon}></div>
+                        <div>Copy Login URL</div>
+                      </button>
+                    </div>
+                  </div>
                 </Tabs.Content>
                 <Tabs.Content value="extension" >
                   <div class={styles.extensionLogin}>
