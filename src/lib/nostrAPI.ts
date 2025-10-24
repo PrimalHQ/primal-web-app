@@ -1,3 +1,4 @@
+import { accountStore } from "../stores/accountStore";
 import {
   NostrExtension,
   NostrRelayEvent,
@@ -75,11 +76,40 @@ const enqueueWebLn = async <T>(action: (webln: WebLnExtension) => Promise<T>) =>
 }
 
 const enqueueNostr = async <T>(action: (nostr: NostrExtension) => Promise<T>) => {
-  const win = window as NostrWindow;
-  const nostr = win.nostr || PrimalNostr();
+  const loginType = accountStore.loginType;
+
+  if (['none', 'guest', 'npub'].includes(loginType)) throw('no_login');
+
+  let nostr: NostrExtension | undefined;
+
+  if (loginType === 'extension') {
+    const win = window as NostrWindow;
+    nostr = win.nostr;
+
+    if (nostr === undefined) {
+      throw('no_nostr_extension');
+    }
+  }
+
+  if (loginType === 'local') {
+    nostr = PrimalNostr();
+
+    if (nostr === undefined) {
+      throw('no_nostr_local');
+    }
+  }
+
+  if (loginType === 'nip46') {
+    // TODO actually implement nip46 signer
+    nostr = PrimalNostr();
+
+    if (nostr === undefined) {
+      throw('no_nostr_nip46');
+    }
+  }
 
   if (nostr === undefined) {
-    throw('no_nostr_extension');
+    throw('unknown_login');
   }
 
   return await eventQueue.enqueue<T>(() => action(nostr));

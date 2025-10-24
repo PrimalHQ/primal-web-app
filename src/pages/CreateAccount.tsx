@@ -341,10 +341,7 @@ const CreateAccount: Component = () => {
   };
 
   onMount(() => {
-    const { sec, pubkey } = generateKeys(true);
-
-    // @ts-ignore
-    const nsec = hexToNsec(sec);
+    const { nsec, pubkey } = generateKeys(true);
 
     setSec(nsec);
     setTempNsec(nsec);

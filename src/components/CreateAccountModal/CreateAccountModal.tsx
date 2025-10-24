@@ -10,6 +10,7 @@ import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonLink from '../Buttons/ButtonLink';
 import { useNavigate } from '@solidjs/router';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
+import { loginUsingExtension, logUserIn, setLoginType } from '../../stores/accountStore';
 
 const CreateAccountModal: Component<{
   id?: string,
@@ -46,6 +47,14 @@ const CreateAccountModal: Component<{
             onClick={onCreateAccount}
           >
             {intl.formatMessage(tActions.createAccount)}
+          </ButtonPrimary>
+
+          <ButtonPrimary
+            onClick={() => {
+              loginUsingExtension();
+            }}
+          >
+            Use Extension
           </ButtonPrimary>
         </div>
         <div class={styles.alternative}>

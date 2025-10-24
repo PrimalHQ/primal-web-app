@@ -728,7 +728,8 @@ const EditBox: Component<{
   const [isPostingInProgress, setIsPostingInProgress] = createSignal(false);
 
   const postNote = async () => {
-    if (hasPublicKey() || fileToUpload()) {
+
+    if (!hasPublicKey() || fileToUpload()) {
       return;
     }
 
@@ -909,6 +910,8 @@ const EditBox: Component<{
       tags = [...tags, ...relayTags];
 
       setIsPostingInProgress(true);
+
+      console.log('SEND NOTE: ', messageToSend)
 
       const { success, reasons, note } = await sendNote(
         messageToSend,

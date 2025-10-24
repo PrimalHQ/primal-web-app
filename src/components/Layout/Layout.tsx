@@ -97,11 +97,11 @@ const Layout: Component<any> = (props) => {
     }
   });
 
-  createEffect(() => {
-    if (!accountStore.publicKey) {
-      checkNostrKey();
-    }
-  });
+  // createEffect(() => {
+  //   if (!accountStore.publicKey) {
+  //     checkNostrKey();
+  //   }
+  // });
 
   return (
     <Show

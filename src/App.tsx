@@ -19,17 +19,31 @@ import 'media-chrome';
 import "media-chrome/media-theme-element";
 import 'hls-video-element';
 import 'videojs-video-element';
+import { generatePrivateKey, getPublicKey, nip19 } from './lib/nTools';
 
 
 
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_${version}_${Math.floor(Math.random()*10000000000)}`;
 
+const generateAppKeys = () => {
+    if (localStorage.getItem('appNsec')) return;
+
+    let sk = generatePrivateKey();
+    let pk = getPublicKey(sk);
+
+    localStorage.setItem('appNsec', nip19.nsecEncode(sk));
+    localStorage.setItem('appPubkey', pk);
+  }
+
+export const getAppPK = () => localStorage.getItem('pk');
+
+
 const App: Component = () => {
 
   onMount(() => {
     connect();
-
+    generateAppKeys();
     // if ('serviceWorker' in navigator) {
     //   navigator.serviceWorker.register('./sw.js')
     //     .then(reg => console.log('SW registered: ', reg))

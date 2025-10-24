@@ -78,7 +78,7 @@ export const getHomeSettings = async (subid: string) => {
 
     return true;
   } catch (reason) {
-    console.error('Failed to get settings: ', reason);
+    console.error('Failed to get home settings: ', reason);
     return false;
   }
 
@@ -131,7 +131,7 @@ export const getReadsSettings = async (subid: string) => {
 
     return true;
   } catch (reason) {
-    console.error('Failed to get settings: ', reason);
+    console.error('Failed to get reads settings: ', reason);
     return false;
   }
 
@@ -194,7 +194,7 @@ export const getNWCSettings = async (subid: string) => {
 
     return true;
   } catch (reason) {
-    console.error('Failed to get settings: ', reason);
+    console.error('Failed to get nwc settings: ', reason);
     return false;
   }
 

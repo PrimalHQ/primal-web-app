@@ -4,6 +4,7 @@ import { NotificationType, andRD, andVersion, contentScope, defaultContentModera
 import {
   createContext,
   createEffect,
+  on,
   onMount,
   useContext
 } from "solid-js";
@@ -1015,19 +1016,21 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   });
 
   // Initial setup for a user with a public key
-  createEffect(() => {
-    if (!hasPublicKey() && accountStore.isKeyLookupDone) {
+  createEffect(on(() => accountStore.isKeyLookupDone, () => {
+    if (!accountStore.isKeyLookupDone) return;
+
+    const pubkey = accountStore.publicKey;
+    console.log('LOAD SETTINGS: ', pubkey);
+    if (!pubkey) {
       loadDefaults();
       return;
     }
 
-    const publicKey = accountStore.publicKey;
-
     if (!isConnected()) return;
 
-    loadSettings(publicKey, () => {
+    loadSettings(pubkey, () => {
     });
-  });
+  }));
 
   createEffect(() => {
     const html: HTMLElement | null = document.querySelector('html');

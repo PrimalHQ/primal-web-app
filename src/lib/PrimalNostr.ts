@@ -12,12 +12,16 @@ export const [currentPin, setCurrentPin] = createSignal('');
 export const [tempNsec, setTempNsec] = createSignal<string | undefined>();
 
 export const generateKeys = (forceNewKey?: boolean) => {
-  const sec = forceNewKey ?
-    generatePrivateKey() :
-    readSecFromStorage() || generatePrivateKey();
+  let sec = generatePrivateKey();
+  let nsec = readSecFromStorage();
+
+  if (forceNewKey) {
+    nsec = nip19.nsecEncode(sec);
+  }
+
   const pubkey = getPublicKey(sec);
 
-  return { sec, pubkey };
+  return { sec, nsec, pubkey };
 };
 
 export const encryptWithPin = async (pin: string, text: string) => {

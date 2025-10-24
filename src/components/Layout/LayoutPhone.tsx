@@ -46,13 +46,13 @@ const LayoutPhone: Component<{
     }
   });
 
-  createEffect(() => {
-    if (location.pathname === '/') return;
+  // createEffect(() => {
+  //   if (location.pathname === '/') return;
 
-    if (!accountStore.publicKey) {
-      checkNostrKey();
-    }
-  });
+  //   if (!accountStore.publicKey) {
+  //     checkNostrKey();
+  //   }
+  // });
 
   const containerClass = () => {
     let k = styles.containerPhone;

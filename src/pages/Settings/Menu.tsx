@@ -91,7 +91,7 @@ const Menu: Component = () => {
         </Show>
       </div>
 
-      <Show when={accountStore.sec}>
+      <Show when={accountStore.publicKey && !['none', 'guest'].includes(accountStore.loginType)}>
         <div class={styles.webVersion}>
           <ButtonPrimary onClick={() => {
             logout();

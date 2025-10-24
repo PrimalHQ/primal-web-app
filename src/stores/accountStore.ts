@@ -53,6 +53,9 @@ import {
   saveEmojiHistory,
   setStoredProfile,
   saveBookmarks,
+  readEmojiHistory,
+  readPrimalRelaySettings,
+  savePrimalRelaySettings,
 } from "../lib/localStore";
 
 import {
@@ -115,7 +118,12 @@ export type FollowData = {
   following: string[],
 };
 
+const LOGIN_TYPES = ['extension', 'local', 'npub', 'guest', 'nip46', 'none'] as const;
+
+export type LoginType = (typeof LOGIN_TYPES)[number];
+
 export type AccountStore = {
+  loginType: LoginType,
   likes: string[],
   defaultRelays: string[],
   relays: Relay[],
@@ -175,7 +183,8 @@ let connectedRelaysCopy: Relay[] = [];
 
 let membershipSocket: WebSocket | undefined;
 
-export const initAccountStore = {
+export const initAccountStore: AccountStore = {
+  loginType: 'none',
   likes: [],
   defaultRelays: [],
   relays: [],
@@ -415,9 +424,9 @@ export const initAccountStore = {
 
   export const logout = () => {
     updateAccountStore('sec', () => undefined);
-    updateAccountStore('publicKey', () => undefined);
-    localStorage.removeItem('pubkey');
     clearSec();
+    setPublicKey(undefined);
+    setLoginType('none');
   };
 
   export const setSec = (sec: string | undefined, force?: boolean) => {
@@ -452,21 +461,14 @@ export const initAccountStore = {
 
   export const setPublicKey = (pubkey: string | undefined) => {
 
-    if(pubkey && pubkey.length > 0) {
+    if (pubkey && pubkey.length > 0) {
       updateAccountStore('publicKey', () => pubkey);
       localStorage.setItem('pubkey', pubkey);
-      checkMembershipStatus();
-
-      const bks = readBookmarks(pubkey);
-      updateAccountStore('bookmarks', () => [...bks]);
-      fetchBookmarks();
     }
     else {
       updateAccountStore('publicKey', () => undefined);
       localStorage.removeItem('pubkey');
     }
-
-    updateAccountStore('isKeyLookupDone', () => true);
   };
 
   export const hasPublicKey: () => boolean = () => {
@@ -1806,22 +1808,242 @@ export const initAccountStore = {
     triggerImportEvents([note], `import_blossom_list_${APP_ID}`, then);
   }
 
-  export const fetchNostrKey = async () => {
+  export const setLoginType = (type: LoginType) => {
+    localStorage.setItem('loginType', type);
+    updateAccountStore('loginType', () => type);
+  }
 
-    const storedKey = localStorage.getItem('pubkey');
+  export const doAfterLogin = (pubkey: string) => {
+    console.log('DO AFTER LOGIN');
+    updateAccountStore('isKeyLookupDone', true);
 
-    if (storedKey) {
-      setPublicKey(storedKey);
+    const storage = getStorage(pubkey);
 
-      // Read profile from storage
-      const storedUser = getStoredProfile(storedKey);
 
-      if (storedUser) {
-        // If it exists, set it as active user
-        updateAccountStore('activeUser', () => ({...storedUser}));
-      }
+    checkMembershipStatus();
+
+    const bks = readBookmarks(pubkey);
+    updateAccountStore('bookmarks', () => [...bks]);
+    fetchBookmarks();
+
+// ===========================================
+
+
+    let relaySettings = { ...storage.relaySettings };
+
+    updateAccountStore('relaySettings', () => ({ ...storage.relaySettings }));
+
+    let nwcActive = storage.nwcActive;
+
+    nwcActive && setActiveNWC(nwcActive);
+
+    if (Object.keys(relaySettings).length > 0) {
+      connectToRelays(relaySettings);
       return;
     }
+
+    if (accountStore.isKeyLookupDone && accountStore.publicKey) {
+      relaySettings = { ...getStorage(accountStore.publicKey).relaySettings };
+
+      connectToRelays(relaySettings);
+      return;
+    }
+// ==================================================
+
+    if (accountStore.followingSince < storage.followingSince) {
+      updateAccountStore('following', () => ({ ...storage.following }));
+      updateAccountStore('followingSince', () => storage.followingSince);
+    }
+
+    updateContactsList();
+    updateRelays();
+    updateAccountStore('emojiHistory', () => readEmojiHistory(pubkey))
+    updateAccountStore('connectToPrimaryRelays', () => readPrimalRelaySettings(pubkey))
+
+
+// ==================================================
+
+    if (accountStore.mutedSince < storage.mutedSince) {
+      updateAccountStore('muted', () => ({ ...storage.muted }));
+      updateAccountStore('mutedSince', () => storage.mutedSince);
+      updateAccountStore('mutedPrivate', () => storage.mutedPrivate);
+    }
+
+    const mutelistId = `mutelist_${APP_ID}`;
+
+    handleSubscription(
+      mutelistId,
+      () => getProfileMuteList(pubkey, mutelistId),
+      handleMuteListEvent,
+    );
+
+    if (accountStore.mutedSince < storage.mutedSince) {
+      updateAccountStore('streamMuted', () => ({ ...storage.streamMuted }));
+      updateAccountStore('streamMutedSince', () => storage.streamMutedSince);
+      updateAccountStore('streamMutedPrivate', () => storage.streamMutedPrivate);
+    }
+
+    const streamMuteListid = `streammutelist_${APP_ID}`;
+
+    handleSubscription(
+      streamMuteListid,
+      () => getReplacableEvent(pubkey, Kind.StreamMuteList, streamMuteListid),
+      handleStreamMuteListEvent,
+    );
+
+    getFilterLists(pubkey);
+    getAllowList(pubkey);
+
+// ===========================================
+const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
+
+    savePrimalRelaySettings(pubkey, accountStore.connectToPrimaryRelays);
+
+    if (accountStore.connectToPrimaryRelays) {
+      const aru = accountStore.suspendedRelays.map(r => r.url) as string[];
+
+      const relaySettings = rels.
+        filter(u => !aru.includes(u) && !aru.includes(`${u}/`)).
+        reduce((acc, r) => ({
+          ...acc,
+          [r]: { read: true, write: true } ,
+        }), {});
+
+      connectToRelays(relaySettings)
+    }
+    else {
+      for (let i = 0; i < rels.length; i++) {
+        const url = rels[i];
+        const urlVariants = [url, url.endsWith('/') ? url.slice(0, -1) : `${url}/`];
+
+        for (let i = 0; i < urlVariants.length;i++) {
+          const u = urlVariants[i]
+          const relay = accountStore.relays.find(r => r.url === u);
+
+          if (relay) {
+            relay.close();
+            const filtered = accountStore.relays.filter(r => r.url !== u);
+            updateAccountStore('relays', () => filtered);
+            updateAccountStore('activeRelays', () => filtered);
+          }
+        }
+      }
+    }
+
+  }
+
+
+  export const logUserIn = () => {
+    const storedLoginType = (localStorage.getItem('loginType') || 'none') as LoginType;
+
+    let type = accountStore.loginType;
+
+    if (LOGIN_TYPES.includes(storedLoginType)) {
+      setLoginType(storedLoginType);
+      type = storedLoginType;
+    }
+
+    switch (type) {
+      case 'npub':
+        loginUsingNpub();
+        break;
+      case 'extension':
+        loginUsingExtension();
+        break;
+      case 'local':
+        loginUsingLocalNsec();
+        break;
+      case 'nip46':
+        loginUsingNip46();
+        break;
+      default:
+        loginGuest();
+        break;
+    }
+  }
+
+  export const loginGuest = () => {
+    setPublicKey(undefined);
+    updateAccountStore('activeUser', () => undefined);
+    updateAccountStore('isKeyLookupDone', () => true);
+  };
+
+  export const loginUsingExtension = async (extensionAttempt = 0) => {
+    const win = window as NostrWindow;
+    const nostr = win.nostr;
+
+    fetchNostrKey();
+
+    if (!nostr) {
+      if (extensionAttempt > 4) {
+        logInfo('Nostr extension not found');
+        return;
+      }
+
+      logInfo('Nostr extension retry attempt: ', extensionAttempt)
+      setTimeout(() => loginUsingExtension(extensionAttempt + 1), 250);
+      return;
+    }
+
+    try {
+      setLoginType('extension');
+      const key = await getPublicKey();
+
+      if (key === undefined) {
+        setTimeout(() => {
+          loginUsingExtension(extensionAttempt + 1);
+        }, 250);
+      }
+      else {
+        setPublicKey(key);
+
+        // Read profile from storage
+        const storedUser = getStoredProfile(key);
+
+        if (storedUser) {
+          // If it exists, set it as active user
+          updateAccountStore('activeUser', () => ({...storedUser}));
+        }
+
+        // Fetch it anyway, maybe there is an update
+        updateAccountProfile(key);
+
+        doAfterLogin(key);
+      }
+    } catch (e: any) {
+      setLoginType('none');
+      setPublicKey(undefined);
+      localStorage.removeItem('pubkey');
+      logError('error fetching public key: ', e);
+    }
+  };
+
+  export const loginUsingLocalNsec = () => {};
+
+  export const loginUsingNpub = () => {};
+
+  export const loginUsingNip46 = () => {};
+
+  export const fetchNostrKey = () => {
+    const storedKey = localStorage.getItem('pubkey');
+
+    if (!storedKey) return false;
+
+    setPublicKey(storedKey);
+
+    // Read profile from storage
+    const storedUser = getStoredProfile(storedKey);
+
+    if (storedUser) {
+      // If it exists, set it as active user
+      updateAccountStore('activeUser', () => ({...storedUser}));
+    }
+
+    // Fetch it anyway, maybe there is an update
+    updateAccountProfile(storedKey);
+
+    return true;
+
   };
 
 // NOSTR HANDLERS --------------------------------------------------------------

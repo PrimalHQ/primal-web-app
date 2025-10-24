@@ -17,6 +17,7 @@ import { Kind } from "../constants";
 import { LegendCustomizationConfig } from "../lib/premium";
 import { config } from "@milkdown/core";
 import { StreamingData } from "../lib/streaming";
+import { logUserIn } from "../stores/accountStore";
 
 
 export type ReactionStats = {
@@ -576,6 +577,10 @@ const onSocketClose = (closeEvent: CloseEvent) => {
     document.addEventListener('scroll', monitorActivity);
     document.addEventListener('keydown', monitorActivity);
   });
+
+  onMount(() => {
+    logUserIn();
+  })
 
   onCleanup(() => {
     document.removeEventListener('mousemove', monitorActivity);
