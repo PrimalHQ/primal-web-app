@@ -1,49 +1,112 @@
+.title {
+  color: var(--text-primary);
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 32px;
+  margin-left: 36px;
+}
+
 .modal {
-  width: 440px;
+  width: 945px;
   color: var(--text-secondary);
   background-color: var(--background-input);
   border-radius: 8px;
 
   display: flex;
   flex-direction: column;
+  padding: 36px;
 
-  .title {
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 20px;
-    color: var(--text-primary);
-    margin-bottom: 20px;
-  }
-
-  .description {
-    color: var(--text-primary);
-    font-size: 15px;
-    font-weight: 400;
-    line-height: 20px;
-    margin-bottom: 28px;
-  }
-
-  .actions {
+  .infoWrapper {
     display: flex;
+    gap:48px;
     justify-content: flex-start;
-    margin-bottom: 20px;
+    align-items: flex-start;
 
-    button {
-      width: fit-content;
-      padding-block: 10px;
-      padding-inline: 30px;
-      margin: 0px;
+    img {
+      width: 234px;
+      height: 234px;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    .loginSteps {
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+
+      .loginExplain {
+        color: var(--text-secondary);
+        font-size: 18px;
+        font-weight: 400;
+        line-height: 24px;
+      }
+
+      .loginList {
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+
+        .loginListItem {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+
+          .number {
+            color: var(--accent-links);
+            font-size: 24px;
+            font-weight: 700;
+            line-height: 24px;
+          }
+
+          .itemLabel {
+            color: var(--text-primary);
+            font-size: 24px;
+            font-weight: 400;
+            line-height: 24px;
+
+            button {
+              display: inline;
+              width: fit-content;
+              color: var(--accent-links);
+            }
+          }
+        }
+      }
     }
   }
 
-  .alternative {
-    color: var(--text-primary);
-    font-size: 15px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 20px;
-  }
+  .bellowInfo {
+    width: 100%;
+    display: flex;
+    gap: 48px;
+    margin-top:16px;
 
+    .appLinks {
+      display: flex;
+      justify-content: space-between;
+      width: 234px;
+
+      a {
+        img {
+          width: 108px;
+          height: 34px;
+        }
+      }
+    }
+
+    .loginNow {
+      color: var(--text-secondary);
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 24px;
+
+      button {
+        display: inline;
+        width: fit-content;
+        color: var(--accent-links);
+      }
+    }
+  }
 }
 
 .hidden {

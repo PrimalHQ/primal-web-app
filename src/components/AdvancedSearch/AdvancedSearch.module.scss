@@ -432,6 +432,17 @@
       margin: 0;
     }
 
+    &.noPadding {
+      padding: 0;
+
+      .dialogHeader {
+        .dialogCloseButton {
+          margin-top: 20px;
+          margin-right: 24px;
+        }
+      }
+    }
+
   }
 
   @media only screen and (max-width: 720px) {

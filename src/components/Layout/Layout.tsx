@@ -32,7 +32,8 @@ import LiveStreamContextMenu from '../Note/LiveStreamContextMenu';
 import ProfileQrCodeModal from '../ProfileQrCodeModal/ProfileQrCodeModal';
 import ReportContentModal from '../ReportContentModal/ReportContentModal';
 import NoteVideoContextMenu from '../Note/NoteVideoContextMenu';
-import { accountStore, checkNostrKey, logout, resolveContacts, setFlag, setFollowData, setSec, setString } from '../../stores/accountStore';
+import { accountStore, checkNostrKey, doAfterLogin, loginUsingLocalNsec, logout, resolveContacts, setFlag, setFollowData, setSec, setString } from '../../stores/accountStore';
+import { storeSec } from '../../lib/localStore';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -193,6 +194,7 @@ const Layout: Component<any> = (props) => {
           valueToDecrypt={accountStore.showPin}
           onSuccess={(sec: string) => {
             setSec(sec, true);
+            accountStore.publicKey && doAfterLogin(accountStore.publicKey);
             setString('showPin', '');
           }}
           onAbort={() => setString('showPin', '')}

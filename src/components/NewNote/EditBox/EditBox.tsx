@@ -911,8 +911,6 @@ const EditBox: Component<{
 
       setIsPostingInProgress(true);
 
-      console.log('SEND NOTE: ', messageToSend)
-
       const { success, reasons, note } = await sendNote(
         messageToSend,
         accountStore.proxyThroughPrimal || false,

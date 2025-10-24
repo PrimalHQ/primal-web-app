@@ -51,8 +51,25 @@ export const account = {
   },
   createNewDescription: {
     id: 'account.createNewDescription',
-    defaultMessage: 'New to Nostr? Create your account now and join this magical place. It’s quick and easy!',
+    defaultMessage: 'It will only take a minute to login to primal.net securely.',
     description: 'Label inviting users to join Nostr',
+  },
+  getStartedSteps: {
+    step_one: {
+      id: 'settings.account.getStartedSteps.step_one',
+      defaultMessage: 'Install the Primal mobile app',
+      description: 'First step in getting started',
+    },
+    step_two: {
+      id: 'settings.account.getStartedSteps.step_two',
+      defaultMessage: 'Create your account within the app ',
+      description: 'Second step in getting started',
+    },
+    step_three: {
+      id: 'settings.account.getStartedSteps.step_three',
+      defaultMessage: 'Go to the login page and scan the QR code',
+      description: 'First step in getting started',
+    },
   },
   create: {
     title: {
@@ -83,8 +100,30 @@ export const account = {
 export const login = {
   title: {
     id: 'login.title',
-    defaultMessage: 'Login',
+    defaultMessage: 'Login to Primal.net',
     description: 'Login ',
+  },
+  tabs: {
+    simple: {
+      id: 'login.tabs.simple',
+      defaultMessage: 'Simple Login',
+      description: 'Simple login',
+    },
+    extension: {
+      id: 'login.tabs.extension',
+      defaultMessage: 'Browser Extension',
+      description: 'Browser Extension',
+    },
+    nsec: {
+      id: 'login.tabs.nsec',
+      defaultMessage: 'Nsec Login',
+      description: 'Nsec login',
+    },
+    npub: {
+      id: 'login.tabs.npub',
+      defaultMessage: 'Npub Login',
+      description: 'Npub login',
+    },
   },
   description: {
     id: 'login.description',
@@ -191,6 +230,11 @@ export const actions = {
     id: 'actions.getStarted',
     defaultMessage: 'Get Started',
     description: 'Get Started action, button label',
+  },
+  getStartedTitle: {
+    id: 'actions.getStartedTitle',
+    defaultMessage: 'Get Started - Download the Primal Mobile App',
+    description: 'Get Started action title',
   },
   forgotPin: {
     id: 'actions.forgotPin',

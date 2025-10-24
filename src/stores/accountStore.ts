@@ -95,6 +95,7 @@ import {
   Kind,
   supportedBookmarkTypes,
   primalBlossom,
+  pinEncodePrefix,
 } from "../constants";
 
 import {
@@ -1814,11 +1815,11 @@ export const initAccountStore: AccountStore = {
   }
 
   export const doAfterLogin = (pubkey: string) => {
-    console.log('DO AFTER LOGIN');
     updateAccountStore('isKeyLookupDone', true);
 
-    const storage = getStorage(pubkey);
+    updateAccountProfile(pubkey);
 
+    const storage = getStorage(pubkey);
 
     checkMembershipStatus();
 
@@ -1839,14 +1840,11 @@ export const initAccountStore: AccountStore = {
 
     if (Object.keys(relaySettings).length > 0) {
       connectToRelays(relaySettings);
-      return;
     }
-
-    if (accountStore.isKeyLookupDone && accountStore.publicKey) {
+    else {
       relaySettings = { ...getStorage(accountStore.publicKey).relaySettings };
 
       connectToRelays(relaySettings);
-      return;
     }
 // ==================================================
 
@@ -1895,7 +1893,7 @@ export const initAccountStore: AccountStore = {
     getAllowList(pubkey);
 
 // ===========================================
-const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
+    const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
 
     savePrimalRelaySettings(pubkey, accountStore.connectToPrimaryRelays);
 
@@ -2005,9 +2003,6 @@ const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
           updateAccountStore('activeUser', () => ({...storedUser}));
         }
 
-        // Fetch it anyway, maybe there is an update
-        updateAccountProfile(key);
-
         doAfterLogin(key);
       }
     } catch (e: any) {
@@ -2018,9 +2013,46 @@ const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
     }
   };
 
-  export const loginUsingLocalNsec = () => {};
+  export const loginUsingLocalNsec = () => {
+    const sec = readSecFromStorage();
 
-  export const loginUsingNpub = () => {};
+    if (!sec) return;
+
+    setLoginType('local');
+    fetchNostrKey()
+
+    if (sec.startsWith(pinEncodePrefix)) {
+      updateAccountStore('showPin', () => sec);
+    }
+    else {
+      setSec(sec);
+      accountStore.publicKey && doAfterLogin(accountStore.publicKey)
+    }
+  };
+
+  export const loginUsingNpub = (npub?: string) => {
+    setLoginType('npub');
+
+    if (npub) {
+      const decoded = nip19.decode(npub);
+
+      if (decoded.type !== 'npub') return;
+
+      const pk = decoded.data;
+
+      setPublicKey(pk);
+      doAfterLogin(pk);
+      return;
+    }
+
+
+    let pk = localStorage.getItem('pubkey');
+
+    if (!pk) return;
+
+    setPublicKey(pk);
+    doAfterLogin(pk);
+  };
 
   export const loginUsingNip46 = () => {};
 

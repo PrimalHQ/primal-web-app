@@ -1,55 +1,222 @@
+.title {
+  color: var(--text-primary);
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 32px;
+  margin-left: 60px;
+}
+
 .modal {
-  width: 440px;
+  width: 945px;
   color: var(--text-secondary);
   background-color: var(--background-input);
   border-radius: 8px;
 
   display: flex;
   flex-direction: column;
+}
 
-  .title {
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 20px;
-    color: var(--text-primary);
-    margin-bottom: 20px;
+.hidden {
+  display: none;
+}
+
+.tabContent {
+  width: 100%;
+  min-height: 315px;
+  height: fit-content;
+  border-top: 1px solid;
+  border-color: var(--subtile-devider);
+  padding: 40px 60px;
+  background: var(--background-header-input);
+}
+
+.profileTabs {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 24px;
+  align-items: center;
+  width: 100%;
+  padding-inline: 60px;
+}
+
+.profileTab {
+  position: relative;
+  display: inline-block;
+  border: none;
+  background: none;
+  width: fit-content;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 12px;
+
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 14px;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.profileTabIndicator {
+  position: absolute;
+  height: 4px;
+  top: 22px;
+  left: 0;
+  border-radius: 2px 2px 0px 0px;
+  background: var(--accent);
+  transition: all 250ms;
+}
+
+.extensionLogin {
+  display: flex;
+  gap: 48px;
+
+  .extensionIcon {
+    min-width: 234px;
+    min-height: 234px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: url(../../assets/images/extension.svg);
   }
 
-  .description {
-    color: var(--text-primary);
-    font-size: 15px;
-    font-weight: 400;
-    line-height: 20px;
-    margin-bottom: 28px;
-  }
-
-  .inputs {
-    margin-bottom: 4px;
-
-  }
-
-  .actions {
+  .extensionDesc {
     display: flex;
-    justify-content: flex-start;
-    margin-bottom: 20px;
+    flex-direction: column;
+    gap: 30px;
+    flex-grow: 1;
+
+    .description {
+      color: var(--text-primary);
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 32px;
+
+      a {
+        color: var(--accent-links);
+      }
+    }
 
     button {
-      width: fit-content;
-      padding-block: 10px;
-      padding-inline: 44px;
-      margin: 0px;
+      min-width: 200px;
     }
   }
 
-  .alternative {
-    color: var(--text-primary);
-    font-size: 15px;
-    font-style: normal;
+}
+
+.nsecLogin {
+  display: flex;
+  gap: 48px;
+
+  .nsecIcon {
+    min-width: 234px;
+    min-height: 234px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: url(../../assets/images/nsec.svg);
+  }
+
+  .nsecDesc {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex-grow: 1;
+
+    .description {
+      color: var(--text-primary);
+      font-size: 24px;
+      font-weight: 400;
+      line-height: 32px;
+
+      a {
+        color: var(--accent-links);
+      }
+    }
+
+    button {
+      min-width: 200px;
+    }
+  }
+
+}
+
+.input {
+  width: 100%;
+  max-height: 44px;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 20px;
+  margin: 0 !important;
+  padding: 12px 24px !important;
+  border-radius: 99999px;
+  border: none;
+  color: var(--text-primary);
+  background-color: var(--subtile-devider);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  --icon-invalid: none;
+  --form-element-invalid-border-color: none;
+
+  &::placeholder {
+    color: var(--text-secondary);
+    font-size: 18px;
     font-weight: 400;
     line-height: 20px;
   }
 
+  &:focus, &:focus-visible {
+    outline: none;
+    border: none;
+    box-shadow: none;
+  }
 }
-.hidden {
-  display: none;
+
+.nsecInput {
+  background: var(--subtile-devider) !important;
+  width: 100%;
+  padding: 24px;
+}
+
+.nsecWarning {
+  width: 560px;
+  padding: 8px 16px;
+
+  border-radius: 16px;
+  background-color: var(--warning-dim);
+
+  span {
+    color: var(--warning-bright);
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 24px;
+
+    &.bold {
+      font-weight: 700;
+    }
+  }
+}
+
+.npubWarning {
+  width: 560px;
+  padding: 8px 16px;
+
+  border-radius: 16px;
+  background-color: var(--devider);
+
+  span {
+    color: var(--text-tertiary);
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 24px;
+
+    &.bold {
+      font-weight: 700;
+    }
+  }
 }

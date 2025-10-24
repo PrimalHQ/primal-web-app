@@ -13,6 +13,7 @@ const AdvancedSearchDialog: Component<{
   open?: boolean,
   setOpen?: (v: boolean) => void,
   hideHeader?: boolean,
+  noPadding?: boolean,
   id?: string,
 }> = (props) => {
 
@@ -24,7 +25,7 @@ const AdvancedSearchDialog: Component<{
       <Dialog.Portal>
         <Dialog.Overlay class={styles.dialogOverlay} />
         <div class={styles.dialog}>
-          <Dialog.Content class={styles.dialogContent} >
+          <Dialog.Content class={`${styles.dialogContent} ${props.noPadding ? styles.noPadding : ''}`} >
             <Show when={!props.hideHeader}>
               <div class={styles.dialogHeader}>
                 <Dialog.Title class={styles.dialogTitle}>

@@ -398,7 +398,6 @@ export const AppProvider = (props: { children: JSXElement }) => {
   };
 
   const closeNoteVideoContextMenu = () => {
-    console.log('close video')
     updateStore('showNoteVideoContextMenu', () => false);
   };
 

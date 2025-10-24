@@ -1020,13 +1020,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     if (!accountStore.isKeyLookupDone) return;
 
     const pubkey = accountStore.publicKey;
-    console.log('LOAD SETTINGS: ', pubkey);
     if (!pubkey) {
       loadDefaults();
       return;
     }
 
-    if (!isConnected()) return;
+    // if (!isConnected()) return;
 
     loadSettings(pubkey, () => {
     });

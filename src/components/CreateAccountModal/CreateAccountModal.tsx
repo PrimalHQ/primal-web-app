@@ -12,6 +12,12 @@ import { useNavigate } from '@solidjs/router';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import { loginUsingExtension, logUserIn, setLoginType } from '../../stores/accountStore';
 
+import { appStoreLink, playstoreLink, apkLink } from '../../constants';
+
+import appstoreImg from '../../assets/images/appstore_download.svg';
+import playstoreImg from '../../assets/images/playstore_download.svg';
+import primalQr from '../../assets/images/primal_qr.png';
+
 const CreateAccountModal: Component<{
   id?: string,
   open?: boolean,
@@ -33,35 +39,66 @@ const CreateAccountModal: Component<{
       setOpen={(isOpen: boolean) => !isOpen && props.onAbort && props.onAbort()}
       title={
       <div class={styles.title}>
-        {intl.formatMessage(tActions.getStarted)}
+        {intl.formatMessage(tActions.getStartedTitle)}
       </div>
       }
       triggerClass={styles.hidden}
     >
       <div id={props.id} class={styles.modal}>
-        <div class={styles.description}>
-          {intl.formatMessage(t.createNewDescription)}
-        </div>
-        <div class={styles.actions}>
-          <ButtonPrimary
-            onClick={onCreateAccount}
-          >
-            {intl.formatMessage(tActions.createAccount)}
-          </ButtonPrimary>
+        <div class={styles.infoWrapper}>
+          <img src={primalQr}></img>
+          <div class={styles.loginSteps}>
+            <div class={styles.loginExplain}>
+              {intl.formatMessage(t.createNewDescription)}
+            </div>
+            <div class={styles.loginList}>
+              <div class={styles.loginListItem}>
+                <div class={styles.number}>1</div>
+                <div class={styles.itemLabel}>
+                  {intl.formatMessage(t.getStartedSteps.step_one)}
+                </div>
+              </div>
 
-          <ButtonPrimary
-            onClick={() => {
-              loginUsingExtension();
-            }}
-          >
-            Use Extension
-          </ButtonPrimary>
+              <div class={styles.loginListItem}>
+                <div class={styles.number}>2</div>
+                <div class={styles.itemLabel}>
+                  {intl.formatMessage(t.getStartedSteps.step_two)}
+                </div>
+              </div>
+
+              <div class={styles.loginListItem}>
+                <div class={styles.number}>3</div>
+                <div class={styles.itemLabel}>
+                  <span>Go to the </span>
+                  <button onClick={props.onLogin}>login page</button>
+                  <span> and scan the QR code</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class={styles.alternative}>
-        {intl.formatMessage(t.alreadyHaveAccount)}&nbsp;
-          <ButtonLink onClick={props.onLogin}>
-            {intl.formatMessage(tActions.loginNow)}
-          </ButtonLink>
+
+        <div class={styles.bellowInfo}>
+          <div class={styles.appLinks}>
+            <a
+              href={appStoreLink}
+              target='_blank'
+            >
+              <img src={appstoreImg} />
+            </a>
+
+            <a
+              href={playstoreLink}
+              target='_blank'
+            >
+              <img src={playstoreImg} />
+            </a>
+          </div>
+
+          <div class={styles.loginNow}>
+            {intl.formatMessage(t.alreadyHaveAccount)}&nbsp;
+            <button onClick={props.onLogin}>{intl.formatMessage(tActions.loginNow)}</button>
+          </div>
         </div>
       </div>
 
