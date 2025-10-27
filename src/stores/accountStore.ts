@@ -2088,7 +2088,9 @@ export const initAccountStore: AccountStore = {
   const handleUserProfileEvent = (content: NostrEventContent) => {
     if (content?.content) {
       if (content.kind === Kind.Metadata) {
-        const user = JSON.parse(content.content);
+        let user = JSON.parse(content.content);
+
+        user.pubkey = content.pubkey;
 
         updateAccountStore('activeUser', () => ({...user, pubkey: content.pubkey}));
         setStoredProfile(user);
