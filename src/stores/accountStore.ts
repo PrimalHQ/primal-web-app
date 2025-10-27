@@ -1944,6 +1944,9 @@ export const initAccountStore: AccountStore = {
       type = storedLoginType;
     }
 
+    const isStored = fetchNostrKey();
+    updateAccountStore('isKeyLookupDone', () => isStored);
+
     switch (type) {
       case 'npub':
         loginUsingNpub();
@@ -1972,10 +1975,6 @@ export const initAccountStore: AccountStore = {
   export const loginUsingExtension = async (extensionAttempt = 0) => {
     const win = window as NostrWindow;
     const nostr = win.nostr;
-
-    const isStored = fetchNostrKey();
-
-    updateAccountStore('isKeyLookupDone', () => isStored);
 
     if (!nostr) {
       if (extensionAttempt > 4) {
@@ -2019,10 +2018,6 @@ export const initAccountStore: AccountStore = {
   };
 
   export const loginUsingLocalNsec = () => {
-    const isStored = fetchNostrKey();
-
-    updateAccountStore('isKeyLookupDone', () => isStored);
-
     const sec = readSecFromStorage();
 
     if (!sec) return;

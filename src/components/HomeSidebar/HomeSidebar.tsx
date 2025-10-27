@@ -3,6 +3,7 @@ import {
   createEffect,
   createSignal,
   For,
+  on,
   onCleanup,
   onMount,
   Show,
@@ -135,7 +136,7 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
   const [initialLiveLoaded, setInitialLiveLoaded] = createSignal(false);
 
-  onMount(() => {
+  createEffect(on(() => accountStore.publicKey, (pubkey) => {
     const def = sidebarOptions.find(o => o.id === 'trending_4h') || sidebarOptions[0];
     if (accountStore.isKeyLookupDone && home?.sidebarNotes.length === 0) {
       let stored = readHomeSidebarSelection(accountStore.publicKey) || { ...def };
@@ -148,9 +149,11 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
       home?.actions.doSidebarSearch(stored.value || '');
     }
 
+    if (['none', 'guest'].includes(accountStore.loginType)) return;
+
     if (accountStore.isKeyLookupDone) {
-      const cachedStreams = loadLiveStreams(accountStore.publicKey);
-      const cachedLiveAuthors = loadLiveAuthors(accountStore.publicKey);
+      const cachedStreams = loadLiveStreams(pubkey);
+      const cachedLiveAuthors = loadLiveAuthors(pubkey);
 
       if (cachedStreams.length > 0) {
         // setInitialLiveLoaded(true);
@@ -198,8 +201,8 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
       }
     })
 
-    startListeningForLiveEventsSidebar(accountStore.publicKey, subId);
-  });
+    startListeningForLiveEventsSidebar(pubkey, subId);
+  }));
 
   onCleanup(() => {
     unsub && unsub();
