@@ -31,7 +31,7 @@ const FollowButton: Component<{
     e.preventDefault();
     if (accountStore.followInProgress !== '') return;
 
-    if (hasPublicKey() || !props.person) {
+    if (!hasPublicKey() || !props.person) {
       showGetStarted();
       return;
     }

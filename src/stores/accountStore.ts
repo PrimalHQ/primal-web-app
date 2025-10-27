@@ -1970,7 +1970,9 @@ export const initAccountStore: AccountStore = {
     const win = window as NostrWindow;
     const nostr = win.nostr;
 
-    fetchNostrKey();
+    const isStored = fetchNostrKey();
+
+    updateAccountStore('isKeyLookupDone', () => isStored);
 
     if (!nostr) {
       if (extensionAttempt > 4) {
@@ -2014,12 +2016,15 @@ export const initAccountStore: AccountStore = {
   };
 
   export const loginUsingLocalNsec = () => {
+    const isStored = fetchNostrKey();
+
+    updateAccountStore('isKeyLookupDone', () => isStored);
+
     const sec = readSecFromStorage();
 
     if (!sec) return;
 
     setLoginType('local');
-    fetchNostrKey()
 
     if (sec.startsWith(pinEncodePrefix)) {
       updateAccountStore('showPin', () => sec);
