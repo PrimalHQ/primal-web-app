@@ -56,6 +56,8 @@ import {
   readEmojiHistory,
   readPrimalRelaySettings,
   savePrimalRelaySettings,
+  saveMembershipStatus,
+  loadMembershipStatus,
 } from "../lib/localStore";
 
 import {
@@ -376,6 +378,7 @@ export const initAccountStore: AccountStore = {
 
           gotEvent = true;
           updateAccountStore('membershipStatus', () => ({ ...status }));
+          saveMembershipStatus(accountStore.publicKey, status);
         }
 
         if (type === 'EOSE') {
@@ -2074,6 +2077,12 @@ export const initAccountStore: AccountStore = {
     if (storedUser) {
       // If it exists, set it as active user
       updateAccountStore('activeUser', () => ({...storedUser}));
+    }
+
+    const membershipStatus = loadMembershipStatus(storedKey);
+
+    if (membershipStatus) {
+      updateAccountStore('membershipStatus', () => ({ ...membershipStatus }));
     }
 
     // Fetch it anyway, maybe there is an update

@@ -1,6 +1,7 @@
 import { TopicStat } from "../megaFeeds";
 import { convertToUser, userName } from "../stores/profile";
-import { EmojiOption, NostrRelays, NostrStats, PrimalArticleFeed, PrimalDVM, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
+import { EmojiOption, MembershipStatus, NostrRelays, NostrStats, PrimalArticleFeed, PrimalDVM, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
+import { LegendCustomizationConfig } from "./premium";
 import { StreamingData } from "./streaming";
 
 export type LocalStore = {
@@ -52,6 +53,8 @@ export type LocalStore = {
   useSystemDarkMode: boolean | undefined,
   liveStreams: StreamingData[] | undefined,
   liveAuthors: PrimalUser[] | undefined,
+  legendCustomization: LegendCustomizationConfig | undefined,
+  membershipStatus: MembershipStatus | undefined,
 };
 
 export type UploadTime = {
@@ -110,6 +113,8 @@ export const emptyStorage: LocalStore = {
   useSystemDarkMode: false,
   liveStreams: undefined,
   liveAuthors: undefined,
+  legendCustomization: undefined,
+  membershipStatus: undefined,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -842,4 +847,50 @@ export const loadLiveAuthors = (pubkey: string | undefined) => {
   const store = getStorage(pubkey);
 
   return store.liveAuthors || [];
+};
+
+
+export const saveLegendCustomization = (pubkey: string | undefined, config: LegendCustomizationConfig) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.legendCustomization = { ...config };
+
+  setStorage(pubkey, store);
+}
+
+
+export const loadLegendCustomization = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  return store.legendCustomization;
+};
+
+
+export const saveMembershipStatus = (pubkey: string | undefined, status: MembershipStatus) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.membershipStatus = { ...status };
+
+  setStorage(pubkey, store);
+}
+
+
+export const loadMembershipStatus = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  return store.membershipStatus;
 };

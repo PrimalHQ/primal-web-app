@@ -17,7 +17,8 @@ import { Kind } from "../constants";
 import { LegendCustomizationConfig } from "../lib/premium";
 import { config } from "@milkdown/core";
 import { StreamingData } from "../lib/streaming";
-import { logUserIn } from "../stores/accountStore";
+import { accountStore, hasPublicKey, logUserIn } from "../stores/accountStore";
+import { loadLegendCustomization, saveLegendCustomization } from "../lib/localStore";
 
 
 export type ReactionStats = {
@@ -466,6 +467,7 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
   const setLegendCustomization = (pubkey: string, config: LegendCustomizationConfig) => {
     updateStore('legendCustomization', () => ({ [pubkey]: { ...config }}));
+    saveLegendCustomization(pubkey, config);
   }
 
   const getUserBlossomUrls = (pubkey: string) => {
@@ -585,6 +587,27 @@ const onSocketClose = (closeEvent: CloseEvent) => {
     document.removeEventListener('mousemove', monitorActivity);
     document.removeEventListener('scroll', monitorActivity);
     document.removeEventListener('keydown', monitorActivity);
+  });
+
+  createEffect(() => {
+    const config = store.legendCustomization;
+    const pubkey = accountStore.publicKey;
+
+    if (!pubkey || !config || !config[pubkey]) return;
+
+    saveLegendCustomization(pubkey, config[pubkey]);
+  })
+
+  createEffect(() => {
+    if (hasPublicKey()) {
+      const pubkey = accountStore.publicKey;
+
+      const legendConfig = loadLegendCustomization(pubkey);
+
+      if (!pubkey || !legendConfig) return;
+
+      updateStore('legendCustomization', () => ({ [pubkey]: { ...legendConfig } }));
+    }
   });
 
   let wakingTimeout = 0;
