@@ -13,7 +13,7 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
 
   const intl = useIntl();
 
-  const connectedRelays = () => accountStore.relays || [];
+  const connectedRelays = () => accountStore.activeRelays || [];
 
   const disconnectedRelays = () => {
     const allRelayUrls = Object.keys(accountStore.relaySettings || {}).map(utils.normalizeURL);

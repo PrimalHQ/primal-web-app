@@ -3,6 +3,7 @@ import {
   createContext,
   createEffect,
   JSXElement,
+  on,
   onCleanup,
   onMount,
   useContext
@@ -17,7 +18,7 @@ import { Kind } from "../constants";
 import { LegendCustomizationConfig } from "../lib/premium";
 import { config } from "@milkdown/core";
 import { StreamingData } from "../lib/streaming";
-import { accountStore, hasPublicKey, logUserIn } from "../stores/accountStore";
+import { accountStore, hasPublicKey, logUserIn, reconnectSuspendedRelays, suspendRelays } from "../stores/accountStore";
 import { loadLegendCustomization, saveLegendCustomization } from "../lib/localStore";
 
 
@@ -114,7 +115,6 @@ export type AppContextStore = {
   cashuMints: Map<string, CashuMint>,
   subscribeToAuthor: PrimalUser | undefined,
   subscribeToTier: (tier: Tier) => void,
-  connectedRelays: Relay[],
   verifiedUsers: Record<string, string>,
   legendCustomization: Record<string, LegendCustomizationConfig>,
   memberCohortInfo: Record<string, CohortInfo>,
@@ -172,8 +172,6 @@ export type AppContextStore = {
     getCashuMint: (url: string) => CashuMint | undefined,
     openAuthorSubscribeModal: (author: PrimalUser | undefined, subscribeTo: (tier: Tier, cost: TierCost) => void) => void,
     closeAuthorSubscribeModal: () => void,
-    addConnectedRelay: (relay: Relay) => void,
-    removeConnectedRelay: (relay: Relay) => void,
     profileLink: (pubkey: string | undefined, noP?: boolean) => string,
     setLegendCustomization: (pubkey: string, config: LegendCustomizationConfig) => void,
     getUserBlossomUrls: (pubkey: string) => string[],
@@ -216,7 +214,6 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   confirmInfo: undefined,
   cashuMints: new Map(),
   subscribeToAuthor: undefined,
-  connectedRelays: [],
   verifiedUsers: {},
   legendCustomization: {},
   memberCohortInfo: {},
@@ -430,18 +427,6 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('subscribeToAuthor', () => undefined);
   };
 
-  const addConnectedRelay = (relay: Relay) => {
-    if (store.connectedRelays.find(r => r.url === relay.url)) return;
-
-    updateStore('connectedRelays', store.connectedRelays.length, () => ({ ...relay }));
-  };
-
-  const removeConnectedRelay = (relay: Relay) => {
-    if (!store.connectedRelays.find(r => r.url === relay.url)) return;
-
-    updateStore('connectedRelays', (rs) => rs.filter(r => r.url !== relay.url));
-  };
-
   const profileLink = (pubkey: string | undefined, noP?: boolean) => {
     if (!pubkey) return '/home';
 
@@ -629,18 +614,23 @@ const onSocketClose = (closeEvent: CloseEvent) => {
     }
   });
 
-  createEffect(() => {
-    if (store.appState === 'sleep') {
+  createEffect(on(() => store.appState, (state, prev) => {
+    if (state === prev) return;
+
+    if (state === 'sleep') {
       logInfo('Disconnected from Primal socket due to inactivity at: ', (new Date()).toLocaleTimeString())
       disconnect(false);
+      suspendRelays();
       return;
     }
 
-    if (store.appState === 'waking' && socket()?.readyState === WebSocket.CLOSED) {
+    if (state === 'waking' && socket()?.readyState === WebSocket.CLOSED) {
       logInfo('Reconnected to Primal socket at: ', (new Date()).toLocaleTimeString());
       connect();
+      reconnectSuspendedRelays();
+      return;
     }
-  })
+  }));
 
   createEffect(() => {
     if (isConnected()) {
@@ -687,8 +677,6 @@ const onSocketClose = (closeEvent: CloseEvent) => {
       getCashuMint,
       openAuthorSubscribeModal,
       closeAuthorSubscribeModal,
-      addConnectedRelay,
-      removeConnectedRelay,
       profileLink,
       setLegendCustomization,
       getUserBlossomUrls,

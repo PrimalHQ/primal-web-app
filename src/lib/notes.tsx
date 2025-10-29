@@ -11,6 +11,7 @@ import { encrypt44, signEvent } from "./nostrAPI";
 import { ArticleEdit } from "../pages/ReadsEditor";
 import ExternalLiveEventPreview from "../components/LiveVideo/ExternalLiveEventPreview";
 import { APP_ID } from "../App";
+import { accountStore } from "../stores/accountStore";
 
 const getLikesStorageKey = () => {
   const key = localStorage.getItem('pubkey') || 'anon';
@@ -730,86 +731,112 @@ export const sendEvent = async (event: NostrEvent, relays: Relay[], relaySetting
     return [...acc];
   }, []);
 
-  let relaysActual = [...relays];
+  const allRelays = [...accountStore.activeRelays.map(r => r.url), ...hintRelayUrls]
 
-  if (relaysActual.length === 0) {
-    relaysActual = Object.keys(relaySettings || {});
-  }
-
-  for (let i = 0;i < relaysActual.length;i++) {
-
-    const relay = relaysActual[i];
-
-    const settings = (relaySettings && relaySettings[relay.url]) || { read: true, write: true };
-
-    if (!settings.write) {
-      continue;
-    }
-
-    responses.push(new Promise<string>(async (resolve, reject) => {
-      const timeout = setTimeout(() => {
-        logError(`Publishing note to ${relay.url} has timed out`);
-        reasons.push('timeout');
-        reject('timeout');
-      }, 8_000);
-
-      try {
-        logInfo('publishing to relay: ', relay, signedNote)
-
-        await relay.publish(signedNote);
-
-        logInfo(`${relay.url} has accepted our event`);
-        clearTimeout(timeout);
-        resolve('success');
-
-      } catch (e) {
-        logError(`Failed publishing note to ${relay.url}: `, e);
-        clearTimeout(timeout);
-        reasons.push(`${e}`);
-        reject(e);
+  const unsub = accountStore.relayPool.subscribe(
+    allRelays,
+    {
+      kinds: [signedNote.kind],
+      authors: [signedNote.pubkey],
+    },
+    {
+      onevent: (e) => {
+        console.log('GOT EVENT: ', e)
+        unsub.close();
       }
-    }));
-  }
-
-  for (let i = 0;i < hintRelayUrls.length;i++) {
-    const url = hintRelayUrls[i];
-
-    try {
-      new Promise<string>(async (resolve, reject) => {
-        const relay = relayInit(url);
-        await relay.connect();
-
-        try {
-          logInfo('publishing to relay hint: ', relay)
-
-          await relay.publish(signedNote);
-
-          logInfo(`hint ${relay.url} has accepted our event`);
-          resolve('success');
-
-        } catch (e) {
-          logError(`Failed publishing note to hint ${relay.url}: `, e);
-          reject('success');
-        }
-
-        relay.close();
-      });
-
-    } catch (err) {
-      logError('REALY ERROR: ', err)
     }
-  }
+  )
 
   try {
-    await Promise.any(responses);
+    await Promise.any(accountStore.relayPool.publish(allRelays, signedNote))
 
     return { success: true, note: signedNote } as SendNoteResult;
   }
   catch (e) {
     logError('Failed to publish the note: ', e);
     return await proxyEvent(event, relays, relaySettings);
-    // return { success: false, reasons, note: signedNote} as SendNoteResult;
   }
+
+  // let relaysActual = [...relays];
+
+  // if (relaysActual.length === 0) {
+  //   relaysActual = Object.keys(relaySettings || {});
+  // }
+
+  // for (let i = 0;i < relaysActual.length;i++) {
+
+  //   const relay = relaysActual[i];
+
+  //   const settings = (relaySettings && relaySettings[relay.url]) || { read: true, write: true };
+
+  //   if (!settings.write) {
+  //     continue;
+  //   }
+
+  //   responses.push(new Promise<string>(async (resolve, reject) => {
+  //     const timeout = setTimeout(() => {
+  //       logError(`Publishing note to ${relay.url} has timed out`);
+  //       reasons.push('timeout');
+  //       reject('timeout');
+  //     }, 8_000);
+
+  //     try {
+  //       logInfo('publishing to relay: ', relay, signedNote)
+
+  //       await relay.publish(signedNote);
+
+  //       logInfo(`${relay.url} has accepted our event`);
+  //       clearTimeout(timeout);
+  //       resolve('success');
+
+  //     } catch (e) {
+  //       logError(`Failed publishing note to ${relay.url}: `, e);
+  //       clearTimeout(timeout);
+  //       reasons.push(`${e}`);
+  //       reject(e);
+  //     }
+  //   }));
+  // }
+
+  // for (let i = 0;i < hintRelayUrls.length;i++) {
+  //   const url = hintRelayUrls[i];
+
+  //   try {
+  //     new Promise<string>(async (resolve, reject) => {
+  //       const relay = relayInit(url);
+  //       await relay.connect();
+
+  //       try {
+  //         logInfo('publishing to relay hint: ', relay)
+
+  //         await relay.publish(signedNote);
+
+  //         logInfo(`hint ${relay.url} has accepted our event`);
+  //         resolve('success');
+
+  //       } catch (e) {
+  //         logError(`Failed publishing note to hint ${relay.url}: `, e);
+  //         reject('success');
+  //       }
+
+  //       relay.close();
+  //     });
+
+  //   } catch (err) {
+  //     logError('REALY ERROR: ', err)
+  //   }
+  // }
+
+  // try {
+  //   await Promise.any(responses);
+
+  //   return { success: true, note: signedNote } as SendNoteResult;
+  // }
+  // catch (e) {
+  //   logError('Failed to publish the note: ', e);
+  //   return await proxyEvent(event, relays, relaySettings);
+  //   // return { success: false, reasons, note: signedNote} as SendNoteResult;
+  // }
 }
 
 export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: string, then?: () => void) => {

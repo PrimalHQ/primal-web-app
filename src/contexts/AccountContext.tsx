@@ -248,13 +248,13 @@ export function AccountProvider(props: { children: JSXElement }) {
   // });
 
   const suspendRelays = () => {
-    if (store.relays.length === 0) {
+    if (store.activeRelays.length === 0) {
       const urls: string[] = Object.keys(store.relaySettings || {}).map(utils.normalizeURL);
       const suspendedRelays = urls.map(relayInit);
       updateStore('suspendedRelays', () => suspendedRelays);
     }
     else {
-      updateStore('suspendedRelays', () => store.relays);
+      updateStore('suspendedRelays', () => store.activeRelays);
 
       for (let i=0; i<store.relays.length; i++) {
         const relay = store.relays[i];

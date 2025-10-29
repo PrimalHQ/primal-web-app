@@ -201,7 +201,7 @@ const CreateAccount: Component = () => {
     const { success } = await sendProfile(
       { ...metadata },
       accountStore.proxyThroughPrimal || false,
-      accountStore.relays,
+      accountStore.activeRelays,
       relaySettings,
     );
 
@@ -225,7 +225,7 @@ const CreateAccount: Component = () => {
         date,
         '',
         accountStore.proxyThroughPrimal,
-        accountStore.relays,
+        accountStore.activeRelays,
         relaySettings,
       );
 
@@ -236,7 +236,7 @@ const CreateAccount: Component = () => {
         });
       }
 
-      const relayResult = await sendRelays(accountStore.relays, relaySettings, accountStore.proxyThroughPrimal);
+      const relayResult = await sendRelays(accountStore.activeRelays, relaySettings, accountStore.proxyThroughPrimal);
 
       if (relayResult.success && relayResult.note) {
         triggerImportEvents([relayResult.note], `import_relays_${APP_ID}`, () => {

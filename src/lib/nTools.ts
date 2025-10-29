@@ -2,7 +2,8 @@ import {
   finalizeEvent,
   generateSecretKey as generatePrivateKey,
   getPublicKey,
-  verifyEvent
+  verifyEvent,
+  SimplePool
 } from 'nostr-tools';
 
 // @ts-ignore
@@ -42,4 +43,5 @@ export {
   getPublicKey,
   verifyEvent,
   finalizeEvent,
+  SimplePool,
 }

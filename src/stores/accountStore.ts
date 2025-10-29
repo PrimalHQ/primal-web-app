@@ -34,6 +34,7 @@ import {
   nip19,
   utils,
   relayInit,
+  SimplePool,
 } from "../lib/nTools";
 
 import {
@@ -58,6 +59,7 @@ import {
   savePrimalRelaySettings,
   saveMembershipStatus,
   loadMembershipStatus,
+  readRelaySettings,
 } from "../lib/localStore";
 
 import {
@@ -111,6 +113,7 @@ import {
   subsTo,
   reset,
 } from "../sockets";
+import { fetchPeople } from "../megaFeeds";
 
 
 export type FollowData = {
@@ -129,8 +132,8 @@ export type AccountStore = {
   loginType: LoginType,
   likes: string[],
   defaultRelays: string[],
-  relays: Relay[],
-  suspendedRelays: Relay[],
+  activeRelays: Relay[],
+  relayPool: SimplePool,
   relaySettings: NostrRelays,
   publicKey: string | undefined,
   activeUser: PrimalUser | undefined,
@@ -165,7 +168,6 @@ export type AccountStore = {
   bookmarks: string[],
   proxyThroughPrimal: boolean,
   proxySettingSet: boolean,
-  activeRelays: Relay[],
   followData: FollowData,
   premiumReminder: boolean,
   activeNWC:string[],
@@ -174,15 +176,8 @@ export type AccountStore = {
   mirrorBlossom: boolean,
 }
 
-const PRIMAL_PUBKEY = '532d830dffe09c13e75e8b145c825718fc12b0003f61d61e9077721c7fff93cb';
-
 let relayAtempts: Record<string, number> = {};
-const relayAtemptLimit = 10;
 let relaysExplicitlyClosed: string[] = [];
-
-let relayReliability: Record<string, number> = {};
-
-let connectedRelaysCopy: Relay[] = [];
 
 let membershipSocket: WebSocket | undefined;
 
@@ -190,9 +185,7 @@ export const initAccountStore: AccountStore = {
   loginType: 'none',
   likes: [],
   defaultRelays: [],
-  relays: [],
   activeRelays: [],
-  suspendedRelays: [],
   relaySettings: {},
   publicKey: undefined,
   activeUser: undefined,
@@ -239,53 +232,21 @@ export const initAccountStore: AccountStore = {
     openDialog: false,
     following: [],
   },
+  // @ts-ignore
+  relayPool: new SimplePool({ enablePing: true, enableReconnect: true }),
 };
+
+  export const getRelayUrls = () => Object.keys(accountStore.relaySettings || {}).map(utils.normalizeURL)
 
 // ACTIONS ---------------------------------------------------------------------
 
   export const suspendRelays = () => {
-    if (accountStore.relays.length === 0) {
-      const urls: string[] = Object.keys(accountStore.relaySettings || {}).map(utils.normalizeURL);
-      const suspendedRelays = urls.map(relayInit);
-      updateAccountStore('suspendedRelays', () => suspendedRelays);
-    }
-    else {
-      updateAccountStore('suspendedRelays', () => accountStore.relays);
-
-      for (let i=0; i<accountStore.relays.length; i++) {
-        const relay = accountStore.relays[i];
-        relay.close();
-      }
-    }
-
-    const priorityRelays: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
-
-    for (let i=0; i<priorityRelays.length; i++) {
-      const pr = priorityRelays[i];
-
-      if (!accountStore.suspendedRelays.find(r => r.url === pr)) {
-        updateAccountStore('suspendedRelays', accountStore.suspendedRelays.length, () => relayInit(pr));
-      }
-    }
-
-    updateAccountStore('relays', () => []);
-    updateAccountStore('activeRelays', () => [...accountStore.suspendedRelays]);
+    accountStore.relayPool.close(accountStore.activeRelays.map(r => r.url));
+    updateAccountStore('activeRelays', () => []);
   }
 
   export const reconnectSuspendedRelays = async () => {
-    const relaysToConnect = accountStore.suspendedRelays.length > 0 ?
-    accountStore.suspendedRelays.reduce((acc, r) => {
-      return {
-        ...acc,
-        [r.url]: { ...accountStore.relaySettings[r.url] ?? { read: true, write: true} },
-      };
-    }, {}) :
-    accountStore.relaySettings;
-
-    await connectToRelays(relaysToConnect);
-
-    updateAccountStore('suspendedRelays', () => []);
-    updateAccountStore('activeRelays', () => accountStore.relays);
+    await connectToRelays(accountStore.relaySettings);
   }
 
   export const setProxyThroughPrimal = async (shouldProxy: boolean) => {
@@ -303,52 +264,17 @@ export const initAccountStore: AccountStore = {
     }
   }
 
-  export const checkNostrChange = async () => {
-    if (location.pathname === '/') return;
-
-    const win = window as NostrWindow;
-    const nostr = win.nostr;
-
-    if (!nostr) return;
-
-    const storedKey = localStorage.getItem('pubkey');
-
-    try {
-      const key = await getPublicKey();
-
-      if (key === storedKey) return;
-
-      updateAccountStore('isKeyLookupDone', () => false);
-
-      setPublicKey(key);
-
-      // Read profile from storage
-      const storedUser = getStoredProfile(key);
-
-      if (storedUser) {
-        // If it exists, set it as active user
-        updateAccountStore('activeUser', () => ({...storedUser}));
-      }
-
-      // Fetch it anyway, maybe there is an update
-      updateAccountProfile(key);
-    } catch (e: any) {
-      setPublicKey(undefined);
-      localStorage.removeItem('pubkey');
-      logError('error fetching public key: ', e);
-    }
-  };
-
-  export const updateAccountProfile = (pubkey: string) => {
+  export const updateAccountProfile = async (pubkey: string) => {
     if (pubkey !== accountStore.publicKey) return;
 
     const subId = `user_profile_${APP_ID}`;
 
-    handleSubscription(
-      subId,
-      () => getUserProfiles([pubkey], subId),
-      handleUserProfileEvent,
-    );
+    const { users } = await fetchPeople([pubkey], subId);
+
+    const user = users[0];
+
+    updateAccountStore('activeUser', () => ({ ...user }));
+    setStoredProfile(user);
   };
 
   export const openMembershipSocket = (onOpen: () => void) => {
@@ -495,21 +421,21 @@ export const initAccountStore: AccountStore = {
     }
 
     if (replace) {
+      let relaysToClose = new Set<string>();
+
       for (let url in accountStore.relaySettings) {
         if (settings[url]) {
           continue;
         }
         updateAccountStore('relaySettings', () => ({[url]: undefined}));
-        const relay = accountStore.relays.find(r => r.url === url);
-
-        if (relay) {
-          relay.close();
-          const filtered = accountStore.relays.filter(r => r.url !== url);
-          updateAccountStore('relays', () => filtered);
-        }
+        relaysToClose.add(url);
       }
 
+      accountStore.relayPool.close(Array.from(relaysToClose))
+      const filtered = accountStore.activeRelays.filter(r => !relaysToClose.has(r.url));
+      updateAccountStore('activeRelays', () => filtered);
       updateAccountStore('relaySettings', () => ({...settings}));
+
       connectToRelays(settings)
       saveRelaySettings(accountStore.publicKey, settings);
       return true;
@@ -540,15 +466,44 @@ export const initAccountStore: AccountStore = {
     return { ...relaySettings, ...defaultRelays };
   };
 
+  export const detachDefaultRelays = (relaySettings: NostrRelays) => {
+    const defaultRelays = getPreConfiguredRelays();
+    const relays = Object.keys(defaultRelays);
+
+    const newRelaySettings: NostrRelays = {};
+
+    for (let i = 0; i < relays.length; i++) {
+      const url = relays[i];
+
+      if (!relaySettings[url]) {
+        newRelaySettings[url] = { read: true, write: true };
+      }
+    }
+
+    return  { ...newRelaySettings };
+  }
+
   export const setConnectToPrimaryRelays = (flag: boolean) => {
     updateAccountStore('connectToPrimaryRelays', () => flag);
+    savePrimalRelaySettings(accountStore.publicKey, flag);
+
+    let relaySettings = accountStore.relaySettings;
+
+    if (flag) {
+      relaySettings = attachDefaultRelays(relaySettings);
+    } else {
+      relaySettings = detachDefaultRelays(relaySettings);
+    }
+
+    return relaySettings;
   }
 
   export const connectToRelays = async (relaySettings: NostrRelays, sendRelayList?: boolean) => {
+    if (accountStore.proxyThroughPrimal) return;
 
-    if (!accountStore.proxySettingSet || accountStore.proxyThroughPrimal) return;
+    const relays = Object.keys(relaySettings);
 
-    if (Object.keys(relaySettings).length === 0) {
+    if (relays.length === 0) {
       const defaultRelaysId = `default_relays_${APP_ID}`;
       handleSubscription(
         defaultRelaysId,
@@ -558,64 +513,12 @@ export const initAccountStore: AccountStore = {
       return;
     }
 
-    const relaysToConnect = accountStore.connectToPrimaryRelays ?
-      attachDefaultRelays(relaySettings) :
-      relaySettings;
-
-    for (let i = 0; i < connectedRelaysCopy.length; i ++) {
-      const relay = connectedRelaysCopy[i];
-
-      if (relaysToConnect[relay.url]) {
-        delete relaysToConnect[relay.url];
-      }
-    }
-
-    const onConnect = (connectedRelay: Relay) => {
-      if (sendRelayList) {
-        sendRelays([connectedRelay], relaySettings, accountStore.proxyThroughPrimal);
-      }
-
-      if (accountStore.relays.find(r => r.url === connectedRelay.url)) {
-        return;
-      }
-
-      // Reset atempts after stable connection
-      relayReliability[connectedRelay.url] = setTimeout(() => {
-        relayAtempts[connectedRelay.url] = 0;
-      }, 3 * relayConnectingTimeout)
-
-      updateAccountStore('relays', (rs) => [ ...rs, connectedRelay ]);
-    };
-
-    const onFail = (failedRelay: Relay, reasons: any) => {
-      logWarning('Connection failed to relay ', failedRelay.url, ' because: ', reasons);
-
-      // connection is unstable, clear reliability timeout
-      relayReliability[failedRelay.url] && clearTimeout(relayReliability[failedRelay.url]);
-
-      updateAccountStore('relays', (rs) => rs.filter(r => r.url !== failedRelay.url));
-
-      if (relaysExplicitlyClosed.includes(failedRelay.url)) {
-        relaysExplicitlyClosed = relaysExplicitlyClosed.filter(u => u !== failedRelay.url);
-        return;
-      }
-
-      if (reasons === 'close') return;
-
-      if ((relayAtempts[failedRelay.url] || 0) < relayAtemptLimit) {
-        relayAtempts[failedRelay.url] = (relayAtempts[failedRelay.url] || 0) + 1;
-
-        // Reconnect with a progressive delay
-        setTimeout(() => {
-          logInfo('Reconnect to ', failedRelay.url, ' , try', relayAtempts[failedRelay.url], '/', relayAtemptLimit);
-          connectToRelay(failedRelay, relayConnectingTimeout * relayAtempts[failedRelay.url], onConnect, onFail, true);
-        }, relayConnectingTimeout * relayAtempts[failedRelay.url]);
-        return;
-      }
-      logWarning('Reached atempt limit ', failedRelay.url)
-    };
-
-    await connectRelays(relaysToConnect, onConnect, onFail);
+    relays.forEach(url => {
+      accountStore.relayPool.ensureRelay(url).then(r => {
+        if (accountStore.activeRelays.find(ar => ar.url === r.url)) return;
+        updateAccountStore('activeRelays', accountStore.activeRelays.length, () => r)
+      });
+    });
 
   };
 
@@ -651,10 +554,15 @@ export const initAccountStore: AccountStore = {
   };
 
   export const addRelay = (url: string) => {
-    const relay: NostrRelays = { [url]: { write: true, read: true }};
+    const normalUrl = utils.normalizeURL(url);
 
-    setRelaySettings(relay);
-    connectToRelays(relay)
+    if (accountStore.relaySettings[normalUrl]) return;
+
+    const newRelaySettings: NostrRelays = {
+      ...accountStore.relaySettings,
+      [normalUrl]: { write: true, read: true }};
+
+    setRelaySettings(newRelaySettings);
 
     // Remove relay from the list of explicitly closed relays
     relaysExplicitlyClosed = relaysExplicitlyClosed.filter(u => u !== url);
@@ -678,34 +586,14 @@ export const initAccountStore: AccountStore = {
   };
 
   export const removeRelay = (url: string) => {
-    const urlVariants = [url, url.endsWith('/') ? url.slice(0, -1) : `${url}/`];
+    const normalUrl = utils.normalizeURL(url);
 
-    const relay: Relay = accountStore.relays.find(r => {
-      return urlVariants.includes(r.url);
-    });
+    accountStore.relayPool.close([normalUrl]);
 
-    // if relay is connected, close it and remove it from the list of open relays
-    if (relay) {
-      relay.close();
-      const filtered = accountStore.relays.filter(r => !urlVariants.includes(r.url));
-      updateAccountStore('relays', () => filtered);
-
-      const filteredActive = accountStore.activeRelays.filter(r => !urlVariants.includes(r.url));
-      updateAccountStore('activeRelays', () => filteredActive);
-    }
-
-    for (let i = 0; i<urlVariants.length; i++) {
-      const u = urlVariants[i];
-
-      // Add relay to the list of explicitly closed relays
-      relaysExplicitlyClosed.push(u);
-
-      // Reset connection attempts
-      relayAtempts[u] = 0;
-
-      // Remove relay from the user's relay settings
-      updateAccountStore('relaySettings', () => ({ [u]: undefined }));
-    }
+    const filtered = accountStore.activeRelays.filter(r => r.url !== normalUrl);
+    updateAccountStore('activeRelays', () => filtered);
+    updateAccountStore('relaySettings', () => ({ [normalUrl]: undefined }));
+    relaysExplicitlyClosed.push(normalUrl);
 
     saveRelaySettings(accountStore.publicKey, accountStore.relaySettings);
 
@@ -944,7 +832,7 @@ export const initAccountStore: AccountStore = {
         if (accountStore.following.length === 0) {
           const date = Math.floor((new Date()).getTime() / 1000);
           const tags = [['p', pubkey]];
-          resolveContacts(pubkey, [pubkey], date, tags, accountStore.relays[0].url, cb);
+          resolveContacts(pubkey, [pubkey], date, tags, accountStore.activeRelays[0].url, cb);
         }
         updateAccountStore('followInProgress', () => '');
         unsub();
@@ -1306,12 +1194,12 @@ export const initAccountStore: AccountStore = {
     for(let i=0; i < accountStore.defaultRelays.length; i++) {
       const url = accountStore.defaultRelays[i];
 
-      const relay = accountStore.relays.find(r => r.url === url);
+      const relay = accountStore.activeRelays.find(r => r.url === url);
 
       if (relay) {
         relay.close();
-        const filtered = accountStore.relays.filter(r => r.url !== url);
-        updateAccountStore('relays', () => filtered);
+        const filtered = accountStore.activeRelays.filter(r => r.url !== url);
+        updateAccountStore('activeRelays', () => filtered);
       }
 
       // Add relay to the list of explicitly closed relays
@@ -1703,7 +1591,7 @@ export const initAccountStore: AccountStore = {
 
     handleSubscription(
       contactsId,
-      () =>   getProfileContactList(accountStore.publicKey, contactsId),
+      () => getProfileContactList(accountStore.publicKey, contactsId),
       handleUserContactsEvent,
     );
   }
@@ -1799,7 +1687,6 @@ export const initAccountStore: AccountStore = {
 
   export const setBlossomServers = (urls: string[]) => {
     updateAccountStore('blossomServers', () => [ ...urls ]);
-    // updateBlossomEvent();
   }
 
   export const updateBlossomEvent = async (then?: () => void) => {
@@ -1817,12 +1704,11 @@ export const initAccountStore: AccountStore = {
     updateAccountStore('loginType', () => type);
   }
 
-  export const doAfterLogin = (pubkey: string) => {
+  export const doAfterLogin = async (pubkey: string) => {
     updateAccountStore('isKeyLookupDone', true);
+    const storage = getStorage(pubkey);
 
     updateAccountProfile(pubkey);
-
-    const storage = getStorage(pubkey);
 
     checkMembershipStatus();
 
@@ -1832,24 +1718,25 @@ export const initAccountStore: AccountStore = {
 
 // ===========================================
 
+    let relaySettings = readRelaySettings(pubkey) || {};
 
-    let relaySettings = { ...storage.relaySettings };
+    updateAccountStore('connectToPrimaryRelays', () => readPrimalRelaySettings(pubkey));
+
+    if (accountStore.connectToPrimaryRelays) {
+      relaySettings = attachDefaultRelays(relaySettings);
+    }
 
     updateAccountStore('relaySettings', () => ({ ...storage.relaySettings }));
+    connectToRelays(relaySettings);
+
+    updateRelays();
+
+// ===============================================
 
     let nwcActive = storage.nwcActive;
-
     nwcActive && setActiveNWC(nwcActive);
 
-    if (Object.keys(relaySettings).length > 0) {
-      connectToRelays(relaySettings);
-    }
-    else {
-      relaySettings = { ...getStorage(accountStore.publicKey).relaySettings };
-
-      connectToRelays(relaySettings);
-    }
-// ==================================================
+// ===============================================
 
     if (accountStore.followingSince < storage.followingSince) {
       updateAccountStore('following', () => ({ ...storage.following }));
@@ -1857,10 +1744,7 @@ export const initAccountStore: AccountStore = {
     }
 
     updateContactsList();
-    updateRelays();
     updateAccountStore('emojiHistory', () => readEmojiHistory(pubkey))
-    updateAccountStore('connectToPrimaryRelays', () => readPrimalRelaySettings(pubkey))
-
 
 // ==================================================
 
@@ -1878,6 +1762,8 @@ export const initAccountStore: AccountStore = {
       handleMuteListEvent,
     );
 
+// ==================================================
+
     if (accountStore.mutedSince < storage.mutedSince) {
       updateAccountStore('streamMuted', () => ({ ...storage.streamMuted }));
       updateAccountStore('streamMutedSince', () => storage.streamMutedSince);
@@ -1892,44 +1778,10 @@ export const initAccountStore: AccountStore = {
       handleStreamMuteListEvent,
     );
 
+// ==================================================
+
     getFilterLists(pubkey);
     getAllowList(pubkey);
-
-// ===========================================
-    const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
-
-    savePrimalRelaySettings(pubkey, accountStore.connectToPrimaryRelays);
-
-    if (accountStore.connectToPrimaryRelays) {
-      const aru = accountStore.suspendedRelays.map(r => r.url) as string[];
-
-      const relaySettings = rels.
-        filter(u => !aru.includes(u) && !aru.includes(`${u}/`)).
-        reduce((acc, r) => ({
-          ...acc,
-          [r]: { read: true, write: true } ,
-        }), {});
-
-      connectToRelays(relaySettings)
-    }
-    else {
-      for (let i = 0; i < rels.length; i++) {
-        const url = rels[i];
-        const urlVariants = [url, url.endsWith('/') ? url.slice(0, -1) : `${url}/`];
-
-        for (let i = 0; i < urlVariants.length;i++) {
-          const u = urlVariants[i]
-          const relay = accountStore.relays.find(r => r.url === u);
-
-          if (relay) {
-            relay.close();
-            const filtered = accountStore.relays.filter(r => r.url !== u);
-            updateAccountStore('relays', () => filtered);
-            updateAccountStore('activeRelays', () => filtered);
-          }
-        }
-      }
-    }
 
   }
 

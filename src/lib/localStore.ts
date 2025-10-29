@@ -228,6 +228,16 @@ export const saveRelaySettings = (pubkey: string | undefined, settings: NostrRel
   setStorage(pubkey, store);
 }
 
+export const readRelaySettings = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  return store.relaySettings;
+}
+
 export const savePrimalRelaySettings = (pubkey: string | undefined, usePrimalRelay: boolean) => {
   if (!pubkey) {
     return;

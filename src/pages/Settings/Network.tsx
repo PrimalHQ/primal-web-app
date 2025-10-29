@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
-import { Relay, relayInit } from "../../lib/nTools";
+import { Relay, relayInit, utils } from "../../lib/nTools";
 import styles from './Settings.module.scss';
 
 import { useIntl } from '@cookbook/solid-intl';
@@ -39,19 +39,21 @@ const Network: Component = () => {
   let customRelayInput: HTMLInputElement | undefined;
   let cachingServiceInput: HTMLInputElement | undefined;
 
-  const relays = () => {
-    let settingsRelays = [];
+  const relays = () => Object.keys(accountStore.relaySettings);
 
-    for (let url in (accountStore.relaySettings || {})) {
+  // const relays = () => {
+  //   let settingsRelays = [];
 
-      settingsRelays.push(relayInit(url))
-    }
+  //   for (let url in (accountStore.relaySettings || {})) {
 
-    return settingsRelays;
-  };
+  //     settingsRelays.push(relayInit(url))
+  //   }
+
+  //   return settingsRelays;
+  // };
 
   const otherRelays = () => {
-    const myRelays: string[] = relays().map(r => r.url);
+    const myRelays: string[] = relays();
 
     let unusedRelays: string[] = [];
 
@@ -75,7 +77,9 @@ const Network: Component = () => {
   }
 
   const isConnected = (url: string) => {
-    const relay: Relay | undefined = accountStore.relays.find(r => r.url === url);
+    if (accountStore.proxyThroughPrimal) return false;
+
+    const relay: Relay | undefined = accountStore.activeRelays.find(r => utils.normalizeURL(r.url) === utils.normalizeURL(url));
 
     return relay && relay.ws && relay.ws.readyState === WebSocket.OPEN;
   };
@@ -271,21 +275,21 @@ const Network: Component = () => {
       >
         <For each={relays()}>
           {relay => (
-            <button class={styles.relayItem} onClick={() => setConfirmRemoveRelay(relay.url)}>
+            <button class={styles.relayItem} onClick={() => setConfirmRemoveRelay(relay)}>
               <div class={styles.relayEntry}>
                 <Switch fallback={<div class={styles.disconnected}></div>}>
                   <Match when={accountStore.proxyThroughPrimal}>
                     <div class={styles.suspended}></div>
                   </Match>
 
-                  <Match when={isConnected(relay.url)}>
+                  <Match when={isConnected(relay)}>
                     <div class={styles.connected}></div>
                   </Match>
                 </Switch>
 
                 <div class={styles.webIcon}></div>
-                <span class={styles.relayUrl} title={relay.url}>
-                  {relay.url}
+                <span class={styles.relayUrl} title={relay}>
+                  {relay}
                 </span>
               </div>
 

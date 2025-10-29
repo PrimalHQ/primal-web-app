@@ -894,7 +894,7 @@ const EditBox: Component<{
         }
       }
 
-      const relayTags = accountStore.relays.map(r => {
+      const relayTags = accountStore.activeRelays.map(r => {
         let t = ['r', r.url];
 
         const settings = accountStore.relaySettings[r.url];

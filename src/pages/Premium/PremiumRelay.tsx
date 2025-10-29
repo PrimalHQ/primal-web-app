@@ -13,7 +13,7 @@ const premiumRelay = 'wss://premium.primal.net/';
 const PremiumRelay: Component<{
   data: PremiumStore,
 }> = (props) => {
-  const isConnected = () => accountStore.relays.find(r => r.url === premiumRelay);
+  const isConnected = () => accountStore.activeRelays.find(r => r.url === premiumRelay);
 
   const [relayInfo, setRelayInfo] = createStore<any>({});
 
