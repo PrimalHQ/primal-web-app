@@ -46,9 +46,6 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
       [...bookmarkTags],
       date,
       '',
-      accountStore.proxyThroughPrimal || false,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
     );
 
     if (success && note) {

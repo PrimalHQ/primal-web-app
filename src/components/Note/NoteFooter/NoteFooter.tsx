@@ -121,9 +121,6 @@ const NoteFooter: Component<{
       pubkey,
       id,
       Kind.Repost,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
-      accountStore.proxyThroughPrimal,
     );
 
     if (!success || !deleteEvent) return;
@@ -190,12 +187,7 @@ const NoteFooter: Component<{
 
     props.updateState && props.updateState('isRepostMenuVisible', () => false);
 
-    const { success } = await sendRepost(
-      props.note,
-      accountStore.proxyThroughPrimal,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
-    );
+    const { success } = await sendRepost(props.note);
 
     if (success) {
       batch(() => {

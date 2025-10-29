@@ -913,10 +913,7 @@ const EditBox: Component<{
 
       const { success, reasons, note } = await sendNote(
         messageToSend,
-        accountStore.proxyThroughPrimal || false,
-        accountStore.activeRelays,
         tags,
-        accountStore.relaySettings,
       );
 
       if (success) {

@@ -36,7 +36,7 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
 
     updateBookmarks(bookmarks)
     saveBookmarks(accountStore.publicKey, bookmarks);
-    const { success, note} = await sendBookmarks([...bookmarkTags], date, '', accountStore.proxyThroughPrimal || false, accountStore.activeRelays, accountStore.relaySettings);
+    const { success, note} = await sendBookmarks([...bookmarkTags], date, '');
 
     if (success && note) {
       triggerImportEvents([note], `bookmark_import_${APP_ID}`)

@@ -177,9 +177,6 @@ const LiveStreamContextMenu: Component<{
       user.pubkey,
       coordinate,
       kind,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
-      accountStore.proxyThroughPrimal,
     );
 
     if (!success || !deleteEvent) return;

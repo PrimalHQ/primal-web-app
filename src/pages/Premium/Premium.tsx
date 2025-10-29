@@ -328,7 +328,7 @@ const Premium: Component = () => {
 
     if (metaUpdate.lud16 === user.lud16 && metaUpdate.nip05 === user.nip05) return;
 
-    const { success, note } = await sendProfile({ ...user, ...metaUpdate }, accountStore.proxyThroughPrimal,  accountStore.activeRelays, accountStore.relaySettings);
+    const { success, note } = await sendProfile({ ...user, ...metaUpdate });
 
     if (success) {
       note && triggerImportEvents([note], `import_profile_${APP_ID}`, () => {

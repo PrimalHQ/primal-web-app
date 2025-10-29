@@ -252,12 +252,7 @@ const EditProfile: Component = () => {
       oldProfile.bithday = userProfile.bithday
     }
 
-    const { success, note } = await sendProfile(
-      { ...oldProfile, ...metadata},
-      accountStore.proxyThroughPrimal || false,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
-    );
+    const { success, note } = await sendProfile({ ...oldProfile, ...metadata});
 
     if (success) {
       note && triggerImportEvents([note], `import_profile_${APP_ID}`, () => {

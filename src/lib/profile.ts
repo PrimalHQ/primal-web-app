@@ -277,7 +277,7 @@ export const isAccountVerified: (domain: string | undefined) => Promise<nip19.Pr
 };
 
 
-export const sendProfile = async (metaData: any, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendProfile = async (metaData: any) => {
   const event = {
     content: JSON.stringify(metaData),
     kind: Kind.Metadata,
@@ -285,7 +285,7 @@ export const sendProfile = async (metaData: any, shouldProxy: boolean, relays: R
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays, relaySettings, shouldProxy);
+  return await sendEvent(event);
 };
 
 export const reportUser = async (pubkey: string | undefined, subid: string, user?: PrimalUser) => {
@@ -328,7 +328,7 @@ export const getFilterlists = (pubkey: string | undefined, subid: string, extend
   ]));
 };
 
-export const sendFilterlists = async (filterLists: Filterlist[], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendFilterlists = async (filterLists: Filterlist[], date: number, content: string) => {
   const tags = filterLists.reduce((acc, fl) => {
     let s = [];
     if (fl.content) s.push('content');
@@ -349,7 +349,7 @@ export const sendFilterlists = async (filterLists: Filterlist[], date: number, c
     created_at: date,
   };
 
-  return await sendEvent(event, relays, relaySettings, shouldProxy);
+  return await sendEvent(event);
 };
 
 export const getAllowlist = (pubkey: string | undefined, subid: string, extended?: boolean) => {
@@ -364,7 +364,7 @@ export const getAllowlist = (pubkey: string | undefined, subid: string, extended
   ]));
 };
 
-export const sendAllowList = async (allowlist: string[], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendAllowList = async (allowlist: string[], date: number, content: string) => {
   const tags = allowlist.reduce((acc, pk) => {
     return [...acc, ['p', pk]];
   }, [['d', 'allowlist']]);
@@ -376,7 +376,7 @@ export const sendAllowList = async (allowlist: string[], date: number, content: 
     created_at: date,
   };
 
-  return await sendEvent(event, relays, relaySettings, shouldProxy);
+  return await sendEvent(event);
 };
 
 export const getSuggestions = async (subid: string) => {
@@ -400,7 +400,7 @@ export const getRelays = async (pubkey: string | undefined, subid: string) => {
 };
 
 
-export const sendRelays = async (relays: Relay[], relaySettings: NostrRelays, shouldProxy: boolean) => {
+export const sendRelays = async (relaySettings: NostrRelays) => {
   const tags = Object.entries(relaySettings).reduce<string[][]>((acc, [url, config]) => {
     if (config.read && config.write) {
       return [ ...acc, ['r', url]];
@@ -422,7 +422,7 @@ export const sendRelays = async (relays: Relay[], relaySettings: NostrRelays, sh
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  const result = await sendEvent(event, relays, relaySettings, shouldProxy);
+  const result = await sendEvent(event);
 
   if (result.success && result.note) {
     triggerImportEvents([result.note], `import_events_${APP_ID}`);
@@ -431,7 +431,7 @@ export const sendRelays = async (relays: Relay[], relaySettings: NostrRelays, sh
   return result;
 };
 
-export const sendBookmarks = async (tags: string[][], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendBookmarks = async (tags: string[][], date: number, content: string) => {
   const event = {
     content,
     kind: Kind.Bookmarks,
@@ -439,7 +439,7 @@ export const sendBookmarks = async (tags: string[][], date: number, content: str
     created_at: date,
   };
 
-  return await sendEvent(event, relays, relaySettings, shouldProxy);
+  return await sendEvent(event);
 };
 
 export const getBookmarks = async (pubkey: string | undefined, subid: string) => {

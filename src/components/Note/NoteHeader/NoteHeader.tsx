@@ -101,9 +101,6 @@ const NoteHeader: Component<{
   const broadcastNote = async () => {
     const { success } = await broadcastEvent(
       props.note.msg as NostrRelaySignedEvent,
-      accountStore.proxyThroughPrimal,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
     );
     setContext(false);
 

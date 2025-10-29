@@ -377,7 +377,7 @@ const ReadsEditor: Component = () => {
 
     setIsPublishing(true);
 
-    const { success, note } = await sendArticle(articleToPost, accountStore.proxyThroughPrimal || false, accountStore.activeRelays, tags, accountStore.relaySettings);
+    const { success, note } = await sendArticle(articleToPost, tags);
 
     if (success && note) {
 
@@ -408,9 +408,6 @@ const ReadsEditor: Component = () => {
           user.pubkey,
           lastDraft,
           Kind.Draft,
-          accountStore.activeRelays,
-          accountStore.relaySettings,
-          accountStore.proxyThroughPrimal,
         );
       }
 
@@ -506,9 +503,6 @@ const ReadsEditor: Component = () => {
       user,
       article,
       markdownContent(),
-      accountStore.activeRelays,
-      accountStore.relaySettings,
-      accountStore.proxyThroughPrimal,
     );
 
     if (success && note) {
@@ -528,9 +522,6 @@ const ReadsEditor: Component = () => {
           user.pubkey,
           lastDraft,
           Kind.Draft,
-          accountStore.activeRelays,
-          accountStore.relaySettings,
-          accountStore.proxyThroughPrimal,
         );
 
         if (delResponse.success && delResponse.note) {

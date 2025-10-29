@@ -130,9 +130,6 @@ const ArticleDraftContextMenu: Component<{
       user.pubkey,
       article.id,
       Kind.Draft,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
-      accountStore.proxyThroughPrimal,
     );
 
     if (!success || !note) return;

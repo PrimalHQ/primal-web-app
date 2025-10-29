@@ -272,7 +272,7 @@ const Longform: Component< { naddr: string } > = (props) => {
       ],
     }
 
-    const { success, note } = await sendEvent(subEvent, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
+    const { success, note } = await sendEvent(subEvent);
 
     if (success && note) {
       const isZapped = await zapSubscription(
@@ -306,7 +306,7 @@ const Longform: Component< { naddr: string } > = (props) => {
       ],
     };
 
-    await sendEvent(unsubEvent, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
+    await sendEvent(unsubEvent);
 
   }
 

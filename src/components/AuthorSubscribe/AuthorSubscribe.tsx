@@ -66,7 +66,7 @@ const AuthorSubscribe: Component<{
     }
 
 
-    const { success, note } = await sendEvent(subEvent, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
+    const { success, note } = await sendEvent(subEvent);
 
     if (success && note) {
       const isZapped = await zapSubscription(
@@ -100,7 +100,7 @@ const AuthorSubscribe: Component<{
       ],
     };
 
-    await sendEvent(unsubEvent, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
+    await sendEvent(unsubEvent);
 
   }
 

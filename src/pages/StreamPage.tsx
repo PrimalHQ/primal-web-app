@@ -792,7 +792,7 @@ const StreamPage: Component = () => {
         ['a', eventCoodrinate, accountStore.activeRelays[0].url, 'root'],
       ],
     }
-    const { success, note } = await sendEvent(messageEvent, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
+    const { success, note } = await sendEvent(messageEvent);
 
     if (success && note) {
       setEvents((es) => [{ ...note }, ...es ]);

@@ -543,7 +543,7 @@ export const initAccountStore: AccountStore = {
       return false;
     }
 
-    const { success } = await sendLike(note, accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+    const { success } = await sendLike(note);
 
     if (success) {
       updateAccountStore('likes', (likes) => [ ...likes, note.id]);
@@ -576,7 +576,7 @@ export const initAccountStore: AccountStore = {
         setRelaySettings(relays, true);
       },
       onEose: () => {
-        sendRelays(accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal);
+        sendRelays(accountStore.relaySettings);
 
         unsub();
       },
@@ -600,17 +600,13 @@ export const initAccountStore: AccountStore = {
     const unsub = subsTo(`before_remove_relay_${APP_ID}`, {
       onEvent: (_, content) => {
         let relayInfo: NostrRelays = JSON.parse(content?.content || '{}');
-
         delete relayInfo[url];
 
         const relays = { ...accountStore.relaySettings, ...relayInfo };
-
         setRelaySettings(relays, true);
       },
       onEose: () => {
-
-        sendRelays(accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal);
-
+        sendRelays(accountStore.relaySettings);
         unsub();
       },
     });
@@ -731,7 +727,7 @@ export const initAccountStore: AccountStore = {
     relayInfo: string,
     cb?: (remove: boolean, pubkey: string) => void,
   ) => {
-    const { success, note: event } = await sendContacts(tags, date, relayInfo, accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+    const { success, note: event } = await sendContacts(tags, date, relayInfo);
 
     if (success && event) {
       updateAccountStore('following', () => following);
@@ -752,7 +748,7 @@ export const initAccountStore: AccountStore = {
     relayInfo: string,
     cb?: (remove: boolean, pubkey: string | undefined) => void,
   ) => {
-    const { success, note: event } = await sendContacts(tags, date, relayInfo, accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+    const { success, note: event } = await sendContacts(tags, date, relayInfo);
 
     if (success && event) {
       const following = event.tags.reduce<string[]>((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
@@ -958,7 +954,7 @@ export const initAccountStore: AccountStore = {
 
           const tags = [ ...unwrap(accountStore.mutedTags), ['p', pubkey]];
 
-          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate, accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate);
 
           if (success) {
             updateAccountStore('muted', () => muted);
@@ -982,7 +978,7 @@ export const initAccountStore: AccountStore = {
 
           const tags = [ ...unwrap(accountStore.mutedTags), [flags[muteKind], pubkey]];
 
-          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate, accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate);
 
           if (success) {
             updateAccountStore('mutedTags', () => tags);
@@ -1034,7 +1030,7 @@ export const initAccountStore: AccountStore = {
 
           const tags = unwrap(accountStore.mutedTags).filter(t => t[0] !== 'p' || t[1] !== pubkey);
 
-          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate, accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate);
 
           if (success) {
             updateAccountStore('muted', () => muted);
@@ -1058,7 +1054,7 @@ export const initAccountStore: AccountStore = {
 
           const tags = unwrap(accountStore.mutedTags).filter(t => t[0] !== flags[muteKind] || t[1] !== pubkey).filter(t => t[1] !== "");
 
-          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate, accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate);
 
           if (success) {
             updateAccountStore('mutedTags', () => tags);
@@ -1110,7 +1106,7 @@ export const initAccountStore: AccountStore = {
 
         const tags = [ ...unwrap(accountStore.streamMutedTags), ['p', pubkey]];
 
-        const { success, note } = await sendStreamMuteList(tags, date, accountStore.streamMutedPrivate, accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+        const { success, note } = await sendStreamMuteList(tags, date, accountStore.streamMutedPrivate);
 
         if (success) {
           updateAccountStore('streamMuted', () => muted);
@@ -1162,7 +1158,7 @@ export const initAccountStore: AccountStore = {
 
         const tags = unwrap(accountStore.streamMutedTags).filter(t => t[0] !== 'p' || t[1] !== pubkey);
 
-        const { success, note } = await sendStreamMuteList(tags, date, accountStore.streamMutedPrivate, accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+        const { success, note } = await sendStreamMuteList(tags, date, accountStore.streamMutedPrivate);
 
         if (success) {
           updateAccountStore('streamMuted', () => muted);
@@ -1317,7 +1313,7 @@ export const initAccountStore: AccountStore = {
 
         updateAccountStore('mutelists', (mls) => [ ...mls, { pubkey, content: true, trending: true } ]);
 
-        const { success, note } = await sendFilterlists(accountStore.mutelists, date, '', accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+        const { success, note } = await sendFilterlists(accountStore.mutelists, date, '');
 
         if (success) {
           note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`);
@@ -1357,7 +1353,7 @@ export const initAccountStore: AccountStore = {
 
         updateAccountStore('mutelists', () => [ ...modified ]);
 
-        const { success, note } = await sendFilterlists(accountStore.mutelists, date, '', accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+        const { success, note } = await sendFilterlists(accountStore.mutelists, date, '');
 
         if (success) {
           note && triggerImportEvents([note], `import_mutelists_event_remove_${APP_ID}`);
@@ -1400,7 +1396,7 @@ export const initAccountStore: AccountStore = {
           () => ({ content, trending }),
         );
 
-        const { success, note } = await sendFilterlists(accountStore.mutelists, date, '', accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+        const { success, note } = await sendFilterlists(accountStore.mutelists, date, '');
 
         if (success) {
           note && triggerImportEvents([note], `import_mutelists_event_update_${APP_ID}`);
@@ -1479,7 +1475,7 @@ export const initAccountStore: AccountStore = {
 
         updateAccountStore('allowlist', accountStore.allowlist.length, () => pubkey);
 
-        const { success, note } = await sendAllowList(accountStore.allowlist, date, '', accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+        const { success, note } = await sendAllowList(accountStore.allowlist, date, '');
 
         if (success) {
           note && triggerImportEvents([note], `import_allowlist_event_add_${APP_ID}`)
@@ -1521,7 +1517,7 @@ export const initAccountStore: AccountStore = {
 
         updateAccountStore('allowlist', () => [...newList]);
 
-        const { success, note } = await sendAllowList(accountStore.allowlist, date, '', accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+        const { success, note } = await sendAllowList(accountStore.allowlist, date, '');
 
         if (success) {
           note && triggerImportEvents([note], `import_allowlist_event_remove_${APP_ID}`)
@@ -1690,7 +1686,7 @@ export const initAccountStore: AccountStore = {
   }
 
   export const updateBlossomEvent = async (then?: () => void) => {
-    const { success, note } = await sendBlossomEvent(accountStore.blossomServers, accountStore.proxyThroughPrimal, accountStore.activeRelays, accountStore.relaySettings);
+    const { success, note } = await sendBlossomEvent(accountStore.blossomServers);
 
     if (!success || !note) {
       // toast?.sendWarning('Failed to send server list');

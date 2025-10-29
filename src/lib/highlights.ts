@@ -3,7 +3,7 @@ import { Kind } from "../constants";
 import { NostrRelays } from "../types/primal";
 import { sendEvent } from "./notes";
 
-export const sendHighlight = async (content: string, context: string, author: string, article: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendHighlight = async (content: string, context: string, author: string, article: string) => {
 
   const event = {
     content,
@@ -17,10 +17,10 @@ export const sendHighlight = async (content: string, context: string, author: st
     created_at: Math.floor((new Date()).getTime() / 1_000),
   };
 
-  return await sendEvent(event, relays, relaySettings, shouldProxy);
+  return await sendEvent(event);
 };
 
-export const removeHighlight = async (id: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+export const removeHighlight = async (id: string) => {
 
   const event = {
     content: '',
@@ -32,5 +32,5 @@ export const removeHighlight = async (id: string, shouldProxy: boolean, relays: 
     created_at: Math.floor((new Date()).getTime() / 1_000),
   };
 
-  return await sendEvent(event, relays, relaySettings, shouldProxy);
+  return await sendEvent(event);
 };

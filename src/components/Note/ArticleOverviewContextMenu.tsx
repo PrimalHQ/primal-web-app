@@ -134,9 +134,6 @@ const ArticleOverviewContextMenu: Component<{
       user.pubkey,
       article.coordinate,
       Kind.LongForm,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
-      accountStore.proxyThroughPrimal,
     );
 
     if (!deleted || !deletedArticle) return;
@@ -151,11 +148,9 @@ const ArticleOverviewContextMenu: Component<{
         summary: article.summary,
         content: article.content,
         tags: [...article.tags],
+        msg: undefined,
       },
       article.content,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
-      accountStore.proxyThroughPrimal,
     );
 
     if (success && draft) {
@@ -178,9 +173,6 @@ const ArticleOverviewContextMenu: Component<{
       user.pubkey,
       article.coordinate,
       Kind.LongForm,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
-      accountStore.proxyThroughPrimal,
     );
 
     if (!success || !note) return;
@@ -261,9 +253,6 @@ const ArticleOverviewContextMenu: Component<{
 
     const { success } = await broadcastEvent(
       note().msg as NostrRelaySignedEvent,
-      accountStore.proxyThroughPrimal,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
     );
     props.onClose()
 

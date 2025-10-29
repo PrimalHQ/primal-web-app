@@ -624,7 +624,7 @@ const sendMessage = async (receiver: string, message: DirectMessage) => {
       created_at: Math.floor((new Date).getTime() / 1000),
     };
 
-    const { success, note } = await sendEvent(event, accountStore.activeRelays, accountStore.relaySettings, accountStore.proxyThroughPrimal || false);
+    const { success, note } = await sendEvent(event);
 
     if (success && note) {
       const subId = `import_dm_${APP_ID}`;

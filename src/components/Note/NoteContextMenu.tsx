@@ -186,9 +186,6 @@ const NoteContextMenu: Component<{
       user.pubkey,
       id,
       noteToDelete.msg.kind,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
-      accountStore.proxyThroughPrimal,
     );
 
     if (!success || !deleteEvent) return;
@@ -219,9 +216,6 @@ const NoteContextMenu: Component<{
 
     const { success } = await broadcastEvent(
       note().msg as NostrRelaySignedEvent,
-      accountStore.proxyThroughPrimal,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
     );
     props.onClose()
 

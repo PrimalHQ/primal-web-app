@@ -123,12 +123,7 @@ const ArticleFooter: Component<{
 
     props.updateState('isRepostMenuVisible', () => false);
 
-    const { success } = await sendArticleRepost(
-      props.note,
-      accountStore.proxyThroughPrimal,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
-    );
+    const { success } = await sendArticleRepost(props.note);
 
     if (success) {
       batch(() => {

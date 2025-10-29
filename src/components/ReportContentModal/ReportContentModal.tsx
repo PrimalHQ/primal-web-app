@@ -68,9 +68,6 @@ const ReportContentModal: Component<{
                   props.note.id,
                   props.note.pubkey,
                   selectedReason() || '',
-                  accountStore.proxyThroughPrimal,
-                  accountStore.activeRelays,
-                  accountStore.relaySettings,
                 );
 
                 if (success && event) {

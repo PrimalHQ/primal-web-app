@@ -105,9 +105,6 @@ const ArticleHighlightActionMenu: Component<{
       context || generated.context,
       props.article.pubkey,
       `${Kind.LongForm}:${props.article.pubkey}:${(props.article.msg.tags.find(t => t[0] === 'd') || [])[1]}`,
-      accountStore.proxyThroughPrimal,
-      accountStore.activeRelays,
-      accountStore.relaySettings,
     );
   };
 
@@ -189,9 +186,6 @@ const ArticleHighlightActionMenu: Component<{
 
     const { success } = await removeHighlight(
       highlight.id,
-      accountStore.proxyThroughPrimal,
-      accountStore.activeRelays,
-      accountStore.relaySettings
     );
   }
 
