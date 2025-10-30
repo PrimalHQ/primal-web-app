@@ -176,7 +176,6 @@ export type AccountStore = {
   mirrorBlossom: boolean,
 }
 
-let relayAtempts: Record<string, number> = {};
 let relaysExplicitlyClosed: string[] = [];
 
 let membershipSocket: WebSocket | undefined;
@@ -1184,26 +1183,6 @@ export const initAccountStore: AccountStore = {
     }
 
     reset();
-  };
-
-  export const dissconnectDefaultRelays = () => {
-    for(let i=0; i < accountStore.defaultRelays.length; i++) {
-      const url = accountStore.defaultRelays[i];
-
-      const relay = accountStore.activeRelays.find(r => r.url === url);
-
-      if (relay) {
-        relay.close();
-        const filtered = accountStore.activeRelays.filter(r => r.url !== url);
-        updateAccountStore('activeRelays', () => filtered);
-      }
-
-      // Add relay to the list of explicitly closed relays
-      relaysExplicitlyClosed.push(url);
-
-      // Reset connection attempts
-      relayAtempts[url] = 0;
-    }
   };
 
   export const updateFilterlists = (mutelists: NostrMutedContent) => {

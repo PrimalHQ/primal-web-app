@@ -23,7 +23,7 @@ import ButtonLink from '../../components/Buttons/ButtonLink';
 import { logError } from '../../lib/logger';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import CheckBox from '../../components/Checkbox/CheckBox';
-import { accountStore, addRelay, changeCachingService, connectToRelays, dissconnectDefaultRelays, removeRelay, resetRelays, setConnectToPrimaryRelays } from '../../stores/accountStore';
+import { accountStore, addRelay, changeCachingService, connectToRelays, removeRelay, resetRelays, setConnectToPrimaryRelays } from '../../stores/accountStore';
 
 
 const Network: Component = () => {
@@ -41,41 +41,6 @@ const Network: Component = () => {
 
   const relays = () => Object.keys(accountStore.relaySettings);
 
-  // const relays = () => {
-  //   let settingsRelays = [];
-
-  //   for (let url in (accountStore.relaySettings || {})) {
-
-  //     settingsRelays.push(relayInit(url))
-  //   }
-
-  //   return settingsRelays;
-  // };
-
-  const otherRelays = () => {
-    const myRelays: string[] = relays();
-
-    let unusedRelays: string[] = [];
-
-    for (let i = 0; i < recomendedRelays.length; i++) {
-      const relay = recomendedRelays[i];
-
-      const exists = myRelays.find(r => {
-
-        const a = new URL(r);
-        const b = new URL(relay.url);
-
-        return a.href === b.href;
-      });
-
-      if (!exists) {
-        unusedRelays.push(relay.url);
-      }
-    }
-
-    return unusedRelays;
-  }
-
   const isConnected = (url: string) => {
     if (accountStore.proxyThroughPrimal) return false;
 
@@ -92,22 +57,6 @@ const Network: Component = () => {
 
   const onCheckPrimalRelay = () => {
     setConnectToPrimaryRelays(!accountStore.connectToPrimaryRelays)
-  };
-
-  const onAddRelay = (url: string) => {
-    const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
-
-    if (rels.includes(url)) {
-      setConnectToPrimaryRelays(true);
-    }
-
-    const myRelays = relays();
-
-    if (myRelays.length === 0) {
-      dissconnectDefaultRelays()
-    }
-
-    addRelay(url);
   };
 
   const onRemoveRelay = (url: string) => {
