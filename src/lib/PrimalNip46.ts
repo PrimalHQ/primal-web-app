@@ -1,4 +1,5 @@
-import { verifyEvent, nip46, nip19, getPublicKey, generatePrivateKey } from '../lib/nTools';
+import { bytesToHex, hexToBytes } from 'nostr-tools/utils';
+import { verifyEvent, nip46, getPublicKey, generatePrivateKey } from '../lib/nTools';
 import { NostrExtension, NostrRelayEvent, NostrRelays, NostrRelaySignedEvent } from '../types/primal';
 import { uuidv4 } from '../utils';
 import { logWarning } from './logger';
@@ -9,29 +10,27 @@ export const setAppSigner = (bunker: nip46.BunkerSigner) => {
   appSigner = bunker;
 }
 
-export const generateAppKeys = () => {
-  if (localStorage.getItem('appNsec')) return;
+export const generateAppKeys = (opts?: { reset?: boolean }) => {
+  if (localStorage.getItem('appNsec') && !opts?.reset) return;
 
   let sk = generatePrivateKey();
   let pk = getPublicKey(sk);
 
-  localStorage.setItem('appNsec', nip19.nsecEncode(sk));
+  localStorage.setItem('appNsec', bytesToHex(sk));
   localStorage.setItem('appPubkey', pk);
 }
 
 export const getAppPK = () => localStorage.getItem('appPubkey');
 
 export const getAppSK = () => {
-  const nsec = localStorage.getItem('appNsec');
+  const nsecHex = localStorage.getItem('appNsec');
 
-  if (!nsec) return;
+  if (!nsecHex) return;
 
   try {
-    const decoded = nip19.decode(nsec);
+    const sk = hexToBytes(nsecHex);
 
-    if (decoded.type !== 'nsec') return;
-
-    return decoded.data;
+    return sk;
   } catch (e) {
     logWarning('Failed to decode App nsec: ', e);
     return;

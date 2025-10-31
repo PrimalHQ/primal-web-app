@@ -16,7 +16,8 @@ import { Tabs } from '@kobalte/core/tabs';
 import { useToastContext } from '../Toaster/Toaster';
 import QrCode from '../QrCode/QrCode';
 import { useAppContext } from '../../contexts/AppContext';
-import { generateClientConnectionUrl, getAppSK, storeBunker } from '../../lib/PrimalNip46';
+import { appSigner, generateClientConnectionUrl, getAppSK, setAppSigner, storeBunker } from '../../lib/PrimalNip46';
+import { logWarning } from '../../lib/logger';
 
 const LoginModal: Component<{
   id?: string,
@@ -31,14 +32,16 @@ const LoginModal: Component<{
   const [step, setStep] = createSignal<'login' | 'pin' | 'none'>('login')
   const [enteredKey, setEnteredKey] = createSignal('');
   const [enteredNpub, setEnteredNpub] = createSignal('');
+  const [showBunkerInput, setShowBunkerInput] = createSignal(false);
 
   const [clientUrl, setClientUrl] = createSignal('');
 
-  const [activeTab, setActiveTab] = createSignal('simple');
+  const [activeTab, setActiveTab] = createSignal('extension');
+  const [copying, setCopying] = createSignal(false);
 
   let nsecInput: HTMLInputElement | undefined;
-
   let npubInput: HTMLInputElement | undefined;
+  let bunkerInput: HTMLInputElement | undefined;
 
   const onLogin = () => {
     const sec = enteredKey();
@@ -109,38 +112,48 @@ const LoginModal: Component<{
   let signer: nip46.BunkerSigner | undefined;
 
   createEffect(() => {
+    if (!props.open) {
+      signer = undefined;
+    }
+  });
+
+  createEffect(() => {
     if (!props.open) return;
 
     if (activeTab() === 'nsec') {
       setTimeout(() => {
         nsecInput?.focus();
-      }, 100)
+      }, 100);
     }
 
     if (activeTab() === 'npub') {
       setTimeout(() => {
         npubInput?.focus();
-      }, 100)
+      }, 100);
     }
 
     if (activeTab() === 'simple') {
       setupSigner();
+      setTimeout(() => {
+        bunkerInput?.focus();
+      }, 100);
     }
   });
 
   const setupSigner = async () => {
-    const clientUrl = generateClientConnectionUrl();
+    const cUrl = generateClientConnectionUrl();
 
-    if (clientUrl.length === 0) return;
+    if (cUrl.length === 0) return;
 
-    setClientUrl(clientUrl);
+    setClientUrl(cUrl);
 
     const sec = getAppSK();
+
     if (!sec) return;
 
     if (!signer) {
       pool = new SimplePool();
-      signer = await nip46.BunkerSigner.fromURI(sec, clientUrl, { pool });
+      signer = await nip46.BunkerSigner.fromURI(sec, cUrl, { pool });
     }
 
     storeBunker(signer);
@@ -153,9 +166,59 @@ const LoginModal: Component<{
     props.onAbort && props.onAbort();
   }
 
+  const onBunkerLogin = async () => {
+    const bunkerUrl = bunkerInput?.value || '';
+    const sec = getAppSK();
+
+    try {
+      if (!sec) {
+        throw new Error('no-app-sec');
+      }
+
+      if (!bunkerUrl) {
+        throw new Error('no-buker-url');
+      };
+
+      const bunkerPointer = await nip46.parseBunkerInput(bunkerUrl);
+
+      if (!bunkerPointer) {
+        throw new Error('no-buker-pointer');
+      }
+
+      const pool = new SimplePool();
+
+      const signer = nip46.BunkerSigner.fromBunker(sec, bunkerPointer, { pool });
+
+      signer.connect();
+
+      storeBunker(signer);
+
+      if (!appSigner) {
+        throw new Error('no-app-signer');
+      }
+
+      const pubkey = await appSigner.getPublicKey();
+
+      setLoginType('nip46');
+      setPublicKey(pubkey);
+      doAfterLogin(pubkey);
+
+      props.onAbort && props.onAbort();
+    } catch (e) {
+      logWarning('FAILED TO LOGIN: ', e)
+      setLoginType('none');
+    }
+  }
+
   const onKeyUp = (e: KeyboardEvent) => {
     if (e.code === 'Enter' && isValidNsec()) {
-      onLogin();
+      if (activeTab() === 'nsec') {
+        onLogin();
+      }
+
+      if (activeTab() === 'simple') {
+        onBunkerLogin();
+      }
     }
   };
 
@@ -176,11 +239,11 @@ const LoginModal: Component<{
           <div id={props.id} class={styles.modal}>
             <Tabs value={activeTab()} onChange={setActiveTab}>
               <Tabs.List class={styles.profileTabs}>
-                <Tabs.Trigger class={styles.profileTab} value="simple">
-                  {intl.formatMessage(tLogin.tabs.simple)}
-                </Tabs.Trigger>
                 <Tabs.Trigger class={styles.profileTab} value="extension">
                   {intl.formatMessage(tLogin.tabs.extension)}
+                </Tabs.Trigger>
+                <Tabs.Trigger class={styles.profileTab} value="simple">
+                  {intl.formatMessage(tLogin.tabs.simple)}
                 </Tabs.Trigger>
                 <Tabs.Trigger class={styles.profileTab} value="nsec">
                   {intl.formatMessage(tLogin.tabs.nsec)}
@@ -197,14 +260,56 @@ const LoginModal: Component<{
                   <div class={styles.extensionLogin}>
                     <div class={styles.qrCode}>
                       <Show when={clientUrl().length > 0}>
-                        <QrCode
-                          data={clientUrl()}
-                          width={234}
-                          height={234}
-                        />
+                        <div class={styles.actualQr}>
+                          <QrCode
+                            data={clientUrl()}
+                            width={234}
+                            height={234}
+                          />
+                        </div>
+                        <button
+                          class={styles.copyNostrConnect}
+                          onClick={() => {
+                            navigator.clipboard.writeText(clientUrl());
+                            setCopying(true);
+                            setTimeout(() => setCopying(false), 2_000);
+                          }}
+                        >
+                          <div class={styles.content}>{clientUrl()}</div>
+                          <div class={styles.copyIcon}></div>
+                        </button>
                       </Show>
                     </div>
-                    <div class={styles.simpleDesc}>
+                    <div class={styles.bunkerDesc}>
+                      <div class={styles.loginExplain}>
+                        Login by scanning the QR code or pasting the connect string into your bunker.
+                      </div>
+                      <button
+                        class={styles.bunkerShow}
+                        onClick={() => {
+                          setShowBunkerInput(f => !f);
+                        }}
+                      >
+                        Or, enter Bunker URL manually
+                      </button>
+                      <Show when={showBunkerInput()}>
+                        <div class={styles.bunkerInput}>
+                          <input
+                            ref={bunkerInput}
+                            class={styles.input}
+                            type="text"
+                            onKeyUp={onKeyUp}
+                            onInput={(e) => setEnteredNpub(e.target.value)}
+                            placeholder='bunker://...'
+                            // validationState={enteredKey().length === 0 || isValidNsec() ? 'valid' : 'invalid'}
+                            // errorMessage={intl.formatMessage(tLogin.invalidNsec)}
+                            // inputClass={styles.nsecInput}
+                          />
+                          <ButtonPrimary onClick={() => onBunkerLogin()}>Login</ButtonPrimary>
+                        </div>
+                      </Show>
+                    </div>
+                    {/* <div class={styles.simpleDesc}>
                       <div class={styles.loginExplain}>
                         The simplest way to login:
                       </div>
@@ -228,7 +333,7 @@ const LoginModal: Component<{
                         <div class={styles.copyIcon}></div>
                         <div>Copy Login URL</div>
                       </button>
-                    </div>
+                    </div> */}
                   </div>
                 </Tabs.Content>
                 <Tabs.Content value="extension" >

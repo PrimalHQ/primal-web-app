@@ -22,7 +22,7 @@
 
 .tabContent {
   width: 100%;
-  min-height: 315px;
+  min-height: 367px;
   height: fit-content;
   border-top: 1px solid;
   border-color: var(--subtile-devider);
@@ -78,10 +78,59 @@
   gap: 48px;
 
   .qrCode {
-    width: 234px;
-    height: 234px;
+    min-width: 234px;
+    height: fit-content;
     overflow: hidden;
     border-radius: 12px;
+    flex-grow: 1;
+
+    .actualQr {
+      width: 234px;
+      height: 234px;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+
+    .copyNostrConnect {
+      display: flex;
+      width: 232px;
+      height: 40px;
+      padding: 12px 16px;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+      border-radius: 99px;
+      border: 1px solid var(--subtile-devider);
+      background: var(--background-sheet);
+      margin-top: 12px;
+
+      .content {
+        overflow: hidden;
+        color: var(--text-secondary);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 20px;
+        max-width: 174px;
+      }
+
+      .copyIcon {
+        width: 16px;
+        height: 16px;
+        background-color: var(--text-tertiary-2);
+        -webkit-mask: url(../../assets/icons/copy.svg) no-repeat 0 / 100%;
+        mask: url(../../assets/icons/copy.svg) no-repeat 0 / 100%;
+
+        &.left {
+          margin-right: 8px;
+        }
+        &.right {
+          margin-left: 8px;
+        }
+      }
+    }
   }
 
   .extensionIcon {
@@ -90,6 +139,7 @@
     overflow: hidden;
     border-radius: 12px;
     background: url(../../assets/images/extension.svg);
+    background-repeat: no-repeat;
   }
 
   .extensionDesc {
@@ -126,6 +176,7 @@
     overflow: hidden;
     border-radius: 12px;
     background: url(../../assets/images/nsec.svg);
+    background-repeat: no-repeat;
   }
 
   .nsecDesc {
@@ -270,6 +321,37 @@
           color: var(--accent-links);
         }
       }
+    }
+  }
+}
+
+
+.bunkerDesc {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .loginExplain {
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 32px;
+  }
+
+  .bunkerShow {
+    color: var(--accent-links);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 32px;
+    width: fit-content;
+  }
+
+  .bunkerInput {
+    display: flex;
+    gap: 12px;
+
+    button {
+      min-width: 108px;
     }
   }
 }
