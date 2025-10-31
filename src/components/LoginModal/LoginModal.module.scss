@@ -4,6 +4,7 @@
   font-weight: 600;
   line-height: 32px;
   margin-left: 60px;
+  margin-top: 24px;
 }
 
 .modal {
@@ -135,10 +136,10 @@
 
   .extensionIcon {
     min-width: 234px;
-    min-height: 234px;
+    min-height: 272px;
     overflow: hidden;
     border-radius: 12px;
-    background: url(../../assets/images/extension.svg);
+    background: url(../../assets/images/extension2.svg);
     background-repeat: no-repeat;
   }
 
@@ -172,17 +173,17 @@
 
   .nsecIcon {
     min-width: 234px;
-    min-height: 234px;
+    min-height: 272px;
     overflow: hidden;
     border-radius: 12px;
-    background: url(../../assets/images/nsec.svg);
+    background: url(../../assets/images/nsec2.svg);
     background-repeat: no-repeat;
   }
 
   .nsecDesc {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     flex-grow: 1;
 
     .description {

@@ -345,7 +345,8 @@ export const initAccountStore: AccountStore = {
   }
 
   export const showGetStarted = () => {
-    updateAccountStore('showGettingStarted', () => true);
+    updateAccountStore('showLogin', () => true);
+    // updateAccountStore('showGettingStarted', () => true);
   }
 
   export const logout = () => {
