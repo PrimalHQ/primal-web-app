@@ -527,6 +527,7 @@ const Notifications: Component = () => {
       },
     });
 
+
     setOldNotifications('page', () => ({ messages: [], users: {}, postStats: {}, notifications: [] }));
 
     const pk = publicKey();

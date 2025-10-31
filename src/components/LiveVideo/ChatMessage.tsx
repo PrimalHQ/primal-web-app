@@ -862,7 +862,6 @@ const ChatMessage: Component<{
   const renderUserMention = (item: NoteContent) => {
     return <For each={item.tokens}>
       {(token) => {
-        console.log('USER MENTION: ', token);
         let [nostr, id] = token.split(':');
 
         if (!id) {

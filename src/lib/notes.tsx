@@ -744,7 +744,6 @@ export const sendEvent = async (event: NostrEvent) => {
     },
     {
       onevent: (e) => {
-        console.log('GOT EVENT: ', e)
         unsub.close();
       }
     }
@@ -1042,13 +1041,11 @@ export const getMyRepostOfEvent = (event_id: string, pubkey: string | undefined)
     const unsub = subsTo(subId, {
       onEvent: (_,event) => {
         if (event.kind === Kind.Repost) {
-          console.log('content: ', event);
           id = event.id || '';
         }
       },
       onEose: () => {
         unsub();
-        console.log('ID: ', id)
         if (!id || id.length === 0) {
           resolve(undefined);
           return;

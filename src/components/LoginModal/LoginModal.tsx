@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, createSignal, Match, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, Match, Show, Switch } from 'solid-js';
 
 import { login as tLogin, actions as tActions } from '../../translations';
 
@@ -7,17 +7,16 @@ import styles from './LoginModal.module.scss';
 import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import CreatePinModal from '../CreatePinModal/CreatePinModal';
-import TextInput from '../TextInput/TextInput';
-import { nip19 } from '../../lib/nTools';
+import { nip19, nip46, SimplePool } from '../../lib/nTools';
 import { storeSec } from '../../lib/localStore';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
-import { accountStore, loginUsingExtension, loginUsingLocalNsec, loginUsingNpub, setSec } from '../../stores/accountStore';
+import { accountStore, doAfterLogin, loginUsingExtension, loginUsingLocalNsec, loginUsingNpub, setLoginType, setPublicKey, setSec } from '../../stores/accountStore';
 import { Tabs } from '@kobalte/core/tabs';
 
-import extensionIcon from '../../assets/images/extension.svg';
-import nsecIcon from '../../assets/images/nsec.svg';
 import { useToastContext } from '../Toaster/Toaster';
 import QrCode from '../QrCode/QrCode';
+import { useAppContext } from '../../contexts/AppContext';
+import { generateClientConnectionUrl, getAppSK, storeBunker } from '../../lib/PrimalNip46';
 
 const LoginModal: Component<{
   id?: string,
@@ -27,11 +26,13 @@ const LoginModal: Component<{
 
   const intl = useIntl();
   const toaster = useToastContext();
+  const app = useAppContext();
 
   const [step, setStep] = createSignal<'login' | 'pin' | 'none'>('login')
   const [enteredKey, setEnteredKey] = createSignal('');
   const [enteredNpub, setEnteredNpub] = createSignal('');
 
+  const [clientUrl, setClientUrl] = createSignal('');
 
   const [activeTab, setActiveTab] = createSignal('simple');
 
@@ -104,13 +105,12 @@ const LoginModal: Component<{
     return false;
   };
 
-  createEffect(() => {
-    if (props.open && step() === 'login') {
-      nsecInput?.focus();
-    }
-  });
+  let pool: SimplePool | undefined;
+  let signer: nip46.BunkerSigner | undefined;
 
   createEffect(() => {
+    if (!props.open) return;
+
     if (activeTab() === 'nsec') {
       setTimeout(() => {
         nsecInput?.focus();
@@ -122,7 +122,36 @@ const LoginModal: Component<{
         npubInput?.focus();
       }, 100)
     }
+
+    if (activeTab() === 'simple') {
+      setupSigner();
+    }
   });
+
+  const setupSigner = async () => {
+    const clientUrl = generateClientConnectionUrl();
+
+    if (clientUrl.length === 0) return;
+
+    setClientUrl(clientUrl);
+
+    const sec = getAppSK();
+    if (!sec) return;
+
+    if (!signer) {
+      pool = new SimplePool();
+      signer = await nip46.BunkerSigner.fromURI(sec, clientUrl, { pool });
+    }
+
+    storeBunker(signer);
+    const pk = await signer.getPublicKey();
+
+    setLoginType('nip46');
+    setPublicKey(pk);
+    doAfterLogin(pk);
+
+    props.onAbort && props.onAbort();
+  }
 
   const onKeyUp = (e: KeyboardEvent) => {
     if (e.code === 'Enter' && isValidNsec()) {
@@ -167,11 +196,13 @@ const LoginModal: Component<{
                 <Tabs.Content value="simple" >
                   <div class={styles.extensionLogin}>
                     <div class={styles.qrCode}>
-                      <QrCode
-                        data="https://primal.net"
-                        width={234}
-                        height={234}
-                      />
+                      <Show when={clientUrl().length > 0}>
+                        <QrCode
+                          data={clientUrl()}
+                          width={234}
+                          height={234}
+                        />
+                      </Show>
                     </div>
                     <div class={styles.simpleDesc}>
                       <div class={styles.loginExplain}>

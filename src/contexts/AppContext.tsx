@@ -8,19 +8,43 @@ import {
   onMount,
   useContext
 } from "solid-js";
-import { MediaEvent, MediaVariant, NostrBlossom, NostrEOSE, NostrEvent, NostrEventContent, NostrEvents, NostrLiveChat, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
+import {
+  NostrBlossom,
+  NostrEOSE,
+  NostrEvent,
+  NostrEventContent,
+  NostrEvents,
+  NostrLiveChat,
+  PrimalArticle,
+  PrimalDVM,
+  PrimalNote,
+  PrimalUser,
+  ZapOption,
+} from "../types/primal";
+import {
+  connect,
+  disconnect,
+  isConnected,
+  readData,
+  refreshSocketListeners,
+  removeSocketListeners,
+  socket,
+} from "../sockets";
+import {
+  accountStore,
+  hasPublicKey,
+  logUserIn,
+  reconnectSuspendedRelays,
+  suspendRelays,
+} from "../stores/accountStore";
 import { CashuMint } from "@cashu/cashu-ts";
 import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
-import { connect, disconnect, isConnected, isNotConnected, readData, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
-import { nip19, Relay } from "../lib/nTools";
+import { nip19, nip46 } from "../lib/nTools";
 import { logInfo } from "../lib/logger";
 import { Kind } from "../constants";
 import { LegendCustomizationConfig } from "../lib/premium";
-import { config } from "@milkdown/core";
 import { StreamingData } from "../lib/streaming";
-import { accountStore, hasPublicKey, logUserIn, reconnectSuspendedRelays, suspendRelays } from "../stores/accountStore";
 import { loadLegendCustomization, saveLegendCustomization } from "../lib/localStore";
-
 
 export type ReactionStats = {
   likes: number,
@@ -120,6 +144,7 @@ export type AppContextStore = {
   memberCohortInfo: Record<string, CohortInfo>,
   showProfileQr: PrimalUser | undefined,
   reportContent: PrimalNote | PrimalArticle | NostrLiveChat | undefined,
+  signer: nip46.BunkerSigner | undefined,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
@@ -220,6 +245,7 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   subscribeToTier: () => {},
   showProfileQr: undefined,
   reportContent: undefined,
+  signer: undefined,
 };
 
 export const AppContext = createContext<AppContextStore>();

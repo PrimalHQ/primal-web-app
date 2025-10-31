@@ -8,6 +8,7 @@ import {
   SendPaymentResponse,
   WebLnExtension,
  } from "../types/primal";
+import { PrimalNip46 } from "./PrimalNip46";
 import { PrimalNostr } from "./PrimalNostr";
 
 
@@ -100,8 +101,7 @@ const enqueueNostr = async <T>(action: (nostr: NostrExtension) => Promise<T>) =>
   }
 
   if (loginType === 'nip46') {
-    // TODO actually implement nip46 signer
-    nostr = PrimalNostr();
+    nostr = PrimalNip46();
 
     if (nostr === undefined) {
       throw('no_nostr_nip46');

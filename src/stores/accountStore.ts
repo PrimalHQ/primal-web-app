@@ -33,8 +33,8 @@ import {
   getPublicKey as nostrGetPubkey,
   nip19,
   utils,
-  relayInit,
   SimplePool,
+  nip46,
 } from "../lib/nTools";
 
 import {
@@ -73,7 +73,6 @@ import {
 } from "../lib/notes";
 
 import {
-  getUserProfiles,
   sendRelays,
   getProfileContactList,
   getProfileMuteList,
@@ -89,13 +88,10 @@ import {
 import {
   getPreConfiguredRelays,
   getDefaultRelays,
-  connectToRelay,
-  connectRelays,
 } from "../lib/relays";
 
 import {
   sevenDays,
-  relayConnectingTimeout,
   Kind,
   supportedBookmarkTypes,
   primalBlossom,
@@ -114,6 +110,7 @@ import {
   reset,
 } from "../sockets";
 import { fetchPeople } from "../megaFeeds";
+import { appSigner, getAppSK, setAppSigner } from "../lib/PrimalNip46";
 
 
 export type FollowData = {
@@ -355,6 +352,12 @@ export const initAccountStore: AccountStore = {
     updateAccountStore('sec', () => undefined);
     clearSec();
     setPublicKey(undefined);
+
+    if (accountStore.loginType == 'nip46') {
+      localStorage.removeItem('bunkerUrl');
+      localStorage.removeItem('clientConnectionUrl');
+    }
+
     setLoginType('none');
   };
 
@@ -1884,7 +1887,38 @@ export const initAccountStore: AccountStore = {
     doAfterLogin(pk);
   };
 
-  export const loginUsingNip46 = () => {};
+  export const loginUsingNip46 = async () => {
+    setLoginType('nip46');
+
+    const sec = getAppSK();
+    const bunkerUrl = localStorage.getItem('bunkerUrl');
+
+    if (!sec || !bunkerUrl) {
+      setLoginType('none');
+      return;
+    }
+
+    const bunkerPointer = await nip46.parseBunkerInput(bunkerUrl)
+
+    if (!bunkerPointer) {
+      setLoginType('none');
+      return;
+    }
+
+    const pool = new SimplePool();
+
+    setAppSigner(nip46.BunkerSigner.fromBunker(sec, bunkerPointer, { pool }))
+
+    if (!appSigner) {
+      setLoginType('none');
+      return;
+    }
+
+    const pubkey = await appSigner.getPublicKey()
+
+    setPublicKey(pubkey);
+    doAfterLogin(pubkey);
+  };
 
   export const fetchNostrKey = () => {
     const storedKey = localStorage.getItem('pubkey');
