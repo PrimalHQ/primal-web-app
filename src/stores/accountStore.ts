@@ -359,7 +359,7 @@ export const initAccountStore: AccountStore = {
       localStorage.removeItem('clientConnectionUrl');
     }
 
-    setLoginType('none');
+    setLoginType('guest');
   };
 
   export const setSec = (sec: string | undefined, force?: boolean) => {
@@ -1791,15 +1791,46 @@ export const initAccountStore: AccountStore = {
       case 'nip46':
         loginUsingNip46();
         break;
-      default:
+      case 'guest':
         loginGuest();
         break;
+      default:
+        findActiveLogin();
+        break;
     }
+  }
+
+  export const findActiveLogin = (extensionAttempt = 0) => {
+    const win = window as NostrWindow;
+    const nostr = win.nostr;
+
+    if (!nostr && extensionAttempt < 4) {
+      setTimeout(() => {
+        findActiveLogin(extensionAttempt + 1);
+      }, 500);
+      return;
+    }
+
+    if (nostr) {
+      loginUsingExtension();
+      return;
+    }
+
+
+    const sec = readSecFromStorage();
+
+    if (sec) {
+      loginUsingLocalNsec(sec);
+      return;
+    }
+
+    loginGuest();
   }
 
   export const loginGuest = () => {
     setPublicKey(undefined);
     updateAccountStore('activeUser', () => undefined);
+    updateAccountStore('loginType', () => 'guest');
     updateAccountStore('isKeyLookupDone', () => true);
   };
 
@@ -1848,8 +1879,8 @@ export const initAccountStore: AccountStore = {
     }
   };
 
-  export const loginUsingLocalNsec = () => {
-    const sec = readSecFromStorage();
+  export const loginUsingLocalNsec = (oSec?: string) => {
+    const sec = oSec || readSecFromStorage();
 
     if (!sec) return;
 
