@@ -235,6 +235,7 @@ const LoginModal: Component<{
           }
           triggerClass={styles.hidden}
           noPadding={true}
+          topAlignedHeader={true}
         >
           <div id={props.id} class={styles.modal}>
             <Tabs value={activeTab()} onChange={setActiveTab}>
@@ -348,7 +349,7 @@ const LoginModal: Component<{
                         loginUsingExtension();
                         props.onAbort && props.onAbort();
                       }}>
-                        Login
+                        Login Now
                       </ButtonPrimary>
                     </div>
                   </div>

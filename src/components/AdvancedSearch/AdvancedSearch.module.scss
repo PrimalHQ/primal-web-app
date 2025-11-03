@@ -388,6 +388,10 @@
       justify-content: space-between;
       margin-bottom: 24px;
 
+      &.topAligned {
+        align-items: flex-start;
+      }
+
       .dialogCloseButton {
         height: 16px;
         width: 16px;

@@ -162,6 +162,10 @@
 
     button {
       min-width: 200px;
+      min-height: 44px;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 20px;
     }
   }
 
@@ -170,6 +174,7 @@
 .nsecLogin {
   display: flex;
   gap: 48px;
+  align-items: center;
 
   .nsecIcon {
     min-width: 234px;
@@ -199,6 +204,9 @@
 
     button {
       min-width: 200px;
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 20px;
     }
   }
 
@@ -353,6 +361,9 @@
 
     button {
       min-width: 108px;
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 20px;
     }
   }
 }
