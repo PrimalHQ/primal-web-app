@@ -52,7 +52,9 @@ const NoteVideo: Component<{
       }
       else {
         video.muted = true;
-        video.pause();
+        if (video.pause) {
+          video.pause();
+        }
       }
     });
   });
