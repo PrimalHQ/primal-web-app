@@ -1764,7 +1764,6 @@ export const initAccountStore: AccountStore = {
 
   }
 
-
   export const logUserIn = () => {
     const storedLoginType = (localStorage.getItem('loginType') || 'none') as LoginType;
 
@@ -1801,6 +1800,13 @@ export const initAccountStore: AccountStore = {
   }
 
   export const findActiveLogin = (extensionAttempt = 0) => {
+    const sec = readSecFromStorage();
+
+    if (sec) {
+      loginUsingLocalNsec(sec);
+      return;
+    }
+
     const win = window as NostrWindow;
     const nostr = win.nostr;
 
@@ -1813,14 +1819,6 @@ export const initAccountStore: AccountStore = {
 
     if (nostr) {
       loginUsingExtension();
-      return;
-    }
-
-
-    const sec = readSecFromStorage();
-
-    if (sec) {
-      loginUsingLocalNsec(sec);
       return;
     }
 
