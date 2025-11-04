@@ -113,8 +113,8 @@ export const zapNote = async (
   const sats = Math.round(amount * 1000);
 
   let payload = {
-    profile: note.pubkey,
-    event: note.id,
+    pubkey: note.pubkey,
+    event: note.msg,
     amount: sats,
     relays: relays.map(r => r.url)
   };
@@ -171,8 +171,8 @@ export const zapArticle = async (
   const sats = Math.round(amount * 1000);
 
   let payload = {
-    profile: note.pubkey,
-    event: note.msg.id,
+    pubkey: note.pubkey,
+    event: note.msg,
     amount: sats,
     relays: relays.map(r => r.url)
   };
@@ -231,7 +231,7 @@ export const zapProfile = async (
   const sats = Math.round(amount * 1000);
 
   let payload = {
-    profile: profile.pubkey,
+    pubkey: profile.pubkey,
     amount: sats,
     relays: relays.map(r => r.url)
   };
@@ -301,8 +301,8 @@ export const zapSubscription = async (
   }
 
   let payload = {
-    profile: recipient.pubkey,
-    event: subEvent.id,
+    pubkey: recipient.pubkey,
+    event: subEvent,
     amount: sats,
     relays: relays.map(r => r.url)
   };
@@ -360,8 +360,8 @@ export const zapDVM = async (
   const sats = Math.round(amount * 1000);
 
   let payload = {
-    profile: dvm.pubkey,
-    event: dvm.id,
+    pubkey: dvm.pubkey,
+    event: dvm,
     amount: sats,
     relays: relays.map(r => r.url)
   };
@@ -423,8 +423,8 @@ export const zapStream = async (
   const sats = Math.round(amount * 1000);
 
   let payload = {
-    profile: host.pubkey,
-    event: stream.event?.id || null,
+    pubkey: host.pubkey,
+    event: stream.event,
     amount: sats,
     relays: relays.map(r => r.url),
   };
