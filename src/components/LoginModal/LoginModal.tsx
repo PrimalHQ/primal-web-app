@@ -43,8 +43,11 @@ const LoginModal: Component<{
   const [activeTab, setActiveTab] = createSignal('extension');
   const [copying, setCopying] = createSignal(false);
 
+  const [isPinInvalid, setPinInvalid] = createSignal(false);
+
   let nsecInput: HTMLInputElement | undefined;
   let npubInput: HTMLInputElement | undefined;
+  let pinInput: HTMLInputElement | undefined;
   let bunkerInput: HTMLInputElement | undefined;
 
   const onNsecLogin = async () => {
@@ -55,8 +58,6 @@ const LoginModal: Component<{
       return;
     }
 
-    setSec(sec);
-
     const pin = passwordKey();
 
     if (pin.length == 0) {
@@ -65,9 +66,13 @@ const LoginModal: Component<{
     }
 
     if (pin.length < 4) {
-      setInvalidPassword();
+      setPinInvalid(true);
+      pinInput?.focus();
       return;
     }
+
+    setPinInvalid(false);
+    setSec(sec);
 
     // Encrypt private key
     const enc = await encryptWithPin(pin, sec);
@@ -75,14 +80,14 @@ const LoginModal: Component<{
     // Save PIN for the session
     setCurrentPin(pin);
 
-    onStoreSec(enc);
+    storeSec(enc);
+    loginUsingLocalNsec(sec);
+    onAbort();
   };
-
-  const setInvalidPassword = () => {};
 
   const onStoreSec = (sec: string | undefined) => {
     storeSec(sec);
-    loginUsingLocalNsec();
+    loginUsingLocalNsec(sec);
     onAbort();
   }
 
@@ -412,15 +417,26 @@ const LoginModal: Component<{
                            Password to encrypt your key (optional):
                         </div>
 
-                        <input
-                          ref={nsecInput}
-                          class={styles.input}
-                          type="password"
-                          onInput={(e) => setPasswordKey(e.target.value)}
-                          // validationState={enteredKey().length === 0 || isValidNsec() ? 'valid' : 'invalid'}
-                          // errorMessage={intl.formatMessage(tLogin.invalidNsec)}
-                          // inputClass={styles.nsecInput}
-                        />
+                        <div class={styles.inputWrapper}>
+                          <input
+                            ref={pinInput}
+                            class={`${styles.input} ${isPinInvalid() ? styles.invalid : ''}`}
+                            type="password"
+                            onInput={(e) => {
+                              const pin = e.target.value;
+                              setPinInvalid(pin.length > 0 && pin.length < 4);
+                              setPasswordKey(pin);
+                            }}
+                            // validationState={enteredKey().length === 0 || isValidNsec() ? 'valid' : 'invalid'}
+                            // errorMessage={intl.formatMessage(tLogin.invalidNsec)}
+                            // inputClass={styles.nsecInput}
+                          />
+                          <Show when={isPinInvalid()}>
+                            <div class={styles.inputError}>
+                              Password too short
+                            </div>
+                          </Show>
+                        </div>
                       </div>
 
                       <ButtonPrimary onClick={() => {
