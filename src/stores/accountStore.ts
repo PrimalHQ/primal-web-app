@@ -1870,7 +1870,7 @@ export const initAccountStore: AccountStore = {
         doAfterLogin(key);
       }
     } catch (e: any) {
-      setLoginType('none');
+      setLoginType('guest');
       setPublicKey(undefined);
       localStorage.removeItem('pubkey');
       logError('error fetching public key: ', e);
@@ -1924,14 +1924,14 @@ export const initAccountStore: AccountStore = {
     const bunkerUrl = localStorage.getItem('bunkerUrl');
 
     if (!sec || !bunkerUrl) {
-      setLoginType('none');
+      setLoginType('guest');
       return;
     }
 
     const bunkerPointer = await nip46.parseBunkerInput(bunkerUrl)
 
     if (!bunkerPointer) {
-      setLoginType('none');
+      setLoginType('guest');
       return;
     }
 
@@ -1940,7 +1940,7 @@ export const initAccountStore: AccountStore = {
     setAppSigner(nip46.BunkerSigner.fromBunker(sec, bunkerPointer, { pool }))
 
     if (!appSigner) {
-      setLoginType('none');
+      setLoginType('guest');
       return;
     }
 

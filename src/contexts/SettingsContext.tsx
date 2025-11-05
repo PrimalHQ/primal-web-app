@@ -70,6 +70,7 @@ export type SettingsContextStore = {
   actions: {
     setTheme: (theme: PrimalTheme | null) => void,
     setThemeByName: (theme: string | null, temp?: boolean) => void,
+    isLightTheme: () => boolean,
     addAvailableFeed: (feed: PrimalFeed, addToTop?: boolean) => void,
     removeAvailableFeed: (feed: PrimalFeed) => void,
     setAvailableFeeds: (feedList: PrimalFeed[]) => void,
@@ -145,6 +146,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   const intl = useIntl();
 
 // ACTIONS --------------------------------------
+
+  const isLightTheme = () => {
+    return ['sunrise', 'ice'].includes(store.theme);
+  }
 
   const setUseSystemTheme = (flag: boolean) => {
     updateStore('useSystemTheme', () => flag);
@@ -1051,6 +1056,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     actions: {
       setTheme,
       setThemeByName,
+      isLightTheme,
       addAvailableFeed,
       removeAvailableFeed,
       setAvailableFeeds,

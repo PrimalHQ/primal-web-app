@@ -1,14 +1,14 @@
 .title {
   color: var(--text-primary);
-  font-size: 32px;
+  font-size: 20px;
   font-weight: 600;
-  line-height: 32px;
-  margin-left: 60px;
-  margin-top: 24px;
+  line-height: 24px;
+  margin-left: 24px;
+  margin-top: 20px;
 }
 
 .modal {
-  width: 945px;
+  width: 720px;
   color: var(--text-secondary);
   background-color: var(--background-input);
   border-radius: 12px;
@@ -23,11 +23,10 @@
 
 .tabContent {
   width: 100%;
-  min-height: 367px;
   height: fit-content;
   border-top: 1px solid;
   border-color: var(--subtile-devider);
-  padding: 40px 60px;
+  padding: 24px;
   background: var(--background-header-input);
   border-radius: 0 0 12px 12px;
 }
@@ -40,7 +39,7 @@
   gap: 24px;
   align-items: center;
   width: 100%;
-  padding-inline: 60px;
+  padding-inline: 24px;
 }
 
 .profileTab {
@@ -76,27 +75,27 @@
 
 .extensionLogin {
   display: flex;
-  gap: 48px;
+  gap: 40px;
 
   .qrCode {
-    min-width: 234px;
+    min-width: 200px;
     height: fit-content;
     overflow: hidden;
     border-radius: 12px;
     flex-grow: 1;
 
     .actualQr {
-      width: 234px;
-      height: 234px;
+      width: 200px;
+      height: 200px;
       overflow: hidden;
       border-radius: 12px;
     }
 
     .copyNostrConnect {
       display: flex;
-      width: 232px;
-      height: 40px;
-      padding: 12px 16px;
+      width: 200px;
+      // height: 40px;
+      padding: 10px 14px;
       justify-content: center;
       align-items: center;
       gap: 8px;
@@ -104,17 +103,17 @@
       border-radius: 99px;
       border: 1px solid var(--subtile-devider);
       background: var(--background-sheet);
-      margin-top: 12px;
+      margin-top: 16px;
 
       .content {
         overflow: hidden;
         color: var(--text-secondary);
         text-overflow: ellipsis;
         white-space: nowrap;
-        font-size: 16px;
+        font-size: 14px;
         font-weight: 400;
-        line-height: 20px;
-        max-width: 174px;
+        line-height: 16px;
+        max-width: 148px;
       }
 
       .copyIcon {
@@ -130,30 +129,41 @@
         &.right {
           margin-left: 8px;
         }
+
+        &.copyDone {
+        background-color: var(--success-bright);
+        -webkit-mask: url(../../assets/icons/check.svg) no-repeat 0 / 100%;
+        mask: url(../../assets/icons/check.svg) no-repeat 0 / 100%;
+        }
       }
     }
   }
 
   .extensionIcon {
-    min-width: 234px;
-    min-height: 272px;
+    min-width: 200px;
+    min-height: 200px;
     overflow: hidden;
     border-radius: 12px;
-    background: url(../../assets/images/extension2.svg);
+    background: url(../../assets/images/extension_dark.svg);
     background-repeat: no-repeat;
+
+    &.light {
+      background: url(../../assets/images/extension_light.svg);
+    }
   }
 
   .extensionDesc {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    justify-content: center;
+    gap: 26px;
     flex-grow: 1;
 
     .description {
       color: var(--text-primary);
-      font-size: 24px;
+      font-size: 18px;
       font-weight: 400;
-      line-height: 32px;
+      line-height: 26px;
 
       a {
         color: var(--accent-links);
@@ -161,11 +171,7 @@
     }
 
     button {
-      min-width: 200px;
-      min-height: 44px;
-      font-size: 20px;
-      font-weight: 600;
-      line-height: 20px;
+      min-width: 120px;
     }
   }
 
@@ -173,29 +179,52 @@
 
 .nsecLogin {
   display: flex;
-  gap: 48px;
-  align-items: center;
+  gap: 32px;
+  align-items: flex-start;
 
   .nsecIcon {
-    min-width: 234px;
-    min-height: 272px;
+    min-width: 200px;
+    min-height: 208px;
     overflow: hidden;
     border-radius: 12px;
-    background: url(../../assets/images/nsec2.svg);
+    background: url(../../assets/images/nsec_dark.svg);
     background-repeat: no-repeat;
+
+    &.light {
+      background: url(../../assets/images/nsec_light.svg);
+    }
   }
 
-  .nsecDesc {
+  .npubIcon {
+    min-width: 200px;
+    min-height: 208px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: url(../../assets/images/npub_dark.svg);
+    background-repeat: no-repeat;
+
+    &.light {
+      background: url(../../assets/images/npub_light.svg);
+    }
+  }
+
+  .nsecDesc, .npubDesc {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
     flex-grow: 1;
+
+    .inputGroup {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
 
     .description {
       color: var(--text-primary);
-      font-size: 24px;
+      font-size: 16px;
       font-weight: 400;
-      line-height: 32px;
+      line-height: 20px;
 
       a {
         color: var(--accent-links);
@@ -203,23 +232,29 @@
     }
 
     button {
-      min-width: 200px;
-      font-size: 20px;
+      min-width: 100px;
+      font-size: 16px;
       font-weight: 600;
-      line-height: 20px;
+      line-height: 16px;
     }
+  }
+
+  .npubDesc {
+    gap: unset;
+    height: 208px;
+    justify-content: space-between;
   }
 
 }
 
 .input {
   width: 100%;
-  max-height: 44px;
-  font-size: 18px;
+  max-height: 36px;
+  font-size: 16px;
   font-weight: 400;
-  line-height: 20px;
+  line-height: 16px;
   margin: 0 !important;
-  padding: 12px 24px !important;
+  padding: 10px 20px !important;
   border-radius: 99999px;
   border: none;
   color: var(--text-primary);
@@ -252,17 +287,16 @@
 }
 
 .nsecWarning {
-  width: 560px;
-  padding: 8px 16px;
+  padding: 4px 8px;
 
-  border-radius: 16px;
+  border-radius: 12px;
   background-color: var(--warning-dim);
 
   span {
     color: var(--warning-bright);
-    font-size: 17px;
+    font-size: 12px;
     font-weight: 400;
-    line-height: 24px;
+    line-height: 16px;
 
     &.bold {
       font-weight: 700;
@@ -271,17 +305,16 @@
 }
 
 .npubWarning {
-  width: 560px;
-  padding: 8px 16px;
+  padding: 4px 8px;
 
-  border-radius: 16px;
+  border-radius: 12px;
   background-color: var(--devider);
 
   span {
     color: var(--text-tertiary);
-    font-size: 17px;
+    font-size: 12px;
     font-weight: 400;
-    line-height: 24px;
+    line-height: 16px;
 
     &.bold {
       font-weight: 700;
@@ -338,13 +371,14 @@
 .bunkerDesc {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  justify-content: center;
+  gap: 12px;
 
   .loginExplain {
     color: var(--text-primary);
-    font-size: 24px;
+    font-size: 18px;
     font-weight: 400;
-    line-height: 32px;
+    line-height: 26px;
   }
 
   .bunkerShow {
@@ -358,12 +392,15 @@
   .bunkerInput {
     display: flex;
     gap: 12px;
+    min-height: 40px;
 
     button {
-      min-width: 108px;
-      font-size: 18px;
+      min-width: 100px;
+      max-height: 36px;
+      font-size: 16px;
       font-weight: 600;
-      line-height: 20px;
+      line-height: 16px;
+      padding: 10px 16px !important;
     }
   }
 }

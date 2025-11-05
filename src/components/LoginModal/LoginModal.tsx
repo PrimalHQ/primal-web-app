@@ -18,6 +18,8 @@ import QrCode from '../QrCode/QrCode';
 import { useAppContext } from '../../contexts/AppContext';
 import { appSigner, generateClientConnectionUrl, getAppSK, setAppSigner, storeBunker } from '../../lib/PrimalNip46';
 import { logWarning } from '../../lib/logger';
+import { useSettingsContext } from '../../contexts/SettingsContext';
+import { encryptWithPin, setCurrentPin } from '../../lib/PrimalNostr';
 
 const LoginModal: Component<{
   id?: string,
@@ -28,9 +30,11 @@ const LoginModal: Component<{
   const intl = useIntl();
   const toaster = useToastContext();
   const app = useAppContext();
+  const settings = useSettingsContext();
 
-  const [step, setStep] = createSignal<'login' | 'pin' | 'none'>('login')
+  const [step, setStep] = createSignal<'login' | 'pin' | 'none'>('login');
   const [enteredKey, setEnteredKey] = createSignal('');
+  const [passwordKey, setPasswordKey] = createSignal('');
   const [enteredNpub, setEnteredNpub] = createSignal('');
   const [showBunkerInput, setShowBunkerInput] = createSignal(false);
 
@@ -43,7 +47,7 @@ const LoginModal: Component<{
   let npubInput: HTMLInputElement | undefined;
   let bunkerInput: HTMLInputElement | undefined;
 
-  const onLogin = () => {
+  const onNsecLogin = async () => {
     const sec = enteredKey();
 
     if (!isValidNsec()) {
@@ -52,9 +56,29 @@ const LoginModal: Component<{
     }
 
     setSec(sec);
-    setStep(() => 'pin');
-    props.onAbort && props.onAbort();
+
+    const pin = passwordKey();
+
+    if (pin.length == 0) {
+      onStoreSec(sec);
+      return;
+    }
+
+    if (pin.length < 4) {
+      setInvalidPassword();
+      return;
+    }
+
+    // Encrypt private key
+    const enc = await encryptWithPin(pin, sec);
+
+    // Save PIN for the session
+    setCurrentPin(pin);
+
+    onStoreSec(enc);
   };
+
+  const setInvalidPassword = () => {};
 
   const onStoreSec = (sec: string | undefined) => {
     storeSec(sec);
@@ -114,6 +138,9 @@ const LoginModal: Component<{
   createEffect(() => {
     if (!props.open) {
       signer = undefined;
+      setTimeout(() => {
+        setActiveTab('extension');
+      }, 200);
     }
   });
 
@@ -206,16 +233,12 @@ const LoginModal: Component<{
       props.onAbort && props.onAbort();
     } catch (e) {
       logWarning('FAILED TO LOGIN: ', e)
-      setLoginType('none');
+      setLoginType('guest');
     }
   }
 
   const onKeyUp = (e: KeyboardEvent) => {
     if (e.code === 'Enter' && isValidNsec()) {
-      if (activeTab() === 'nsec') {
-        onLogin();
-      }
-
       if (activeTab() === 'simple') {
         onBunkerLogin();
       }
@@ -235,7 +258,6 @@ const LoginModal: Component<{
           }
           triggerClass={styles.hidden}
           noPadding={true}
-          topAlignedHeader={true}
         >
           <div id={props.id} class={styles.modal}>
             <Tabs value={activeTab()} onChange={setActiveTab}>
@@ -264,8 +286,8 @@ const LoginModal: Component<{
                         <div class={styles.actualQr}>
                           <QrCode
                             data={clientUrl()}
-                            width={234}
-                            height={234}
+                            width={200}
+                            height={200}
                           />
                         </div>
                         <button
@@ -277,7 +299,7 @@ const LoginModal: Component<{
                           }}
                         >
                           <div class={styles.content}>{clientUrl()}</div>
-                          <div class={styles.copyIcon}></div>
+                          <div class={`${styles.copyIcon} ${copying() ? styles.copyDone : ''}`}></div>
                         </button>
                       </Show>
                     </div>
@@ -293,7 +315,10 @@ const LoginModal: Component<{
                       >
                         Or, enter Bunker URL manually
                       </button>
-                      <Show when={showBunkerInput()}>
+                      <Show
+                        when={showBunkerInput()}
+                        fallback={<div class={styles.bunkerInput}></div>}
+                      >
                         <div class={styles.bunkerInput}>
                           <input
                             ref={bunkerInput}
@@ -339,7 +364,7 @@ const LoginModal: Component<{
                 </Tabs.Content>
                 <Tabs.Content value="extension" >
                   <div class={styles.extensionLogin}>
-                    <div class={styles.extensionIcon} />
+                    <div class={`${styles.extensionIcon} ${settings?.actions.isLightTheme() ? styles.light : ''}`} />
                     <div class={styles.extensionDesc}>
                       <div class={styles.description}>
                         <span>Login using a browser extension like </span>
@@ -356,31 +381,50 @@ const LoginModal: Component<{
                 </Tabs.Content>
                 <Tabs.Content value="nsec" >
                   <div class={styles.nsecLogin}>
-                    <div class={styles.nsecIcon} />
+                    <div class={`${styles.nsecIcon} ${settings?.actions.isLightTheme() ? styles.light : ''}`} />
                     <div class={styles.nsecDesc}>
-                      <div class={styles.description}>
-                        Enter your Nostr private key (nsec):
-                      </div>
-                      <input
-                        ref={nsecInput}
-                        class={styles.input}
-                        type="password"
-                        onKeyUp={onKeyUp}
-                        onInput={(e) => setEnteredKey(e.target.value)}
-                        placeholder='nsec1...'
-                        // validationState={enteredKey().length === 0 || isValidNsec() ? 'valid' : 'invalid'}
-                        // errorMessage={intl.formatMessage(tLogin.invalidNsec)}
-                        // inputClass={styles.nsecInput}
-                      />
                       <div class={styles.nsecWarning}>
                         <span class={styles.bold}>Warning: </span>
                         <span>
-                          This is a dangerous login method. Never enter your nsec in an untrusted application. Use an alternative login method if possible.
+                          This login method is insecure. If you must use a private key to login, we recommend setting a password to encrypt your key.
                         </span>
                       </div>
 
+                      <div class={styles.inputGroup}>
+                        <div class={styles.description}>
+                          Your Nostr private key (nsec):
+                        </div>
+
+                        <input
+                          ref={nsecInput}
+                          class={styles.input}
+                          type="password"
+                          onInput={(e) => setEnteredKey(e.target.value)}
+                          placeholder='nsec1...'
+                          // validationState={enteredKey().length === 0 || isValidNsec() ? 'valid' : 'invalid'}
+                          // errorMessage={intl.formatMessage(tLogin.invalidNsec)}
+                          // inputClass={styles.nsecInput}
+                        />
+                      </div>
+
+                      <div class={styles.inputGroup}>
+                        <div class={styles.description}>
+                           Password to encrypt your key (optional):
+                        </div>
+
+                        <input
+                          ref={nsecInput}
+                          class={styles.input}
+                          type="password"
+                          onInput={(e) => setPasswordKey(e.target.value)}
+                          // validationState={enteredKey().length === 0 || isValidNsec() ? 'valid' : 'invalid'}
+                          // errorMessage={intl.formatMessage(tLogin.invalidNsec)}
+                          // inputClass={styles.nsecInput}
+                        />
+                      </div>
+
                       <ButtonPrimary onClick={() => {
-                        onLogin();
+                        onNsecLogin();
                       }}>
                         Login
                       </ButtonPrimary>
@@ -389,27 +433,28 @@ const LoginModal: Component<{
                 </Tabs.Content>
                 <Tabs.Content value="npub" >
                   <div class={styles.nsecLogin}>
-                    <div class={styles.nsecIcon} />
-                    <div class={styles.nsecDesc}>
-                      <div class={styles.description}>
-                        Enter your Nostr public key (npub):
-                      </div>
-                      <input
-                        ref={npubInput}
-                        class={styles.input}
-                        type="password"
-                        onKeyUp={onKeyUp}
-                        onInput={(e) => setEnteredNpub(e.target.value)}
-                        placeholder='npub1...'
-                        // validationState={enteredKey().length === 0 || isValidNsec() ? 'valid' : 'invalid'}
-                        // errorMessage={intl.formatMessage(tLogin.invalidNsec)}
-                        // inputClass={styles.nsecInput}
-                      />
+                    <div class={`${styles.npubIcon} ${settings?.actions.isLightTheme() ? styles.light : ''}`} />
+                    <div class={styles.npubDesc}>
                       <div class={styles.npubWarning}>
-                        <span class={styles.bold}>Be Aware: </span>
+                        <span class={styles.bold}>Be aware: </span>
                         <span>
-                          Logging in with your npub will allow you to browse nostr in read mode only.
+                          Logging in with your public key will allow you to browse Nostr in ready-only mode.
                         </span>
+                      </div>
+                      <div class={styles.inputGroup}>
+                        <div class={styles.description}>
+                          Your Nostr public key (npub):
+                        </div>
+                        <input
+                          ref={npubInput}
+                          class={styles.input}
+                          type="password"
+                          onInput={(e) => setEnteredNpub(e.target.value)}
+                          placeholder='npub1...'
+                          // validationState={enteredKey().length === 0 || isValidNsec() ? 'valid' : 'invalid'}
+                          // errorMessage={intl.formatMessage(tLogin.invalidNsec)}
+                          // inputClass={styles.nsecInput}
+                        />
                       </div>
 
                       <ButtonPrimary onClick={() => {
@@ -430,17 +475,6 @@ const LoginModal: Component<{
             </Tabs>
           </div>
         </AdvancedSearchDialog>
-      </Match>
-
-      <Match when={step() === 'pin'}>
-        <CreatePinModal
-          open={step() === 'pin'}
-          onAbort={() => {
-            onStoreSec(accountStore.sec);
-          }}
-          valueToEncrypt={enteredKey()}
-          onPinApplied={onStoreSec}
-        />
       </Match>
     </Switch>
   );
