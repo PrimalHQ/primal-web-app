@@ -261,12 +261,11 @@ export const initAccountStore: AccountStore = {
   export const suspendRelays = () => {
     relayWorker.onmessage = (e: MessageEvent) => {
       if (e.data !== 'RELAYS_CLOSED') return;
+      console.log('UPDATE ACTIVE RELAYS: SUSPEND');
       updateAccountStore('activeRelays', () => []);
     };
-    console.log('OPEN CLOSE_RELAYS 3')
+
     relayWorker.postMessage({ type: 'CLOSE_RELAYS', relays: [...accountStore.activeRelays] });
-    // accountStore.relayPool.close(accountStore.activeRelays.map(r => r.url));
-    // updateAccountStore('activeRelays', () => []);
   }
 
   export const reconnectSuspendedRelays = async () => {
@@ -458,6 +457,7 @@ export const initAccountStore: AccountStore = {
         if (settings[url]) {
           continue;
         }
+        console.log('UPDATE RELAY SETTINGS: CLOSE 1 ', url);
         updateAccountStore('relaySettings', () => ({[url]: undefined}));
         relaysToClose.add(url);
       }
@@ -466,7 +466,10 @@ export const initAccountStore: AccountStore = {
         if (e.data !== 'RELAYS_CLOSED') return;
 
         const filtered = accountStore.activeRelays.filter(r => !relaysToClose.has(r));
+        console.log('UPDATE ACTIVE RELAYS: CLOSE: ', [...relaysToClose]);
         updateAccountStore('activeRelays', () => filtered);
+
+        console.log('UPDATE RELAY SETTINGS: CLOSE 2 ', { ...settings });
         updateAccountStore('relaySettings', () => ({...settings}));
 
         connectToRelays(settings)
@@ -490,6 +493,7 @@ export const initAccountStore: AccountStore = {
       return true;
     }
 
+    console.log('UPDATE RELAY SETTINGS: SET ', toSave);
     updateAccountStore('relaySettings', () => ({ ...toSave }));
     saveRelaySettings(accountStore.publicKey, toSave);
     return true;
@@ -554,6 +558,7 @@ export const initAccountStore: AccountStore = {
       if (type !== 'RELAY_OPENED' || ! relay) return;
       if (accountStore.activeRelays.find(ar => ar === relay)) return;
 
+      console.log('UPDATE ACTIVE RELAYS: CONNECT ', relay);
       updateAccountStore('activeRelays', accountStore.activeRelays.length, () => relay);
     };
 
@@ -630,7 +635,10 @@ export const initAccountStore: AccountStore = {
       if (e.data !== 'RELAYS_CLOSED') return;
 
       const filtered = accountStore.activeRelays.filter(r => r !== normalUrl);
+      console.log('UPDATE ACTIVE RELAYS: REMOVE ', normalUrl);
       updateAccountStore('activeRelays', () => filtered);
+
+      console.log('UPDATE RELAY SETTINGS: REMOVE ', normalUrl);
       updateAccountStore('relaySettings', () => ({ [normalUrl]: undefined }));
       relaysExplicitlyClosed.push(normalUrl);
 
@@ -1744,6 +1752,7 @@ export const initAccountStore: AccountStore = {
       relaySettings = attachDefaultRelays(relaySettings);
     }
 
+    console.log('UPDATE RELAY SETTINGS: AFTER LOGIN ', storage.relaySettings);
     updateAccountStore('relaySettings', () => ({ ...storage.relaySettings }));
     connectToRelays(relaySettings);
 

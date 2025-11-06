@@ -173,60 +173,6 @@ export const trimVerification = (address: string | undefined) => {
   return address.split('@');
 }
 
-export const getLikes = (pubkey: string | undefined, relays: Relay[], callback: (likes: string[]) => void) => {
-  if (!pubkey) {
-    return;
-  }
-
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
-  const storage = getStorage(pubkey);
-
-  let likes = new Set<string>(storage.likes);
-
-  if (!nostr) {
-    callback(storage.likes);
-    return;
-  }
-
-  // Request Reactions from all relays
-  try {
-    // const signedNote = await nostr.signEvent(event);
-
-    relays.forEach(relay => {
-
-      // if (!relay.subscribe) return;
-
-
-      const sub = relay.subscribe(
-        [
-          {
-            kinds: [Kind.Reaction],
-            authors: [pubkey],
-          },
-        ],
-        {
-          onevent(event: any) {
-            const e = event.tags.find((t: string[]) => t[0] === 'e');
-
-            e && e[1] && likes.add(e[1]);
-          },
-          oneose() {
-            const likeArray = Array.from(likes);
-
-            callback(likeArray);
-
-            sub.close();
-          },
-        },
-      );
-    });
-
-  } catch (e) {
-    logError('Failed sending note: ', e);
-  }
-};
-
 export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles> = async (vanityName: string) => {
   try {
     const name = vanityName.toLowerCase();
@@ -250,16 +196,16 @@ export const isVerifiedByPrimal = async (user: PrimalUser | undefined) => {
   return isVerified && nip05 && nip05.endsWith && nip05.endsWith('primal.net');
 }
 
-export const checkVerification: (user: PrimalUser | undefined) => Promise<boolean> = (user: PrimalUser | undefined) => {
+export const checkVerification: (user: PrimalUser | undefined) => Promise<boolean> = async (user: PrimalUser | undefined) => {
   const nip05 = user?.nip05;
 
   if (!user || !nip05) {
-    return new Promise((resolve) => false)
+    return false;
   }
 
-  return isAccountVerified(nip05).then(profile => {
-    return profile && profile.pubkey === user?.pubkey
-  });
+  const profile = await isAccountVerified(nip05);
+
+  return profile ? profile.pubkey === user?.pubkey : false;
 }
 
 export const isAccountVerified: (domain: string | undefined) => Promise<nip19.ProfilePointer | null> = async (domain: string | undefined) => {

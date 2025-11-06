@@ -118,10 +118,4 @@ self.addEventListener('message', (e: MessageEvent<WorkerMessageType>) => {
       self.postMessage({ success: false, note: event });
     }
   }
-
-  // if (type === 'PROCESS') {
-  //   // Do heavy computation
-  //   const result = data.map(x => x * 2);
-  //   self.postMessage({ type: 'RESULT', data: result });
-  // }
 });

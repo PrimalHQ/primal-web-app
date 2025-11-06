@@ -13,13 +13,16 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
 
   const intl = useIntl();
 
-  const connectedRelays = () => accountStore.activeRelays || [];
+  const connectedRelays = () => {
+    const allRelayUrls = Object.keys(accountStore.relaySettings || {}).map(utils.normalizeURL);
+
+    return allRelayUrls.filter(url => accountStore.activeRelays.includes(url));
+  }
 
   const disconnectedRelays = () => {
     const allRelayUrls = Object.keys(accountStore.relaySettings || {}).map(utils.normalizeURL);
-    const connectedUrls = connectedRelays().map(r => utils.normalizeURL(r));
 
-    return allRelayUrls.filter(url => !connectedUrls.includes(url));
+    return allRelayUrls.filter(url => !accountStore.activeRelays.includes(url));
   };
 
   return (

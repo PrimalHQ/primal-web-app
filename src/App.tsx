@@ -51,6 +51,9 @@ const App: Component = () => {
   createEffect(() => {
     console.log('RELAY SETTINGS CHANGE: ', { ...accountStore.relaySettings });
   });
+  createEffect(() => {
+    console.log('ACTIVE RELAYS CHANGE: ', { ...accountStore.activeRelays });
+  });
 
   const initRelayWorker = () => {
     relayWorker.addEventListener('message', (e: MessageEvent) => {
