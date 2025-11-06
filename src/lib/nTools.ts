@@ -3,7 +3,8 @@ import {
   generateSecretKey as generatePrivateKey,
   getPublicKey,
   verifyEvent,
-  SimplePool
+  SimplePool,
+  Event,
 } from 'nostr-tools';
 
 import * as nip46 from 'nostr-tools/nip46'
@@ -47,4 +48,6 @@ export {
   verifyEvent,
   finalizeEvent,
   SimplePool,
-}
+};
+
+export type NostrEvent = Event;

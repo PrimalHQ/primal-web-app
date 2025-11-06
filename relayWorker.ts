@@ -110,7 +110,6 @@ self.addEventListener('message', (e: MessageEvent<WorkerMessageType>) => {
 
     try {
       Promise.any(relayPool.publish(relays, event)).then(() => {
-        console.log('MESSAGE POSTED');
         self.postMessage({ success: true, note: event });
       })
     }

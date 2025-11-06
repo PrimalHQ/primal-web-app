@@ -1,4 +1,4 @@
-import { Component, onCleanup, onMount } from 'solid-js';
+import { Component, createEffect, onCleanup, onMount } from 'solid-js';
 import { connect, disconnect } from './sockets';
 import Toaster from './components/Toaster/Toaster';
 import { HomeProvider } from './contexts/HomeContext';
@@ -21,6 +21,7 @@ import 'hls-video-element';
 import 'videojs-video-element';
 import { nip46 } from './lib/nTools';
 import { generateAppKeys } from './lib/PrimalNip46';
+import { accountStore } from './stores/accountStore';
 
 
 export const version = import.meta.env.PRIMAL_VERSION;
@@ -47,6 +48,10 @@ const App: Component = () => {
     relayWorker?.terminate();
   });
 
+  createEffect(() => {
+    console.log('RELAY SETTINGS CHANGE: ', { ...accountStore.relaySettings });
+  });
+
   const initRelayWorker = () => {
     relayWorker.addEventListener('message', (e: MessageEvent) => {
       const message = e.data;
@@ -55,7 +60,7 @@ const App: Component = () => {
 
       }
 
-      if (message.type === 'DENQUE_EVENT' && message.event) {
+      if (message.type === 'DEQUE_EVENT' && message.event) {
 
       }
     });

@@ -25,6 +25,7 @@ import { NostrEventContent,
   NostrMutedContent,
   NostrWindow,
   NostrBlossom,
+  NostrRelaySignedEvent,
 } from "../types/primal";
 
 import {
@@ -111,6 +112,7 @@ import {
 } from "../sockets";
 import { fetchPeople } from "../megaFeeds";
 import { appSigner, getAppSK, setAppSigner } from "../lib/PrimalNip46";
+import { updateStore } from "../services/StoreService";
 
 
 export type FollowData = {
@@ -132,6 +134,7 @@ export type AccountStore = {
   activeRelays: string[],
   // relayPool: SimplePool,
   relaySettings: NostrRelays,
+  eventQueue: NostrRelaySignedEvent[],
   publicKey: string | undefined,
   activeUser: PrimalUser | undefined,
   showNewNoteForm: boolean,
@@ -228,6 +231,7 @@ export const initAccountStore: AccountStore = {
     openDialog: false,
     following: [],
   },
+  eventQueue: [],
   // @ts-ignore
   // relayPool: new SimplePool({ enablePing: true, enableReconnect: true }),
 };
@@ -235,6 +239,20 @@ export const initAccountStore: AccountStore = {
   export const getRelayUrls = () => Object.keys(accountStore.relaySettings || {}).map(utils.normalizeURL)
 
 // ACTIONS ---------------------------------------------------------------------
+
+  export const enqueEvent = (event: NostrRelaySignedEvent) => {
+    if (accountStore.eventQueue.find(e => e.id === event.id && e.kind === e.kind)) return;
+
+    accountStore.eventQueue.push(event);
+  }
+
+  export const dequeEvent = (event: NostrRelaySignedEvent) => {
+    const quedEvent = accountStore.eventQueue.find(e => e.id === event.id && e.kind === e.kind);
+
+    if (!quedEvent) return;
+
+    updateStore
+  }
 
   export const subscribeTORelayPool = () => {
     return 'string';
@@ -455,17 +473,7 @@ export const initAccountStore: AccountStore = {
         saveRelaySettings(accountStore.publicKey, settings);
       };
 
-    console.log('OPEN CLOSE_RELAYS 2')
       relayWorker.postMessage({ type: 'CLOSE_RELAYS', relays: Array.from(relaysToClose)});
-
-      // accountStore.relayPool.close(Array.from(relaysToClose))
-      // const filtered = accountStore.activeRelays.filter(r => !relaysToClose.has(r.url));
-      // updateAccountStore('activeRelays', () => filtered);
-      // updateAccountStore('relaySettings', () => ({...settings}));
-
-      // connectToRelays(settings)
-      // saveRelaySettings(accountStore.publicKey, settings);
-      // return true;
     }
 
     const rs = accountStore.relaySettings;
@@ -543,24 +551,13 @@ export const initAccountStore: AccountStore = {
     relayWorker.onmessage = (e: MessageEvent<{ type: string, relay: Relay }>) => {
       const { type, relay } = e.data;
 
-      console.log('MESSAGE: ', e.data);
-
       if (type !== 'RELAY_OPENED' || ! relay) return;
       if (accountStore.activeRelays.find(ar => ar === relay)) return;
 
       updateAccountStore('activeRelays', accountStore.activeRelays.length, () => relay);
     };
 
-    console.log('OPEN MESSAGE: ', relayWorker)
-    // debugger;
     relayWorker.postMessage({ type: 'OPEN_RELAYS', relays: [...relays]});
-// debugger;
-    // relays.forEach(url => {
-    //   accountStore.relayPool.ensureRelay(url).then(r => {
-    //     if (accountStore.activeRelays.find(ar => ar.url === r.url)) return;
-    //     updateAccountStore('activeRelays', accountStore.activeRelays.length, () => r)
-    //   });
-    // });
   };
 
   export const setShowPin = (sec: string) => {
@@ -656,33 +653,7 @@ export const initAccountStore: AccountStore = {
       getRelays(accountStore.publicKey, `before_remove_relay_${APP_ID}`);
     }
 
-    console.log('CLOSE MESSAGE')
     relayWorker.postMessage({ type: 'CLOSE_RELAYS', relays: [normalUrl]});
-
-    // accountStore.relayPool.close([normalUrl]);
-
-    // const filtered = accountStore.activeRelays.filter(r => r.url !== normalUrl);
-    // updateAccountStore('activeRelays', () => filtered);
-    // updateAccountStore('relaySettings', () => ({ [normalUrl]: undefined }));
-    // relaysExplicitlyClosed.push(normalUrl);
-
-    // saveRelaySettings(accountStore.publicKey, accountStore.relaySettings);
-
-    // const unsub = subsTo(`before_remove_relay_${APP_ID}`, {
-    //   onEvent: (_, content) => {
-    //     let relayInfo: NostrRelays = JSON.parse(content?.content || '{}');
-    //     delete relayInfo[url];
-
-    //     const relays = { ...accountStore.relaySettings, ...relayInfo };
-    //     setRelaySettings(relays, true);
-    //   },
-    //   onEose: () => {
-    //     sendRelays(accountStore.relaySettings);
-    //     unsub();
-    //   },
-    // });
-
-    // getRelays(accountStore.publicKey, `before_remove_relay_${APP_ID}`);
   };
 
   export const updateContacts = (content: NostrContactsContent) => {
