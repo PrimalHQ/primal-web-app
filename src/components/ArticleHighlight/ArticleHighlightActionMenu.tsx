@@ -211,7 +211,7 @@ const ArticleHighlightActionMenu: Component<{
 
       const highlightId = nip19.neventEncode({
         id: note.id,
-        relays: accountStore.activeRelays.map(r => r.url).slice(0,3),
+        relays: accountStore.activeRelays.map(r => r).slice(0,3),
         author: note.pubkey,
         kind: Kind.Highlight,
       });
@@ -225,7 +225,7 @@ const ArticleHighlightActionMenu: Component<{
 
     const highlightId = nip19.neventEncode({
       id: props.highlight.id,
-      relays: accountStore.activeRelays.map(r => r.url).slice(0,3),
+      relays: accountStore.activeRelays.map(r => r).slice(0,3),
       author: props.highlight.pubkey,
       kind: Kind.Highlight,
     });

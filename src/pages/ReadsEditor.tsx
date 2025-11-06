@@ -136,9 +136,9 @@ const ReadsEditor: Component = () => {
     let tags: string[][] = referencesToTags(content, relayHints);;
 
     const relayTags = accountStore.activeRelays.map(r => {
-      let t = ['r', r.url];
+      let t = ['r', r];
 
-      const settings = accountStore.relaySettings[r.url];
+      const settings = accountStore.relaySettings[r];
       if (settings && settings.read && !settings.write) {
         t = [...t, 'read'];
       }
@@ -340,9 +340,9 @@ const ReadsEditor: Component = () => {
     let tags: string[][] = referencesToTags(content, relayHints);;
 
     const relayTags = accountStore.activeRelays.map(r => {
-      let t = ['r', r.url];
+      let t = ['r', r];
 
-      const settings = accountStore.relaySettings[r.url];
+      const settings = accountStore.relaySettings[r];
       if (settings && settings.read && !settings.write) {
         t = [...t, 'read'];
       }

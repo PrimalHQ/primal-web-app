@@ -17,7 +17,7 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
 
   const disconnectedRelays = () => {
     const allRelayUrls = Object.keys(accountStore.relaySettings || {}).map(utils.normalizeURL);
-    const connectedUrls = connectedRelays().map(r => utils.normalizeURL(r.url));
+    const connectedUrls = connectedRelays().map(r => utils.normalizeURL(r));
 
     return allRelayUrls.filter(url => !connectedUrls.includes(url));
   };
@@ -39,8 +39,8 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
             >
               <div class={styles.connected}></div>
             </Show>
-            <span class={styles.relayUrl} title={relay.url}>
-              {relay.url}
+            <span class={styles.relayUrl} title={relay}>
+              {relay}
             </span>
           </div>
         )}

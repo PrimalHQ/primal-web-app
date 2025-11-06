@@ -118,6 +118,10 @@ export enum Kind  {
   TierList = 17_000,
   StreamMuteList = 10_555,
 
+  WalletInfo = 13_194,
+  WalletRequest = 23_194,
+  WalletResponse = 23_195,
+
   CategorizedPeople = 30_000,
   LongForm = 30_023,
   Settings = 30_078,

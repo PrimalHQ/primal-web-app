@@ -1,5 +1,5 @@
 import { createStore, Part, unwrap } from "solid-js/store";
-import { APP_ID } from "../App";
+import { APP_ID, relayWorker } from "../App";
 import { getMembershipStatus } from "../lib/membership";
 
 import {
@@ -129,8 +129,8 @@ export type AccountStore = {
   loginType: LoginType,
   likes: string[],
   defaultRelays: string[],
-  activeRelays: Relay[],
-  relayPool: SimplePool,
+  activeRelays: string[],
+  // relayPool: SimplePool,
   relaySettings: NostrRelays,
   publicKey: string | undefined,
   activeUser: PrimalUser | undefined,
@@ -229,16 +229,26 @@ export const initAccountStore: AccountStore = {
     following: [],
   },
   // @ts-ignore
-  relayPool: new SimplePool({ enablePing: true, enableReconnect: true }),
+  // relayPool: new SimplePool({ enablePing: true, enableReconnect: true }),
 };
 
   export const getRelayUrls = () => Object.keys(accountStore.relaySettings || {}).map(utils.normalizeURL)
 
 // ACTIONS ---------------------------------------------------------------------
 
+  export const subscribeTORelayPool = () => {
+    return 'string';
+  }
+
   export const suspendRelays = () => {
-    accountStore.relayPool.close(accountStore.activeRelays.map(r => r.url));
-    updateAccountStore('activeRelays', () => []);
+    relayWorker.onmessage = (e: MessageEvent) => {
+      if (e.data !== 'RELAYS_CLOSED') return;
+      updateAccountStore('activeRelays', () => []);
+    };
+    console.log('OPEN CLOSE_RELAYS 3')
+    relayWorker.postMessage({ type: 'CLOSE_RELAYS', relays: [...accountStore.activeRelays] });
+    // accountStore.relayPool.close(accountStore.activeRelays.map(r => r.url));
+    // updateAccountStore('activeRelays', () => []);
   }
 
   export const reconnectSuspendedRelays = async () => {
@@ -434,14 +444,28 @@ export const initAccountStore: AccountStore = {
         relaysToClose.add(url);
       }
 
-      accountStore.relayPool.close(Array.from(relaysToClose))
-      const filtered = accountStore.activeRelays.filter(r => !relaysToClose.has(r.url));
-      updateAccountStore('activeRelays', () => filtered);
-      updateAccountStore('relaySettings', () => ({...settings}));
+      relayWorker.onmessage = (e: MessageEvent) => {
+        if (e.data !== 'RELAYS_CLOSED') return;
 
-      connectToRelays(settings)
-      saveRelaySettings(accountStore.publicKey, settings);
-      return true;
+        const filtered = accountStore.activeRelays.filter(r => !relaysToClose.has(r));
+        updateAccountStore('activeRelays', () => filtered);
+        updateAccountStore('relaySettings', () => ({...settings}));
+
+        connectToRelays(settings)
+        saveRelaySettings(accountStore.publicKey, settings);
+      };
+
+    console.log('OPEN CLOSE_RELAYS 2')
+      relayWorker.postMessage({ type: 'CLOSE_RELAYS', relays: Array.from(relaysToClose)});
+
+      // accountStore.relayPool.close(Array.from(relaysToClose))
+      // const filtered = accountStore.activeRelays.filter(r => !relaysToClose.has(r.url));
+      // updateAccountStore('activeRelays', () => filtered);
+      // updateAccountStore('relaySettings', () => ({...settings}));
+
+      // connectToRelays(settings)
+      // saveRelaySettings(accountStore.publicKey, settings);
+      // return true;
     }
 
     const rs = accountStore.relaySettings;
@@ -516,13 +540,27 @@ export const initAccountStore: AccountStore = {
       return;
     }
 
-    relays.forEach(url => {
-      accountStore.relayPool.ensureRelay(url).then(r => {
-        if (accountStore.activeRelays.find(ar => ar.url === r.url)) return;
-        updateAccountStore('activeRelays', accountStore.activeRelays.length, () => r)
-      });
-    });
+    relayWorker.onmessage = (e: MessageEvent<{ type: string, relay: Relay }>) => {
+      const { type, relay } = e.data;
 
+      console.log('MESSAGE: ', e.data);
+
+      if (type !== 'RELAY_OPENED' || ! relay) return;
+      if (accountStore.activeRelays.find(ar => ar === relay)) return;
+
+      updateAccountStore('activeRelays', accountStore.activeRelays.length, () => relay);
+    };
+
+    console.log('OPEN MESSAGE: ', relayWorker)
+    // debugger;
+    relayWorker.postMessage({ type: 'OPEN_RELAYS', relays: [...relays]});
+// debugger;
+    // relays.forEach(url => {
+    //   accountStore.relayPool.ensureRelay(url).then(r => {
+    //     if (accountStore.activeRelays.find(ar => ar.url === r.url)) return;
+    //     updateAccountStore('activeRelays', accountStore.activeRelays.length, () => r)
+    //   });
+    // });
   };
 
   export const setShowPin = (sec: string) => {
@@ -591,30 +629,60 @@ export const initAccountStore: AccountStore = {
   export const removeRelay = (url: string) => {
     const normalUrl = utils.normalizeURL(url);
 
-    accountStore.relayPool.close([normalUrl]);
+    relayWorker.onmessage = (e) => {
+      if (e.data !== 'RELAYS_CLOSED') return;
 
-    const filtered = accountStore.activeRelays.filter(r => r.url !== normalUrl);
-    updateAccountStore('activeRelays', () => filtered);
-    updateAccountStore('relaySettings', () => ({ [normalUrl]: undefined }));
-    relaysExplicitlyClosed.push(normalUrl);
+      const filtered = accountStore.activeRelays.filter(r => r !== normalUrl);
+      updateAccountStore('activeRelays', () => filtered);
+      updateAccountStore('relaySettings', () => ({ [normalUrl]: undefined }));
+      relaysExplicitlyClosed.push(normalUrl);
 
-    saveRelaySettings(accountStore.publicKey, accountStore.relaySettings);
+      saveRelaySettings(accountStore.publicKey, accountStore.relaySettings);
 
-    const unsub = subsTo(`before_remove_relay_${APP_ID}`, {
-      onEvent: (_, content) => {
-        let relayInfo: NostrRelays = JSON.parse(content?.content || '{}');
-        delete relayInfo[url];
+      const unsub = subsTo(`before_remove_relay_${APP_ID}`, {
+        onEvent: (_, content) => {
+          let relayInfo: NostrRelays = JSON.parse(content?.content || '{}');
+          delete relayInfo[url];
 
-        const relays = { ...accountStore.relaySettings, ...relayInfo };
-        setRelaySettings(relays, true);
-      },
-      onEose: () => {
-        sendRelays(accountStore.relaySettings);
-        unsub();
-      },
-    });
+          const relays = { ...accountStore.relaySettings, ...relayInfo };
+          setRelaySettings(relays, true);
+        },
+        onEose: () => {
+          sendRelays(accountStore.relaySettings);
+          unsub();
+        },
+      });
 
-    getRelays(accountStore.publicKey, `before_remove_relay_${APP_ID}`);
+      getRelays(accountStore.publicKey, `before_remove_relay_${APP_ID}`);
+    }
+
+    console.log('CLOSE MESSAGE')
+    relayWorker.postMessage({ type: 'CLOSE_RELAYS', relays: [normalUrl]});
+
+    // accountStore.relayPool.close([normalUrl]);
+
+    // const filtered = accountStore.activeRelays.filter(r => r.url !== normalUrl);
+    // updateAccountStore('activeRelays', () => filtered);
+    // updateAccountStore('relaySettings', () => ({ [normalUrl]: undefined }));
+    // relaysExplicitlyClosed.push(normalUrl);
+
+    // saveRelaySettings(accountStore.publicKey, accountStore.relaySettings);
+
+    // const unsub = subsTo(`before_remove_relay_${APP_ID}`, {
+    //   onEvent: (_, content) => {
+    //     let relayInfo: NostrRelays = JSON.parse(content?.content || '{}');
+    //     delete relayInfo[url];
+
+    //     const relays = { ...accountStore.relaySettings, ...relayInfo };
+    //     setRelaySettings(relays, true);
+    //   },
+    //   onEose: () => {
+    //     sendRelays(accountStore.relaySettings);
+    //     unsub();
+    //   },
+    // });
+
+    // getRelays(accountStore.publicKey, `before_remove_relay_${APP_ID}`);
   };
 
   export const updateContacts = (content: NostrContactsContent) => {
@@ -831,7 +899,7 @@ export const initAccountStore: AccountStore = {
         if (accountStore.following.length === 0) {
           const date = Math.floor((new Date()).getTime() / 1000);
           const tags = [['p', pubkey]];
-          resolveContacts(pubkey, [pubkey], date, tags, accountStore.activeRelays[0].url, cb);
+          resolveContacts(pubkey, [pubkey], date, tags, accountStore.activeRelays[0], cb);
         }
         updateAccountStore('followInProgress', () => '');
         unsub();

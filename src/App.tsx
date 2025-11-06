@@ -26,21 +26,42 @@ import { generateAppKeys } from './lib/PrimalNip46';
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_${version}_${Math.floor(Math.random()*10000000000)}`;
 
+export const relayWorker = new Worker(
+  new URL(`../relayWorker.ts`, import.meta.url),
+  {
+    type: 'module'
+  },
+);
+
+
 const App: Component = () => {
 
   onMount(() => {
     connect();
     generateAppKeys();
-    // if ('serviceWorker' in navigator) {
-    //   navigator.serviceWorker.register('./sw.js')
-    //     .then(reg => console.log('SW registered: ', reg))
-    //     .catch(err => console.log('SW registration failed: ', err));
-    // }
+    initRelayWorker();
   });
 
   onCleanup(() => {
     disconnect();
+    relayWorker?.terminate();
   });
+
+  const initRelayWorker = () => {
+    relayWorker.addEventListener('message', (e: MessageEvent) => {
+      const message = e.data;
+
+      if (message.type === 'ENQUE_EVENT' && message.event) {
+
+      }
+
+      if (message.type === 'DENQUE_EVENT' && message.event) {
+
+      }
+    });
+
+    relayWorker.postMessage({type: 'INIT'});
+  }
 
   return (
     <AppProvider>

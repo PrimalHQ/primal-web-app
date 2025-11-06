@@ -80,6 +80,7 @@ import LiveEventPreview from "../../LiveVideo/LiveEventPreview";
 import { StreamingData, getStreamingEvent } from "../../../lib/streaming";
 import { fetchUserProfile } from "../../../handleFeeds";
 import { accountStore, hasPublicKey, quoteNote, saveEmoji, setShowPin } from "../../../stores/accountStore";
+import { DecodedNaddr } from "nostr-tools/lib/types/nip19";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -818,7 +819,7 @@ const EditBox: Component<{
           '';
 
           // @ts-ignore
-          const decoded = nip19.decode(rep.naddr);
+          const decoded = nip19.decode(rep.naddr) as DecodedNaddr;
 
           const data = decoded.data as nip19.AddressPointer;
 
@@ -895,9 +896,9 @@ const EditBox: Component<{
       }
 
       const relayTags = accountStore.activeRelays.map(r => {
-        let t = ['r', r.url];
+        let t = ['r', r];
 
-        const settings = accountStore.relaySettings[r.url];
+        const settings = accountStore.relaySettings[r];
         if (settings && settings.read && !settings.write) {
           t = [...t, 'read'];
         }
@@ -1540,7 +1541,8 @@ const EditBox: Component<{
 
         rec[url] = (<div>
           <LiveEventPreview stream={stream} user={user} />
-        </div>)?.outerHTML || url;
+        </div>)?.
+        outerHTML || url;
       }
     }
 

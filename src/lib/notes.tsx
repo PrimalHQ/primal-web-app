@@ -1,5 +1,5 @@
-import { Relay, relayInit } from "../lib/nTools";
-import { createStore, unwrap } from "solid-js/store";
+import { Relay } from "../lib/nTools";
+import { createStore } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegexLocal, profileRegex, rumbleRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, tidalEmbedRegex, twitchPlayerRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex, zapStreamEmbedRegex } from "../constants";
 import { sendMessage, subsTo } from "../sockets";
@@ -9,9 +9,9 @@ import { logError, logInfo, logWarning } from "./logger";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { encrypt44, signEvent } from "./nostrAPI";
 import { ArticleEdit } from "../pages/ReadsEditor";
-import ExternalLiveEventPreview from "../components/LiveVideo/ExternalLiveEventPreview";
-import { APP_ID } from "../App";
+import { APP_ID, relayWorker } from "../App";
 import { accountStore } from "../stores/accountStore";
+import { DecodedNaddr } from "nostr-tools/lib/types/nip19";
 
 const getLikesStorageKey = () => {
   const key = localStorage.getItem('pubkey') || 'anon';
@@ -631,68 +631,69 @@ export const sendStreamMuteList = async (muteList: string[][], date: number, con
   return await sendEvent(event);
 };
 export const broadcastEvent = async (event: NostrRelaySignedEvent) => {
-  const relays = accountStore.activeRelays;
-  const relaySettings = accountStore.relaySettings;
-  const shouldProxy = accountStore.proxyThroughPrimal;
+  // const relays = accountStore.activeRelays;
+  // const relaySettings = accountStore.relaySettings;
+  // const shouldProxy = accountStore.proxyThroughPrimal;
 
-  if (shouldProxy) {
-    return await proxyEvent(event, relays, relaySettings);
-  }
+  // if (shouldProxy) {
+  //   return await proxyEvent(event, relays, relaySettings);
+  // }
 
-  let responses = [];
-  let reasons: string[] = [];
+  // let responses = [];
+  // let reasons: string[] = [];
 
-  for (let i = 0;i < relays.length;i++) {
-    const relay = relays[i];
+  // for (let i = 0;i < relays.length;i++) {
+  //   const relay = relays[i];
 
-    const settings = (relaySettings && relaySettings[relay.url]) || { read: true, write: true };
+  //   const settings = (relaySettings && relaySettings[relay]) || { read: true, write: true };
 
-    if (!settings.write) {
-      continue;
-    }
+  //   if (!settings.write) {
+  //     continue;
+  //   }
 
-    responses.push(new Promise<string>((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        logError(`Publishing post to ${relay.url} has timed out`);
-        reasons.push('timeout');
-        reject('timeout');
-      }, 8_000);
+  //   responses.push(new Promise<string>((resolve, reject) => {
+  //     const timeout = setTimeout(() => {
+  //       logError(`Publishing post to ${relay} has timed out`);
+  //       reasons.push('timeout');
+  //       reject('timeout');
+  //     }, 8_000);
 
-      try {
-        let pub = relay.publish(event);
+  //     try {
+  //       let pub = relay.publish(event);
 
-        logInfo('publishing to relay: ', relay)
+  //       logInfo('publishing to relay: ', relay)
 
-        pub.on('ok', () => {
-          logInfo(`${relay.url} has accepted our event`);
-          clearTimeout(timeout);
-          resolve('success');
-        });
+  //       pub.on('ok', () => {
+  //         logInfo(`${relay.url} has accepted our event`);
+  //         clearTimeout(timeout);
+  //         resolve('success');
+  //       });
 
-        pub.on('failed', (reason: any) => {
-          logError(`failed to publish to ${relay.url}: ${reason}`)
-          clearTimeout(timeout);
-          reasons.push(reason);
-          reject('failed');
-        });
+  //       pub.on('failed', (reason: any) => {
+  //         logError(`failed to publish to ${relay.url}: ${reason}`)
+  //         clearTimeout(timeout);
+  //         reasons.push(reason);
+  //         reject('failed');
+  //       });
 
-      } catch (e) {
-        logError('Failed publishing note: ', e);
-        clearTimeout(timeout);
-        reasons.push(`${e}`);
-        reject(e);
-      }
-    }));
-  }
+  //     } catch (e) {
+  //       logError('Failed publishing note: ', e);
+  //       clearTimeout(timeout);
+  //       reasons.push(`${e}`);
+  //       reject(e);
+  //     }
+  //   }));
+  // }
 
-  try {
-    await Promise.any(responses);
-    return { success: true, note: event } as SendNoteResult;
-  }
-  catch (e) {
-    logError('Error broadcasting note: ', e);
-    return { success: false, reasons, note: event} as SendNoteResult;
-  }
+  // try {
+  //   await Promise.any(responses);
+  //   return { success: true, note: event } as SendNoteResult;
+  // }
+  // catch (e) {
+  //   logError('Error broadcasting note: ', e);
+  //   return { success: false, reasons, note: event} as SendNoteResult;
+  // }
+  return { success: false }
 };
 
 export const sendEvent = async (event: NostrEvent) => {
@@ -714,16 +715,13 @@ export const sendEvent = async (event: NostrEvent) => {
     return { success: false , reasons: [reason]} as SendNoteResult;
   }
 
-  let responses = [];
-  let reasons: string[] = [];
-
   // Relay hints fromm `e` tags
   const hintRelayUrls = event.tags.reduce((acc, t) => {
     if (
       t[0] === 'e' &&
       t[2] &&
       t[2].length > 0 &&
-      !relays.find(r => r.url === t[2])
+      !relays.find(r => r === t[2])
     ) {
       return [ ...acc, t[2] ];
     }
@@ -732,32 +730,62 @@ export const sendEvent = async (event: NostrEvent) => {
   }, []);
 
   const allRelays = [
-    ...accountStore.activeRelays.map(r => r.url),
+    ...accountStore.activeRelays.map(r => r),
     ...hintRelayUrls,
   ];
 
-  const unsub = accountStore.relayPool.subscribe(
-    allRelays,
-    {
-      kinds: [signedNote.kind],
-      authors: [signedNote.pubkey],
-    },
-    {
-      onevent: (e) => {
-        unsub.close();
-      }
-    }
-  )
-
-  try {
-    await Promise.any(accountStore.relayPool.publish(allRelays, signedNote))
-
-    return { success: true, note: signedNote } as SendNoteResult;
+  relayWorker.onmessage = (e) => {
+    console.log('MESSAGE: ', e.data);
   }
-  catch (e) {
-    logError('Failed to publish the note: ', e);
-    return await proxyEvent(event, relays, relaySettings);
-  }
+
+    console.log('SEND EVENT')
+  relayWorker.postMessage({type: 'SEND_EVENT', data: { event: signedNote, relays: allRelays }});
+
+  // if (!worker) {
+  //   return { success: false , reasons: ['worker-not-found']} as SendNoteResult;
+  // }
+
+  // worker.onmessage = (e: MessageEvent<{success: boolean, note: NostrRelaySignedEvent }>) => {
+  //   const { success, note } = e.data;
+
+  //   console.log('Event Sent: ', success, note);
+
+  //   if (!success) {
+  //     proxyEvent(event, relays, relaySettings);
+  //   }
+  // };
+
+  // console.log('POST MESSAGE: ', worker)
+  // worker.postMessage({
+  //   type: 'SEND_EVENT',
+  //   signedNote,
+  //   relays: allRelays,
+  // })
+
+  return { success: true, note: signedNote } as SendNoteResult;
+
+  // const unsub = accountStore.relayPool.subscribe(
+  //   allRelays,
+  //   {
+  //     kinds: [signedNote.kind],
+  //     authors: [signedNote.pubkey],
+  //   },
+  //   {
+  //     onevent: (e) => {
+  //       unsub.close();
+  //     }
+  //   }
+  // )
+
+  // try {
+  //   await Promise.any(accountStore.relayPool.publish(allRelays, signedNote))
+
+  //   return { success: true, note: signedNote } as SendNoteResult;
+  // }
+  // catch (e) {
+  //   logError('Failed to publish the note: ', e);
+  //   return await proxyEvent(event, relays, relaySettings);
+  // }
 
   // let relaysActual = [...relays];
 
@@ -864,7 +892,7 @@ export const getEventReactions = (eventId: string, kind: number, subid: string, 
   }
 
   if (eventId.startsWith('naddr')) {
-    const decode = decodeIdentifier(event_id);
+    const decode = decodeIdentifier(event_id) as DecodedNaddr;
 
     pubkey = decode.data.pubkey;
     identifier = decode.data.identifier;
@@ -904,7 +932,7 @@ export const getEventQuotes = (eventId: string, subid: string, offset = 0, user_
   }
 
   if (eventId.startsWith('naddr')) {
-    const decode = decodeIdentifier(event_id);
+    const decode = decodeIdentifier(event_id) as DecodedNaddr;
 
     pubkey = decode.data.pubkey;
     identifier = decode.data.identifier;
@@ -947,7 +975,7 @@ export const getEventZaps = (eventId: string, user_pubkey: string | undefined, s
   }
 
   if (eventId.startsWith('naddr')) {
-    const decode = decodeIdentifier(event_id);
+    const decode = decodeIdentifier(event_id) as DecodedNaddr;
 
     pubkey = decode.data.pubkey;
     identifier = decode.data.identifier;

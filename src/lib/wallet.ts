@@ -1,4 +1,5 @@
-import { APP_ID } from "../App";
+import { Event } from "nostr-tools";
+import { APP_ID, relayWorker } from "../App";
 import { Kind } from "../constants";
 import { logInfo } from "./logger";
 import { Relay, relayInit } from "./nTools";
@@ -171,47 +172,9 @@ export const decodeNWCUri = (uri: string) => {
 };
 
 export const sendNWCInfoEvent = async (nwcConfig: NWCConfig) => {
-  let relays: Relay[] = [];
-  let relayConnections = []
+  relayWorker.onmessage = (e: MessageEvent<{ event: Event }>) => {
+    logInfo('GOT EVENT: ', e);
+  };
 
-  for (let i = 0; i < nwcConfig.relays.length; i++) {
-    const relayUri = nwcConfig.relays[i];
-
-    const relay = relayInit(relayUri);
-
-    relay.connect().then(() => {
-      const sub = relay.subscribe([{ kinds: [13194], authors: [nwcConfig.pubkey]}], {
-        onevent(event) {
-          logInfo('GOT EVENT: ', event);
-        },
-        oneose() {
-          sub.close();
-          relay.close();
-        }
-      })
-    });
-  }
-};
-
-export const sendNWCPayInvoice = async (nwcConfig: NWCConfig, invoice: string) => {
-  let relays: Relay[] = [];
-  let relayConnections = []
-
-  for (let i = 0; i < nwcConfig.relays.length; i++) {
-    const relayUri = nwcConfig.relays[i];
-
-    const relay = relayInit(relayUri);
-
-    relay.connect().then(() => {
-      const sub = relay.subscribe([{ kinds: [13194], authors: [nwcConfig.pubkey]}], {
-        onevent(event) {
-          logInfo('GOT EVENT: ', event);
-        },
-        oneose() {
-          sub.close();
-          relay.close();
-        }
-      })
-    });
-  }
+  relayWorker.postMessage({ type: 'NWC_INFO', nwcData: { nwcConfig }})
 };

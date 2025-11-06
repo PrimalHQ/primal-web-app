@@ -44,7 +44,7 @@ const Network: Component = () => {
   const isConnected = (url: string) => {
     if (accountStore.proxyThroughPrimal) return false;
 
-    const relay: Relay | undefined = accountStore.activeRelays.find(r => utils.normalizeURL(r.url) === utils.normalizeURL(url));
+    const relay: Relay | undefined = accountStore.activeRelays.find(r => utils.normalizeURL(r) === utils.normalizeURL(url));
 
     return relay && relay.ws && relay.ws.readyState === WebSocket.OPEN;
   };

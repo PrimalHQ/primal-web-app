@@ -789,7 +789,7 @@ const StreamPage: Component = () => {
       content,
       created_at: Math.floor((new Date()).getTime() / 1_000),
       tags: [
-        ['a', eventCoodrinate, accountStore.activeRelays[0].url, 'root'],
+        ['a', eventCoodrinate, accountStore.activeRelays[0], 'root'],
       ],
     }
     const { success, note } = await sendEvent(messageEvent);
