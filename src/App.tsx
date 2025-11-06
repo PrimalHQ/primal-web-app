@@ -21,7 +21,7 @@ import 'hls-video-element';
 import 'videojs-video-element';
 import { nip46 } from './lib/nTools';
 import { generateAppKeys } from './lib/PrimalNip46';
-import { accountStore } from './stores/accountStore';
+import { accountStore, dequeEvent, enqueEvent } from './stores/accountStore';
 
 
 export const version = import.meta.env.PRIMAL_VERSION;
@@ -55,16 +55,20 @@ const App: Component = () => {
     console.log('ACTIVE RELAYS CHANGE: ', { ...accountStore.activeRelays });
   });
 
+  createEffect(() => {
+    console.log('EVENT QUEUE: ', accountStore.eventQueue.length);
+  })
+
   const initRelayWorker = () => {
     relayWorker.addEventListener('message', (e: MessageEvent) => {
       const message = e.data;
 
       if (message.type === 'ENQUE_EVENT' && message.event) {
-
+        enqueEvent(message.event);
       }
 
       if (message.type === 'DEQUE_EVENT' && message.event) {
-
+        dequeEvent(message.event);
       }
     });
 

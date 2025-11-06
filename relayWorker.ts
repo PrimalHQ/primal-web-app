@@ -25,8 +25,14 @@ self.addEventListener('message', (e: MessageEvent<WorkerMessageType>) => {
   if (type === 'OPEN_RELAYS' && relays) {
     for (let i=0; i < relays.length; i++) {
       const url = relays[i];
-
-      relayPool.ensureRelay(url).then(r => self.postMessage({ type: 'RELAY_OPENED', relay: r.url }));
+      try {
+        relayPool.ensureRelay(url).then(r => self.postMessage({ type: 'RELAY_OPENED', relay: r.url }));
+      } catch (e) {
+        setTimeout(() => {
+          console.log('SECOND RELAY OPEN ATTEMPT: ', url);
+          relayPool?.ensureRelay(url).then(r => self.postMessage({ type: 'RELAY_OPENED', relay: r.url }));
+        }, 500)
+      }
     }
   }
 
@@ -94,6 +100,7 @@ self.addEventListener('message', (e: MessageEvent<WorkerMessageType>) => {
 
   if (type === 'SEND_EVENT' && eventData) {
     const { event, relays } = eventData;
+    self.postMessage({ type: 'ENQUE_EVENT', event });
 
     const unsub = relayPool.subscribe(
       relays,
@@ -111,6 +118,7 @@ self.addEventListener('message', (e: MessageEvent<WorkerMessageType>) => {
     try {
       Promise.any(relayPool.publish(relays, event)).then(() => {
         self.postMessage({ success: true, note: event });
+        self.postMessage({ type: 'DEQUE_EVENT', event })
       })
     }
     catch (e) {

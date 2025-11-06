@@ -737,7 +737,7 @@ export const sendEvent = async (event: NostrEvent) => {
   relayWorker.onmessage = (e) => {
   }
 
-  relayWorker.postMessage({type: 'SEND_EVENT', data: { event: signedNote, relays: allRelays }});
+  relayWorker.postMessage({type: 'SEND_EVENT', eventData: { event: signedNote, relays: allRelays }});
 
   return { success: true, note: signedNote } as SendNoteResult;
 }

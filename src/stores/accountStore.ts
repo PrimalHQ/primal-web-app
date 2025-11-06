@@ -241,17 +241,17 @@ export const initAccountStore: AccountStore = {
 // ACTIONS ---------------------------------------------------------------------
 
   export const enqueEvent = (event: NostrRelaySignedEvent) => {
-    if (accountStore.eventQueue.find(e => e.id === event.id && e.kind === e.kind)) return;
+    if (accountStore.eventQueue.find(e => e.id === event.id)) return;
 
-    accountStore.eventQueue.push(event);
+    updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...event }));
   }
 
   export const dequeEvent = (event: NostrRelaySignedEvent) => {
-    const quedEvent = accountStore.eventQueue.find(e => e.id === event.id && e.kind === e.kind);
+    const quedEvent = accountStore.eventQueue.find(e => e.id === event.id);
 
     if (!quedEvent) return;
 
-    updateStore
+    updateAccountStore('eventQueue', (que) => que.filter(e => e.id !== event.id));
   }
 
   export const subscribeTORelayPool = () => {
