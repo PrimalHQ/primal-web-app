@@ -1,6 +1,6 @@
 import { batch, Component, createEffect, Show } from 'solid-js';
 import { MenuItem, PrimalNote, ZapOption } from '../../../types/primal';
-import { getMyRepostOfEvent, sendDeleteEvent, sendRepost, triggerImportEvents } from '../../../lib/notes';
+import { getMyRepostOfEvent, sendDeleteEvent, sendRepost } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
 import { useToastContext } from '../../Toaster/Toaster';
@@ -124,8 +124,6 @@ const NoteFooter: Component<{
     );
 
     if (!success || !deleteEvent) return;
-
-    triggerImportEvents([deleteEvent], `delete_import_${APP_ID}`);
 
     // id of the note to remove from UI
     let removeId = props.note.pubkey === accountStore.publicKey ?

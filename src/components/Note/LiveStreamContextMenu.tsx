@@ -10,7 +10,7 @@ import PrimalMenu from '../PrimalMenu/PrimalMenu';
 import { APP_ID } from '../../App';
 import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
-import { sendDeleteEvent, triggerImportEvents } from '../../lib/notes';
+import { sendDeleteEvent } from '../../lib/notes';
 import { LiveStreamContextMenuInfo, useAppContext } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { readSecFromStorage } from '../../lib/localStore';
@@ -180,8 +180,6 @@ const LiveStreamContextMenu: Component<{
     );
 
     if (!success || !deleteEvent) return;
-
-    triggerImportEvents([deleteEvent], `delete_import_${APP_ID}`);
 
     props.data?.onDelete && props.data?.onDelete(stream().id || '');
     props.onClose();

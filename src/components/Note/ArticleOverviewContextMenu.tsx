@@ -10,7 +10,7 @@ import PrimalMenu from '../PrimalMenu/PrimalMenu';
 import { APP_ID } from '../../App';
 import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
-import { broadcastEvent, sendDeleteEvent, sendDraft, triggerImportEvents } from '../../lib/notes';
+import { broadcastEvent, sendDeleteEvent, sendDraft } from '../../lib/notes';
 import { NoteContextMenuInfo, useAppContext } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { nip19 } from 'nostr-tools';
@@ -157,8 +157,6 @@ const ArticleOverviewContextMenu: Component<{
       imports.push(draft);
     }
 
-    triggerImportEvents(imports, `unpublish_import_${APP_ID}`);
-
     // Used here just as a signal, not for actually custom zaps
     props.data.openCustomZap && props.data.openCustomZap();
     props.onClose();
@@ -176,8 +174,6 @@ const ArticleOverviewContextMenu: Component<{
     );
 
     if (!success || !note) return;
-
-    triggerImportEvents([note], `delete_import_${APP_ID}`);
 
     props.data.onDelete && props.data.onDelete(article.noteId);
     props.onClose();

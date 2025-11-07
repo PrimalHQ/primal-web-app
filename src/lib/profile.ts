@@ -1,14 +1,11 @@
-import { Relay, nip05, nip19 } from "../lib/nTools";
-import { unwrap } from "solid-js/store";
+import { nip05, nip19 } from "../lib/nTools";
 import { Kind, minKnownProfiles } from "../constants";
 import { sendMessage } from "../sockets";
 import { userName } from "../stores/profile";
-import { Filterlist, NostrRelays, NostrWindow, PrimalUser, VanityProfiles } from "../types/primal";
-import { getStorage } from "./localStore";
+import { Filterlist, NostrRelays, PrimalUser, VanityProfiles } from "../types/primal";
 import { logError } from "./logger";
 import { signEvent } from "./nostrAPI";
-import { sendEvent, triggerImportEvents } from "./notes";
-import { APP_ID } from "../App";
+import { sendEvent } from "./notes";
 
 export const getUserProfiles = (pubkeys: string[], subid: string) => {
   sendMessage(JSON.stringify([
@@ -369,10 +366,6 @@ export const sendRelays = async (relaySettings: NostrRelays) => {
   };
 
   const result = await sendEvent(event);
-
-  if (result.success && result.note) {
-    triggerImportEvents([result.note], `import_events_${APP_ID}`);
-  }
 
   return result;
 };

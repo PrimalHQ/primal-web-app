@@ -12,7 +12,6 @@ import { bookmarks as tBookmarks } from '../../translations';
 
 import styles from './BookmarkNote.module.scss';
 import { saveBookmarks } from '../../lib/localStore';
-import { triggerImportEvents } from '../../lib/notes';
 import { accountStore, updateBookmarks as updateAccountBookmarks } from '../../stores/accountStore';
 
 const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: boolean }> = (props) => {
@@ -42,15 +41,11 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
     updateAccountBookmarks(bookmarks);
     saveBookmarks(accountStore.publicKey, bookmarks);
 
-    const { success, note} = await sendBookmarks(
+    sendBookmarks(
       [...bookmarkTags],
       date,
       '',
     );
-
-    if (success && note) {
-      triggerImportEvents([note], `bookmark_import_${APP_ID}`);
-    }
   };
 
   const addBookmark = async (bookmarkTags: string[][]) => {
@@ -69,8 +64,8 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
           description: intl.formatMessage(tBookmarks.confirm.description),
           confirmLabel: intl.formatMessage(tBookmarks.confirm.confirm),
           abortLabel: intl.formatMessage(tBookmarks.confirm.abort),
-          onConfirm: async () => {
-            await updateBookmarks(bookmarksToAdd);
+          onConfirm: () => {
+            updateBookmarks(bookmarksToAdd);
             app.actions.closeConfirmModal();
           },
           onAbort: app.actions.closeConfirmModal,
@@ -79,7 +74,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
         return;
       }
 
-      await updateBookmarks(bookmarksToAdd);
+      updateBookmarks(bookmarksToAdd);
     }
   }
 
@@ -99,8 +94,8 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
           description: intl.formatMessage(tBookmarks.confirm.descriptionZero),
           confirmLabel: intl.formatMessage(tBookmarks.confirm.confirmZero),
           abortLabel: intl.formatMessage(tBookmarks.confirm.abortZero),
-          onConfirm: async () => {
-            await updateBookmarks(bookmarksToAdd);
+          onConfirm: () => {
+            updateBookmarks(bookmarksToAdd);
             app.actions.closeConfirmModal();
           },
           onAbort: app.actions.closeConfirmModal,
@@ -109,7 +104,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
         return;
       }
 
-      await updateBookmarks(bookmarksToAdd);
+      updateBookmarks(bookmarksToAdd);
     }
   }
 
@@ -127,12 +122,12 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
 
         bookmarks = content.tags;
       },
-      onEose: async () => {
+      onEose: () => {
         if (remove) {
-          await removeBookmark(bookmarks);
+          removeBookmark(bookmarks);
         }
         else {
-          await addBookmark(bookmarks);
+          addBookmark(bookmarks);
         }
 
         then && then();

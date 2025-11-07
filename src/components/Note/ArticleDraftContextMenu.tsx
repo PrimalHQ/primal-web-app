@@ -10,7 +10,7 @@ import PrimalMenu from '../PrimalMenu/PrimalMenu';
 import { APP_ID } from '../../App';
 import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
-import { sendDeleteEvent, triggerImportEvents } from '../../lib/notes';
+import { sendDeleteEvent } from '../../lib/notes';
 import { NoteContextMenuInfo } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { readSecFromStorage } from '../../lib/localStore';
@@ -134,7 +134,6 @@ const ArticleDraftContextMenu: Component<{
 
     if (!success || !note) return;
 
-    triggerImportEvents([note], `delete_import_${APP_ID}`);
     // Used here just as a signal, not for actually custom zaps
     props.data.onDelete && props.data.onDelete(article.id);
     props.onClose()

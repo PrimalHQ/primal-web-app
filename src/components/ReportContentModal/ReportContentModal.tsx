@@ -6,16 +6,14 @@ import { NostrLiveChat, PrimalArticle, PrimalNote } from '../../types/primal';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 
 import styles from './ReportContentModal.module.scss';
-import { APP_ID } from '../../App';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 import { actions as tActions } from '../../translations';
-import { sendContentReport, triggerImportEvents } from '../../lib/notes';
+import { sendContentReport } from '../../lib/notes';
 import { useToastContext } from '../Toaster/Toaster';
 import RadioBox, { RadioBoxOption } from '../Checkbox/RadioBox';
 import { titleCase } from '../../utils';
-import { accountStore } from '../../stores/accountStore';
 
 const reportReasons = ['nudity', 'profanity', 'illegal', 'spam', 'impersonation'];
 
@@ -71,7 +69,6 @@ const ReportContentModal: Component<{
                 );
 
                 if (success && event) {
-                  triggerImportEvents([event], `import_report_${APP_ID}`);
                   toast?.sendSuccess(`Content reported as ${selectedReason()}`)
                 }
 

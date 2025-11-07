@@ -30,7 +30,7 @@ import {
 import { useSearchContext } from "../../../contexts/SearchContext";
 import { TranslatorProvider } from "../../../contexts/TranslatorContext";
 import { getEvents } from "../../../lib/feed";
-import { parseNote1, sanitize, sendNote, replaceLinkPreviews, importEvents, getParametrizedEvent } from "../../../lib/notes";
+import { parseNote1, sanitize, sendNote, replaceLinkPreviews, getParametrizedEvent } from "../../../lib/notes";
 import { getUserProfiles, getUsersRelayInfo } from "../../../lib/profile";
 import { subsTo } from "../../../sockets";
 import { convertToArticles, convertToLiveEvents, convertToNotes, referencesToTags } from "../../../stores/note";
@@ -917,24 +917,12 @@ const EditBox: Component<{
         tags,
       );
 
-      if (success) {
-
-        const importId = `import_note_${APP_ID}`;
-
-        const unsub = subsTo(importId, {
-          onEose: () => {
-            if (note) {
-              toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
-              props.onSuccess && props.onSuccess({ success, reasons, note }, { noteRefs, userRefs, articleRefs, highlightRefs, relayHints });
-              setIsPostingInProgress(false);
-              saveNoteDraft(accountStore.publicKey, '', rep?.noteId)
-              clearEditor();
-            }
-            unsub();
-          }
-        });
-
-        note && importEvents([note], importId);
+      if (success && note) {
+        toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
+        props.onSuccess && props.onSuccess({ success, reasons, note }, { noteRefs, userRefs, articleRefs, highlightRefs, relayHints });
+        setIsPostingInProgress(false);
+        saveNoteDraft(accountStore.publicKey, '', rep?.noteId)
+        clearEditor();
 
         return;
       }

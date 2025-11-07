@@ -14,7 +14,7 @@ import ArticlePreviewPhone from '../components/ArticlePreview/ArticlePreviewPhon
 import ArticleShort from '../components/ArticlePreview/ArticleShort';
 import ReadsEditorPreview from '../components/ReadsEditor/ReadsEditorPreview';
 import { decrypt44 } from '../lib/nostrAPI';
-import { importEvents, sendArticle, sendDeleteEvent, sendDraft, triggerImportEvents } from '../lib/notes';
+import { sendArticle, sendDeleteEvent, sendDraft } from '../lib/notes';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { BeforeLeaveEventArgs, useBeforeLeave, useNavigate, useParams } from '@solidjs/router';
 import { fetchArticles, fetchDrafts } from '../handleNotes';
@@ -23,7 +23,6 @@ import ReadsPublishDialog from '../components/ReadsMentionDialog/ReadsPublishDia
 import { readSecFromStorage } from '../lib/localStore';
 import { useIntl } from '@cookbook/solid-intl';
 import { toast as tToast, actions as tActions } from '../translations';
-import { subsTo } from '../sockets';
 import ReadsLeaveDialog from '../components/ReadsMentionDialog/ReadsLeaveDialog';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { longDate } from '../lib/dates';
@@ -381,27 +380,16 @@ const ReadsEditor: Component = () => {
 
     if (success && note) {
 
-      const importId = `import_article_${APP_ID}`;
       const lastDraft = lastSaved.draftId;
 
-      const unsub = subsTo(importId, {
-        onEose: () => {
-          unsub();
-          if (note) {
-            toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
-            setArticle(() => emptyArticleEdit());
-            if (promote) {
-              setTimeout(() => {
-                quoteArticle(note);
-              }, 1_000);
-            }
-            setShowPublishSucess(() => true);
-          }
-        }
-      });
-
-      importEvents([note], importId);
-
+      toast?.sendSuccess(intl.formatMessage(tToast.publishNoteSuccess));
+      setArticle(() => emptyArticleEdit());
+      if (promote) {
+        setTimeout(() => {
+          quoteArticle(note);
+        }, 1_000);
+      }
+      setShowPublishSucess(() => true);
 
       if (lastDraft.length > 0) {
         sendDeleteEvent(
@@ -507,7 +495,6 @@ const ReadsEditor: Component = () => {
 
     if (success && note) {
       toast?.sendSuccess('Draft saved');
-      triggerImportEvents([note], `draft_import_${APP_ID}`);
 
       setLastSaved(() => ({
         ...article,
@@ -518,15 +505,11 @@ const ReadsEditor: Component = () => {
       }));
 
       if (lastDraft.length > 0) {
-        const delResponse = await sendDeleteEvent(
+        sendDeleteEvent(
           user.pubkey,
           lastDraft,
           Kind.Draft,
         );
-
-        if (delResponse.success && delResponse.note) {
-          triggerImportEvents([delResponse.note], `del_last_draft_import_${APP_ID}`);
-        }
       }
     }
     else {

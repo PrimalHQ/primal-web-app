@@ -12,7 +12,6 @@ import { bookmarks as tBookmarks } from '../../translations';
 
 import styles from './BookmarkNote.module.scss';
 import { readSecFromStorage, saveBookmarks } from '../../lib/localStore';
-import { triggerImportEvents } from '../../lib/notes';
 import { accountStore, hasPublicKey, setShowPin, showGetStarted, updateBookmarks } from '../../stores/accountStore';
 
 const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boolean }> = (props) => {
@@ -26,7 +25,7 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
     setIsBookmarked(() => accountStore.bookmarks.includes(props.note.post.id) || false);
   })
 
-  const updateTheBookmarks = async (bookmarkTags: string[][]) => {
+  const updateTheBookmarks = (bookmarkTags: string[][]) => {
 
     const bookmarks = bookmarkTags.reduce((acc, t) =>
       t[0] === 'e' ? [...acc, t[1]] : [...acc]
@@ -36,14 +35,10 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
 
     updateBookmarks(bookmarks)
     saveBookmarks(accountStore.publicKey, bookmarks);
-    const { success, note} = await sendBookmarks([...bookmarkTags], date, '');
-
-    if (success && note) {
-      triggerImportEvents([note], `bookmark_import_${APP_ID}`)
-    }
+    sendBookmarks([...bookmarkTags], date, '');
   };
 
-  const addBookmark = async (bookmarkTags: string[][]) => {
+  const addBookmark = (bookmarkTags: string[][]) => {
     if (!hasPublicKey()) {
       showGetStarted();
       return;
@@ -68,8 +63,8 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
           description: intl.formatMessage(tBookmarks.confirm.description),
           confirmLabel: intl.formatMessage(tBookmarks.confirm.confirm),
           abortLabel: intl.formatMessage(tBookmarks.confirm.abort),
-          onConfirm: async () => {
-            await updateTheBookmarks(bookmarksToAdd);
+          onConfirm: () => {
+            updateTheBookmarks(bookmarksToAdd);
             app.actions.closeConfirmModal();
           },
           onAbort: app.actions.closeConfirmModal,
@@ -78,7 +73,7 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
         return;
       }
 
-      await updateTheBookmarks(bookmarksToAdd);
+      updateTheBookmarks(bookmarksToAdd);
     }
   }
 
@@ -94,8 +89,8 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
           description: intl.formatMessage(tBookmarks.confirm.descriptionZero),
           confirmLabel: intl.formatMessage(tBookmarks.confirm.confirmZero),
           abortLabel: intl.formatMessage(tBookmarks.confirm.abortZero),
-          onConfirm: async () => {
-            await updateTheBookmarks(bookmarksToAdd);
+          onConfirm: () => {
+            updateTheBookmarks(bookmarksToAdd);
             app.actions.closeConfirmModal();
           },
           onAbort: app.actions.closeConfirmModal,
@@ -104,7 +99,7 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
         return;
       }
 
-      await updateTheBookmarks(bookmarksToAdd);
+      updateTheBookmarks(bookmarksToAdd);
     }
   }
 
@@ -117,12 +112,12 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
 
         bookmarks = content.tags;
       },
-      onEose: async () => {
+      onEose: () => {
         if (remove) {
-          await removeBookmark(bookmarks);
+          removeBookmark(bookmarks);
         }
         else {
-          await addBookmark(bookmarks);
+          addBookmark(bookmarks);
         }
 
         then && then();

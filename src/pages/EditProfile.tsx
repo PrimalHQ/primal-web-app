@@ -20,8 +20,6 @@ import { useNavigate } from '@solidjs/router';
 import PageTitle from '../components/PageTitle/PageTitle';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
-import { triggerImportEvents } from '../lib/notes';
-import { APP_ID } from '../App';
 import { useAppContext } from '../contexts/AppContext';
 import UploaderBlossom from '../components/Uploader/UploaderBlossom';
 import { accountStore, updateAccountProfile } from '../stores/accountStore';
@@ -254,13 +252,11 @@ const EditProfile: Component = () => {
 
     const { success, note } = await sendProfile({ ...oldProfile, ...metadata});
 
-    if (success) {
-      note && triggerImportEvents([note], `import_profile_${APP_ID}`, () => {
-        note && profile?.actions.updateProfile(note.pubkey);
-        note && updateAccountProfile(note.pubkey);
-        note && navigate(app?.actions.profileLink(note.pubkey) || '/home')
-        toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess))
-      });
+    if (success && note) {
+      profile?.actions.updateProfile(note.pubkey);
+      updateAccountProfile(note.pubkey);
+      navigate(app?.actions.profileLink(note.pubkey) || '/home');
+      toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
       return false;
     }
 

@@ -50,7 +50,6 @@ import PremiumCustomLegend from './PremiumCustomLegend';
 import PremiumOrderHistoryModal from './PremiumOrderHistoryModal';
 import { emptyPaging, PaginationInfo } from '../../megaFeeds';
 import { useToastContext } from '../../components/Toaster/Toaster';
-import { triggerImportEvents } from '../../lib/notes';
 import { useAppContext } from '../../contexts/AppContext';
 import { isPhone } from '../../utils';
 import PremiumManageModal from './PremiumManageModal';
@@ -330,13 +329,11 @@ const Premium: Component = () => {
 
     const { success, note } = await sendProfile({ ...user, ...metaUpdate });
 
-    if (success) {
-      note && triggerImportEvents([note], `import_profile_${APP_ID}`, () => {
-        const prof = JSON.parse(note.content)
-        premiumData.recipientPubkey && updateAccountProfile(premiumData.recipientPubkey);
-        setPremiumData('recipient', () => ({...prof}));
-        toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
-      });
+    if (success && note) {
+      const prof = JSON.parse(note.content)
+      premiumData.recipientPubkey && updateAccountProfile(premiumData.recipientPubkey);
+      setPremiumData('recipient', () => ({...prof}));
+      toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
       return;
     }
   }

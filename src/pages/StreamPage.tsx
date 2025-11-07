@@ -21,10 +21,10 @@ import { APP_ID } from '../App';
 import { readData, refreshSocketListeners, removeSocketListeners, socket } from '../sockets';
 
 import { fetchPeople } from '../megaFeeds';
-import { NostrEvent, NostrEOSE, NostrEvents, NostrEventContent, NostrLiveChat, PrimalUser, NostrUserZaps, PrimalZap, ZapOption, NostrRelaySignedEvent } from '../types/primal';
+import { NostrEvent, NostrEOSE, NostrEvents, NostrEventContent, NostrLiveChat, PrimalUser, NostrUserZaps, PrimalZap, ZapOption, } from '../types/primal';
 
 import { CustomZapInfo, useAppContext } from '../contexts/AppContext';
-import { isHashtag, isUrl, sendEvent, triggerImportEvents } from '../lib/notes';
+import { isHashtag, isUrl, sendEvent } from '../lib/notes';
 import { canUserReceiveZaps, convertToZap, zapStream } from '../lib/zap';
 import { readSecFromStorage } from '../lib/localStore';
 import { useToastContext } from '../components/Toaster/Toaster';
@@ -796,7 +796,6 @@ const StreamPage: Component = () => {
 
     if (success && note) {
       setEvents((es) => [{ ...note }, ...es ]);
-      triggerImportEvents([note], `import_live_message_${APP_ID}`);
       return success;
     }
   }

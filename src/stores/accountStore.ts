@@ -1040,7 +1040,7 @@ export const initAccountStore: AccountStore = {
             updateAccountStore('mutedTags', () => tags);
             updateAccountStore('mutedSince', () => date);
             saveMuted(accountStore.publicKey, muted, date);
-            note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`);
+            // note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`);
           }
 
           then && then(success);
@@ -1062,7 +1062,7 @@ export const initAccountStore: AccountStore = {
           if (success) {
             updateAccountStore('mutedTags', () => tags);
             updateAccountStore('mutedSince', () => date);
-            note && triggerImportEvents([note], `import_mute_list_word_add_${APP_ID}`);
+            // note && triggerImportEvents([note], `import_mute_list_word_add_${APP_ID}`);
           }
 
           then && then(success);
@@ -1116,7 +1116,7 @@ export const initAccountStore: AccountStore = {
             updateAccountStore('mutedTags', () => tags);
             updateAccountStore('mutedSince', () => date);
             saveMuted(accountStore.publicKey, muted, date);
-            note && triggerImportEvents([note], `import_mute_list_remove_${APP_ID}`);
+            // note && triggerImportEvents([note], `import_mute_list_remove_${APP_ID}`);
           }
 
           then && then(success);
@@ -1138,7 +1138,7 @@ export const initAccountStore: AccountStore = {
           if (success) {
             updateAccountStore('mutedTags', () => tags);
             updateAccountStore('mutedSince', () => date);
-            note && triggerImportEvents([note], `import_mute_list_word_remove_${APP_ID}`);
+            // note && triggerImportEvents([note], `import_mute_list_word_remove_${APP_ID}`);
           }
 
           then && then(success);
@@ -1192,7 +1192,7 @@ export const initAccountStore: AccountStore = {
           updateAccountStore('streamMutedTags', () => tags);
           updateAccountStore('streamMutedSince', () => date);
           saveStreamMuted(accountStore.publicKey, muted, date);
-          note && triggerImportEvents([note], `import_stream_mute_list_add_${APP_ID}`);
+          // note && triggerImportEvents([note], `import_stream_mute_list_add_${APP_ID}`);
         }
 
         then && then(success);
@@ -1244,7 +1244,7 @@ export const initAccountStore: AccountStore = {
           updateAccountStore('streamMutedTags', () => tags);
           updateAccountStore('streamMutedSince', () => date);
           saveStreamMuted(accountStore.publicKey, muted, date);
-          note && triggerImportEvents([note], `import_stream_mute_list_remove_${APP_ID}`);
+          // note && triggerImportEvents([note], `import_stream_mute_list_remove_${APP_ID}`);
         }
 
         then && then(success);
@@ -1372,11 +1372,11 @@ export const initAccountStore: AccountStore = {
 
         updateAccountStore('mutelists', (mls) => [ ...mls, { pubkey, content: true, trending: true } ]);
 
-        const { success, note } = await sendFilterlists(accountStore.mutelists, date, '');
+        sendFilterlists(accountStore.mutelists, date, '');
 
-        if (success) {
-          note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`);
-        }
+        // if (success) {
+        //   note && triggerImportEvents([note], `import_mutelists_event_add_${APP_ID}`);
+        // }
 
         unsub();
       },
@@ -1412,11 +1412,11 @@ export const initAccountStore: AccountStore = {
 
         updateAccountStore('mutelists', () => [ ...modified ]);
 
-        const { success, note } = await sendFilterlists(accountStore.mutelists, date, '');
+        await sendFilterlists(accountStore.mutelists, date, '');
 
-        if (success) {
-          note && triggerImportEvents([note], `import_mutelists_event_remove_${APP_ID}`);
-        }
+        // if (success) {
+        //   note && triggerImportEvents([note], `import_mutelists_event_remove_${APP_ID}`);
+        // }
 
         unsub();
       },
@@ -1455,11 +1455,11 @@ export const initAccountStore: AccountStore = {
           () => ({ content, trending }),
         );
 
-        const { success, note } = await sendFilterlists(accountStore.mutelists, date, '');
+        await sendFilterlists(accountStore.mutelists, date, '');
 
-        if (success) {
-          note && triggerImportEvents([note], `import_mutelists_event_update_${APP_ID}`);
-        }
+        // if (success) {
+        //   note && triggerImportEvents([note], `import_mutelists_event_update_${APP_ID}`);
+        // }
 
         unsub();
       },
@@ -1534,11 +1534,11 @@ export const initAccountStore: AccountStore = {
 
         updateAccountStore('allowlist', accountStore.allowlist.length, () => pubkey);
 
-        const { success, note } = await sendAllowList(accountStore.allowlist, date, '');
+        await sendAllowList(accountStore.allowlist, date, '');
 
-        if (success) {
-          note && triggerImportEvents([note], `import_allowlist_event_add_${APP_ID}`)
-        }
+        // if (success) {
+        //   note && triggerImportEvents([note], `import_allowlist_event_add_${APP_ID}`)
+        // }
 
         then && then();
         unsub();
@@ -1576,12 +1576,12 @@ export const initAccountStore: AccountStore = {
 
         updateAccountStore('allowlist', () => [...newList]);
 
-        const { success, note } = await sendAllowList(accountStore.allowlist, date, '');
+        await sendAllowList(accountStore.allowlist, date, '');
 
-        if (success) {
-          note && triggerImportEvents([note], `import_allowlist_event_remove_${APP_ID}`)
-          return;
-        }
+        // if (success) {
+        //   note && triggerImportEvents([note], `import_allowlist_event_remove_${APP_ID}`)
+        //   return;
+        // }
 
         unsub();
       },
@@ -1745,13 +1745,13 @@ export const initAccountStore: AccountStore = {
   }
 
   export const updateBlossomEvent = async (then?: () => void) => {
-    const { success, note } = await sendBlossomEvent(accountStore.blossomServers);
+    sendBlossomEvent(accountStore.blossomServers);
 
-    if (!success || !note) {
+    // if (!success || !note) {
       // toast?.sendWarning('Failed to send server list');
-      return;
-    }
-    triggerImportEvents([note], `import_blossom_list_${APP_ID}`, then);
+      // return;
+    // }
+    // triggerImportEvents([note], `import_blossom_list_${APP_ID}`, then);
   }
 
   export const setLoginType = (type: LoginType) => {

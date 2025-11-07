@@ -10,7 +10,7 @@ import PrimalMenu from '../PrimalMenu/PrimalMenu';
 import { APP_ID } from '../../App';
 import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
-import { broadcastEvent, sendDeleteEvent, triggerImportEvents } from '../../lib/notes';
+import { broadcastEvent, sendDeleteEvent } from '../../lib/notes';
 import { NoteContextMenuInfo, useAppContext } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { nip19 } from 'nostr-tools';
@@ -189,8 +189,6 @@ const NoteContextMenu: Component<{
     );
 
     if (!success || !deleteEvent) return;
-
-    triggerImportEvents([deleteEvent], `delete_import_${APP_ID}`);
 
     props.data.onDelete && props.data.onDelete(noteToDelete.noteId);
     props.onClose();
