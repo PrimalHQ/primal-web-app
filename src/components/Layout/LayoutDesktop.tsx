@@ -10,6 +10,7 @@ import { SendNoteResult } from '../../types/primal';
 import Branding from '../Branding/Branding';
 import LiveNavMenu from '../NavMenu/LiveNavMenu';
 import { accountStore } from '../../stores/accountStore';
+import EventQueueWidget from '../EventQueueWidget/EventQueueWidget';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -92,6 +93,7 @@ const LayoutDesktop: Component<{
                   </div>
 
                   <div class={styles.leftFooter}>
+                    <EventQueueWidget />
                     <Show when={location.pathname !== '/new'}>
                       <ProfileWidget />
                     </Show>

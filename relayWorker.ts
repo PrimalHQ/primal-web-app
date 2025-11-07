@@ -117,8 +117,8 @@ self.addEventListener('message', (e: MessageEvent<WorkerMessageType>) => {
 
     try {
       Promise.any(relayPool.publish(relays, event)).then(() => {
-        self.postMessage({ success: true, note: event });
-        self.postMessage({ type: 'DEQUE_EVENT', event })
+        self.postMessage({ type: 'EVENT_SENT', event });
+        self.postMessage({ type: 'DEQUE_EVENT', event });
       })
     }
     catch (e) {

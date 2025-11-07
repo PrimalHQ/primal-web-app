@@ -396,16 +396,16 @@ export const sendArticleRepost = async (note: PrimalArticle) => {
   return await sendEvent(event);
 }
 
-export const proxyEvent = async (event: NostrEvent, relays: Relay[], relaySettings?: NostrRelays) => {
-  let signedNote: NostrRelaySignedEvent | undefined;
+export const proxyEvent = async (event: NostrRelaySignedEvent, relays: Relay[], relaySettings?: NostrRelays) => {
+  // let signedNote: NostrRelaySignedEvent | undefined;
 
-  try {
-    signedNote = await signEvent(event);
-    if (!signedNote) throw('event_not_signed');
-  } catch (reason) {
-    logError('Failed to send event: ', reason);
-    return { success: false , reasons: [reason]} as SendNoteResult;
-  }
+  // try {
+  //   signedNote = await signEvent(event);
+  //   if (!signedNote) throw('event_not_signed');
+  // } catch (reason) {
+  //   logError('Failed to send event: ', reason);
+  //   return { success: false , reasons: [reason]} as SendNoteResult;
+  // }
 
   // Relay hints from `e` tags
   const hintRelayUrls = event.tags.reduce((acc, t) => {
@@ -428,12 +428,12 @@ export const proxyEvent = async (event: NostrEvent, relays: Relay[], relaySettin
   const publishRelays = new Set<string>([ ...userRelays.map(r => r.url), ...hintRelayUrls]);
 
   const promise = new Promise<boolean>((resolve, reject) => {
-    if (!signedNote) {
+    if (!event) {
       reject("Note not signed");
       return;
     }
 
-    const subId = `publish_event_${signedNote.id}`;
+    const subId = `publish_event_${event.id}`;
 
     const unsub = subsTo(subId, {
       onEvent: () => {
@@ -453,18 +453,18 @@ export const proxyEvent = async (event: NostrEvent, relays: Relay[], relaySettin
     sendMessage(JSON.stringify([
       "REQ",
       subId,
-      { cache: ["broadcast_events", { events: [signedNote], relays: Array.from(publishRelays) }]}
+      { cache: ["broadcast_events", { events: [event], relays: Array.from(publishRelays) }]}
     ]));
   });
 
   try {
     await Promise.race([promise]);
 
-    return { success: true, note: signedNote } as SendNoteResult;
+    return { success: true, note: event } as SendNoteResult;
   }
   catch (e) {
     logError('Failed to publish the note: ', e);
-    return { success: false, reasons: [e], note: signedNote} as SendNoteResult;
+    return { success: false, reasons: [e], note: event} as SendNoteResult;
   }
 }
 
@@ -696,24 +696,8 @@ export const broadcastEvent = async (event: NostrRelaySignedEvent) => {
   return { success: false }
 };
 
-export const sendEvent = async (event: NostrEvent) => {
-  const relays = accountStore.activeRelays;
-  const relaySettings = accountStore.relaySettings;
-  const shouldProxy = accountStore.proxyThroughPrimal;
-
-  if (shouldProxy) {
-    return await proxyEvent(event, relays, relaySettings);
-  }
-
-  let signedNote: NostrRelaySignedEvent | undefined;
-
-  try {
-    signedNote = await signEvent(event);
-    if (!signedNote) throw('event_not_signed');
-  } catch (reason) {
-    logError('Failed to send event: ', reason);
-    return { success: false , reasons: [reason]} as SendNoteResult;
-  }
+export const sendSignedEvent = (event: NostrRelaySignedEvent) => {
+  const relays = [...accountStore.activeRelays];
 
   // Relay hints fromm `e` tags
   const hintRelayUrls = event.tags.reduce((acc, t) => {
@@ -730,14 +714,33 @@ export const sendEvent = async (event: NostrEvent) => {
   }, []);
 
   const allRelays = [
-    ...accountStore.activeRelays.map(r => r),
+    ...relays.map(r => r),
     ...hintRelayUrls,
   ];
 
-  relayWorker.onmessage = (e) => {
+  relayWorker.postMessage({type: 'SEND_EVENT', eventData: { event, relays: allRelays }});
+}
+
+export const sendEvent = async (event: NostrEvent) => {
+  const relays = accountStore.activeRelays;
+  const relaySettings = accountStore.relaySettings;
+  const shouldProxy = accountStore.proxyThroughPrimal;
+
+  let signedNote: NostrRelaySignedEvent | undefined;
+
+  try {
+    signedNote = await signEvent(event);
+    if (!signedNote) throw('event_not_signed');
+  } catch (reason) {
+    logError('Failed to send event: ', reason);
+    return { success: false , reasons: [reason]} as SendNoteResult;
   }
 
-  relayWorker.postMessage({type: 'SEND_EVENT', eventData: { event: signedNote, relays: allRelays }});
+  if (shouldProxy) {
+    return await proxyEvent(signedNote, relays, relaySettings);
+  }
+
+  sendSignedEvent(signedNote);
 
   return { success: true, note: signedNote } as SendNoteResult;
 }

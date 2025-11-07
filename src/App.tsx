@@ -21,7 +21,8 @@ import 'hls-video-element';
 import 'videojs-video-element';
 import { nip46 } from './lib/nTools';
 import { generateAppKeys } from './lib/PrimalNip46';
-import { accountStore, dequeEvent, enqueEvent } from './stores/accountStore';
+import { accountStore, dequeEvent, enqueEvent, startEventQueueMonitor } from './stores/accountStore';
+import { triggerImportEvents } from './lib/notes';
 
 
 export const version = import.meta.env.PRIMAL_VERSION;
@@ -57,7 +58,7 @@ const App: Component = () => {
 
   createEffect(() => {
     console.log('EVENT QUEUE: ', accountStore.eventQueue.length);
-  })
+  });
 
   const initRelayWorker = () => {
     relayWorker.addEventListener('message', (e: MessageEvent) => {
@@ -65,10 +66,15 @@ const App: Component = () => {
 
       if (message.type === 'ENQUE_EVENT' && message.event) {
         enqueEvent(message.event);
+        startEventQueueMonitor();
       }
 
       if (message.type === 'DEQUE_EVENT' && message.event) {
         dequeEvent(message.event);
+      }
+
+      if (message.type === 'EVENT_SENT' && message.event) {
+        triggerImportEvents([message.event], `import_event_${message.event.id}_${APP_ID}`);
       }
     });
 

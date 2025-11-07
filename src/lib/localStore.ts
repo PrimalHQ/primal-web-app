@@ -1,6 +1,6 @@
 import { TopicStat } from "../megaFeeds";
 import { convertToUser, userName } from "../stores/profile";
-import { EmojiOption, MembershipStatus, NostrRelays, NostrStats, PrimalArticleFeed, PrimalDVM, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
+import { EmojiOption, MembershipStatus, NostrRelays, NostrRelaySignedEvent, NostrStats, PrimalArticleFeed, PrimalDVM, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
 import { LegendCustomizationConfig } from "./premium";
 import { StreamingData } from "./streaming";
 
@@ -55,6 +55,7 @@ export type LocalStore = {
   liveAuthors: PrimalUser[] | undefined,
   legendCustomization: LegendCustomizationConfig | undefined,
   membershipStatus: MembershipStatus | undefined,
+  eventQueue: NostrRelaySignedEvent[] | undefined,
 };
 
 export type UploadTime = {
@@ -115,6 +116,7 @@ export const emptyStorage: LocalStore = {
   liveAuthors: undefined,
   legendCustomization: undefined,
   membershipStatus: undefined,
+  eventQueue: undefined,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -903,4 +905,19 @@ export const loadMembershipStatus = (pubkey: string | undefined) => {
   const store = getStorage(pubkey);
 
   return store.membershipStatus;
+};
+
+
+export const loadEventQueue = (pubkey: string) => {
+  const store = getStorage(pubkey);
+
+  return store.eventQueue || [];
+};
+
+export const saveEventQueue = (pubkey: string, eventQueue: NostrRelaySignedEvent[]) => {
+  let store = getStorage(pubkey);
+
+  store.eventQueue = [ ...eventQueue ];
+
+  setStorage(pubkey, store);
 };

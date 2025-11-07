@@ -32,7 +32,7 @@
     position: fixed;
     width: var(--left-col-w);
     display: grid;
-    grid-template-rows: var(--header-height) 1fr 82px;
+    grid-template-rows: var(--header-height) 1fr 106px;
     height: 100%;
     border-right: 1px solid var(--devider);
   }
@@ -65,9 +65,14 @@
   }
 
   .leftFooter {
-    height: 82px;
-    display: flex;
+    height: 106px;
+    display: grid;
+    grid-template-rows: 30px 48px;
+    row-gap: 6px;
+    flex-direction: column;
+    align-items: flex-end;
     justify-content: flex-start;
+    padding-right: 24px;
   }
 }
 

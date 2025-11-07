@@ -61,6 +61,8 @@ import {
   saveMembershipStatus,
   loadMembershipStatus,
   readRelaySettings,
+  saveEventQueue,
+  loadEventQueue,
 } from "../lib/localStore";
 
 import {
@@ -71,6 +73,7 @@ import {
   sendStreamMuteList,
   getReplacableEvent,
   sendBlossomEvent,
+  sendSignedEvent,
 } from "../lib/notes";
 
 import {
@@ -241,17 +244,43 @@ export const initAccountStore: AccountStore = {
 // ACTIONS ---------------------------------------------------------------------
 
   export const enqueEvent = (event: NostrRelaySignedEvent) => {
-    if (accountStore.eventQueue.find(e => e.id === event.id)) return;
+    const pubkey = accountStore.publicKey;
+    if (!pubkey || accountStore.eventQueue.find(e => e.id === event.id)) return;
 
     updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...event }));
+    saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
   export const dequeEvent = (event: NostrRelaySignedEvent) => {
+    const pubkey = accountStore.publicKey;
     const quedEvent = accountStore.eventQueue.find(e => e.id === event.id);
 
-    if (!quedEvent) return;
+    if (!quedEvent || !pubkey) return;
 
     updateAccountStore('eventQueue', (que) => que.filter(e => e.id !== event.id));
+    saveEventQueue(pubkey, accountStore.eventQueue);
+  }
+
+  let monitorInterval = 0;
+
+  export const startEventQueueMonitor = () => {
+    clearInterval(monitorInterval);
+
+    monitorInterval = setInterval(() => {
+      const queue = accountStore.eventQueue;
+
+      if (queue.length === 0) {
+        clearInterval(monitorInterval);
+        return;
+      }
+
+      for (let i=0;i<queue.length;i++) {
+        const event = queue[i];
+
+        sendSignedEvent(unwrap(event));
+      }
+
+    }, 16_000);
   }
 
   export const subscribeTORelayPool = () => {
@@ -1735,6 +1764,18 @@ export const initAccountStore: AccountStore = {
     const storage = getStorage(pubkey);
 
     updateAccountProfile(pubkey);
+
+// ===========================================
+
+    const eventQueue = loadEventQueue(pubkey);
+
+    updateAccountStore('eventQueue', () => [ ...eventQueue]);
+
+    if (eventQueue.length > 0) {
+      startEventQueueMonitor();
+    }
+
+// ===========================================
 
     checkMembershipStatus();
 
