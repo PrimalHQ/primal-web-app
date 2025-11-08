@@ -50,10 +50,10 @@ const App: Component = () => {
   });
 
   createEffect(() => {
-    console.log('RELAY SETTINGS CHANGE: ', { ...accountStore.relaySettings });
+    console.log('RELAY SETTINGS CHANGE: ', Object.entries(accountStore.relaySettings));
   });
   createEffect(() => {
-    console.log('ACTIVE RELAYS CHANGE: ', { ...accountStore.activeRelays });
+    console.log('ACTIVE RELAYS CHANGE: ', [ ...accountStore.activeRelays ]);
   });
 
   createEffect(() => {
