@@ -696,7 +696,7 @@ export const broadcastEvent = async (event: NostrRelaySignedEvent) => {
   return { success: false }
 };
 
-export const sendSignedEvent = (event: NostrRelaySignedEvent) => {
+export const sendSignedEvent = (event: NostrRelaySignedEvent, callbacks?: { success?: () => void, fail?: () => void}) => {
   const relays = [...accountStore.activeRelays];
 
   // Relay hints fromm `e` tags
@@ -717,6 +717,21 @@ export const sendSignedEvent = (event: NostrRelaySignedEvent) => {
     ...relays.map(r => r),
     ...hintRelayUrls,
   ];
+
+  if (callbacks) {
+    const onSuccess = (e: MessageEvent<{ type: string, event: NostrRelaySignedEvent }>) => {
+      const { type, event: rEvent } = e.data;
+
+      if (type === 'EVENT_SENT' && rEvent.id === event.id) {
+        callbacks.success?.();
+        relayWorker.removeEventListener('message', onSuccess);
+        return;
+      }
+    }
+
+    relayWorker.addEventListener('message', onSuccess);
+  }
+
 
   relayWorker.postMessage({type: 'SEND_EVENT', eventData: { event, relays: allRelays }});
 }

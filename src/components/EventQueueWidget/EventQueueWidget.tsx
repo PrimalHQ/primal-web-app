@@ -13,7 +13,6 @@ const EventQueueWidget: Component<{ id?: string, hideName?: boolean }> = (props)
 
   createEffect(on(() => accountStore.eventQueue.length, (len) => {
     if (len === 0) {
-      console.log('QUEUE APPLY 0: ', len);
       clearTimeout(queueTimeout);
       setQueueLength(len);
       return;

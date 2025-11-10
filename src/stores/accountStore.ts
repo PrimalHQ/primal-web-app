@@ -247,6 +247,7 @@ export const initAccountStore: AccountStore = {
     const pubkey = accountStore.publicKey;
     if (!pubkey || accountStore.eventQueue.find(e => e.id === event.id)) return;
 
+    console.log('ENQUEUE EVENT: ', event)
     updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...event }));
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
@@ -257,34 +258,76 @@ export const initAccountStore: AccountStore = {
 
     if (!quedEvent || !pubkey) return;
 
+    console.log('DEQUEUE EVENT: ', event)
     updateAccountStore('eventQueue', (que) => que.filter(e => e.id !== event.id));
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
   let monitorInterval = 0;
 
+  export const processArrayUntilFailure = async <T>(
+    items: T[],
+    sendToAPI: (item: T) => Promise<void>
+  ): Promise<T[]> => {
+    let queue = [...items];
+
+    while (queue.length > 0) {
+      const item = queue[0];
+
+      try {
+        await sendToAPI(item);
+        // Success - remove the item and continue
+        queue.shift();
+      } catch (error) {
+        // Failed - abort iteration
+        logWarning('Failed to send item from queue: ', error);
+        break;
+      }
+    }
+
+    return [ ...queue ];
+  }
+
   export const startEventQueueMonitor = () => {
+    console.log('START MONITORING QUEUE: ')
+    const pubkey = accountStore.publicKey;
+    if (!pubkey) return;
+
     clearInterval(monitorInterval);
 
-    monitorInterval = setInterval(() => {
-      const queue = accountStore.eventQueue;
+    monitorInterval = setInterval(async () => {
+      const queue = unwrap(accountStore.eventQueue);
 
+      console.log('PROCCESS QUEUE: ', queue)
       if (queue.length === 0) {
         clearInterval(monitorInterval);
         return;
       }
 
-      for (let i=0;i<queue.length;i++) {
-        const event = queue[i];
+      const newQueue = await processArrayUntilFailure<NostrRelaySignedEvent>(queue, (item) => {
+        console.log('SENDING EVENT: ', item)
+        return new Promise<void>((resolve, reject) => {
+          let timeout = setTimeout(
+            () => reject('relay_send_timeout'),
+            8_000,
+          );
 
-        sendSignedEvent(unwrap(event));
-      }
+          sendSignedEvent(item, {
+            success: () => {
+              clearTimeout(timeout);
+              resolve();
+            },
+          });
+        });
+      });
+
+
+      console.log('NEW QUEUE: ', newQueue);
+
+      updateAccountStore('eventQueue', () => [ ...newQueue ]);
+      saveEventQueue(pubkey, accountStore.eventQueue);
 
     }, 16_000);
-  }
-
-  export const subscribeTORelayPool = () => {
-    return 'string';
   }
 
   export const suspendRelays = () => {

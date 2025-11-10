@@ -18,7 +18,7 @@ type QueueItem = {
   reject: (reason: any) => void,
 };
 
-class Queue {
+export class Queue {
   #items: QueueItem[];
   #pendingPromise: boolean;
 
