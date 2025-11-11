@@ -31,7 +31,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
     }
   })
 
-  const updateBookmarks = async (bookmarkTags: string[][]) => {
+  const updateBookmarks = async (bookmarkTags: string[][], temp?: boolean) => {
     const bookmarks = bookmarkTags.reduce((acc, t) =>
       supportedBookmarkTypes.includes(t[0]) ? [...acc, t[1]] : [...acc]
     , []);
@@ -39,6 +39,8 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
     const date = Math.floor((new Date()).getTime() / 1000);
 
     updateAccountBookmarks(bookmarks);
+
+    if (temp) return;
     saveBookmarks(accountStore.publicKey, bookmarks);
 
     sendBookmarks(
@@ -48,7 +50,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
     );
   };
 
-  const addBookmark = async (bookmarkTags: string[][]) => {
+  const addBookmark = async (bookmarkTags: string[][], temp?: boolean) => {
     if (!props.note) return;
 
     const aTag = ['a', `${props.note.msg.kind}:${props.note.pubkey}:${(props.note.msg.tags.find(t => t[0] === 'd') || [])[1]}`];
@@ -65,7 +67,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
           confirmLabel: intl.formatMessage(tBookmarks.confirm.confirm),
           abortLabel: intl.formatMessage(tBookmarks.confirm.abort),
           onConfirm: () => {
-            updateBookmarks(bookmarksToAdd);
+            updateBookmarks(bookmarksToAdd, temp);
             app.actions.closeConfirmModal();
           },
           onAbort: app.actions.closeConfirmModal,
@@ -74,11 +76,11 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
         return;
       }
 
-      updateBookmarks(bookmarksToAdd);
+      updateBookmarks(bookmarksToAdd, temp);
     }
   }
 
-  const removeBookmark = async (bookmarks: string[][]) => {
+  const removeBookmark = async (bookmarks: string[][], temp?: boolean) => {
     if (!props.note) return;
 
     const aTag = ['a', `${props.note.msg.kind}:${props.note.pubkey}:${(props.note.msg.tags.find(t => t[0] === 'd') || [])[1]}`];
@@ -95,7 +97,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
           confirmLabel: intl.formatMessage(tBookmarks.confirm.confirmZero),
           abortLabel: intl.formatMessage(tBookmarks.confirm.abortZero),
           onConfirm: () => {
-            updateBookmarks(bookmarksToAdd);
+            updateBookmarks(bookmarksToAdd, temp);
             app.actions.closeConfirmModal();
           },
           onAbort: app.actions.closeConfirmModal,
@@ -104,7 +106,7 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
         return;
       }
 
-      updateBookmarks(bookmarksToAdd);
+      updateBookmarks(bookmarksToAdd, temp);
     }
   }
 
@@ -135,6 +137,22 @@ const BookmarkArticle: Component<{ note: PrimalArticle | undefined, large?: bool
         unsub();
       },
     });
+
+
+    const taggedBookmarks = accountStore.bookmarks.map(b => {
+      if (b.split(':').length === 3) {
+        return ['a', b];
+      }
+
+      return ['e', b];
+    })
+
+    if (remove) {
+      removeBookmark(taggedBookmarks, true);
+    }
+    else {
+      addBookmark(taggedBookmarks, true);
+    }
 
     setBookmarkInProgress(() => true);
     getBookmarks(accountStore.publicKey, `before_bookmark_${APP_ID}`);

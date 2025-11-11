@@ -1,4 +1,4 @@
-import { createStore, Part, unwrap } from "solid-js/store";
+import { createStore, Part, reconcile, unwrap } from "solid-js/store";
 import { APP_ID, relayWorker } from "../App";
 import { getMembershipStatus } from "../lib/membership";
 
@@ -710,8 +710,16 @@ export const initAccountStore: AccountStore = {
       console.log('UPDATE ACTIVE RELAYS: REMOVE ', normalUrl);
       updateAccountStore('activeRelays', () => filtered);
 
-      console.log('UPDATE RELAY SETTINGS: REMOVE ', normalUrl);
-      updateAccountStore('relaySettings', () => ({ [normalUrl]: undefined }));
+      console.log('UPDATE RELAY SETTINGS: REMOVE ', normalUrl, {...accountStore.relaySettings});
+      const newSettings = Object.keys(accountStore.relaySettings).reduce<NostrRelays>(
+        (acc, key) => {
+          const normalKey = utils.normalizeURL(key);
+          if (normalKey === normalUrl) return { ...acc };
+          return { ...acc, [normalKey]: accountStore.relaySettings[normalKey]}
+        },
+        {},
+      );
+      updateAccountStore('relaySettings', reconcile(newSettings));
       relaysExplicitlyClosed.push(normalUrl);
 
       saveRelaySettings(accountStore.publicKey, accountStore.relaySettings);
@@ -924,7 +932,10 @@ export const initAccountStore: AccountStore = {
           const relayInfo = contactData.content;
           const date = Math.floor((new Date()).getTime() / 1000);
           const existingTags = contactData.tags;
-          const following = [...contactData.following, pubkey];
+          let following = [...contactData.following];
+          if (!following.includes(pubkey)) {
+            following.push(pubkey);
+          }
 
           const tags = [ ...existingTags, ['p', pubkey]];
 
@@ -957,6 +968,7 @@ export const initAccountStore: AccountStore = {
       },
     });
 
+    updateAccountStore('following', accountStore.following.length, () => pubkey);
     getProfileContactList(accountStore.publicKey, `before_follow_${APP_ID}`);
 
   }
@@ -1028,6 +1040,8 @@ export const initAccountStore: AccountStore = {
         unsub();
       },
     });
+
+    updateAccountStore('following', (fl) => fl.filter(f => f !== pubkey));
 
     getProfileContactList(accountStore.publicKey, `before_unfollow_${APP_ID}`);
 
@@ -1113,6 +1127,25 @@ export const initAccountStore: AccountStore = {
       },
     });
 
+    if (muteKind === 'user' && !accountStore.muted.includes(pubkey)) {
+      const muted = [...unwrap(accountStore.muted), pubkey];
+      const tags = [ ...unwrap(accountStore.mutedTags), ['p', pubkey]];
+
+      updateAccountStore('muted', () => muted);
+      updateAccountStore('mutedTags', () => tags);
+    }
+
+    if (['word', 'hashtag', 'thread'].includes(muteKind)) {
+      const flags: Record<string, string> = {
+        word: 'word',
+        hashtag: 't',
+        thread: 'e',
+      };
+
+      const tags = [ ...unwrap(accountStore.mutedTags), [flags[muteKind], pubkey]];
+      updateAccountStore('mutedTags', () => tags);
+    }
+
     getProfileMuteList(accountStore.publicKey, subId);
   };
 
@@ -1189,6 +1222,25 @@ export const initAccountStore: AccountStore = {
       }
     });
 
+    if (muteKind === 'user' && accountStore.muted.includes(pubkey)) {
+      const muted = unwrap(accountStore.muted).filter(m => m !== pubkey);
+      const tags = unwrap(accountStore.mutedTags).filter(t => t[0] !== 'p' || t[1] !== pubkey);
+
+      updateAccountStore('muted', () => muted);
+      updateAccountStore('mutedTags', () => tags);
+    }
+
+    if (['word', 'hashtag', 'thread'].includes(muteKind)) {
+      const flags: Record<string, string> = {
+        word: 'word',
+        hashtag: 't',
+        thread: 'e',
+      };
+
+      const tags = unwrap(accountStore.mutedTags).filter(t => t[0] !== flags[muteKind] || t[1] !== pubkey).filter(t => t[1] !== ""); [flags[muteKind], pubkey];
+      updateAccountStore('mutedTags', () => tags);
+    }
+
     getProfileMuteList(accountStore.publicKey, `before_unmute_${APP_ID}`);
   };
 
@@ -1242,6 +1294,14 @@ export const initAccountStore: AccountStore = {
       },
     });
 
+    if (!accountStore.streamMuted.includes(pubkey)) {
+      const muted = [...unwrap(accountStore.streamMuted), pubkey];
+      const tags = [ ...unwrap(accountStore.streamMutedTags), ['p', pubkey]];
+
+      updateAccountStore('streamMuted', () => muted);
+      updateAccountStore('streamMutedTags', () => tags);
+    }
+
     getReplacableEvent(accountStore.publicKey, Kind.StreamMuteList, subId);
   };
 
@@ -1277,7 +1337,6 @@ export const initAccountStore: AccountStore = {
 
         const date = Math.floor((new Date()).getTime() / 1000);
         const muted = unwrap(accountStore.streamMuted).filter(m => m !== pubkey);
-
         const tags = unwrap(accountStore.streamMutedTags).filter(t => t[0] !== 'p' || t[1] !== pubkey);
 
         const { success, note } = await sendStreamMuteList(tags, date, accountStore.streamMutedPrivate);
@@ -1293,6 +1352,14 @@ export const initAccountStore: AccountStore = {
         then && then(success);
       }
     });
+
+    if (accountStore.streamMuted.includes(pubkey)) {
+      const muted = unwrap(accountStore.streamMuted).filter(m => m !== pubkey);
+      const tags = unwrap(accountStore.streamMutedTags).filter(t => t[0] !== 'p' || t[1] !== pubkey);
+
+      updateAccountStore('streamMuted', () => muted);
+      updateAccountStore('streamMutedTags', () => tags);
+    }
 
     getReplacableEvent(accountStore.publicKey, Kind.StreamMuteList, subId);
   };
@@ -1893,6 +1960,10 @@ export const initAccountStore: AccountStore = {
 
     getFilterLists(pubkey);
     getAllowList(pubkey);
+
+// ==================================================
+
+    fetchBookmarks();
 
   }
 

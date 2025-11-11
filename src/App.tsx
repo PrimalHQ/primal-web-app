@@ -21,7 +21,7 @@ import 'hls-video-element';
 import 'videojs-video-element';
 import { nip46 } from './lib/nTools';
 import { generateAppKeys } from './lib/PrimalNip46';
-import { accountStore, dequeEvent, enqueEvent, startEventQueueMonitor } from './stores/accountStore';
+import { accountStore, dequeEvent, enqueEvent, startEventQueueMonitor, updateRelays } from './stores/accountStore';
 import { triggerImportEvents } from './lib/notes';
 
 
@@ -50,7 +50,15 @@ const App: Component = () => {
   });
 
   createEffect(() => {
+    const relays = Object.keys(accountStore.relaySettings);
     console.log('RELAY SETTINGS CHANGE: ', Object.entries(accountStore.relaySettings));
+
+    if (relays.length === 0) {
+      console.log('NO RELAYS, UPDATE THEM!')
+      setTimeout(() => {
+        updateRelays();
+      }, 200);
+    }
   });
   createEffect(() => {
     console.log('ACTIVE RELAYS CHANGE: ', [ ...accountStore.activeRelays ]);

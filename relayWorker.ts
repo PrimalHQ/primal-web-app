@@ -28,10 +28,11 @@ self.addEventListener('message', (e: MessageEvent<WorkerMessageType>) => {
       try {
         relayPool.ensureRelay(url).then(r => self.postMessage({ type: 'RELAY_OPENED', relay: r.url }));
       } catch (e) {
-        setTimeout(() => {
-          console.log('SECOND RELAY OPEN ATTEMPT: ', url);
-          relayPool?.ensureRelay(url).then(r => self.postMessage({ type: 'RELAY_OPENED', relay: r.url }));
-        }, 500)
+        console.log('FAILED TO OPEN RELAY: ', e);
+        // setTimeout(() => {
+        //   console.log('SECOND RELAY OPEN ATTEMPT: ', url);
+        //   relayPool?.ensureRelay(url).then(r => self.postMessage({ type: 'RELAY_OPENED', relay: r.url }));
+        // }, 500)
       }
     }
   }
