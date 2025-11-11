@@ -33,6 +33,7 @@ export type NotificationsContextStore = {
   downloadsCount: number,
   actions: {
     resetNotificationCounter: () => void,
+    calculateDownloadCount: () => void,
   }
 }
 
@@ -212,6 +213,7 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
     ...initialData,
     actions: {
       resetNotificationCounter,
+      calculateDownloadCount,
     },
   });
 

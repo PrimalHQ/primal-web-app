@@ -24,11 +24,13 @@ import { useSettingsContext } from '../contexts/SettingsContext';
 import { isAndroid } from '@kobalte/utils';
 import { isIOS, isPhone } from '../utils';
 import NoteVideo from '../components/ParsedNote/NoteVideo';
+import { useNotificationsContext } from '../contexts/NotificationsContext';
 
 const Downloads: Component = () => {
 
   const intl = useIntl();
   const settings = useSettingsContext();
+  const notification = useNotificationsContext();
 
   const iosRD = () => stringToDate(settings?.mobileReleases.ios.date || '0');
   const iosVersion = () => settings?.mobileReleases.ios.version || '0';
@@ -46,6 +48,8 @@ const Downloads: Component = () => {
     if (today() > andRD()) {
       localStorage.setItem('andDownload', andVersion());
     }
+
+    notification?.actions.calculateDownloadCount();
   });
 
   const displayDate = (dateValue: number) => {
