@@ -56,7 +56,7 @@ const QrCode: Component<{
         margin: 0,
       },
       dotsOptions:{
-        type: "rounded",
+        type: "dots",
         color: 'black',
       },
       cornersSquareOptions: {
@@ -64,7 +64,7 @@ const QrCode: Component<{
         color: 'black',
       },
       cornersDotOptions: {
-        type: 'square',
+        type: 'dot',
         color: 'black',
       },
       backgroundOptions: {
