@@ -253,8 +253,10 @@
     border-radius: 20px;
     padding-block: 0;
     padding-left: 4px;
+    padding-right: 8px;
     margin: 0;
     text-transform: lowercase;
+    gap: 12px;
 
     .avatars {
       display: flex;
@@ -272,7 +274,6 @@
     }
 
     .counter {
-      margin-left: 24px;
     }
   }
 }
