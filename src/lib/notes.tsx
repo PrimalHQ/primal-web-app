@@ -97,6 +97,8 @@ export const isOggVideo = (url: string) => ['.ogg'].some(x => url.includes(x));
 export const isWebmVideo = (url: string) => ['.webm'].some(x => url.includes(x));
 export const is3gppVideo = (url: string) => ['.3gp'].some(x => url.includes(x));
 
+export const isAudio = (url: string) => ['.mp3', '.wav'].some(x => url.includes(x));
+
 export const isYouTube = (url: string) => youtubeRegex.test(url);
 export const isSpotify = (url: string) => spotifyRegex.test(url);
 export const isTwitch = (url: string) => twitchRegex.test(url);
@@ -150,6 +152,10 @@ export const urlify = (
 
       if (is3gppVideo(url)) {
         return `<video class="w-max" controls><source src="${url}" type="video/3gpp"></video>`;
+      }
+
+      if (isAudio(url)) {
+        return `<audio class="mtop-12" controls src="${url}"></audio>`;
       }
 
       if (isYouTube(url)) {

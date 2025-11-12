@@ -6,6 +6,7 @@ import {
   is3gppVideo,
   isAddrMention,
   isAppleMusic,
+  isAudio,
   isCustomEmoji,
   isHashtag,
   isImage,
@@ -310,7 +311,7 @@ const ParsedNote: Component<{
     }
 
     if (token === '__SP__') {
-      if (!['image', 'video', 'LB'].includes(lastSignificantContent)) {
+      if (!['image', 'video', 'audio', 'LB'].includes(lastSignificantContent)) {
         updateContent(content, 'text', ' ');
       }
       return;
@@ -390,6 +391,14 @@ const ParsedNote: Component<{
           isAfterEmbed = true;
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/3gpp'});
+          return;
+        }
+
+        if (isAudio(token)) {
+          removeLinebreaks('audio');
+          isAfterEmbed = true;
+          lastSignificantContent = 'audio';
+          updateContent(content, 'audio', token);
           return;
         }
 
@@ -731,6 +740,29 @@ const ParsedNote: Component<{
         }}
       </For>
     </div>
+  }
+
+
+  const renderAudio = (item: NoteContent, index?: number) => {
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
+
+    return <For each={item.tokens}>{
+      (token) => {
+        if (isNoteTooLong()) return;
+
+        const audio = <div>
+            <audio
+              class={styles.audio}
+              controls={true}
+              src={token}
+            />
+          </div>
+
+        return audio;
+      }
+    }</For>;
   }
 
   const renderVideo = (item: NoteContent, index?: number) => {
@@ -1951,6 +1983,7 @@ const ParsedNote: Component<{
       linebreak: renderLinebreak,
       text: renderText,
       image: renderImage,
+      audio: renderAudio,
       video: renderVideo,
       youtube: renderYouTube,
       spotify: renderSpotify,
