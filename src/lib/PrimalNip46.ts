@@ -3,6 +3,7 @@ import { verifyEvent, nip46, getPublicKey, generatePrivateKey } from '../lib/nTo
 import { NostrExtension, NostrRelayEvent, NostrRelays, NostrRelaySignedEvent } from '../types/primal';
 import { uuidv4 } from '../utils';
 import { logWarning } from './logger';
+import primalLogo from '../assets/icons/logo_fire.svg';
 
 export let appSigner: nip46.BunkerSigner | undefined;
 
@@ -46,8 +47,10 @@ export const generateClientConnectionUrl = (): string => {
     nip46.createNostrConnectURI({
       clientPubkey,
       relays: ['wss://relay.primal.net'],
-      secret: `sec-${uuidv4()}`, // A secret to verify the bunker's response
-      name: `Primal_Web_App`
+      secret: `sec-${uuidv4()}`,
+      name: 'Primal Web App',
+      url: location.origin,
+      image: `${location.origin}${primalLogo}`,
     });
 
   localStorage.setItem('clientConnectionUrl', n);
