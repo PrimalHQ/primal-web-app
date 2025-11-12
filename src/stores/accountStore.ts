@@ -958,7 +958,7 @@ export const initAccountStore: AccountStore = {
         }
       },
       onEose: () => {
-        if (accountStore.following.length === 0) {
+        if (accountStore.following.filter(f => f !== pubkey).length === 0) {
           const date = Math.floor((new Date()).getTime() / 1000);
           const tags = [['p', pubkey]];
           resolveContacts(pubkey, [pubkey], date, tags, accountStore.activeRelays[0], cb);

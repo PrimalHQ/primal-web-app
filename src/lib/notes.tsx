@@ -474,7 +474,7 @@ export const proxyEvent = async (event: NostrRelaySignedEvent, relays: Relay[], 
   }
 }
 
-export const sendNote = async (text: string, tags: string[][]) => {
+export const sendNote = (text: string, tags: string[][]) => {
   const event = {
     content: text,
     kind: Kind.Text,
@@ -482,7 +482,18 @@ export const sendNote = async (text: string, tags: string[][]) => {
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event);
+  return new Promise<SendNoteResult>((resolve) => {
+    sendEvent(event, {
+      success: (noteEvent) => {
+        if (noteEvent) {
+          resolve({ success: true, note: noteEvent });
+          return;
+        }
+
+        resolve({ success: false, reasons: ['failed-to-publish']});
+      }
+    });
+  })
 }
 
 export const sendArticle = async (articleData: ArticleEdit, tags: string[][]) => {
@@ -702,7 +713,7 @@ export const broadcastEvent = async (event: NostrRelaySignedEvent) => {
   return { success: false }
 };
 
-export const sendSignedEvent = (event: NostrRelaySignedEvent, callbacks?: { success?: () => void, fail?: () => void}) => {
+export const sendSignedEvent = (event: NostrRelaySignedEvent, callbacks?: { success?: (event?: NostrRelaySignedEvent) => void, fail?: (event?: NostrRelaySignedEvent) => void}) => {
   const relays = [...accountStore.activeRelays];
 
   // Relay hints fromm `e` tags
@@ -729,7 +740,7 @@ export const sendSignedEvent = (event: NostrRelaySignedEvent, callbacks?: { succ
       const { type, event: rEvent } = e.data;
 
       if (type === 'EVENT_SENT' && rEvent.id === event.id) {
-        callbacks.success?.();
+        callbacks.success?.(rEvent);
         relayWorker.removeEventListener('message', onSuccess);
         return;
       }
@@ -742,7 +753,7 @@ export const sendSignedEvent = (event: NostrRelaySignedEvent, callbacks?: { succ
   relayWorker.postMessage({type: 'SEND_EVENT', eventData: { event, relays: allRelays }});
 }
 
-export const sendEvent = async (event: NostrEvent) => {
+export const sendEvent = async (event: NostrEvent, callbacks?: { success?: (event?: NostrRelaySignedEvent) => void, fail?: (event?: NostrRelaySignedEvent) => void}) => {
   const relays = accountStore.activeRelays;
   const relaySettings = accountStore.relaySettings;
   const shouldProxy = accountStore.proxyThroughPrimal;
@@ -761,7 +772,7 @@ export const sendEvent = async (event: NostrEvent) => {
     return await proxyEvent(signedNote, relays, relaySettings);
   }
 
-  sendSignedEvent(signedNote);
+  sendSignedEvent(signedNote, callbacks);
 
   return { success: true, note: signedNote } as SendNoteResult;
 }
