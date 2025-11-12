@@ -85,7 +85,7 @@ const NoteFooter: Component<{
     } :
     {
       action: () => doRepost(),
-      label: 'Repost Note',
+      label: 'Repost',
       icon: 'feed_repost',
     };
   }
@@ -94,7 +94,7 @@ const NoteFooter: Component<{
     repostItem(),
     {
       action: () => doQuote(),
-      label: 'Quote Note',
+      label: 'Quote',
       icon: 'quote',
     },
   ];
@@ -483,7 +483,6 @@ const NoteFooter: Component<{
         id={`btn_repost_${props.note.post.id}`}
         class={`${styles.stat} ${props.state.reposted ? styles.highlighted : ''}`}
         onClick={showRepostMenu}
-        title={props.state.reposts.toLocaleString()}
       >
         <div
           class={`${buttonTypeClasses.repost}`}

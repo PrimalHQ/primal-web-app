@@ -64,12 +64,12 @@ const ArticleFooter: Component<{
   const repostMenuItems: MenuItem[] = [
     {
       action: () => doRepost(),
-      label: 'Repost Note',
+      label: 'Repost',
       icon: 'feed_repost',
     },
     {
       action: () => doQuote(),
-      label: 'Quote Note',
+      label: 'Quote',
       icon: 'quote',
     },
   ];

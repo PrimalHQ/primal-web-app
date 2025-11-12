@@ -575,7 +575,7 @@ export const actions = {
     },
     repostNote: {
       id: 'actions.noteContext.repostNote',
-      defaultMessage: 'Repost Note',
+      defaultMessage: 'Repost',
       description: 'Label for reposting note from context menu',
     },
     requestDelete: {
@@ -590,7 +590,7 @@ export const actions = {
     },
     quoteNote: {
       id: 'actions.noteContext.quoteNote',
-      defaultMessage: 'Quote Note',
+      defaultMessage: 'Quote',
       description: 'Label for quoting note from context menu',
     },
   },
