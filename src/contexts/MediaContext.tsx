@@ -18,6 +18,11 @@ export type MediaStats = {
   other: number,
 }
 
+export type HLSConfig = {
+  hls_url: string,
+  provider: string,
+}
+
 export type MediaContextStore = {
   windowSize: { w: number, h: number },
   media: Record<string, MediaVariant[]>,
@@ -25,6 +30,7 @@ export type MediaContextStore = {
   mediaStats: MediaStats,
   liveEvents: StreamingData[],
   videoAutoplay: string[],
+  hlsVideos: Record<string, HLSConfig[]>
   actions: {
     getMedia: (url: string , size?: MediaSize, animated?: boolean) => MediaVariant | undefined,
     getMediaUrl: (url: string | undefined, size?: MediaSize, animated?: boolean) => string | undefined,
@@ -33,6 +39,7 @@ export type MediaContextStore = {
     getStream: (pubkey: string, onlyLive?: boolean) => StreamingData,
     isStreaming: (pubkey: string) => boolean,
     removeAutoplayVideo: (videoId: string) => void,
+    findHLS: (url: string) => string,
   },
 }
 
@@ -47,6 +54,7 @@ const initialData = {
   windowSize: { w: window.innerWidth, h: window.innerHeight },
   liveEvents: [],
   videoAutoplay: [],
+  hlsVideos: {},
 };
 
 export const MediaContext = createContext<MediaContextStore>();
@@ -138,6 +146,18 @@ export const MediaProvider = (props: { children: JSXElement }) => {
     updateStore('videoAutoplay', (ids) => ids.filter(id => id !== videoId))
   }
 
+  const findHLS = (url: string) => {
+    const provider = localStorage.getItem('hlsProvider');
+
+    if (!provider) return url;
+
+    const config = store.hlsVideos[`${url}`]?.find(c => {
+      return c.provider === provider
+    });
+
+    return config ? config.hls_url : url;
+  }
+
 // SOCKET HANDLERS ------------------------------
 
   const handleMediaEvent = (content: NostrEventContent) => {
@@ -195,6 +215,25 @@ export const MediaProvider = (props: { children: JSXElement }) => {
       updateStore('liveEvents', index, () => ({ ...streamData }));
       return;
     }
+
+    // @ts-ignore
+    if (content.kind === Kind.HLSVideo) {
+      // @ts-ignore
+      const data: Record<string, HLSConfig[]> | undefined = JSON.parse(content.content);
+
+      if (!data) return;
+
+      const urls = Object.keys(data);
+
+      for (let i=0;i<urls.length; i++) {
+        const url = urls[i];
+        if (url==='event_id') continue;
+
+        updateStore('hlsVideos', () => ({[url]: data[url]}))
+      }
+
+    }
+
   }
 
   const onMessage = async (event: MessageEvent) => {
@@ -267,6 +306,7 @@ export const MediaProvider = (props: { children: JSXElement }) => {
       getStream,
       isStreaming,
       removeAutoplayVideo,
+      findHLS,
     },
   });
 

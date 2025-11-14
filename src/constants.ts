@@ -14,6 +14,7 @@ export const emptyPage: FeedPage = {
   postStats: {},
   noteActions: {},
   topZaps: {},
+  streams: [],
 }
 
 export const nostrHighlights ='9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a';
@@ -188,6 +189,8 @@ export enum Kind  {
   LongFormShell = 10_030_023,
 
   LiveChatReload = 11_000_001,
+
+  HLSVideo = 10_000_178,
 }
 
 export const relayConnectingTimeout = 1000;

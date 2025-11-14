@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal, Match, onCleanup, onMount, Show, Switch } from "solid-js";
-import { useMediaContext } from "../../contexts/MediaContext";
+import { HLSConfig, useMediaContext } from "../../contexts/MediaContext";
 import { determineOrient, uuidv4 } from "../../utils";
 import Hls from 'hls.js';
 
@@ -31,6 +31,19 @@ const NoteVideo: Component<{
   const [isMediaLoaded, setIsMediaLoaded] = createSignal(false);
 
   const uuid = uuidv4();
+
+  const [src, setSrc] = createSignal(props.src || '');
+
+  createEffect(() => {
+    const originalSrc = props.src;
+
+    if (!media?.hlsVideos[originalSrc]) return;
+
+    const hlsUrl = media?.actions.findHLS(originalSrc);
+
+    setSrc(hlsUrl || originalSrc);
+
+  });
 
   const observer = new IntersectionObserver(entries => {
     entries.forEach((entry) => {
@@ -133,14 +146,14 @@ const NoteVideo: Component<{
   })
 
   const isHls = () => {
-    return props.src.endsWith(".m3u8");
+    return src().endsWith(".m3u8");
   }
 
   const [openContextMenu, setOpenContextMenu] = createSignal(false);
 
   const triggerContextMenu = () => {
     app?.actions.openNoteVideoContextMenu(
-      props.src,
+      src(),
       streamContextMenu?.getBoundingClientRect(),
       downloadVideo,
     );
@@ -165,11 +178,11 @@ const NoteVideo: Component<{
   }
 
   const downloadVideo = async () => {
-    const sections = props.src.split('/');
+    const sections = src().split('/');
     const filename = sections[sections.length-1];
 
     const a = document.createElement('a');
-    a.href = props.src;
+    a.href = src();
     a.target = '__blank';
     a.download = filename;
     a.click();
@@ -183,7 +196,7 @@ const NoteVideo: Component<{
       <Switch
         fallback={<div class={styles.videoPlaceholder}></div>}
       >
-        <Match when={props.src}>
+        <Match when={src()}>
           <Show when={!checkMediaLoaded()}>
             <div class={styles.videoPlaceholder}></div>
           </Show>
@@ -204,12 +217,12 @@ const NoteVideo: Component<{
                   playsinline={true}
                   data-uuid={uuid}
                 >
-                  <source src={props.src} type={props.type} />
+                  <source src={src()} type={props.type} />
                 </video>
               }
             >
               <hls-video
-                src={props.src}
+                src={src()}
                 slot="media"
                 crossorigin
                 autoplay
