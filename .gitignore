@@ -9,3 +9,7 @@ dist
 
 # Development notes
 .dev-notes-*.md
+
+# Claude configuration
+.claude/
+CLAUDE.md
