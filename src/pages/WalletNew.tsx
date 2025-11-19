@@ -10,8 +10,11 @@ import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import { TextField } from '@kobalte/core/text-field';
 import AdvancedSearchDialog from '../components/AdvancedSearch/AdvancedSearchDialog';
 import SparkPaymentsList from '../components/SparkPaymentsList/SparkPaymentsList';
+import CurrencyDropdown from '../components/CurrencyDropdown/CurrencyDropdown';
 import { generateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
+import { useCurrencyConversion } from '../hooks/useCurrencyConversion';
+import { formatFiatAmount } from '../lib/currency';
 
 import styles from './Wallet.module.scss';
 
@@ -20,6 +23,12 @@ const WalletContent: Component = () => {
   const account = useAccountContext();
   const toast = useToastContext();
   const sparkWallet = useSparkWallet();
+
+  // Currency conversion
+  const { fiatValue, isLoading: isLoadingConversion } = useCurrencyConversion(
+    () => sparkWallet.store.balance,
+    () => sparkWallet.store.displayCurrency
+  );
 
   const [mnemonic, setMnemonic] = createSignal('');
   const [showMnemonic, setShowMnemonic] = createSignal(false);
@@ -334,28 +343,77 @@ const WalletContent: Component = () => {
             {/* Balance Section */}
             <div class={styles.balanceCard}>
               <div class={styles.balanceHeader}>
-                <div class={styles.balanceLabel}>Total Balance</div>
-                <Show when={account?.activeWalletType === 'breez'}>
-                  <div class={styles.activeBadge}>
-                    <div class={styles.checkCircleIcon}></div>
-                    <span>Active Wallet</span>
-                  </div>
-                </Show>
+                <div class={styles.balanceLabel}>Balance</div>
+                <div class={styles.balanceControls}>
+                  <CurrencyDropdown
+                    value={sparkWallet.store.displayCurrency}
+                    onChange={(currency) => sparkWallet.actions.setDisplayCurrency(currency)}
+                  />
+                  <button
+                    class={styles.syncButton}
+                    onClick={handleRefreshBalance}
+                    type="button"
+                  >
+                    Sync
+                  </button>
+                </div>
               </div>
-              <div class={styles.balanceAmount}>
-                {sparkWallet.store.balance?.toLocaleString() || 0}
-                <span class={styles.balanceUnit}>sats</span>
+              <div class={styles.balanceDisplay}>
+                <div class={styles.balanceAmount}>
+                  <Show
+                    when={!sparkWallet.store.isBalanceHidden}
+                    fallback={<span>••••••</span>}
+                  >
+                    <Show
+                      when={sparkWallet.store.displayCurrency === 'SATS'}
+                      fallback={
+                        <Show
+                          when={!isLoadingConversion() && fiatValue() !== null}
+                          fallback={<span>Loading...</span>}
+                        >
+                          <span>
+                            {formatFiatAmount(fiatValue()!, sparkWallet.store.displayCurrency)}
+                            <span class={styles.balanceUnit}>
+                              {sparkWallet.store.balance.toLocaleString()} sats
+                            </span>
+                          </span>
+                        </Show>
+                      }
+                    >
+                      {sparkWallet.store.balance.toLocaleString()}
+                      <span class={styles.balanceUnit}>sats</span>
+                    </Show>
+                  </Show>
+                </div>
+                <button
+                  class={styles.balanceToggle}
+                  onClick={() => sparkWallet.actions.toggleBalanceVisibility()}
+                  type="button"
+                  title={sparkWallet.store.isBalanceHidden ? "Show balance" : "Hide balance"}
+                >
+                  <Show
+                    when={sparkWallet.store.isBalanceHidden}
+                    fallback={
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                        <line x1="1" y1="1" x2="23" y2="23"/>
+                      </svg>
+                    }
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </Show>
+                </button>
               </div>
-              <div class={styles.balanceActions}>
-                <ButtonPrimary onClick={handleRefreshBalance}>
-                  Refresh Balance
-                </ButtonPrimary>
-                <Show when={account?.activeWalletType !== 'breez'}>
+              <Show when={account?.activeWalletType !== 'breez'}>
+                <div class={styles.balanceActions}>
                   <ButtonSecondary onClick={handleSetAsActive}>
                     Set as Active
                   </ButtonSecondary>
-                </Show>
-              </div>
+                </div>
+              </Show>
             </div>
 
             {/* Tabs */}

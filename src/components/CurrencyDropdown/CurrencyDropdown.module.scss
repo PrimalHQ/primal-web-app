@@ -1,0 +1,108 @@
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.chevron {
+  width: 12px;
+  height: 12px;
+  opacity: 0.6;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 998;
+}
+
+.menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background-color: var(--background-input);
+  border: 1px solid var(--devider);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 400px;
+  overflow-y: auto;
+  min-width: 200px;
+  z-index: 999;
+}
+
+.menuSection {
+  padding: 8px 0;
+}
+
+.menuLabel {
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  &Active {
+    background-color: var(--accent-subtle);
+    color: var(--accent);
+  }
+}
+
+.currencySymbol {
+  font-family: monospace;
+  font-size: 12px;
+  min-width: 24px;
+  color: var(--text-secondary);
+}
+
+.menuDivider {
+  height: 1px;
+  background-color: var(--devider);
+  margin: 4px 0;
+}
+
+.currencyGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+}
