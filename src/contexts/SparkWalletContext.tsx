@@ -42,6 +42,10 @@ export type SparkWalletStore = {
   // Payment history
   payments: BreezPaymentInfo[];
   paymentsLoading: boolean;
+
+  // Display preferences
+  displayCurrency: string; // SATS, USD, EUR, etc.
+  isBalanceHidden: boolean;
 };
 
 export type SparkWalletActions = {
@@ -67,6 +71,10 @@ export type SparkWalletActions = {
 
   // Configuration
   updateConfig: (config: Partial<SparkWalletConfig>) => void;
+
+  // Display preferences
+  setDisplayCurrency: (currency: string) => void;
+  toggleBalanceVisibility: () => void;
 };
 
 export type SparkWalletContextType = {
@@ -78,6 +86,24 @@ const SparkWalletContext = createContext<SparkWalletContextType>();
 
 export const SparkWalletProvider: ParentComponent = (props) => {
   const account = useAccountContext();
+
+  // Load preferences from localStorage
+  const loadDisplayCurrency = () => {
+    try {
+      return localStorage.getItem('spark_display_currency') || 'SATS';
+    } catch {
+      return 'SATS';
+    }
+  };
+
+  const loadBalanceVisibility = () => {
+    try {
+      const stored = localStorage.getItem('spark_balance_hidden');
+      return stored === 'true';
+    } catch {
+      return false;
+    }
+  };
 
   // Initialize store
   const [store, setStore] = createStore<SparkWalletStore>({
@@ -91,6 +117,8 @@ export const SparkWalletProvider: ParentComponent = (props) => {
     hasBackup: false,
     payments: [],
     paymentsLoading: false,
+    displayCurrency: loadDisplayCurrency(),
+    isBalanceHidden: loadBalanceVisibility(),
   });
 
   // Event listener ID for cleanup
@@ -563,6 +591,30 @@ export const SparkWalletProvider: ParentComponent = (props) => {
     }
   });
 
+  /**
+   * Set display currency preference
+   */
+  const setDisplayCurrency = (currency: string) => {
+    setStore('displayCurrency', currency);
+    try {
+      localStorage.setItem('spark_display_currency', currency);
+    } catch (error) {
+      logError('[SparkWallet] Failed to save currency preference:', error);
+    }
+  };
+
+  /**
+   * Toggle balance visibility
+   */
+  const toggleBalanceVisibility = () => {
+    setStore('isBalanceHidden', !store.isBalanceHidden);
+    try {
+      localStorage.setItem('spark_balance_hidden', String(!store.isBalanceHidden));
+    } catch (error) {
+      logError('[SparkWallet] Failed to save balance visibility preference:', error);
+    }
+  };
+
   // Actions object
   const actions: SparkWalletActions = {
     connect,
@@ -578,6 +630,8 @@ export const SparkWalletProvider: ParentComponent = (props) => {
     syncBackupFromRelays,
     checkBackupStatus,
     updateConfig,
+    setDisplayCurrency,
+    toggleBalanceVisibility,
   };
 
   return (

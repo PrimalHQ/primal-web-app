@@ -27,6 +27,7 @@
     "@breeztech/breez-sdk-spark": "^0.4.0-rc2",
     "@cashu/cashu-ts": "0.9.0",
     "@cookbook/solid-intl": "0.1.2",
+    "@getalby/lightning-tools": "^6.0.0",
     "@jukben/emoji-search": "3.0.0",
     "@kobalte/core": "0.13.9",
     "@milkdown/core": "7.3.6",
