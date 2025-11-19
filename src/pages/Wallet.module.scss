@@ -1,0 +1,520 @@
+.walletPage {
+  background-color: var(--background-card);
+  min-height: 100vh;
+  padding-bottom: 20px;
+}
+
+.walletContent {
+  padding-inline: 20px;
+  padding-top: 28px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+// Empty state
+.walletEmpty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.emptyIcon {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.lightningIconLarge {
+  width: 80px;
+  height: 80px;
+  background-color: var(--accent);
+  -webkit-mask: url(../assets/icons/lightning.svg) no-repeat center / contain;
+  mask: url(../assets/icons/lightning.svg) no-repeat center / contain;
+}
+
+.emptyLogos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.breezLogo {
+  height: 32px;
+  width: auto;
+}
+
+.sparkLogo {
+  height: 40px;
+  width: auto;
+}
+
+.emptyTitle {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 28px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.emptyDescription {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+  max-width: 400px;
+  margin-inline: auto;
+}
+
+.emptyActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+// Connected state
+.walletConnected {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// Balance card
+.balanceCard {
+  background-color: transparent;
+  border-bottom: 1px solid var(--devider);
+  padding: 24px 0;
+}
+
+.balanceHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.balanceLabel {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.activeBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background-color: var(--accent-subtle);
+  border: 1px solid var(--accent);
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.checkCircleIcon {
+  width: 14px;
+  height: 14px;
+  background-color: var(--accent);
+  -webkit-mask: url(../assets/icons/check_circle.svg) no-repeat center / contain;
+  mask: url(../assets/icons/check_circle.svg) no-repeat center / contain;
+}
+
+.balanceAmount {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 56px;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+}
+
+.balanceUnit {
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-left: 8px;
+}
+
+.balanceActions {
+  display: flex;
+  gap: 12px;
+}
+
+// Quick actions
+.quickActions {
+  background-color: transparent;
+  border-bottom: 1px solid var(--devider);
+  padding: 24px 0;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.actionButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  background-color: var(--background-card);
+  border: 1px solid var(--devider);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background-color: var(--background-card-hover);
+    border-color: var(--accent);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  span {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+}
+
+.actionIcon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: var(--accent-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.receiveIcon {
+  width: 24px;
+  height: 24px;
+  background-color: var(--accent);
+  -webkit-mask: url(../assets/icons/qr_lightning.svg) no-repeat center / contain;
+  mask: url(../assets/icons/qr_lightning.svg) no-repeat center / contain;
+}
+
+.sendIcon {
+  width: 24px;
+  height: 24px;
+  background-color: var(--accent);
+  -webkit-mask: url(../assets/icons/lightning.svg) no-repeat center / contain;
+  mask: url(../assets/icons/lightning.svg) no-repeat center / contain;
+}
+
+.actionNote {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--text-tertiary);
+  text-align: center;
+  font-style: italic;
+}
+
+// Transactions
+.transactions {
+  background-color: transparent;
+  border-bottom: 1px solid var(--devider);
+  padding: 24px 0;
+}
+
+.transactionsList {
+  min-height: 120px;
+}
+
+.emptyTransactions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  text-align: center;
+}
+
+.emptyTransactionsIcon {
+  width: 48px;
+  height: 48px;
+  background-color: var(--text-tertiary);
+  -webkit-mask: url(../assets/icons/nothing.svg) no-repeat center / contain;
+  mask: url(../assets/icons/nothing.svg) no-repeat center / contain;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.emptyTransactionsText {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-tertiary);
+}
+
+// Wallet settings
+.walletSettings {
+  background-color: transparent;
+  border-bottom: 1px solid var(--devider);
+  padding: 24px 0;
+}
+
+.settingsList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settingItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background-color: var(--background-card);
+  border: 1px solid var(--devider);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: var(--background-card-hover);
+    border-color: var(--accent-light);
+  }
+}
+
+.settingInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settingLabel {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--text-primary);
+}
+
+.settingLabelDanger {
+  color: var(--error-color);
+}
+
+.settingDesc {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--text-secondary);
+}
+
+.settingArrow {
+  width: 20px;
+  height: 20px;
+  background-color: var(--text-tertiary);
+  -webkit-mask: url(../assets/icons/chevron_right.svg) no-repeat center / contain;
+  mask: url(../assets/icons/chevron_right.svg) no-repeat center / contain;
+}
+
+// Dialog styles
+.dialogContent {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dialogDescription {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-secondary);
+}
+
+.mnemonicInput {
+  width: 100%;
+
+  textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--devider);
+    border-radius: 8px;
+    background-color: var(--background-input);
+    color: var(--text-primary);
+    font-family: monospace;
+    font-size: 14px;
+    resize: vertical;
+  }
+}
+
+.checkboxContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  label {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+}
+
+.dialogWarning {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--warning-color);
+  padding: 12px;
+  background-color: rgba(var(--warning-rgb), 0.1);
+  border-radius: 8px;
+}
+
+.dialogSuccess {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--success-color, #00c800);
+  padding: 12px;
+  background: var(--success-bg, rgba(0, 200, 0, 0.1));
+  border-radius: 8px;
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--devider);
+}
+
+// Tabs
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background-color: var(--background-input);
+  border: 1px solid var(--devider);
+  border-radius: 12px;
+  margin-bottom: 24px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--text-secondary);
+  background-color: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: var(--text-primary);
+    background-color: var(--background-card-hover);
+  }
+}
+
+.tabActive {
+  color: var(--text-primary);
+  background-color: var(--background-card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+// Backup section
+.backupSection {
+  background-color: transparent;
+  border-bottom: 1px solid var(--devider);
+  padding: 24px 0;
+}
+
+.backupInfo {
+  margin-top: 12px;
+}
+
+.backupStatus {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.backupTime {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.backupActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+// Wallet options (Create/Import)
+.walletOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+// File upload section
+.fileUploadSection {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.hiddenFileInput {
+  display: none;
+}
+
+.orDivider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 20px 0;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--devider);
+  }
+
+  span {
+    padding: 0 16px;
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 500;
+  }
+}

@@ -12,6 +12,53 @@ import { StreamingData } from "./streaming";
 
 export let lastZapError: string = "";
 
+export const zapOverBreez = async (invoice: string, recipientPubkey?: string): Promise<boolean> => {
+  try {
+    const { breezWallet } = await import('./breezWalletService');
+
+    // Check if wallet is connected
+    if (!breezWallet.isConnected()) {
+      logError('Breez wallet not connected');
+      lastZapError = 'Breez wallet not connected';
+      return false;
+    }
+
+    // Send payment via Breez SDK
+    const paymentInfo = await breezWallet.sendPayment(invoice);
+
+    // Publish zap receipt if payment succeeded
+    if (paymentInfo.status === 'completed' && recipientPubkey) {
+      try {
+        const { publishZapReceiptForPayment } = await import('./spark/sparkZapReceipt');
+        // Note: The SparkWalletContext will also publish receipts automatically
+        // This is a fallback for when using breezWallet directly
+        logInfo('[Zap] Zap payment completed, receipt handled by SparkWalletContext');
+      } catch (error) {
+        logWarning('[Zap] Failed to import zap receipt module:', error);
+      }
+    }
+
+    // Check payment status
+    if (paymentInfo.status === 'completed') {
+      return true;
+    } else if (paymentInfo.status === 'failed') {
+      logError('Breez payment failed:', paymentInfo);
+      lastZapError = 'Payment failed';
+      return false;
+    } else {
+      // Payment is pending
+      logError('Breez payment pending:', paymentInfo);
+      lastZapError = 'Payment pending';
+      return false;
+    }
+  } catch (error: any) {
+    logError('Failed Breez payment: ', error);
+    console.error('Failed Breez payment: ', error);
+    lastZapError = error?.message || 'Unknown Breez payment error';
+    return false;
+  }
+};
+
 export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string) => {
   let promises: Promise<boolean>[] = [];
   let relays: Relay[] = [];
@@ -99,6 +146,7 @@ export const zapNote = async (
   comment = '',
   relays: Relay[],
   nwc?: string[],
+  walletType?: 'nwc' | 'breez' | null,
 ) => {
   if (!sender) {
     return false;
@@ -134,10 +182,17 @@ export const zapNote = async (
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
+    // Use Breez if it's the active wallet type
+    if (walletType === 'breez') {
+      return await zapOverBreez(pr);
+    }
+
+    // Use NWC if configured
     if (nwc && nwc[1] && nwc[1].length > 0) {
       return await zapOverNWC(sender, nwc[1], pr);
     }
 
+    // Fallback to WebLN
     await enableWebLn();
     await sendPayment(pr);
 
@@ -155,6 +210,7 @@ export const zapArticle = async (
   comment = '',
   relays: Relay[],
   nwc?: string[],
+  walletType?: 'nwc' | 'breez' | null,
 ) => {
   if (!sender) {
     return false;
@@ -196,10 +252,17 @@ export const zapArticle = async (
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
+    // Use Breez if it's the active wallet type
+    if (walletType === 'breez') {
+      return await zapOverBreez(pr);
+    }
+
+    // Use NWC if configured
     if (nwc && nwc[1] && nwc[1].length > 0) {
       return await zapOverNWC(sender, nwc[1], pr);
     }
 
+    // Fallback to WebLN
     await enableWebLn();
     await sendPayment(pr);
 
@@ -217,6 +280,7 @@ export const zapProfile = async (
   comment = '',
   relays: Relay[],
   nwc?: string[],
+  walletType?: 'nwc' | 'breez' | null,
 ) => {
   if (!sender || !profile) {
     return false;
@@ -250,10 +314,17 @@ export const zapProfile = async (
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
+    // Use Breez if it's the active wallet type
+    if (walletType === 'breez') {
+      return await zapOverBreez(pr);
+    }
+
+    // Use NWC if configured
     if (nwc && nwc[1] && nwc[1].length > 0) {
       return await zapOverNWC(sender, nwc[1], pr);
     }
 
+    // Fallback to WebLN
     await enableWebLn();
     await sendPayment(pr);
 
@@ -271,6 +342,7 @@ export const zapSubscription = async (
   relays: Relay[],
   exchangeRate?: Record<string, Record<string, number>>,
   nwc?: string[],
+  walletType?: 'nwc' | 'breez' | null,
 ) => {
   if (!sender || !recipient) {
     return false;
@@ -322,10 +394,17 @@ export const zapSubscription = async (
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
+    // Use Breez if it's the active wallet type
+    if (walletType === 'breez') {
+      return await zapOverBreez(pr);
+    }
+
+    // Use NWC if configured
     if (nwc && nwc[1] && nwc[1].length > 0) {
       return await zapOverNWC(sender, nwc[1], pr);
     }
 
+    // Fallback to WebLN
     await enableWebLn();
     await sendPayment(pr);
 
@@ -344,6 +423,7 @@ export const zapDVM = async (
   comment = '',
   relays: Relay[],
   nwc?: string[],
+  walletType?: 'nwc' | 'breez' | null,
 ) => {
   if (!sender) {
     return false;
@@ -385,10 +465,17 @@ export const zapDVM = async (
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
+    // Use Breez if it's the active wallet type
+    if (walletType === 'breez') {
+      return await zapOverBreez(pr);
+    }
+
+    // Use NWC if configured
     if (nwc && nwc[1] && nwc[1].length > 0) {
       return await zapOverNWC(sender, nwc[1], pr);
     }
 
+    // Fallback to WebLN
     await enableWebLn();
     await sendPayment(pr);
 
@@ -407,6 +494,7 @@ export const zapStream = async (
   comment = '',
   relays: Relay[],
   nwc?: string[],
+  walletType?: 'nwc' | 'breez' | null,
 ) => {
   if (!sender || !host) {
     return { success: false };
@@ -448,12 +536,19 @@ export const zapStream = async (
     const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
     const pr = r2.pr;
 
-    if (nwc && nwc[1] && nwc[1].length > 0) {
-      const success = await zapOverNWC(sender, nwc[1], pr);
-
-      return { success: true, event: signedEvent }
+    // Use Breez if it's the active wallet type
+    if (walletType === 'breez') {
+      const success = await zapOverBreez(pr);
+      return { success, event: signedEvent };
     }
 
+    // Use NWC if configured
+    if (nwc && nwc[1] && nwc[1].length > 0) {
+      const success = await zapOverNWC(sender, nwc[1], pr);
+      return { success: true, event: signedEvent };
+    }
+
+    // Fallback to WebLN
     await enableWebLn();
     await sendPayment(pr);
 

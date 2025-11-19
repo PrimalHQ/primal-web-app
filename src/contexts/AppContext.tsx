@@ -17,6 +17,7 @@ import { Kind } from "../constants";
 import { LegendCustomizationConfig } from "../lib/premium";
 import { config } from "@milkdown/core";
 import { StreamingData } from "../lib/streaming";
+import { BreezPaymentInfo } from "../lib/breezWalletService";
 
 
 export type ReactionStats = {
@@ -118,6 +119,8 @@ export type AppContextStore = {
   memberCohortInfo: Record<string, CohortInfo>,
   showProfileQr: PrimalUser | undefined,
   reportContent: PrimalNote | PrimalArticle | NostrLiveChat | undefined,
+  breezPaymentInProgress: boolean,
+  breezTransactionHistory: BreezPaymentInfo[],
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
@@ -179,6 +182,9 @@ export type AppContextStore = {
     closeProfileQr: () => void,
     openReportContent: (content: PrimalNote | PrimalArticle | NostrLiveChat) => void,
     closeReportContent: () => void,
+    setBreezPaymentInProgress: (inProgress: boolean) => void,
+    updateBreezTransactionHistory: (transactions: BreezPaymentInfo[]) => void,
+    addBreezTransaction: (transaction: BreezPaymentInfo) => void,
   },
 }
 
@@ -221,6 +227,8 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   subscribeToTier: () => {},
   showProfileQr: undefined,
   reportContent: undefined,
+  breezPaymentInProgress: false,
+  breezTransactionHistory: [],
 };
 
 export const AppContext = createContext<AppContextStore>();
@@ -494,6 +502,20 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('reportContent', () => undefined);
   }
 
+  // BREEZ WALLET ACTIONS
+
+  const setBreezPaymentInProgress = (inProgress: boolean) => {
+    updateStore('breezPaymentInProgress', () => inProgress);
+  };
+
+  const updateBreezTransactionHistory = (transactions: BreezPaymentInfo[]) => {
+    updateStore('breezTransactionHistory', () => [...transactions]);
+  };
+
+  const addBreezTransaction = (transaction: BreezPaymentInfo) => {
+    updateStore('breezTransactionHistory', (history) => [transaction, ...history]);
+  };
+
 
 // SOCKET HANDLERS ------------------------------
 
@@ -669,6 +691,9 @@ const onSocketClose = (closeEvent: CloseEvent) => {
       closeProfileQr,
       openReportContent,
       closeReportContent,
+      setBreezPaymentInProgress,
+      updateBreezTransactionHistory,
+      addBreezTransaction,
     }
   });
 

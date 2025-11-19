@@ -47,6 +47,11 @@ const NavMenu: Component< { id?: string } > = (props) => {
       bubble: () => dms?.dmCount || 0,
     },
     {
+      to: '/wallet',
+      label: 'Wallet',
+      icon: 'walletIcon',
+    },
+    {
       to: '/bookmarks',
       label: intl.formatMessage(t.bookmarks),
       icon: 'bookmarkIcon',

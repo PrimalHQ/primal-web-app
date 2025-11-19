@@ -322,6 +322,7 @@ const ArticleFooter: Component<{
         message,
         account.activeRelays,
         account.activeNWC,
+        account.activeWalletType,
       );
 
       props.updateState('isZapping', () => false);

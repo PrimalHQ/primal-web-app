@@ -89,6 +89,7 @@ const AuthorSubscribe: Component<{
         account.activeRelays,
         exchangeRate,
         account.activeNWC,
+        account.activeWalletType,
       );
 
       if (!isZapped) {

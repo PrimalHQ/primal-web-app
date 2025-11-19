@@ -80,6 +80,9 @@
   .bookmarkIcon {
     @include iconNav(url(../../assets/icons/nav/bookmarks.svg), var(--text-secondary));
   }
+  .walletIcon {
+    @include iconNav(url(../../assets/icons/lightning.svg), var(--text-secondary));
+  }
 
 
   &:hover, a.active {
@@ -115,6 +118,9 @@
     }
     .bookmarkIcon {
       @include iconNav(url(../../assets/icons/nav/bookmarks_selected.svg), var(--text-primary));
+    }
+    .walletIcon {
+      @include iconNav(url(../../assets/icons/lightning.svg), var(--text-primary));
     }
   }
 

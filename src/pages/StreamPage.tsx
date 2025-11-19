@@ -903,6 +903,7 @@ const StreamPage: Component = () => {
         message,
         account.activeRelays,
         account.activeNWC,
+        account.activeWalletType,
       );
 
       setIsZapping(() => false);

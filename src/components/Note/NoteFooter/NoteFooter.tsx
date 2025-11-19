@@ -411,6 +411,7 @@ const NoteFooter: Component<{
         message,
         account.activeRelays,
         account.activeNWC,
+        account.activeWalletType,
       );
 
       props.updateState && props.updateState('isZapping', () => false);

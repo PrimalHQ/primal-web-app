@@ -1,0 +1,354 @@
+// Loading state
+.loadingState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--devider);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Empty state
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  text-align: center;
+}
+
+.emptyIcon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  background-color: var(--text-tertiary);
+  -webkit-mask: url(../../assets/icons/nothing.svg) no-repeat center / contain;
+  mask: url(../../assets/icons/nothing.svg) no-repeat center / contain;
+  opacity: 0.5;
+}
+
+.emptyTitle {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.emptyDescription {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--text-tertiary);
+}
+
+// Payments list
+.paymentsList {
+  display: flex;
+  flex-direction: column;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+// Payment item
+.paymentItem {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--devider);
+  background-color: transparent;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.paymentHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.paymentLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.chevron {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.chevronRight {
+  width: 16px;
+  height: 16px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/chevron_right.svg) no-repeat center / contain;
+  mask: url(../../assets/icons/chevron_right.svg) no-repeat center / contain;
+}
+
+.chevronDown {
+  width: 16px;
+  height: 16px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/chevron_right.svg) no-repeat center / contain;
+  mask: url(../../assets/icons/chevron_right.svg) no-repeat center / contain;
+  transform: rotate(90deg);
+}
+
+.paymentIcon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sentIcon {
+  width: 20px;
+  height: 20px;
+  background-image: url(../../assets/icons/sent_icon.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.receivedIcon {
+  width: 20px;
+  height: 20px;
+  background-image: url(../../assets/icons/received_icon.svg);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.paymentAmount {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.amountPositive {
+  color: #22c55e;
+}
+
+.amountNegative {
+  color: #dc2626;
+}
+
+.amountHidden {
+  color: var(--text-tertiary);
+}
+
+.feeText {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.paymentRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.paymentDate {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--text-tertiary);
+}
+
+.paymentStatus {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.statusCompleted {
+  background-color: rgba(34, 197, 94, 0.1);
+  color: var(--success-color);
+}
+
+.statusPending {
+  background-color: rgba(234, 179, 8, 0.1);
+  color: var(--warning-color);
+}
+
+.statusFailed {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--error-color);
+}
+
+// Payment description
+.paymentDescription {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+  margin-left: 32px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Expanded details
+.paymentDetails {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--devider);
+  font-size: 12px;
+  margin-left: 32px;
+}
+
+.pendingWarning {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background-color: rgba(234, 179, 8, 0.1);
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  border-radius: 6px;
+}
+
+.pendingWarningTitle {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--warning-color);
+  margin-bottom: 4px;
+}
+
+.pendingWarningText {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--text-secondary);
+}
+
+.detailsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detailRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+}
+
+.detailLabel {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  color: var(--text-tertiary);
+}
+
+.detailValue {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  max-width: 250px;
+}
+
+.detailCode {
+  font-size: 11px;
+  font-family: monospace;
+  line-height: 16px;
+  background-color: var(--background-input);
+  color: var(--text-primary);
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.copyButton {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background-color: var(--background-card-hover);
+  }
+}
+
+.copyIcon {
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/copy.svg) no-repeat center / contain;
+  mask: url(../../assets/icons/copy.svg) no-repeat center / contain;
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--devider);
+  background-color: var(--background-card);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background-color: var(--background-card-hover);
+    border-color: var(--accent);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.refreshIcon {
+  width: 14px;
+  height: 14px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/refresh.svg) no-repeat center / contain;
+  mask: url(../../assets/icons/refresh.svg) no-repeat center / contain;
+}
+
+.refreshIconSpinning {
+  @extend .refreshIcon;
+  animation: spin 1s linear infinite;
+}

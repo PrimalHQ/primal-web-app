@@ -56,6 +56,13 @@ export type FollowData = {
   following: string[],
 };
 
+export type BreezWalletInfo = {
+  isActive: boolean,
+  isConnected: boolean,
+  balance: number,
+  lud16?: string,
+};
+
 export type AccountContextStore = {
   likes: string[],
   defaultRelays: string[],
@@ -103,6 +110,8 @@ export type AccountContextStore = {
   nwcList: string[][],
   blossomServers: string[],
   mirrorBlossom: boolean,
+  breezWallet: BreezWalletInfo,
+  activeWalletType: 'nwc' | 'breez' | null,
   actions: {
     showNewNoteForm: () => void,
     hideNewNoteForm: () => void,
@@ -166,6 +175,11 @@ export type AccountContextStore = {
     removeBlossomServers: (url: string) => void,
     setBlossomServers: (urls: string[]) => void,
     removeBlossomMirrors: (then?: () => void) => void,
+    connectBreezWallet: (mnemonic: string) => Promise<void>,
+    disconnectBreezWallet: () => Promise<void>,
+    updateBreezBalance: () => Promise<void>,
+    setActiveWalletType: (type: 'nwc' | 'breez' | null) => void,
+    updateBreezWallet: (wallet: Partial<BreezWalletInfo>) => void,
   },
 }
 
@@ -214,6 +228,12 @@ const initialData = {
   nwcList: [],
   blossomServers: [],
   mirrorBlossom: false,
+  breezWallet: {
+    isActive: false,
+    isConnected: false,
+    balance: 0,
+  },
+  activeWalletType: null,
   followData: {
     tags: [],
     date: 0,
@@ -2066,6 +2086,111 @@ export function AccountProvider(props: { children: JSXElement }) {
     updateStore('followData', () => ({ ...followData }));
   }
 
+  // BREEZ WALLET ACTIONS
+
+  const connectBreezWallet = async (mnemonic: string) => {
+    if (!store.publicKey) {
+      throw new Error('User not logged in');
+    }
+
+    try {
+      const { breezWallet } = await import('../lib/breezWalletService');
+      const { saveEncryptedSeed, saveBreezConfig } = await import('../lib/breezStore');
+
+      logInfo('[AccountContext] Connecting to Breez wallet...');
+
+      // Connect to Breez SDK
+      await breezWallet.connect(mnemonic);
+
+      // Save encrypted seed
+      await saveEncryptedSeed(mnemonic, store.publicKey);
+
+      // Save configuration
+      saveBreezConfig(store.publicKey, {
+        isConfigured: true,
+        network: 'mainnet',
+        createdAt: Date.now(),
+      });
+
+      // Get initial balance
+      const balance = await breezWallet.getBalance();
+
+      // Update store
+      updateStore('breezWallet', () => ({
+        isActive: true,
+        isConnected: true,
+        balance,
+      }));
+
+      updateStore('activeWalletType', () => 'breez');
+
+      logInfo('[AccountContext] Breez wallet connected successfully');
+      toast?.sendSuccess('Breez wallet connected successfully');
+    } catch (error) {
+      logError('[AccountContext] Failed to connect Breez wallet:', error);
+      toast?.sendWarning('Failed to connect Breez wallet');
+      throw error;
+    }
+  };
+
+  const disconnectBreezWallet = async () => {
+    try {
+      const { breezWallet } = await import('../lib/breezWalletService');
+
+      logInfo('[AccountContext] Disconnecting Breez wallet...');
+
+      // Disconnect from SDK
+      await breezWallet.disconnect();
+
+      // Update store
+      updateStore('breezWallet', () => ({
+        isActive: false,
+        isConnected: false,
+        balance: 0,
+      }));
+
+      // If Breez was active, clear active wallet type
+      if (store.activeWalletType === 'breez') {
+        updateStore('activeWalletType', () => null);
+      }
+
+      logInfo('[AccountContext] Breez wallet disconnected');
+      toast?.sendSuccess('Breez wallet disconnected');
+    } catch (error) {
+      logError('[AccountContext] Failed to disconnect Breez wallet:', error);
+      toast?.sendWarning('Failed to disconnect Breez wallet');
+      throw error;
+    }
+  };
+
+  const updateBreezBalance = async () => {
+    if (!store.breezWallet.isConnected) {
+      logWarning('[AccountContext] Breez wallet not connected');
+      return;
+    }
+
+    try {
+      const { breezWallet } = await import('../lib/breezWalletService');
+
+      const balance = await breezWallet.getBalance();
+
+      updateStore('breezWallet', 'balance', () => balance);
+
+      logInfo(`[AccountContext] Breez balance updated: ${balance} sats`);
+    } catch (error) {
+      logError('[AccountContext] Failed to update Breez balance:', error);
+    }
+  };
+
+  const setActiveWalletType = (type: 'nwc' | 'breez' | null) => {
+    updateStore('activeWalletType', () => type);
+    logInfo(`[AccountContext] Active wallet type set to: ${type}`);
+  };
+
+  const updateBreezWallet = (wallet: Partial<BreezWalletInfo>) => {
+    updateStore('breezWallet', (current) => ({ ...current, ...wallet }));
+  };
+
   const setActiveNWC = (nwc: string[]) => {
     updateStore('activeNWC', () => [...nwc]);
   }
@@ -2220,6 +2345,11 @@ const [store, updateStore] = createStore<AccountContextStore>({
     removeBlossomServers,
     setBlossomServers,
     removeBlossomMirrors,
+    connectBreezWallet,
+    disconnectBreezWallet,
+    updateBreezBalance,
+    setActiveWalletType,
+    updateBreezWallet,
   },
 });
 

@@ -51,8 +51,10 @@ const Muted = lazy(() => import('./pages/Settings/Muted'));
 const Network = lazy(() => import('./pages/Settings/Network'));
 const Moderation = lazy(() => import('./pages/Settings/Moderation'));
 const NostrWalletConnect = lazy(() => import('./pages/Settings/NostrWalletConnect'));
+const BreezWallet = lazy(() => import('./pages/Settings/BreezWallet'));
 const Menu = lazy(() => import('./pages/Settings/Menu'));
 const BlossomSettings = lazy(() => import('./pages/Settings/Blossom'));
+const Wallet = lazy(() => import('./pages/WalletNew'));
 // const Landing = lazy(() => import('./pages/Landing'));
 const AppDownloadQr = lazy(() => import('./pages/appDownloadQr'));
 
@@ -163,10 +165,12 @@ const AppRouter: Component = () => {
             <Route path="/network" component={Network} />
             <Route path="/filters" component={Moderation} />
             <Route path="/nwc" component={NostrWalletConnect} />
+            <Route path="/breez" component={BreezWallet} />
             <Route path="/devtools" component={DevTools} />
             <Route path="/uploads" component={Blossom} />
           </Route>
           <Route path="/bookmarks" component={Bookmarks} />
+          <Route path="/wallet" component={Wallet} />
           <Route path="/settings/profile" component={EditProfile} />
           <Route path="/profile/:npub?" component={Profile} />
           <Route path="/p/:npub?">
