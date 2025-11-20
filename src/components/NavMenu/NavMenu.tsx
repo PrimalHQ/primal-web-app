@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from '@solidjs/router';
 import { Component, For, Match, Show, Switch } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useNotificationsContext } from '../../contexts/NotificationsContext';
+import { useSparkWallet } from '../../contexts/SparkWalletContext';
 import { navBar as t, actions as tActions, placeholders as tPlaceholders } from '../../translations';
 import NavLink from '../NavLink/NavLink';
 
@@ -18,6 +19,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
   const account = useAccountContext();
   const notifications = useNotificationsContext();
   const dms = useDMContext();
+  const sparkWallet = useSparkWallet();
   const intl = useIntl();
   const loc = useLocation();
   const media = useMediaContext();
@@ -50,6 +52,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
       to: '/wallet',
       label: 'Wallet',
       icon: 'walletIcon',
+      bubble: () => !sparkWallet?.store.isConfigured ? 1 : 0,
     },
     {
       to: '/bookmarks',

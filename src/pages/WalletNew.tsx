@@ -3,7 +3,8 @@ import { useIntl } from '@cookbook/solid-intl';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { useAccountContext } from '../contexts/AccountContext';
-import { SparkWalletProvider, useSparkWallet } from '../contexts/SparkWalletContext';
+import { useSettingsContext } from '../contexts/SettingsContext';
+import { useSparkWallet } from '../contexts/SparkWalletContext';
 import { useToastContext } from '../components/Toaster/Toaster';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
@@ -11,6 +12,7 @@ import { TextField } from '@kobalte/core/text-field';
 import AdvancedSearchDialog from '../components/AdvancedSearch/AdvancedSearchDialog';
 import SparkPaymentsList from '../components/SparkPaymentsList/SparkPaymentsList';
 import CurrencyDropdown from '../components/CurrencyDropdown/CurrencyDropdown';
+import Loader from '../components/Loader/Loader';
 import { generateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
 import { useCurrencyConversion } from '../hooks/useCurrencyConversion';
@@ -21,6 +23,7 @@ import styles from './Wallet.module.scss';
 const WalletContent: Component = () => {
   const intl = useIntl();
   const account = useAccountContext();
+  const settings = useSettingsContext();
   const toast = useToastContext();
   const sparkWallet = useSparkWallet();
 
@@ -56,7 +59,6 @@ const WalletContent: Component = () => {
     setHasBackedUpSeed(false);
     setShowMnemonic(true);
     setOpenCreateDialog(true);
-    toast?.sendInfo('Please write down your seed phrase and store it safely!');
   };
 
   const handleOpenRestore = () => {
@@ -304,8 +306,18 @@ const WalletContent: Component = () => {
                     <div class={styles.lightningIconLarge}></div>
                   </div>
                   <div class={styles.emptyLogos}>
-                    <img src="https://breez.technology/logo-breez-header.svg" alt="Breez" class={styles.breezLogo} />
-                    <img src="https://breez.technology/spark.svg" alt="Spark" class={styles.sparkLogo} />
+                    <img
+                      src="https://breez.technology/logo-breez-header.svg"
+                      alt="Breez"
+                      class={styles.breezLogo}
+                      classList={{ [styles.lightModeLogo]: settings?.theme === 'sunrise' }}
+                    />
+                    <img
+                      src="https://breez.technology/spark.svg"
+                      alt="Spark"
+                      class={styles.sparkLogo}
+                      classList={{ [styles.lightModeLogo]: settings?.theme === 'sunrise' }}
+                    />
                   </div>
                   <div class={styles.emptyTitle}>
                     Self-Custodial Lightning Wallet
@@ -327,10 +339,10 @@ const WalletContent: Component = () => {
             >
               <div class={styles.walletEmpty}>
                 <div class={styles.emptyIcon}>
-                  <div class={styles.lightningIconLarge}></div>
+                  <Loader />
                 </div>
                 <div class={styles.emptyTitle}>
-                  Connecting to Wallet...
+                  Connecting to wallet...
                 </div>
                 <div class={styles.emptyDescription}>
                   Please wait while we connect to your Breez Spark wallet.
@@ -441,7 +453,7 @@ const WalletContent: Component = () => {
                   <SparkPaymentsList
                     payments={sparkWallet.store.payments}
                     loading={sparkWallet.store.paymentsLoading}
-                    isBalanceHidden={false}
+                    isBalanceHidden={sparkWallet.store.isBalanceHidden}
                   />
                 </div>
               </div>
@@ -527,30 +539,11 @@ const WalletContent: Component = () => {
       >
         <div class={styles.dialogContent}>
           <div class={styles.dialogDescription}>
-            <span>⚠️ <strong>Write down these 12 words and store them safely!</strong> This is the ONLY way to recover your wallet.</span>
+            Write down these 12 words and store them safely. This is the only way to recover your wallet.
           </div>
 
-          <TextField class={styles.mnemonicInput}>
-            <TextField.TextArea
-              value={mnemonic()}
-              placeholder="Your 12-word seed phrase..."
-              rows={3}
-              disabled={sparkWallet.store.isConnecting}
-              type={showMnemonic() ? 'text' : 'password'}
-              autoResize
-              autofocus
-              readOnly
-            />
-          </TextField>
-
-          <div class={styles.checkboxContainer}>
-            <input
-              type="checkbox"
-              id="showMnemonicCreate"
-              checked={showMnemonic()}
-              onChange={(e) => setShowMnemonic(e.currentTarget.checked)}
-            />
-            <label for="showMnemonicCreate">Show seed phrase</label>
+          <div class={styles.seedPhraseDisplay}>
+            {mnemonic()}
           </div>
 
           <div class={styles.checkboxContainer}>
@@ -563,10 +556,8 @@ const WalletContent: Component = () => {
             <label for="confirmBackupCreate">I have written down my seed phrase in a safe place</label>
           </div>
 
-          <div class={styles.dialogWarning}>
-            ⚠️ Never share your seed phrase with anyone. Your seed will be encrypted and stored securely using your Nostr key.
-            <br /><br />
-            ✅ Automatic backup to Nostr relays enabled for multi-device sync.
+          <div class={styles.dialogInfo}>
+            Never share your seed phrase with anyone. Your seed will be encrypted and stored securely using your Nostr key.
           </div>
         </div>
 
@@ -610,23 +601,31 @@ const WalletContent: Component = () => {
             <div class={styles.dialogDescription}>
               Choose how you want to restore your wallet.
             </div>
-            <div class={styles.walletOptions}>
-              <ButtonPrimary onClick={() => setRestoreMethod('backup')}>
-                From Relay Backup
-              </ButtonPrimary>
-              <ButtonSecondary onClick={() => setRestoreMethod('manual')}>
-                Enter Seed Phrase
-              </ButtonSecondary>
-              <ButtonSecondary onClick={() => setRestoreMethod('file')}>
-                Upload Wallet File
-              </ButtonSecondary>
-            </div>
-            <div class={styles.dialogWarning}>
-              💡 <strong>From Relay Backup:</strong> Automatically fetch your encrypted wallet from Nostr relays.
-              <br /><br />
-              💡 <strong>Enter Seed Phrase:</strong> Manually enter your 12-24 word recovery phrase.
-              <br /><br />
-              💡 <strong>Upload Wallet File:</strong> Import a JSON wallet file from jumble-spark or sparkihonne.
+            <div class={styles.restoreOptions}>
+              <div class={styles.restoreOption}>
+                <ButtonPrimary onClick={() => setRestoreMethod('backup')}>
+                  Relay Backup
+                </ButtonPrimary>
+                <div class={styles.restoreOptionDescription}>
+                  Fetch your encrypted wallet from Nostr relays
+                </div>
+              </div>
+              <div class={styles.restoreOption}>
+                <ButtonPrimary onClick={() => setRestoreMethod('manual')}>
+                  Seed Phrase
+                </ButtonPrimary>
+                <div class={styles.restoreOptionDescription}>
+                  Enter your 12-24 word recovery phrase
+                </div>
+              </div>
+              <div class={styles.restoreOption}>
+                <ButtonPrimary onClick={() => setRestoreMethod('file')}>
+                  Wallet File
+                </ButtonPrimary>
+                <div class={styles.restoreOptionDescription}>
+                  Import JSON file from jumble-spark or sparkihonne
+                </div>
+              </div>
             </div>
           </Show>
 
@@ -634,10 +633,10 @@ const WalletContent: Component = () => {
             <div class={styles.dialogDescription}>
               <span>Restore your wallet from the encrypted backup stored on Nostr relays.</span>
             </div>
-            <div class={styles.dialogWarning}>
-              🔄 This will fetch your encrypted wallet backup from Nostr relays and restore it.
+            <div class={styles.dialogInfo}>
+              This will fetch your encrypted wallet backup from Nostr relays and restore it.
               <br /><br />
-              ⚠️ You must be logged in with the same Nostr account that created the backup.
+              You must be logged in with the same Nostr account that created the backup.
             </div>
           </Show>
 
@@ -661,14 +660,12 @@ const WalletContent: Component = () => {
 
             <Show when={mnemonic()}>
               <div class={styles.dialogSuccess}>
-                ✅ Wallet file loaded successfully! Click "Restore Wallet" below to continue.
+                Wallet file loaded successfully! Click "Restore Wallet" below to continue.
               </div>
             </Show>
 
-            <div class={styles.dialogWarning}>
-              ⚠️ Your wallet file will be encrypted and stored securely using your Nostr key.
-              <br /><br />
-              ✅ Automatic backup to Nostr relays will be enabled.
+            <div class={styles.dialogInfo}>
+              Your wallet file will be encrypted and stored securely using your Nostr key.
             </div>
           </Show>
 
@@ -700,10 +697,8 @@ const WalletContent: Component = () => {
               <label for="showMnemonicRestore">Show seed phrase</label>
             </div>
 
-            <div class={styles.dialogWarning}>
-              ⚠️ Never share your seed phrase with anyone. Your seed will be encrypted and stored securely using your Nostr key.
-              <br /><br />
-              ✅ Automatic backup to Nostr relays will be enabled.
+            <div class={styles.dialogInfo}>
+              Never share your seed phrase with anyone. Your seed will be encrypted and stored securely using your Nostr key.
             </div>
           </Show>
         </div>
@@ -753,11 +748,7 @@ const WalletContent: Component = () => {
 };
 
 const Wallet: Component = () => {
-  return (
-    <SparkWalletProvider>
-      <WalletContent />
-    </SparkWalletProvider>
-  );
+  return <WalletContent />;
 };
 
 export default Wallet;

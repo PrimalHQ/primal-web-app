@@ -40,13 +40,18 @@
 }
 
 .breezLogo {
+  height: 36px;
+  width: auto;
+  margin-bottom: 10px;
+}
+
+.sparkLogo {
   height: 32px;
   width: auto;
 }
 
-.sparkLogo {
-  height: 40px;
-  width: auto;
+.lightModeLogo {
+  filter: brightness(0) saturate(100%) invert(5%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(95%) contrast(95%);
 }
 
 .emptyTitle {
@@ -84,13 +89,13 @@
 .balanceCard {
   background-color: transparent;
   border-bottom: 1px solid var(--devider);
-  padding: 24px 0;
+  padding: 0;
 }
 
 .balanceHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
   margin-bottom: 12px;
 }
 
@@ -105,7 +110,7 @@
 
 .balanceControls {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 8px;
 }
 
@@ -127,9 +132,10 @@
 
 .balanceDisplay {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   margin-bottom: 20px;
+  min-height: 88px;
 }
 
 .balanceToggle {
@@ -143,6 +149,9 @@
   color: var(--text-secondary);
   border-radius: 4px;
   transition: all 0.2s;
+  flex-shrink: 0;
+  width: auto;
+  min-width: auto;
 
   &:hover {
     background-color: rgba(255, 255, 255, 0.05);
@@ -177,13 +186,18 @@
   line-height: 56px;
   color: var(--text-primary);
   margin-bottom: 20px;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .balanceUnit {
   font-size: 24px;
   font-weight: 500;
   color: var(--text-secondary);
-  margin-left: 8px;
+  white-space: nowrap;
+  padding-left: 10px;
 }
 
 .balanceActions {
@@ -389,6 +403,7 @@
   font-weight: 400;
   line-height: 20px;
   color: var(--text-secondary);
+  text-align: center;
 }
 
 .mnemonicInput {
@@ -407,15 +422,37 @@
   }
 }
 
+.seedPhraseDisplay {
+  width: 100%;
+  padding: 16px;
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 24px;
+  word-spacing: 8px;
+  text-align: center;
+  user-select: all;
+}
+
 .checkboxContainer {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 
   input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     cursor: pointer;
+    accent-color: var(--accent);
+    margin: 0;
+    flex-shrink: 0;
+
+    &:checked {
+      accent-color: var(--accent);
+      background-color: var(--accent);
+    }
   }
 
   label {
@@ -423,6 +460,7 @@
     font-weight: 400;
     color: var(--text-secondary);
     cursor: pointer;
+    margin: 0;
   }
 }
 
@@ -452,6 +490,22 @@
   gap: 12px;
   padding: 16px 20px;
   border-top: 1px solid var(--devider);
+
+  button:first-child {
+    background-color: rgba(0, 0, 0, 0.15);
+    color: var(--text-primary);
+    border: none;
+    border-radius: 24px;
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover:not(:disabled) {
+      background-color: rgba(0, 0, 0, 0.2);
+    }
+  }
 }
 
 // Tabs
@@ -532,6 +586,45 @@
   flex-direction: column;
   gap: 12px;
   margin-top: 16px;
+}
+
+// Restore options
+.restoreOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.restoreOption {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+
+  button {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+.restoreOptionDescription {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 0 16px;
+}
+
+.dialogInfo {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--text-secondary);
+  padding: 12px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 // File upload section

@@ -92,31 +92,31 @@
 }
 
 .chevron {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
   flex-shrink: 0;
 }
 
 .chevronRight {
-  width: 16px;
-  height: 16px;
-  background-color: var(--text-primary);
+  width: 12px;
+  height: 12px;
+  background-color: var(--text-secondary);
   -webkit-mask: url(../../assets/icons/chevron_right.svg) no-repeat center / contain;
   mask: url(../../assets/icons/chevron_right.svg) no-repeat center / contain;
 }
 
 .chevronDown {
-  width: 16px;
-  height: 16px;
-  background-color: var(--text-primary);
+  width: 12px;
+  height: 12px;
+  background-color: var(--text-secondary);
   -webkit-mask: url(../../assets/icons/chevron_right.svg) no-repeat center / contain;
   mask: url(../../assets/icons/chevron_right.svg) no-repeat center / contain;
   transform: rotate(90deg);
 }
 
 .paymentIcon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -124,8 +124,8 @@
 }
 
 .sentIcon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   background-image: url(../../assets/icons/sent_icon.svg);
   background-size: contain;
   background-repeat: no-repeat;
@@ -133,8 +133,8 @@
 }
 
 .receivedIcon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   background-image: url(../../assets/icons/received_icon.svg);
   background-size: contain;
   background-repeat: no-repeat;
@@ -216,9 +216,9 @@
 
 // Expanded details
 .paymentDetails {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--devider);
+  margin-top: 16px;
+  padding-top: 0;
+  border-top: none;
   font-size: 12px;
   margin-left: 32px;
 }
@@ -249,58 +249,64 @@
 .detailsGrid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
 }
 
 .detailRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  min-height: 24px;
+  gap: 12px;
+  line-height: 1;
 }
 
 .detailLabel {
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 18px;
-  color: var(--text-tertiary);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--text-secondary);
+  flex-shrink: 0;
 }
 
 .detailValue {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   min-width: 0;
-  max-width: 250px;
+  flex: 1;
+  justify-content: flex-end;
+  line-height: 1;
 }
 
 .detailCode {
-  font-size: 11px;
+  font-size: 12px;
   font-family: monospace;
-  line-height: 16px;
-  background-color: var(--background-input);
+  line-height: 1;
+  background-color: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
-  padding: 2px 6px;
+  padding: 3px 6px;
   border-radius: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 300px;
 }
 
 .copyButton {
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
   padding: 0;
+  margin: 0;
   border: none;
   background-color: transparent;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
   transition: background-color 0.2s ease;
   flex-shrink: 0;
+  align-self: center;
 
   &:hover {
     background-color: var(--background-card-hover);

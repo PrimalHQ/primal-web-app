@@ -81,7 +81,7 @@
     @include iconNav(url(../../assets/icons/nav/bookmarks.svg), var(--text-secondary));
   }
   .walletIcon {
-    @include iconNav(url(../../assets/icons/lightning.svg), var(--text-secondary));
+    @include iconNav(url(../../assets/icons/nav/wallet.svg), var(--text-secondary));
   }
 
 
@@ -120,7 +120,7 @@
       @include iconNav(url(../../assets/icons/nav/bookmarks_selected.svg), var(--text-primary));
     }
     .walletIcon {
-      @include iconNav(url(../../assets/icons/lightning.svg), var(--text-primary));
+      @include iconNav(url(../../assets/icons/nav/wallet_selected.svg), var(--text-primary));
     }
   }
 

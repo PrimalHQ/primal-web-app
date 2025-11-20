@@ -16,6 +16,7 @@ import { AppProvider } from './contexts/AppContext';
 import { ReadsProvider } from './contexts/ReadsContext';
 import { AdvancedSearchProvider } from './contexts/AdvancedSearchContext';
 import { DMProvider } from './contexts/DMContext';
+import { SparkWalletProvider } from './contexts/SparkWalletContext';
 import 'media-chrome';
 import "media-chrome/media-theme-element";
 import 'hls-video-element';
@@ -48,27 +49,29 @@ const App: Component = () => {
         <Toaster>
           <MediaProvider>
             <AccountProvider>
-              <SearchProvider>
-                <AdvancedSearchProvider>
-                  <SettingsProvider>
-                    <ProfileProvider>
-                      <DMProvider>
-                        <NotificationsProvider>
-                          <ReadsProvider>
-                            <HomeProvider>
-                              <ExploreProvider>
-                                <ThreadProvider>
-                                  <AppRouter />
-                                </ThreadProvider>
-                              </ExploreProvider>
-                            </HomeProvider>
-                          </ReadsProvider>
-                        </NotificationsProvider>
-                      </DMProvider>
-                    </ProfileProvider>
-                  </SettingsProvider>
-                </AdvancedSearchProvider>
-              </SearchProvider>
+              <SparkWalletProvider>
+                <SearchProvider>
+                  <AdvancedSearchProvider>
+                    <SettingsProvider>
+                      <ProfileProvider>
+                        <DMProvider>
+                          <NotificationsProvider>
+                            <ReadsProvider>
+                              <HomeProvider>
+                                <ExploreProvider>
+                                  <ThreadProvider>
+                                    <AppRouter />
+                                  </ThreadProvider>
+                                </ExploreProvider>
+                              </HomeProvider>
+                            </ReadsProvider>
+                          </NotificationsProvider>
+                        </DMProvider>
+                      </ProfileProvider>
+                    </SettingsProvider>
+                  </AdvancedSearchProvider>
+                </SearchProvider>
+              </SparkWalletProvider>
             </AccountProvider>
           </MediaProvider>
         </Toaster>
