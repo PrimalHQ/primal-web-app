@@ -87,13 +87,75 @@ This phase involves connecting your new breezWalletService to the Primal React c
 
 ## **5\. Phase 4: Testing and Deployment**
 
-* **Testing (Local):**  
-  * **Onboarding:** Test the wallet creation and recovery flow.  
-  * **Send/Receive:** Test sending and receiving payments (zaps) between your integrated wallet and another Lightning wallet (e.g., a mobile wallet).  
-  * **Zap Flow:** Test the end-to-end zap flow on posts within the Primal UI.  
-  * **Wallet Switching:** Ensure the user can seamlessly switch between using the integrated wallet and the NWC (external) wallet.  
-* **Environment Variables:**  
-  * You will need a Breez API key. This should be added as an environment variable (e.g., VITE\_BREEZ\_API\_KEY) in the Primal app's .env file.  
-* **Deployment:**  
-  * The integration adds a new client-side dependency. The primal-web-app's existing build process (likely npm run build) should bundle the Breez SDK's JS/WASM files automatically.  
+* **Testing (Local):**
+  * **Onboarding:** Test the wallet creation and recovery flow.
+  * **Send/Receive:** Test sending and receiving payments (zaps) between your integrated wallet and another Lightning wallet (e.g., a mobile wallet).
+  * **Zap Flow:** Test the end-to-end zap flow on posts within the Primal UI.
+  * **Wallet Switching:** Ensure the user can seamlessly switch between using the integrated wallet and the NWC (external) wallet.
+* **Environment Variables:**
+  * You will need a Breez API key. This should be added as an environment variable (e.g., VITE\_BREEZ\_API\_KEY) in the Primal app's .env file.
+* **Deployment:**
+  * The integration adds a new client-side dependency. The primal-web-app's existing build process (likely npm run build) should bundle the Breez SDK's JS/WASM files automatically.
   * Ensure your API key is correctly configured in the production deployment environment.
+
+---
+
+## **6\. Recent UI/UX Updates**
+
+### **Wallet Icon and Branding**
+- Added custom outlined wallet icon (`wallet.svg` and `wallet_selected.svg`) to match nav icon style
+- Implemented theme-aware Breez and Spark logos (dark in light mode via CSS filters)
+- Adjusted logo sizing: Breez 36px with 10px bottom margin, Spark 32px for proper baseline alignment
+- Added wallet notification badge (shows when wallet is not configured)
+
+### **Balance Display**
+- Implemented currency toggle dropdown with SATS + 30+ fiat currencies
+- Added hide/show balance toggle with eye icon
+- Balance visibility affects both balance display and payment history
+- Horizontal layout for balance amount with proper spacing (10px between fiat and sats)
+- Compact layout with reduced padding and min-height (88px)
+- Proper baseline alignment for header elements (BALANCE, currency, Sync button)
+
+### **Currency Dropdown**
+- Compact spacing with line-height: 1 and minimal padding
+- Popular currencies (SATS, USD, EUR, GBP, JPY) shown first
+- Other currencies in scrollable 2-column grid
+- localStorage persistence via SparkWalletContext
+
+### **Payment History**
+- Compact row spacing (6px gap between detail rows)
+- Proper vertical alignment for copy buttons
+- Reduced chevron size (12px) and payment icons increased (24px)
+- Line-height: 1 for compact display
+- No top border/padding for expanded details section
+
+### **Page Header**
+- Fixed PageCaption component to use consistent styling across desktop and mobile
+- Font-weight: 300 (lighter) and text-transform: capitalize
+- "Breez Spark Wallet" displays correctly in Initial Caps, not lowercase
+
+### **Dialogs and Forms**
+- Cleaned up create/restore wallet screens
+- Removed emojis, simplified messaging
+- Seed phrase display with monospace font, non-resizable
+- Light mode visibility fixes (all backgrounds use rgba(0,0,0,X) overlays)
+- Pill-shaped cancel buttons with visible contrast
+- Optional relay backup (not automatic by default)
+
+### **Wallet Settings & Integration (Latest)**
+- Added Breez Spark wallet toggle in Settings → Nostr Wallet Connect page
+- Spark wallet appears at bottom of wallet list with toggle switch
+- Wallet enabled by default for new users (`spark_wallet_enabled` localStorage)
+- When enabled AND connected, Breez is set as active zap wallet (`activeWalletType = 'breez'`)
+- When disabled, `activeWalletType` is cleared to allow NWC wallets to work
+- Navigation wallet icon hidden when Spark wallet is disabled
+- Spark logo theme-aware: white in dark mode, black (#111111) in light mode (using CSS filters)
+
+### **Zap Functionality**
+- Integrated Breez wallet payments into zap flow (zapNote, zapProfile, zapArticle, zapDVM, zapStream)
+- Added recipient pubkey parameter for proper zap receipt generation
+- **Fixed pending payment handling**: Treats both 'completed' and 'pending' status as success
+  - Lightning payments can take a moment to complete, initially returning 'pending'
+  - SparkWalletContext event listener handles final completion and zap receipt publishing
+- Zap priority order: Breez (if enabled) → NWC (if configured) → WebLN (fallback)
+- Auto-connect only when wallet is enabled (checks `isEnabled` flag)

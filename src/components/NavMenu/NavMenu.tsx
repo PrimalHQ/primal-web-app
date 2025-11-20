@@ -26,7 +26,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
   const app = useAppContext();
   const navigate = useNavigate();
 
-  const links = [
+  const allLinks = [
     {
       to: '/home',
       label: intl.formatMessage(t.home),
@@ -53,6 +53,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
       label: 'Wallet',
       icon: 'walletIcon',
       bubble: () => !sparkWallet?.store.isConfigured ? 1 : 0,
+      hidden: () => !sparkWallet?.store.isEnabled,
     },
     {
       to: '/bookmarks',
@@ -88,6 +89,9 @@ const NavMenu: Component< { id?: string } > = (props) => {
     },
   ];
 
+  // Filter out hidden links
+  const links = () => allLinks.filter(link => !link.hidden || !link.hidden());
+
   const isBigScreen = () => (media?.windowSize.w || 0) > 1300;
 
   const noReadsConfirm: ConfirmInfo = {
@@ -106,7 +110,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
   return (
     <div id={props.id} class={styles.navMenu}>
       <nav class={styles.sideNav}>
-        <For each={links}>
+        <For each={links()}>
           {({ to, label, icon, bubble, hiddenOnSmallScreens }) => {
             return <NavLink
               to={to}

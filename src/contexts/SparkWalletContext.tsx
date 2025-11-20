@@ -25,6 +25,7 @@ export type SparkWalletStore = {
   isConnected: boolean;
   isConnecting: boolean;
   isConfigured: boolean;
+  isEnabled: boolean;
 
   // Wallet data
   balance: number; // sats
@@ -52,6 +53,10 @@ export type SparkWalletActions = {
   // Connection management
   connect: (mnemonic: string, enableBackup?: boolean) => Promise<void>;
   disconnect: () => Promise<void>;
+
+  // Wallet enable/disable
+  enableWallet: () => void;
+  disableWallet: () => void;
 
   // Balance operations
   refreshBalance: () => Promise<void>;
@@ -105,11 +110,22 @@ export const SparkWalletProvider: ParentComponent = (props) => {
     }
   };
 
+  const loadWalletEnabled = () => {
+    try {
+      const stored = localStorage.getItem('spark_wallet_enabled');
+      // Default to true if never set before
+      return stored === null ? true : stored === 'true';
+    } catch {
+      return true; // Default to enabled
+    }
+  };
+
   // Initialize store
   const [store, setStore] = createStore<SparkWalletStore>({
     isConnected: false,
     isConnecting: false,
     isConfigured: false,
+    isEnabled: loadWalletEnabled(),
     balance: 0,
     tokenBalances: new Map(),
     config: null,
@@ -154,8 +170,9 @@ export const SparkWalletProvider: ParentComponent = (props) => {
         }
       }
 
-      if (isConfigured && !store.isConnected) {
-        logInfo('[SparkWallet] Wallet configured, auto-connecting...');
+      // Only auto-connect if wallet is enabled
+      if (isConfigured && !store.isConnected && store.isEnabled) {
+        logInfo('[SparkWallet] Wallet configured and enabled, auto-connecting...');
 
         // Load config
         const config = loadSparkConfig(account.publicKey);
@@ -169,6 +186,8 @@ export const SparkWalletProvider: ParentComponent = (props) => {
         if (seed) {
           await actions.connect(seed, false); // Don't backup on auto-connect
         }
+      } else if (isConfigured && !store.isEnabled) {
+        logInfo('[SparkWallet] Wallet configured but disabled, skipping auto-connect');
       }
     } catch (error) {
       logError('[SparkWallet] Auto-connect failed:', error);
@@ -615,10 +634,52 @@ export const SparkWalletProvider: ParentComponent = (props) => {
     }
   };
 
+  /**
+   * Enable Spark wallet for zaps
+   */
+  const enableWallet = () => {
+    setStore('isEnabled', true);
+
+    // If wallet is already connected, set it as active
+    if (store.isConnected && account?.actions.setActiveWalletType) {
+      account.actions.setActiveWalletType('breez');
+      logInfo('[SparkWallet] Set Breez as active wallet');
+    }
+
+    try {
+      localStorage.setItem('spark_wallet_enabled', 'true');
+      logInfo('[SparkWallet] Wallet enabled');
+    } catch (error) {
+      logError('[SparkWallet] Failed to save enabled state:', error);
+    }
+  };
+
+  /**
+   * Disable Spark wallet for zaps
+   */
+  const disableWallet = () => {
+    setStore('isEnabled', false);
+
+    // Clear active wallet type so NWC can be used
+    if (account?.actions.setActiveWalletType) {
+      account.actions.setActiveWalletType(null);
+      logInfo('[SparkWallet] Cleared active wallet type to allow NWC');
+    }
+
+    try {
+      localStorage.setItem('spark_wallet_enabled', 'false');
+      logInfo('[SparkWallet] Wallet disabled');
+    } catch (error) {
+      logError('[SparkWallet] Failed to save disabled state:', error);
+    }
+  };
+
   // Actions object
   const actions: SparkWalletActions = {
     connect,
     disconnect,
+    enableWallet,
+    disableWallet,
     refreshBalance,
     syncWallet,
     sendPayment,

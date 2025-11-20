@@ -39,16 +39,18 @@ export const zapOverBreez = async (invoice: string, recipientPubkey?: string): P
     }
 
     // Check payment status
-    if (paymentInfo.status === 'completed') {
+    if (paymentInfo.status === 'completed' || paymentInfo.status === 'pending') {
+      // Treat pending as success - the payment will complete asynchronously
+      // The SparkWalletContext event listener will handle completion events
       return true;
     } else if (paymentInfo.status === 'failed') {
       logError('Breez payment failed:', paymentInfo);
       lastZapError = 'Payment failed';
       return false;
     } else {
-      // Payment is pending
-      logError('Breez payment pending:', paymentInfo);
-      lastZapError = 'Payment pending';
+      // Unknown status
+      logError('Unknown payment status:', paymentInfo);
+      lastZapError = 'Unknown payment status';
       return false;
     }
   } catch (error: any) {
@@ -184,7 +186,7 @@ export const zapNote = async (
 
     // Use Breez if it's the active wallet type
     if (walletType === 'breez') {
-      return await zapOverBreez(pr);
+      return await zapOverBreez(pr, note.pubkey);
     }
 
     // Use NWC if configured
@@ -316,7 +318,7 @@ export const zapProfile = async (
 
     // Use Breez if it's the active wallet type
     if (walletType === 'breez') {
-      return await zapOverBreez(pr);
+      return await zapOverBreez(pr, profile.pubkey);
     }
 
     // Use NWC if configured
