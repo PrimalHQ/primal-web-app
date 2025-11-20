@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, Show } from 'solid-js';
+import { Component, createEffect, createSignal, Show, For } from 'solid-js';
 import { useIntl } from '@cookbook/solid-intl';
 import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
@@ -38,9 +38,39 @@ const WalletContent: Component = () => {
   const [openCreateDialog, setOpenCreateDialog] = createSignal(false);
   const [openRestoreDialog, setOpenRestoreDialog] = createSignal(false);
   const [restoreMethod, setRestoreMethod] = createSignal<'backup' | 'manual' | 'file' | null>(null);
-  const [activeTab, setActiveTab] = createSignal<'payments' | 'settings'>('payments');
+  const [activeTab, setActiveTab] = createSignal<'payments' | 'topup'>('payments');
+  const [showSettings, setShowSettings] = createSignal(false);
   const [hasBackedUpSeed, setHasBackedUpSeed] = createSignal(false);
   const [isRestoring, setIsRestoring] = createSignal(false);
+
+  // Send payment state
+  const [paymentInput, setPaymentInput] = createSignal('');
+  const [paymentAmount, setPaymentAmount] = createSignal('');
+  const [isSendingPayment, setIsSendingPayment] = createSignal(false);
+  const [isLightningAddress, setIsLightningAddress] = createSignal(false);
+
+  // Calculate max sendable amount (99% of balance to account for fees)
+  const maxSendableAmount = () => Math.floor(sparkWallet.store.balance * 0.99);
+
+  // Top up state
+  const [topUpAmount, setTopUpAmount] = createSignal(10000);
+  const [selectedPreset, setSelectedPreset] = createSignal<number | null>(10000);
+  const [generatedInvoice, setGeneratedInvoice] = createSignal('');
+  const [isGeneratingInvoice, setIsGeneratingInvoice] = createSignal(false);
+  const [isEditingAmount, setIsEditingAmount] = createSignal(false);
+  const [qrCodeDataUrl, setQrCodeDataUrl] = createSignal('');
+
+  const MAX_WALLET_BALANCE = 500000; // 500K sats total wallet limit
+  const HOT_WALLET_WARNING = 100000; // Warn at 100K sats
+
+  // Calculate maximum top-up amount based on current balance
+  const maxTopUpAmount = () => Math.max(0, MAX_WALLET_BALANCE - sparkWallet.store.balance);
+
+  // Currency conversion for top-up amount
+  const { fiatValue: topUpFiatValue, isLoading: isLoadingTopUpConversion } = useCurrencyConversion(
+    () => topUpAmount(),
+    () => sparkWallet.store.displayCurrency
+  );
 
   let fileInputRef: HTMLInputElement | undefined;
 
@@ -213,6 +243,218 @@ const WalletContent: Component = () => {
       console.error('Disconnect failed:', error);
       toast?.sendWarning(`Failed to disconnect: ${error?.message}`);
     }
+  };
+
+  // Check if input is Lightning address (user@domain.com format)
+  const checkIsLightningAddress = (input: string): boolean => {
+    return input.includes('@') && input.includes('.');
+  };
+
+  // Handle payment input change
+  const handlePaymentInputChange = (value: string) => {
+    setPaymentInput(value);
+    setIsLightningAddress(checkIsLightningAddress(value.trim()));
+  };
+
+  // Send Payment Handler
+  const handleSendPayment = async () => {
+    const input = paymentInput().trim();
+    if (!input) {
+      toast?.sendWarning('Please enter a Lightning invoice or address');
+      return;
+    }
+
+    // If it's a Lightning address, we need an amount
+    if (isLightningAddress()) {
+      const amount = parseInt(paymentAmount());
+
+      if (!amount || amount < 1) {
+        toast?.sendWarning('Please enter an amount for this Lightning address');
+        return;
+      }
+
+      // Check if amount exceeds balance
+      if (amount > sparkWallet.store.balance) {
+        toast?.sendWarning(`Amount exceeds wallet balance of ${sparkWallet.store.balance.toLocaleString()} sats`);
+        return;
+      }
+
+      // Warn if sending close to max (may fail due to fees)
+      if (amount > maxSendableAmount()) {
+        toast?.sendWarning('Amount too high. Lightning payments require ~1% fee buffer. Try sending less.');
+        return;
+      }
+    }
+
+    setIsSendingPayment(true);
+    try {
+      // Import breez wallet service
+      const { breezWallet } = await import('../lib/breezWalletService');
+
+      // Parse the input to determine what type it is
+      const parsed = await breezWallet.parseInput(input);
+
+      if (parsed.type === 'lightningAddress' || parsed.type === 'lnurlPay') {
+        // Handle Lightning address or LNURL pay
+        const amountSats = parseInt(paymentAmount());
+        if (!amountSats || amountSats < 1) {
+          toast?.sendWarning('Please enter a valid amount');
+          return;
+        }
+
+        // Get the pay request details from parsed input
+        const payRequest = parsed.type === 'lightningAddress'
+          ? {
+              callback: parsed.callback,
+              minSendable: parsed.minSendable,
+              maxSendable: parsed.maxSendable,
+              metadataStr: parsed.metadataStr,
+              commentAllowed: parsed.commentAllowed || 0,
+              domain: parsed.domain,
+              allowsNostr: parsed.allowsNostr || false,
+              nostrPubkey: parsed.nostrPubkey,
+              lnurlpTag: parsed.tag,
+            }
+          : parsed;
+
+        // Prepare the LNURL pay
+        const prepareResponse = await breezWallet.prepareLnurlPay(amountSats, payRequest);
+
+        // Execute the LNURL pay
+        await breezWallet.lnurlPay(prepareResponse);
+
+        toast?.sendSuccess('Payment sent successfully!');
+      } else if (parsed.type === 'bolt11Invoice' || parsed.type === 'sparkInvoice') {
+        // Handle regular invoice
+        await sparkWallet.actions.sendPayment(input);
+        toast?.sendSuccess('Payment sent successfully!');
+      } else {
+        toast?.sendWarning('Unsupported payment type. Please use a Lightning invoice or address.');
+        return;
+      }
+
+      setPaymentInput('');
+      setPaymentAmount('');
+      setIsLightningAddress(false);
+
+      // Refresh payment history
+      await sparkWallet.actions.loadPaymentHistory();
+    } catch (error: any) {
+      console.error('Payment failed:', error);
+      toast?.sendWarning(`Payment failed: ${error?.message || 'Unknown error'}`);
+    } finally {
+      setIsSendingPayment(false);
+    }
+  };
+
+  // Top Up Handlers
+  const topUpPresets = [
+    { amount: 10000, label: '10k' },
+    { amount: 25000, label: '25k' },
+    { amount: 50000, label: '50k' },
+    { amount: 100000, label: '100k' },
+    { amount: 250000, label: '250k' },
+    { amount: 500000, label: '500k' },
+  ];
+
+  const handlePresetClick = (amount: number) => {
+    setSelectedPreset(amount);
+    setTopUpAmount(amount);
+  };
+
+  const handleTopUpInputChange = (value: string) => {
+    const numValue = parseInt(value) || 0;
+    setTopUpAmount(numValue);
+    // Select preset if it matches, otherwise clear
+    const matchingPreset = topUpPresets.find(p => p.amount === numValue);
+    setSelectedPreset(matchingPreset ? numValue : null);
+  };
+
+  const generateQRCode = async (invoice: string) => {
+    try {
+      // Dynamically import qr-code-styling
+      const QRCodeStyling = (await import('qr-code-styling')).default;
+
+      const qrCode = new QRCodeStyling({
+        width: 300,
+        height: 300,
+        data: invoice.toUpperCase(),
+        margin: 10,
+        qrOptions: {
+          typeNumber: 0,
+          mode: 'Byte',
+          errorCorrectionLevel: 'M',
+        },
+        imageOptions: {
+          hideBackgroundDots: true,
+          imageSize: 0.4,
+          margin: 5,
+        },
+        dotsOptions: {
+          color: '#000000',
+          type: 'rounded',
+        },
+        backgroundOptions: {
+          color: '#ffffff',
+        },
+        cornersSquareOptions: {
+          color: '#000000',
+          type: 'extra-rounded',
+        },
+        cornersDotOptions: {
+          color: '#000000',
+          type: 'dot',
+        },
+      });
+
+      // Get canvas and convert to data URL
+      const blob = await qrCode.getRawData('png');
+      if (blob) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setQrCodeDataUrl(reader.result as string);
+        };
+        reader.readAsDataURL(blob);
+      }
+    } catch (error) {
+      console.error('Failed to generate QR code:', error);
+    }
+  };
+
+  const handleGenerateInvoice = async () => {
+    const amount = topUpAmount();
+
+    if (amount < 1000) {
+      toast?.sendWarning('Minimum top up amount is 1,000 sats');
+      return;
+    }
+
+    const maxAllowed = maxTopUpAmount();
+    if (amount > maxAllowed) {
+      toast?.sendWarning(`Maximum top up amount is ${maxAllowed.toLocaleString()} sats (current balance: ${sparkWallet.store.balance.toLocaleString()} / 500K limit)`);
+      return;
+    }
+
+    setIsGeneratingInvoice(true);
+    try {
+      const invoice = await sparkWallet.actions.createInvoice(amount, 'Top up Spark Wallet');
+      setGeneratedInvoice(invoice);
+
+      // Generate QR code for the invoice
+      await generateQRCode(invoice);
+
+      toast?.sendSuccess('Invoice generated! Pay to top up your wallet.');
+    } catch (error: any) {
+      console.error('Failed to generate invoice:', error);
+      toast?.sendWarning(`Failed to generate invoice: ${error?.message || 'Unknown error'}`);
+    } finally {
+      setIsGeneratingInvoice(false);
+    }
+  };
+
+  const handleCopyInvoice = () => {
+    navigator.clipboard.writeText(generatedInvoice());
+    toast?.sendSuccess('Invoice copied to clipboard');
   };
 
   const handleRemoveWallet = async () => {
@@ -437,30 +679,94 @@ const WalletContent: Component = () => {
                 Payments
               </button>
               <button
-                class={`${styles.tab} ${activeTab() === 'settings' ? styles.tabActive : ''}`}
-                onClick={() => setActiveTab('settings')}
+                class={`${styles.tab} ${activeTab() === 'topup' ? styles.tabActive : ''}`}
+                onClick={() => setActiveTab('topup')}
               >
-                Settings
+                Top Up
               </button>
             </div>
 
             {/* Tab Content */}
             <Show when={activeTab() === 'payments'}>
               <div class={styles.tabContent}>
+                {/* Send Payment Section */}
+                <div class={styles.sendPaymentSection}>
+                  <div class={styles.sectionTitle}>Send Payment</div>
+                  <div class={styles.sendPaymentForm}>
+                    <TextField class={styles.invoiceInput}>
+                      <TextField.Input
+                        placeholder="Paste invoice or Lightning address"
+                        value={paymentInput()}
+                        onInput={(e) => {
+                          const value = e.currentTarget.value;
+                          setPaymentInput(value);
+                          setIsLightningAddress(checkIsLightningAddress(value.trim()));
+                        }}
+                        disabled={isSendingPayment()}
+                      />
+                    </TextField>
+
+                    {/* Amount Input for Lightning Addresses */}
+                    <Show when={isLightningAddress()}>
+                      <div class={styles.amountInputRow}>
+                        <TextField class={styles.paymentAmountInput}>
+                          <TextField.Input
+                            type="number"
+                            placeholder="Amount in sats"
+                            value={paymentAmount()}
+                            onInput={(e) => setPaymentAmount(e.currentTarget.value)}
+                            min={1}
+                            max={maxSendableAmount()}
+                            step={1}
+                            disabled={isSendingPayment()}
+                          />
+                        </TextField>
+                        <span class={styles.amountUnit}>sats</span>
+                      </div>
+                      <div class={styles.lightningAddressNote}>
+                        Max: {maxSendableAmount().toLocaleString()} sats (includes ~1% fee buffer)
+                      </div>
+                    </Show>
+
+                    <ButtonPrimary
+                      onClick={handleSendPayment}
+                      disabled={isSendingPayment() || !paymentInput() || (isLightningAddress() && !paymentAmount())}
+                    >
+                      {isSendingPayment() ? <Loader /> : 'Send Payment'}
+                    </ButtonPrimary>
+                  </div>
+                </div>
+
                 {/* Payment History */}
                 <div class={styles.transactions}>
-                  <div class={styles.sectionTitle}>Transaction History</div>
+                  <div class={styles.sectionHeader}>
+                    <div class={styles.sectionTitle}>Recent Payments</div>
+                    <button class={styles.refreshButton} onClick={() => sparkWallet.actions.loadPaymentHistory()}>
+                      Refresh
+                    </button>
+                  </div>
                   <SparkPaymentsList
                     payments={sparkWallet.store.payments}
                     loading={sparkWallet.store.paymentsLoading}
                     isBalanceHidden={sparkWallet.store.isBalanceHidden}
                   />
                 </div>
-              </div>
-            </Show>
 
-            <Show when={activeTab() === 'settings'}>
-              <div class={styles.tabContent}>
+                {/* Wallet Settings - Collapsible Section */}
+                <div class={styles.walletSettingsCollapsible}>
+                  <button
+                    class={styles.settingsToggle}
+                    onClick={() => setShowSettings(!showSettings())}
+                  >
+                    <div class={styles.settingsToggleIcon}></div>
+                    <div class={styles.settingsToggleLabel}>Wallet Settings</div>
+                    <div class={`${styles.settingsChevron} ${showSettings() ? styles.settingsChevronOpen : ''}`}>
+                      ▼
+                    </div>
+                  </button>
+
+                  <Show when={showSettings()}>
+                    <div class={styles.settingsContent}>
                 {/* Backup Section */}
                 <div class={styles.backupSection}>
                   <div class={styles.sectionTitle}>Backup & Recovery</div>
@@ -486,7 +792,7 @@ const WalletContent: Component = () => {
                       <ButtonSecondary onClick={handleSyncBackup}>
                         Sync Backup to Relays
                       </ButtonSecondary>
-                      <ButtonSecondary onClick={handleRestoreBackup}>
+                      <ButtonSecondary onClick={handleRestoreFromBackup}>
                         Restore from Relays
                       </ButtonSecondary>
                     </div>
@@ -516,6 +822,151 @@ const WalletContent: Component = () => {
                       <div class={styles.settingArrow}></div>
                     </button>
                   </div>
+                </div>
+                    </div>
+                  </Show>
+                </div>
+              </div>
+            </Show>
+
+            <Show when={activeTab() === 'topup'}>
+              <div class={styles.tabContent}>
+                <div class={styles.topUpSection}>
+                  <div class={styles.sectionTitle}>Top Up Wallet</div>
+
+                  {/* Edit Mode Toggle */}
+                  <Show when={!generatedInvoice()}>
+                    <div class={styles.editModeToggle}>
+                      <button
+                        class={styles.editButton}
+                        onClick={() => setIsEditingAmount(!isEditingAmount())}
+                      >
+                        {isEditingAmount() ? 'Show Presets' : 'Enter Custom Amount'}
+                      </button>
+                    </div>
+                  </Show>
+
+                  {/* Preset Amounts */}
+                  <Show when={!isEditingAmount() && !generatedInvoice()}>
+                    <div class={styles.presetAmounts}>
+                      <For each={topUpPresets}>
+                        {(preset) => (
+                          <button
+                            class={`${styles.presetButton} ${selectedPreset() === preset.amount ? styles.presetButtonActive : ''}`}
+                            onClick={() => handlePresetClick(preset.amount)}
+                          >
+                            <div class={styles.presetAmount}>{preset.label} sats</div>
+                            <Show when={sparkWallet.store.displayCurrency !== 'SATS' && !isLoadingTopUpConversion()}>
+                              <div class={styles.presetFiat}>
+                                {formatFiatAmount(
+                                  (preset.amount / topUpAmount()) * (topUpFiatValue() || 0),
+                                  sparkWallet.store.displayCurrency
+                                )}
+                              </div>
+                            </Show>
+                          </button>
+                        )}
+                      </For>
+                    </div>
+
+                    {/* Hot Wallet Warning */}
+                    <Show when={sparkWallet.store.balance >= HOT_WALLET_WARNING}>
+                      <div class={styles.hotWalletWarning}>
+                        Hot wallets should not contain large balances.<br />Consider keeping less than 100k sats for daily use.
+                      </div>
+                    </Show>
+                  </Show>
+
+                  {/* Custom Amount */}
+                  <Show when={isEditingAmount() && !generatedInvoice()}>
+                    <div class={styles.customAmount}>
+                      <TextField class={styles.amountInput}>
+                        <TextField.Input
+                          type="number"
+                          placeholder="Custom amount"
+                          value={topUpAmount().toString()}
+                          onInput={(e) => handleTopUpInputChange(e.currentTarget.value)}
+                          min={1000}
+                          step={1000}
+                        />
+                      </TextField>
+                      <span class={styles.amountUnit}>sats</span>
+                    </div>
+
+                    {/* Currency Conversion Display */}
+                    <Show when={sparkWallet.store.displayCurrency !== 'SATS' && !isLoadingTopUpConversion() && topUpFiatValue()}>
+                      <div class={styles.conversionDisplay}>
+                        ≈ {formatFiatAmount(topUpFiatValue()!, sparkWallet.store.displayCurrency)}
+                      </div>
+                    </Show>
+
+                    {/* Hot Wallet Warning */}
+                    <Show when={sparkWallet.store.balance >= HOT_WALLET_WARNING}>
+                      <div class={styles.hotWalletWarning}>
+                        Hot wallets should not contain large balances.<br />Consider keeping less than 100k sats for daily use.
+                      </div>
+                    </Show>
+                  </Show>
+
+                  <Show when={topUpAmount() < 1000 || topUpAmount() > maxTopUpAmount()}>
+                    <div class={styles.topUpInfo}>
+                      <Show when={topUpAmount() < 1000}>
+                        <p class={styles.warningText}>Minimum top up: 1,000 sats</p>
+                      </Show>
+                      <Show when={topUpAmount() > maxTopUpAmount()}>
+                        <p class={styles.warningText}>
+                          Maximum: {maxTopUpAmount().toLocaleString()} sats (balance {sparkWallet.store.balance.toLocaleString()} / 500K limit)
+                        </p>
+                      </Show>
+                    </div>
+                  </Show>
+
+                  {/* Generate Invoice Button */}
+                  <Show
+                    when={!generatedInvoice()}
+                    fallback={
+                      <div class={styles.invoiceDisplay}>
+                        {/* QR Code */}
+                        <Show when={qrCodeDataUrl()}>
+                          <div class={styles.qrCodeContainer}>
+                            <img src={qrCodeDataUrl()} alt="Invoice QR Code" class={styles.qrCodeImage} />
+                          </div>
+                        </Show>
+
+                        <div class={styles.invoiceLabel}>
+                          Lightning Invoice ({topUpAmount().toLocaleString()} sats)
+                        </div>
+
+                        {/* Currency Conversion */}
+                        <Show when={sparkWallet.store.displayCurrency !== 'SATS' && !isLoadingTopUpConversion() && topUpFiatValue()}>
+                          <div class={styles.invoiceFiatAmount}>
+                            ≈ {formatFiatAmount(topUpFiatValue()!, sparkWallet.store.displayCurrency)}
+                          </div>
+                        </Show>
+
+                        <div class={styles.invoiceText}>{generatedInvoice()}</div>
+                        <div class={styles.invoiceActions}>
+                          <ButtonPrimary onClick={handleCopyInvoice}>
+                            Copy Invoice
+                          </ButtonPrimary>
+                          <ButtonSecondary onClick={() => {
+                            setGeneratedInvoice('');
+                            setQrCodeDataUrl('');
+                            setIsEditingAmount(false);
+                          }}>
+                            Generate New
+                          </ButtonSecondary>
+                        </div>
+                      </div>
+                    }
+                  >
+                    <ButtonPrimary
+                      onClick={handleGenerateInvoice}
+                      disabled={isGeneratingInvoice() || topUpAmount() < 1000 || topUpAmount() > maxTopUpAmount()}
+                    >
+                      {isGeneratingInvoice() ? <Loader /> : `Generate Invoice for ${topUpAmount().toLocaleString()} sats`}
+                    </ButtonPrimary>
+                  </Show>
                 </div>
               </div>
             </Show>
@@ -681,7 +1132,6 @@ const WalletContent: Component = () => {
                 placeholder="Enter your 12-24 word mnemonic..."
                 rows={3}
                 disabled={sparkWallet.store.isConnecting}
-                type={showMnemonic() ? 'text' : 'password'}
                 autoResize
                 autofocus
               />

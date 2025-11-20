@@ -443,6 +443,55 @@ class BreezWalletService {
   }
 
   /**
+   * Prepare an LNURL pay request
+   * @param amountSats - Amount in sats
+   * @param payRequest - LNURL pay request details (from parseInput)
+   * @param comment - Optional comment
+   * @returns Prepared LNURL pay response
+   */
+  async prepareLnurlPay(
+    amountSats: number,
+    payRequest: any,
+    comment?: string
+  ): Promise<any> {
+    await this.ensureConnected();
+
+    try {
+      const request = {
+        amountSats,
+        payRequest,
+        comment,
+        validateSuccessActionUrl: true,
+      };
+
+      return await this.sdk!.prepareLnurlPay(request);
+    } catch (error) {
+      logError('[BreezWallet] Failed to prepare LNURL pay:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Execute an LNURL pay request
+   * @param prepareResponse - Response from prepareLnurlPay
+   * @returns LNURL pay response with payment info
+   */
+  async lnurlPay(prepareResponse: any): Promise<any> {
+    await this.ensureConnected();
+
+    try {
+      const request = {
+        prepareResponse,
+      };
+
+      return await this.sdk!.lnurlPay(request);
+    } catch (error) {
+      logError('[BreezWallet] Failed to execute LNURL pay:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Generate a new BIP39 mnemonic seed phrase
    * Note: This uses the browser's crypto.getRandomValues() for entropy
    * @returns 12-word mnemonic

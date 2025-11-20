@@ -218,6 +218,8 @@
   line-height: 20px;
   color: var(--text-primary);
   margin-bottom: 16px;
+  flex: 0 1 auto;
+  min-width: 0;
 }
 
 .actionGrid {
@@ -508,33 +510,36 @@
   }
 }
 
-// Tabs
+// Tabs - fixed with negative margin
 .tabs {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 4px;
   padding: 4px;
+  padding-bottom: 0;
   background-color: var(--background-input);
   border: 1px solid var(--devider);
   border-radius: 12px;
   margin-bottom: 24px;
+  overflow: hidden;
 }
 
 .tab {
-  flex: 1;
   padding: 10px 16px;
+  margin-bottom: 4px;
   font-size: 14px;
   font-weight: 600;
-  line-height: 20px;
+  line-height: 1.2;
   color: var(--text-secondary);
   background-color: transparent;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s, color 0.2s;
+  text-align: center;
 
-  &:hover {
-    color: var(--text-primary);
-    background-color: var(--background-card-hover);
+  &:hover:not(.tabActive) {
+    background-color: rgba(255, 255, 255, 0.05);
   }
 }
 
@@ -657,4 +662,360 @@
     font-size: 14px;
     font-weight: 500;
   }
+}
+
+// Send Payment Section
+.sendPaymentSection {
+  padding: 20px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--devider);
+}
+
+.sendPaymentForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.invoiceInput {
+  width: 100%;
+
+  input {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: var(--background-input);
+    border: 1px solid var(--devider);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 15px;
+
+    &::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+  }
+}
+
+// Section Header with Refresh
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 16px;
+
+  .sectionTitle {
+    margin-bottom: 0;
+  }
+}
+
+.refreshButton {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 0;
+  transition: color 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  width: auto;
+
+  &:hover {
+    color: var(--accent-light);
+  }
+}
+
+// Collapsible Wallet Settings
+.walletSettingsCollapsible {
+  margin-top: 32px;
+  border-top: 1px solid var(--devider);
+}
+
+.settingsToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: var(--background-input);
+  }
+}
+
+.settingsToggleIcon {
+  width: 20px;
+  height: 20px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../assets/icons/nav/settings.svg) no-repeat center / contain;
+  mask: url(../assets/icons/nav/settings.svg) no-repeat center / contain;
+}
+
+.settingsToggleLabel {
+  flex: 1;
+  text-align: left;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.settingsChevron {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  transition: transform 0.2s;
+}
+
+.settingsChevronOpen {
+  transform: rotate(180deg);
+}
+
+.settingsContent {
+  padding: 0 20px 20px;
+}
+
+// Top Up Section
+.topUpSection {
+  padding: 20px;
+  padding-bottom: 40px;
+}
+
+.presetAmounts {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.presetButton {
+  padding: 16px;
+  background-color: var(--background-input);
+  border: 2px solid var(--devider);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: var(--background-sheet);
+    border-color: var(--accent);
+  }
+
+  &.presetButtonActive {
+    background-color: color-mix(in srgb, var(--accent) 10%, transparent);
+    border-color: var(--accent);
+  }
+}
+
+.presetAmount {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.customAmount {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.amountInput {
+  flex: 1;
+
+  input {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: var(--background-input);
+    border: 1px solid var(--devider);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 15px;
+
+    &::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+  }
+}
+
+.amountUnit {
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.topUpInfo {
+  margin: 8px 0;
+  min-height: 20px;
+}
+
+.warningText {
+  font-size: 14px;
+  color: var(--warning-color, orange);
+  margin: 0;
+}
+
+.invoiceDisplay {
+  margin-top: 20px;
+  padding: 16px;
+  background-color: var(--background-input);
+  border-radius: 8px;
+}
+
+.invoiceLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.invoiceText {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--text-secondary);
+  word-break: break-all;
+  padding: 12px;
+  background-color: var(--background-card);
+  border-radius: 4px;
+  margin-bottom: 12px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.invoiceActions {
+  display: flex;
+  gap: 12px;
+}
+
+.topUpComingSoon {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+// Hot Wallet Warning
+.hotWalletWarning {
+  margin-top: 12px;
+  margin-bottom: 36px;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text-secondary);
+  text-align: center;
+  font-style: italic;
+}
+
+// Edit Mode Toggle
+.editModeToggle {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.editButton {
+  padding: 6px 16px;
+  background-color: var(--background-input);
+  border: 1px solid var(--devider);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: var(--background-sheet);
+    border-color: var(--accent);
+  }
+}
+
+// Preset Fiat Display
+.presetFiat {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+// Conversion Display
+.conversionDisplay {
+  text-align: center;
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+// QR Code
+.qrCodeContainer {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 12px;
+}
+
+.qrCodeImage {
+  width: 300px;
+  height: 300px;
+  display: block;
+}
+
+// Invoice Fiat Amount
+.invoiceFiatAmount {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+// Lightning Address Amount Input
+.amountInputRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.paymentAmountInput {
+  flex: 1;
+
+  input {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: var(--background-input);
+    border: 1px solid var(--devider);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 15px;
+
+    &::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+  }
+}
+
+.lightningAddressNote {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  font-style: italic;
 }
