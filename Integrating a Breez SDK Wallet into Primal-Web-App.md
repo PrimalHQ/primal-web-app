@@ -159,3 +159,38 @@ This phase involves connecting your new breezWalletService to the Primal React c
   - SparkWalletContext event listener handles final completion and zap receipt publishing
 - Zap priority order: Breez (if enabled) → NWC (if configured) → WebLN (fallback)
 - Auto-connect only when wallet is enabled (checks `isEnabled` flag)
+
+### **Top Up & Send Payment Enhancements**
+- **Top Up Tab Features:**
+  - QR code generation for invoices using qr-code-styling library
+  - Currency conversion display showing fiat equivalent for preset and custom amounts
+  - Edit button to toggle between preset selection (10k, 25k, 50k, 100k, 250k, 500k) and custom amount entry
+  - Hot wallet warning displayed when balance exceeds 100K sats
+  - Dynamic maximum top-up calculation: 500K total wallet limit minus current balance
+  - Validation messages showing current balance and remaining capacity
+  - Preset buttons show fiat conversion for each amount option
+
+- **Send Payment Features:**
+  - Lightning address detection (user@domain.com format)
+  - Automatic amount input field when Lightning address detected
+  - Full LNURL-pay flow implementation using Breez SDK (parseInput → prepareLnurlPay → lnurlPay)
+  - Smart input parsing handles BOLT11 invoices, Spark invoices, Lightning addresses, and LNURL
+  - Maximum sendable amount calculation (99% of balance to account for ~1% Lightning fees)
+  - Balance validation preventing sending more than wallet contains
+  - Fee buffer warning for amounts exceeding 99% of balance
+  - Max amount display with fee disclaimer
+
+- **Tab Layout Improvements:**
+  - Redesigned tabs with equal padding top and bottom (no visual imbalance)
+  - Distinct hover state for inactive tabs (subtle background vs active card background)
+  - Settings icon using app's standard settings.svg instead of emoji
+  - Fixed "Recent Payments" / "Refresh" button alignment (no width overflow)
+  - Proper flex layout preventing text wrapping
+
+- **Technical Implementation:**
+  - Added parseInput, prepareLnurlPay, lnurlPay methods to breezWalletService.ts
+  - LNURL protocol support for Lightning addresses via Breez SDK
+  - Currency conversion integration using existing useCurrencyConversion hook
+  - QR code component with white background container and proper sizing (300x300px)
+  - Validation logic for minimum (1K sats) and maximum (500K total wallet) amounts
+  - Fee calculation and warning system for near-maximum sends
