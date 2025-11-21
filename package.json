@@ -96,7 +96,7 @@
     "remark-parse": "11.0.0",
     "remark-rehype": "11.1.2",
     "sass": "1.67.0",
-    "solid-js": "1.9.3",
+    "solid-js": "^1.9.10",
     "solid-tiptap": "0.7.0",
     "solid-transition-group": "0.2.3",
     "tippy.js": "6.3.7",

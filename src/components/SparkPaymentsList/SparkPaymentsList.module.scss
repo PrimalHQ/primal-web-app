@@ -66,7 +66,7 @@
 
 // Payment item
 .paymentItem {
-  padding: 12px 0;
+  padding: 12px 0 8px 0;
   border-bottom: 1px solid var(--devider);
   background-color: transparent;
 
@@ -208,6 +208,7 @@
   line-height: 18px;
   color: var(--text-tertiary);
   margin-top: 4px;
+  margin-bottom: 0;
   margin-left: 32px;
   white-space: nowrap;
   overflow: hidden;

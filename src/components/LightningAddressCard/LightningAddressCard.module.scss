@@ -1,0 +1,388 @@
+.lightningAddressCard {
+  background-color: transparent;
+  border-bottom: 1px solid var(--devider);
+  padding: 0 0 24px 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 12px;
+}
+
+.cardLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+  line-height: 1;
+}
+
+.noAddress {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.noAddressText {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.addressDisplay {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  min-height: 32px;
+}
+
+.addressText {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  word-break: break-all;
+  flex: 1;
+  line-height: 20px;
+}
+
+.addressActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.copyButton,
+.qrButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  height: 20px;
+  width: 20px;
+  flex-shrink: 0;
+
+  svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    color: var(--accent);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.registerForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.formDescription {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.usernameInput {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--background);
+  border: 1px solid var(--devider);
+  border-radius: 8px;
+  padding: 12px 16px !important;
+  height: auto !important;
+  min-height: 48px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+
+  &:focus-within {
+    border-color: var(--accent);
+  }
+}
+
+.textInput {
+  flex: 1;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  font-size: 14px !important;
+  color: var(--text-primary) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  height: auto !important;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box !important;
+  line-height: 1.5 !important;
+
+  &::placeholder {
+    color: var(--text-tertiary);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.domain {
+  font-size: 14px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.availabilityMessage {
+  font-size: 13px;
+  padding: 8px 0;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &.checking {
+    color: var(--text-secondary);
+  }
+
+  &.available {
+    color: var(--text-primary);
+  }
+
+  &.unavailable {
+    color: var(--text-primary);
+  }
+}
+
+.checkIcon {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(34, 197, 94);
+}
+
+.errorIcon {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--error);
+}
+
+.formActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  button {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
+// Dialog animations
+@keyframes overlayShow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.7;
+  }
+}
+
+@keyframes overlayHide {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes contentShow {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes contentHide {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+// Dialog overlay
+.dialogOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-overlay);
+  background-color: var(--background-site);
+  opacity: 0.7;
+  animation: overlayHide 100ms ease 50ms forwards;
+
+  &[data-expanded] {
+    animation: overlayShow 100ms ease;
+  }
+}
+
+// Dialog container
+.dialogContainer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-index-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Dialog content
+.dialogContent {
+  padding: 20px 24px;
+  background-color: var(--background-input);
+  border-radius: var(--border-radius-big);
+  animation: contentHide 150ms ease-in forwards;
+
+  &[data-expanded] {
+    animation: contentShow 150ms ease-out;
+  }
+}
+
+.dialogHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.dialogTitle {
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+  margin: 0;
+}
+
+.dialogCloseButton {
+  height: 24px;
+  width: 24px;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    color: var(--text-primary);
+  }
+}
+
+// QR Code Modal content
+.qrModal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  min-width: 300px;
+}
+
+.qrLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px;
+  color: var(--text-secondary);
+}
+
+.qrCodeWrapper {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qrImage {
+  width: 300px;
+  height: 300px;
+  display: block;
+}
+
+.qrAddressText {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  word-break: break-all;
+  text-align: center;
+  max-width: 100%;
+}
+
+.qrActions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+
+  button {
+    min-width: 200px;
+  }
+}

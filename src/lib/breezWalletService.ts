@@ -18,6 +18,9 @@ import initBreezSDK, {
   EventListener,
   PrepareSendPaymentRequest,
   PrepareSendPaymentResponse,
+  LightningAddressInfo,
+  RegisterLightningAddressRequest,
+  CheckLightningAddressRequest,
 } from '@breeztech/breez-sdk-spark/web';
 import { logError, logInfo, logWarning } from './logger';
 
@@ -501,6 +504,88 @@ class BreezWalletService {
     // The Breez SDK doesn't provide mnemonic generation directly
     // We can add @scure/bip39 library for this
     throw new Error('Mnemonic generation not yet implemented. Please use an external BIP39 library.');
+  }
+
+  /**
+   * Get Lightning address for this wallet
+   * @returns Lightning address info or undefined if not registered
+   */
+  async getLightningAddress(): Promise<LightningAddressInfo | undefined> {
+    await this.ensureConnected();
+
+    try {
+      logInfo('[BreezWallet] Getting Lightning address...');
+      const address = await this.sdk!.getLightningAddress();
+      if (address) {
+        logInfo(`[BreezWallet] Lightning address: ${address.lightningAddress}`);
+      } else {
+        logInfo('[BreezWallet] No Lightning address registered');
+      }
+      return address;
+    } catch (error) {
+      logError('[BreezWallet] Failed to get Lightning address:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check if a Lightning address username is available
+   * @param username - Username to check (without domain)
+   * @returns True if available, false if taken
+   */
+  async checkLightningAddressAvailable(username: string): Promise<boolean> {
+    await this.ensureConnected();
+
+    try {
+      logInfo(`[BreezWallet] Checking availability for username: ${username}`);
+      const request: CheckLightningAddressRequest = { username };
+      const available = await this.sdk!.checkLightningAddressAvailable(request);
+      logInfo(`[BreezWallet] Username ${username} available: ${available}`);
+      return available;
+    } catch (error) {
+      logError('[BreezWallet] Failed to check Lightning address availability:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Register a Lightning address for this wallet
+   * @param username - Desired username (without domain)
+   * @param description - Optional description
+   * @returns Lightning address info
+   */
+  async registerLightningAddress(username: string, description?: string): Promise<LightningAddressInfo> {
+    await this.ensureConnected();
+
+    try {
+      logInfo(`[BreezWallet] Registering Lightning address: ${username}`);
+      const request: RegisterLightningAddressRequest = {
+        username,
+        description,
+      };
+      const address = await this.sdk!.registerLightningAddress(request);
+      logInfo(`[BreezWallet] Lightning address registered: ${address.lightningAddress}`);
+      return address;
+    } catch (error) {
+      logError('[BreezWallet] Failed to register Lightning address:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Delete the Lightning address for this wallet
+   */
+  async deleteLightningAddress(): Promise<void> {
+    await this.ensureConnected();
+
+    try {
+      logInfo('[BreezWallet] Deleting Lightning address...');
+      await this.sdk!.deleteLightningAddress();
+      logInfo('[BreezWallet] Lightning address deleted');
+    } catch (error) {
+      logError('[BreezWallet] Failed to delete Lightning address:', error);
+      throw error;
+    }
   }
 
   /**

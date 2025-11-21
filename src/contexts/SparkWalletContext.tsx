@@ -6,6 +6,7 @@ import { publishBackup, fetchBackup, syncToRelays, syncFromRelays, hasBackup } f
 import { publishZapReceiptForPayment, handleIncomingZap } from '../lib/spark/sparkZapReceipt';
 import { useAccountContext } from './AccountContext';
 import { logError, logInfo, logWarning } from '../lib/logger';
+import type { LightningAddressInfo } from '@breeztech/breez-sdk-spark/web';
 
 /**
  * Spark Wallet Context
@@ -32,6 +33,10 @@ export type SparkWalletStore = {
   tokenBalances: Map<string, any>;
   lastSynced?: Date;
 
+  // Lightning address
+  lightningAddress?: string;
+  lightningAddressInfo?: LightningAddressInfo;
+
   // Configuration
   config: SparkWalletConfig | null;
   network: 'mainnet' | 'regtest';
@@ -43,6 +48,13 @@ export type SparkWalletStore = {
   // Payment history
   payments: BreezPaymentInfo[];
   paymentsLoading: boolean;
+
+  // Last received payment (for notifications)
+  lastReceivedPayment?: {
+    invoice: string;
+    amount: number;
+    timestamp: number;
+  };
 
   // Display preferences
   displayCurrency: string; // SATS, USD, EUR, etc.
@@ -66,6 +78,12 @@ export type SparkWalletActions = {
   sendPayment: (invoice: string, recipientPubkey?: string) => Promise<BreezPaymentInfo>;
   createInvoice: (amountSats: number, description?: string) => Promise<string>;
   loadPaymentHistory: (limit?: number, offset?: number) => Promise<void>;
+
+  // Lightning address operations
+  loadLightningAddress: () => Promise<void>;
+  registerLightningAddress: (username: string, description?: string) => Promise<LightningAddressInfo>;
+  checkLightningAddressAvailable: (username: string) => Promise<boolean>;
+  deleteLightningAddress: () => Promise<void>;
 
   // Backup operations
   enableBackup: () => Promise<void>;
@@ -253,6 +271,13 @@ export const SparkWalletProvider: ParentComponent = (props) => {
       // Set as active wallet
       account.actions.setActiveWalletType('breez');
 
+      // Load Lightning address if one exists
+      try {
+        await loadLightningAddress();
+      } catch (error) {
+        logWarning('[SparkWallet] Failed to load Lightning address:', error);
+      }
+
       logInfo('[SparkWallet] Connected successfully');
 
     } catch (error) {
@@ -285,6 +310,8 @@ export const SparkWalletProvider: ParentComponent = (props) => {
       setStore('tokenBalances', new Map());
       setStore('lastSynced', undefined);
       setStore('payments', []);
+      setStore('lightningAddress', undefined);
+      setStore('lightningAddressInfo', undefined);
 
       // Update account context
       account?.actions.updateBreezWallet({
@@ -399,6 +426,70 @@ export const SparkWalletProvider: ParentComponent = (props) => {
       throw error;
     } finally {
       setStore('paymentsLoading', false);
+    }
+  };
+
+  /**
+   * Load Lightning address for this wallet
+   */
+  const loadLightningAddress = async (): Promise<void> => {
+    try {
+      const addressInfo = await breezWallet.getLightningAddress();
+      if (addressInfo) {
+        setStore('lightningAddress', addressInfo.lightningAddress);
+        setStore('lightningAddressInfo', addressInfo);
+        logInfo(`[SparkWallet] Lightning address loaded: ${addressInfo.lightningAddress}`);
+      } else {
+        setStore('lightningAddress', undefined);
+        setStore('lightningAddressInfo', undefined);
+        logInfo('[SparkWallet] No Lightning address registered');
+      }
+    } catch (error) {
+      logError('[SparkWallet] Failed to load Lightning address:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Register a Lightning address for this wallet
+   */
+  const registerLightningAddress = async (username: string, description?: string): Promise<LightningAddressInfo> => {
+    try {
+      const addressInfo = await breezWallet.registerLightningAddress(username, description);
+      setStore('lightningAddress', addressInfo.lightningAddress);
+      setStore('lightningAddressInfo', addressInfo);
+      logInfo(`[SparkWallet] Lightning address registered: ${addressInfo.lightningAddress}`);
+      return addressInfo;
+    } catch (error) {
+      logError('[SparkWallet] Failed to register Lightning address:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Check if a Lightning address username is available
+   */
+  const checkLightningAddressAvailable = async (username: string): Promise<boolean> => {
+    try {
+      return await breezWallet.checkLightningAddressAvailable(username);
+    } catch (error) {
+      logError('[SparkWallet] Failed to check Lightning address availability:', error);
+      throw error;
+    }
+  };
+
+  /**
+   * Delete the Lightning address for this wallet
+   */
+  const deleteLightningAddress = async (): Promise<void> => {
+    try {
+      await breezWallet.deleteLightningAddress();
+      setStore('lightningAddress', undefined);
+      setStore('lightningAddressInfo', undefined);
+      logInfo('[SparkWallet] Lightning address deleted');
+    } catch (error) {
+      logError('[SparkWallet] Failed to delete Lightning address:', error);
+      throw error;
     }
   };
 
@@ -565,13 +656,28 @@ export const SparkWalletProvider: ParentComponent = (props) => {
 
             // Check if this was an incoming payment and publish zap receipt
             if (event.payment && account?.activeRelays && account.publicKey) {
-              // Incoming payments have paymentType 'received'
               const payment = event.payment;
-              if (payment.paymentType === 'received') {
+
+              if (payment.paymentType === 'receive') {
+                // Store the last received payment for UI notifications
+                const invoice = payment.details?.type === 'lightning' ? payment.details.invoice : undefined;
+
+                // Get amount in sats (amountSats or convert from amountMsat)
+                const amountSats = payment.amountSats || (payment.amountMsat ? Math.floor(payment.amountMsat / 1000) : 0);
+
+                if (invoice) {
+                  setStore('lastReceivedPayment', {
+                    invoice,
+                    amount: amountSats,
+                    timestamp: payment.createdAt,
+                  });
+                  logInfo('[SparkWallet] Received payment for invoice');
+                }
+
                 handleIncomingZap(
                   {
                     id: payment.id,
-                    amount: Number(payment.amountSats),
+                    amount: amountSats,
                     status: payment.status,
                     timestamp: payment.createdAt,
                     description: payment.description,
@@ -697,6 +803,10 @@ export const SparkWalletProvider: ParentComponent = (props) => {
     sendPayment,
     createInvoice,
     loadPaymentHistory,
+    loadLightningAddress,
+    registerLightningAddress,
+    checkLightningAddressAvailable,
+    deleteLightningAddress,
     enableBackup,
     disableBackup,
     syncBackupToRelays,

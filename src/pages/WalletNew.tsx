@@ -12,6 +12,8 @@ import { TextField } from '@kobalte/core/text-field';
 import AdvancedSearchDialog from '../components/AdvancedSearch/AdvancedSearchDialog';
 import SparkPaymentsList from '../components/SparkPaymentsList/SparkPaymentsList';
 import CurrencyDropdown from '../components/CurrencyDropdown/CurrencyDropdown';
+import LightningAddressCard from '../components/LightningAddressCard/LightningAddressCard';
+import LightningFlash from '../components/LightningFlash/LightningFlash';
 import Loader from '../components/Loader/Loader';
 import { generateMnemonic } from '@scure/bip39';
 import { wordlist } from '@scure/bip39/wordlists/english.js';
@@ -61,6 +63,8 @@ const WalletContent: Component = () => {
   const [isGeneratingInvoice, setIsGeneratingInvoice] = createSignal(false);
   const [isEditingAmount, setIsEditingAmount] = createSignal(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = createSignal('');
+  const [showPaymentFlash, setShowPaymentFlash] = createSignal(false);
+  const [lastProcessedPaymentInvoice, setLastProcessedPaymentInvoice] = createSignal<string>('');
 
   const MAX_WALLET_BALANCE = 500000; // 500K sats total wallet limit
   const HOT_WALLET_WARNING = 100000; // Warn at 100K sats
@@ -473,8 +477,8 @@ const WalletContent: Component = () => {
   const handleGenerateInvoice = async () => {
     const amount = topUpAmount();
 
-    if (amount < 1000) {
-      toast?.sendWarning('Minimum top up amount is 1,000 sats');
+    if (amount < 1) {
+      toast?.sendWarning('Please enter a valid amount');
       return;
     }
 
@@ -505,6 +509,51 @@ const WalletContent: Component = () => {
     navigator.clipboard.writeText(generatedInvoice());
     toast?.sendSuccess('Invoice copied to clipboard');
   };
+
+  // Watch for incoming payments
+  createEffect(() => {
+    const lastReceived = sparkWallet.store.lastReceivedPayment;
+    const invoice = generatedInvoice();
+
+    // Only proceed if we have a received payment
+    if (!lastReceived || !lastReceived.invoice) {
+      return;
+    }
+
+    // Check if we've already processed this payment
+    if (lastReceived.invoice === lastProcessedPaymentInvoice()) {
+      return;
+    }
+
+    // Mark this payment as processed
+    setLastProcessedPaymentInvoice(lastReceived.invoice);
+
+    // Check if this payment matches our displayed invoice (Top Up flow)
+    const isInvoicePayment = invoice && lastReceived.invoice === invoice;
+
+    if (isInvoicePayment) {
+      // Invoice payment - show lightning flash and close dialog
+      setShowPaymentFlash(true);
+      toast?.sendSuccess('Payment received! Balance updated');
+
+      // Close invoice dialog and hide animation after 1500ms
+      setTimeout(() => {
+        setShowPaymentFlash(false);
+        setGeneratedInvoice('');
+        setQrCodeDataUrl('');
+        setActiveTab('payments');
+      }, 1500);
+    } else {
+      // Lightning address payment - show lightning flash
+      setShowPaymentFlash(true);
+      toast?.sendSuccess(`Payment received! +${lastReceived.amount.toLocaleString()} sats`);
+
+      // Hide animation after 1500ms
+      setTimeout(() => {
+        setShowPaymentFlash(false);
+      }, 1500);
+    }
+  });
 
   const handleRemoveWallet = async () => {
     if (!account?.publicKey) return;
@@ -665,17 +714,38 @@ const WalletContent: Component = () => {
 
       if (backup) {
         toast?.sendSuccess('Backup found on relays! Your wallet is safely backed up.');
-        console.log('[WalletNew] Backup found:', {
-          version: backup.version,
-          createdAt: new Date(backup.createdAt).toLocaleString(),
-          lastModified: new Date(backup.lastModified).toLocaleString()
-        });
+        console.log('[WalletNew] Backup found on relays');
       } else {
         toast?.sendWarning('No backup found on relays. Click "Sync Backup to Relays" to create one.');
       }
     } catch (error: any) {
       console.error('[WalletNew] Check relay backups failed:', error);
       toast?.sendWarning(`Failed to check relay backups: ${error?.message || 'Unknown error'}`);
+    }
+  };
+
+  const handleDeleteLightningAddress = async () => {
+    if (!sparkWallet.store.lightningAddress) {
+      toast?.sendInfo('No Lightning address to delete');
+      return;
+    }
+
+    const confirmed = confirm(
+      'Delete Lightning Address?\n\n' +
+      `This will remove your Lightning address (${sparkWallet.store.lightningAddress}).\n\n` +
+      'You can register a new one later.\n\n' +
+      'Click OK to delete.\n' +
+      'Click Cancel to keep it.'
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await sparkWallet.actions.deleteLightningAddress();
+      toast?.sendSuccess('Lightning address deleted successfully');
+    } catch (error: any) {
+      console.error('[WalletNew] Delete Lightning address failed:', error);
+      toast?.sendWarning(`Failed to delete Lightning address: ${error?.message || 'Unknown error'}`);
     }
   };
 
@@ -791,6 +861,11 @@ const WalletContent: Component = () => {
 
   return (
     <div class={styles.walletPage}>
+      {/* Lightning flash animation for incoming payments */}
+      <Show when={showPaymentFlash()}>
+        <LightningFlash duration={1000} active={showPaymentFlash()} />
+      </Show>
+
       <PageTitle title="Lightning Wallet" />
 
       <PageCaption>
@@ -931,6 +1006,9 @@ const WalletContent: Component = () => {
               </Show>
             </div>
 
+            {/* Lightning Address Card */}
+            <LightningAddressCard />
+
             {/* Tabs */}
             <div class={styles.tabs}>
               <button
@@ -941,7 +1019,10 @@ const WalletContent: Component = () => {
               </button>
               <button
                 class={`${styles.tab} ${activeTab() === 'topup' ? styles.tabActive : ''}`}
-                onClick={() => setActiveTab('topup')}
+                onClick={() => {
+                  setActiveTab('topup');
+                  setIsEditingAmount(false); // Reset to presets when switching to Top Up
+                }}
               >
                 Top Up
               </button>
@@ -1038,7 +1119,7 @@ const WalletContent: Component = () => {
                       <For each={topUpPresets}>
                         {(preset) => (
                           <button
-                            class={`${styles.presetButton} ${selectedPreset() === preset.amount ? styles.presetButtonActive : ''}`}
+                            class={`${styles.topUpPresetButton} ${selectedPreset() === preset.amount ? styles.topUpPresetButtonActive : ''}`}
                             onClick={() => handlePresetClick(preset.amount)}
                           >
                             <div class={styles.presetAmount}>{preset.label} sats</div>
@@ -1094,16 +1175,11 @@ const WalletContent: Component = () => {
                     </Show>
                   </Show>
 
-                  <Show when={topUpAmount() < 1000 || topUpAmount() > maxTopUpAmount()}>
+                  <Show when={topUpAmount() > maxTopUpAmount()}>
                     <div class={styles.topUpInfo}>
-                      <Show when={topUpAmount() < 1000}>
-                        <p class={styles.warningText}>Minimum top up: 1,000 sats</p>
-                      </Show>
-                      <Show when={topUpAmount() > maxTopUpAmount()}>
-                        <p class={styles.warningText}>
-                          Maximum: {maxTopUpAmount().toLocaleString()} sats (balance {sparkWallet.store.balance.toLocaleString()} / 500K limit)
-                        </p>
-                      </Show>
+                      <p class={styles.warningText}>
+                        Maximum: {maxTopUpAmount().toLocaleString()} sats (balance {sparkWallet.store.balance.toLocaleString()} / 500K limit)
+                      </p>
                     </div>
                   </Show>
 
@@ -1140,18 +1216,20 @@ const WalletContent: Component = () => {
                             setQrCodeDataUrl('');
                             setIsEditingAmount(false);
                           }}>
-                            Generate New
+                            Cancel
                           </ButtonSecondary>
                         </div>
                       </div>
                     }
                   >
-                    <ButtonPrimary
-                      onClick={handleGenerateInvoice}
-                      disabled={isGeneratingInvoice() || topUpAmount() < 1000 || topUpAmount() > maxTopUpAmount()}
-                    >
-                      {isGeneratingInvoice() ? <Loader /> : `Generate Invoice for ${topUpAmount().toLocaleString()} sats`}
-                    </ButtonPrimary>
+                    <div class={styles.generateInvoiceButton}>
+                      <ButtonPrimary
+                        onClick={handleGenerateInvoice}
+                        disabled={isGeneratingInvoice() || topUpAmount() < 1 || topUpAmount() > maxTopUpAmount()}
+                      >
+                        {isGeneratingInvoice() ? 'Generating Invoice...' : `Generate Invoice for ${topUpAmount().toLocaleString()} sats`}
+                      </ButtonPrimary>
+                    </div>
                   </Show>
                 </div>
               </div>
@@ -1217,6 +1295,20 @@ const WalletContent: Component = () => {
                     </div>
                   </div>
 
+                  {/* Nostr Wallet Connect */}
+                  <div class={styles.walletSettings}>
+                    <div class={styles.sectionTitle}>Nostr Wallet Connect</div>
+                    <div class={styles.nwcComingSoon}>
+                      <div class={styles.nwcIcon}></div>
+                      <div class={styles.nwcText}>
+                        <div class={styles.nwcTitle}>Coming Soon</div>
+                        <div class={styles.nwcDesc}>
+                          Connect your wallet to other Nostr apps with NWC
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Wallet Management */}
                   <div class={styles.walletSettings}>
                     <div class={styles.sectionTitle}>Wallet Management</div>
@@ -1228,6 +1320,19 @@ const WalletContent: Component = () => {
                         </div>
                         <div class={styles.settingArrow}></div>
                       </button>
+                      <Show when={sparkWallet.store.lightningAddress}>
+                        <button class={styles.settingItem} onClick={handleDeleteLightningAddress}>
+                          <div class={styles.settingInfo}>
+                            <div class={`${styles.settingLabel} ${styles.settingLabelDanger}`}>
+                              Delete Lightning Address
+                            </div>
+                            <div class={styles.settingDesc}>
+                              Remove {sparkWallet.store.lightningAddress}
+                            </div>
+                          </div>
+                          <div class={styles.settingArrow}></div>
+                        </button>
+                      </Show>
                       <button class={styles.settingItem} onClick={handleDeleteRelayBackups}>
                         <div class={styles.settingInfo}>
                           <div class={`${styles.settingLabel} ${styles.settingLabelDanger}`}>
