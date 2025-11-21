@@ -213,11 +213,11 @@
 }
 
 .sectionTitle {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 20px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 24px;
   color: var(--text-primary);
-  margin-bottom: 16px;
+  margin-bottom: 0;
   flex: 0 1 auto;
   min-width: 0;
 }
@@ -333,52 +333,53 @@
 // Wallet settings
 .walletSettings {
   background-color: transparent;
-  border-bottom: 1px solid var(--devider);
-  padding: 24px 0;
+  padding: 24px 0 0 0;
 }
 
 .settingsList {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .settingItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px;
-  background-color: var(--background-card);
+  padding: 20px;
+  background-color: transparent;
   border: 1px solid var(--devider);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: var(--background-card-hover);
-    border-color: var(--accent-light);
+    background-color: rgba(255, 255, 255, 0.02);
+    border-color: var(--accent);
   }
 }
 
 .settingInfo {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  flex: 1;
 }
 
 .settingLabel {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 20px;
   color: var(--text-primary);
 }
 
 .settingLabelDanger {
-  color: var(--error-color);
+  color: #dc2626; // Fixed red color that works in both light and dark mode
 }
 
 .settingDesc {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
   line-height: 18px;
   color: var(--text-secondary);
@@ -390,6 +391,8 @@
   background-color: var(--text-tertiary);
   -webkit-mask: url(../assets/icons/chevron_right.svg) no-repeat center / contain;
   mask: url(../assets/icons/chevron_right.svg) no-repeat center / contain;
+  flex-shrink: 0;
+  margin-left: 12px;
 }
 
 // Dialog styles
@@ -408,6 +411,10 @@
   text-align: center;
 }
 
+.mnemonicInputWrapper {
+  width: 100%;
+}
+
 .mnemonicInput {
   width: 100%;
 
@@ -416,12 +423,20 @@
     padding: 12px;
     border: 1px solid var(--devider);
     border-radius: 8px;
-    background-color: var(--background-input);
+    background-color: rgba(0, 0, 0, 0.2);
     color: var(--text-primary);
     font-family: monospace;
     font-size: 14px;
-    resize: vertical;
+    line-height: 1.5;
+    box-sizing: border-box;
+    resize: none;
+    min-height: 80px;
   }
+}
+
+.mnemonicHidden {
+  -webkit-text-security: disc;
+  text-security: disc;
 }
 
 .seedPhraseDisplay {
@@ -563,26 +578,78 @@
 }
 
 .backupInfo {
-  margin-top: 12px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.backupActions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+
+  button {
+    width: 100%;
+  }
 }
 
 .backupStatus {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+}
+
+.backupIcon {
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--warning-color, orange);
+}
+
+.backupIconSuccess {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgb(34, 197, 94);
+}
+
+.backupText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.backupStatusLabel {
   font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--text-primary);
+}
+
+.backupStatusDesc {
+  font-size: 13px;
   font-weight: 400;
-  line-height: 20px;
+  line-height: 16px;
   color: var(--text-secondary);
-  margin-bottom: 16px;
 }
 
 .backupTime {
   font-size: 12px;
   color: var(--text-tertiary);
-}
-
-.backupActions {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
 }
 
 // Wallet options (Create/Import)
@@ -788,6 +855,10 @@
 .topUpSection {
   padding: 20px;
   padding-bottom: 40px;
+
+  .sectionTitle {
+    margin-bottom: 20px;
+  }
 }
 
 .presetAmounts {
@@ -827,7 +898,8 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 16px 0;
+  margin-top: 16px;
+  margin-bottom: 20px;
 }
 
 .amountInput {

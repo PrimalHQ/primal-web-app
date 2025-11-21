@@ -107,6 +107,19 @@ async function decryptBackupEvent(
   event: NostrRelaySignedEvent
 ): Promise<BackupData | null> {
   try {
+    // Check if this is a deleted backup event
+    const deletedTag = event.tags.find(t => t[0] === 'deleted');
+    if (deletedTag && deletedTag[1] === 'true') {
+      logInfo('[SparkBackup] Event is marked as deleted, skipping...');
+      return null;
+    }
+
+    // Check if content is empty (deletion marker)
+    if (!event.content || event.content.trim() === '') {
+      logInfo('[SparkBackup] Event has empty content (deleted), skipping...');
+      return null;
+    }
+
     // Detect encryption version from tags (default to nip04 for old backups)
     const encryptionTag = event.tags.find(t => t[0] === 'encryption');
     const encryptionVersion = encryptionTag?.[1] || 'nip04';
@@ -123,15 +136,42 @@ async function decryptBackupEvent(
       decrypted = await decrypt(pubkey, event.content);
     }
 
-    const backupData: BackupData = JSON.parse(decrypted);
+    // Try to parse as JSON first (Primal format)
+    try {
+      const backupData: BackupData = JSON.parse(decrypted);
 
-    // Validate backup data structure
-    if (!backupData.version || !backupData.mnemonic || !backupData.config) {
-      logWarning('[SparkBackup] Invalid backup data structure');
-      return null;
+      // Validate Primal backup data structure
+      if (backupData.version && backupData.mnemonic && backupData.config) {
+        logInfo('[SparkBackup] Found Primal-format backup');
+        return backupData;
+      }
+    } catch (jsonError) {
+      // Not JSON, might be plain mnemonic from Jumble/Sparkihonne
     }
 
-    return backupData;
+    // Check if it's a plain mnemonic string (Jumble/Sparkihonne format)
+    // BIP39 mnemonics are 12-24 words separated by spaces
+    const words = decrypted.trim().split(/\s+/);
+    if (words.length >= 12 && words.length <= 24 && words.every(w => /^[a-z]+$/.test(w))) {
+      logInfo(`[SparkBackup] Found Jumble/Sparkihonne-format backup (plain mnemonic, ${words.length} words)`);
+
+      // Convert to Primal format
+      const backupData: BackupData = {
+        version: BACKUP_VERSION,
+        mnemonic: decrypted.trim(),
+        config: {
+          createdAt: event.created_at * 1000, // Use event timestamp
+          encryptionVersion: BACKUP_VERSION,
+        },
+        createdAt: event.created_at * 1000,
+        lastModified: event.created_at * 1000,
+      };
+
+      return backupData;
+    }
+
+    logWarning('[SparkBackup] Invalid backup data structure - not Primal format or valid mnemonic');
+    return null;
   } catch (error) {
     logError('[SparkBackup] Failed to decrypt backup event:', error);
     return null;
@@ -523,7 +563,7 @@ export async function syncFromRelays(
 
 /**
  * Delete backup from relays
- * Publishes an empty event to replace the backup
+ * For parameterized replaceable events, we replace with an empty event
  * @param relays - Relays to delete from
  * @param pubkey - User's Nostr public key (optional, will fetch if not provided)
  */
@@ -532,6 +572,7 @@ export async function deleteBackup(
   pubkey?: string
 ): Promise<void> {
   try {
+    console.log('[SparkBackup] 🗑️ Deleting wallet backup from relays...');
     logInfo('[SparkBackup] Deleting wallet backup from relays...');
 
     const userPubkey = pubkey || await getPublicKey();
@@ -539,39 +580,55 @@ export async function deleteBackup(
       throw new Error('Cannot delete backup: No pubkey available');
     }
 
-    // Create empty backup event to replace existing one
-    const emptyEvent = {
+    // Add big relays as fallbacks
+    const allRelayUrls = new Set([
+      ...relays.map(r => r.url),
+      ...BIG_RELAY_URLS
+    ]);
+
+    // Create an empty/deleted backup event to replace the existing one
+    // This works because kind 30078 is a parameterized replaceable event
+    const deletionEvent = {
       kind: BACKUP_EVENT_KIND,
       tags: [
         ['d', BACKUP_D_TAG],
-        ['title', 'Deleted'],
-        ['version', BACKUP_VERSION],
+        ['deleted', 'true'], // Mark as deleted
       ],
-      content: '',
+      content: '', // Empty content signals deletion
       created_at: Math.floor(Date.now() / 1000),
     };
 
-    // Sign and publish
-    const signedEvent = await signEvent(emptyEvent as any);
-    if (!signedEvent) {
-      throw new Error('Failed to sign delete event');
+    console.log('[SparkBackup] Signing deletion event...');
+    const signedDeletion = await signEvent(deletionEvent as any);
+    if (!signedDeletion) {
+      throw new Error('Failed to sign deletion event');
     }
 
-    // Publish to all relays
-    const publishPromises = relays.map(async (relay) => {
+    console.log('[SparkBackup] Publishing deletion event to relays...');
+
+    // Publish deletion event to all relays
+    let successCount = 0;
+    const publishPromises = Array.from(allRelayUrls).map(async (url) => {
       try {
+        const relay = new RelayFactory(url);
+        relay.publishTimeout = 10000;
         await relay.connect();
-        relay.publish(signedEvent);
-        logInfo(`[SparkBackup] Deleted from ${relay.url}`);
+        await relay.publish(signedDeletion);
+        successCount++;
+        console.log(`[SparkBackup] ✓ Deletion published to ${url}`);
+        logInfo(`[SparkBackup] Deletion published to ${url}`);
       } catch (error) {
-        logWarning(`[SparkBackup] Failed to delete from ${relay.url}:`, error);
+        console.error(`[SparkBackup] ✗ Failed to publish deletion to ${url}:`, error);
+        logWarning(`[SparkBackup] Failed to publish deletion to ${url}:`, error);
       }
     });
 
     await Promise.all(publishPromises);
 
-    logInfo('[SparkBackup] Backup deletion completed');
+    console.log(`[SparkBackup] ✅ Deletion event published to ${successCount}/${allRelayUrls.size} relays`);
+    logInfo(`[SparkBackup] Backup deletion completed (${successCount}/${allRelayUrls.size} relays)`);
   } catch (error) {
+    console.error('[SparkBackup] ❌ Failed to delete backup:', error);
     logError('[SparkBackup] Failed to delete backup:', error);
     throw error;
   }

@@ -248,6 +248,29 @@ Complete end-to-end workflow verified:
 - Auto-detects encryption method from file version and encryption field
 - Can restore old Primal backups and new Jumble-Spark backups
 
+## Recent Updates (Session 4) - Backup Deletion & Cross-App Compatibility
+
+### Delete Relay Backups Feature ✅
+- **Delete Relay Backups Button** - Added to wallet settings below "Remove Wallet"
+- **Dual Confirmation Flow** - Matches Jumble-Spark UX with two confirmation dialogs
+- **Proper Event Replacement** - Uses parameterized replaceable event strategy (kind 30078)
+- **Deletion Marker** - Publishes empty event with `['deleted', 'true']` tag
+- **Smart Detection** - `decryptBackupEvent` filters out deleted events automatically
+- **UI State Updates** - Backup status changes from green check to warning icon after deletion
+
+### Cross-App Backup Compatibility ✅
+- **Multi-Format Support** - Can import backups from different Spark wallet apps
+- **Primal Format** - JSON object with `{ version, mnemonic, config, createdAt, lastModified }`
+- **Jumble/Sparkihonne Format** - Plain encrypted mnemonic string (12-24 words)
+- **Auto-Detection** - Tries JSON parse first, falls back to mnemonic string validation
+- **Automatic Conversion** - Converts plain mnemonics to Primal format on-the-fly
+- **Supported Apps** - Primal-web-spark, Jumble-Spark, Sparkihonne
+
+### Bug Fixes ✅
+- **Fixed deletion detection** - Events with empty content or deleted tag are now skipped
+- **Fixed cross-app import** - Now properly handles both JSON and plain mnemonic backups
+- **Fixed backup status** - UI correctly updates after deletion to show "no backup found"
+
 ## Known Limitations
 
 - ⚠️ CustomZap component not yet updated (will use default behavior)

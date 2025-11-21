@@ -614,6 +614,102 @@ const WalletContent: Component = () => {
     }
   };
 
+  const handleCheckRelayBackups = async () => {
+    if (!account?.publicKey) {
+      toast?.sendWarning('Please log in first');
+      return;
+    }
+
+    try {
+      const { fetchBackup } = await import('../lib/spark/sparkBackup');
+      const relays = account.activeRelays || [];
+
+      console.log('[WalletNew] Checking for backups on relays...');
+      toast?.sendInfo('Checking relays for backups...');
+
+      const backup = await fetchBackup(relays, account.publicKey);
+
+      if (backup) {
+        toast?.sendSuccess('Backup found on relays! Your wallet is safely backed up.');
+        console.log('[WalletNew] Backup found:', {
+          version: backup.version,
+          createdAt: new Date(backup.createdAt).toLocaleString(),
+          lastModified: new Date(backup.lastModified).toLocaleString()
+        });
+      } else {
+        toast?.sendWarning('No backup found on relays. Click "Sync Backup to Relays" to create one.');
+      }
+    } catch (error: any) {
+      console.error('[WalletNew] Check relay backups failed:', error);
+      toast?.sendWarning(`Failed to check relay backups: ${error?.message || 'Unknown error'}`);
+    }
+  };
+
+  const handleDeleteRelayBackups = async () => {
+    if (!account?.publicKey) {
+      toast?.sendWarning('Please log in first');
+      return;
+    }
+
+    try {
+      // Check if relay backup exists
+      const { fetchBackup, deleteBackup } = await import('../lib/spark/sparkBackup');
+      const relays = account.activeRelays || [];
+      const hasBackup = await fetchBackup(relays, account.publicKey);
+
+      const confirmed = confirm(
+        '⚠️ DELETE RELAY BACKUP\n\n' +
+        '🚨 This will:\n' +
+        (hasBackup
+          ? '❌ DELETE the backup from your Nostr relays\n'
+          : '• No relay backup exists (you never synced to relays)\n') +
+        '❌ Make restoration from relays impossible\n\n' +
+        '✅ Your local wallet will remain on this device\n' +
+        '✅ Your funds remain safe\n\n' +
+        '⚠️ ONLY DO THIS IF:\n' +
+        '• You have downloaded your backup file, OR\n' +
+        '• You have written down your 12-word recovery phrase, OR\n' +
+        '• You are intentionally removing relay backups\n\n' +
+        'Click OK to delete relay backup.\n' +
+        'Click Cancel to go back safely.'
+      );
+
+      if (!confirmed) {
+        return;
+      }
+
+      // Second confirmation for safety (only if relay backup exists)
+      if (hasBackup) {
+        const doubleCheck = confirm(
+          '⚠️ FINAL CONFIRMATION\n\n' +
+          'Are you absolutely sure?\n\n' +
+          'This will DELETE the relay backup and you will NOT be able to restore from relays.\n\n' +
+          'Have you saved your backup file or recovery phrase?\n\n' +
+          'Click OK to proceed with deletion.\n' +
+          'Click Cancel to go back safely.'
+        );
+
+        if (!doubleCheck) {
+          return;
+        }
+      }
+
+      if (hasBackup) {
+        await deleteBackup(relays, account.publicKey);
+
+        // Update local state to reflect that backup is deleted
+        await sparkWallet.actions.checkBackupStatus();
+
+        toast?.sendSuccess('Relay backup deleted successfully.');
+      } else {
+        toast?.sendInfo('No relay backup found to delete.');
+      }
+    } catch (error: any) {
+      console.error('[WalletNew] Delete relay backups failed:', error);
+      toast?.sendWarning(`Failed to delete relay backups: ${error?.message || 'Unknown error'}`);
+    }
+  };
+
   const handleRestoreFromBackup = async () => {
     console.log('[WalletNew] handleRestoreFromBackup - account:', {
       hasAccount: !!account,
@@ -881,84 +977,6 @@ const WalletContent: Component = () => {
                     isBalanceHidden={sparkWallet.store.isBalanceHidden}
                   />
                 </div>
-
-                {/* Wallet Settings - Collapsible Section */}
-                <div class={styles.walletSettingsCollapsible}>
-                  <button
-                    class={styles.settingsToggle}
-                    onClick={() => setShowSettings(!showSettings())}
-                  >
-                    <div class={styles.settingsToggleIcon}></div>
-                    <div class={styles.settingsToggleLabel}>Wallet Settings</div>
-                    <div class={`${styles.settingsChevron} ${showSettings() ? styles.settingsChevronOpen : ''}`}>
-                      ▼
-                    </div>
-                  </button>
-
-                  <Show when={showSettings()}>
-                    <div class={styles.settingsContent}>
-                {/* Backup Section */}
-                <div class={styles.backupSection}>
-                  <div class={styles.sectionTitle}>Backup & Recovery</div>
-                  <div class={styles.backupInfo}>
-                    <Show
-                      when={sparkWallet.store.hasBackup}
-                      fallback={
-                        <p class={styles.backupStatus}>
-                          ⚠️ No backup found on relays. Create a backup to enable multi-device sync.
-                        </p>
-                      }
-                    >
-                      <p class={styles.backupStatus}>
-                        ✅ Wallet backed up to Nostr relays
-                        <Show when={sparkWallet.store.lastBackupSync}>
-                          <span class={styles.backupTime}>
-                            {' '}(Last sync: {new Date(sparkWallet.store.lastBackupSync!).toLocaleString()})
-                          </span>
-                        </Show>
-                      </p>
-                    </Show>
-                    <div class={styles.backupActions}>
-                      <ButtonSecondary onClick={handleSyncBackup}>
-                        Sync Backup to Relays
-                      </ButtonSecondary>
-                      <ButtonSecondary onClick={handleExportWallet}>
-                        Export Wallet
-                      </ButtonSecondary>
-                      <ButtonSecondary onClick={handleRevealSeedPhrase}>
-                        Reveal Seed Phrase
-                      </ButtonSecondary>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Wallet Settings */}
-                <div class={styles.walletSettings}>
-                  <div class={styles.sectionTitle}>Wallet Management</div>
-                  <div class={styles.settingsList}>
-                    <button class={styles.settingItem} onClick={handleDisconnect}>
-                      <div class={styles.settingInfo}>
-                        <div class={styles.settingLabel}>Disconnect Wallet</div>
-                        <div class={styles.settingDesc}>Disconnect from Breez SDK</div>
-                      </div>
-                      <div class={styles.settingArrow}></div>
-                    </button>
-                    <button class={styles.settingItem} onClick={handleRemoveWallet}>
-                      <div class={styles.settingInfo}>
-                        <div class={`${styles.settingLabel} ${styles.settingLabelDanger}`}>
-                          Remove Wallet
-                        </div>
-                        <div class={styles.settingDesc}>
-                          Permanently remove wallet (backup your seed first!)
-                        </div>
-                      </div>
-                      <div class={styles.settingArrow}></div>
-                    </button>
-                  </div>
-                </div>
-                    </div>
-                  </Show>
-                </div>
               </div>
             </Show>
 
@@ -1103,6 +1121,105 @@ const WalletContent: Component = () => {
                 </div>
               </div>
             </Show>
+
+            {/* Wallet Settings - Collapsible Section (visible in both tabs) */}
+            <div class={styles.walletSettingsCollapsible}>
+              <button
+                class={styles.settingsToggle}
+                onClick={() => setShowSettings(!showSettings())}
+              >
+                <div class={styles.settingsToggleIcon}></div>
+                <div class={styles.settingsToggleLabel}>Wallet Settings</div>
+                <div class={`${styles.settingsChevron} ${showSettings() ? styles.settingsChevronOpen : ''}`}>
+                  ▼
+                </div>
+              </button>
+
+              <Show when={showSettings()}>
+                <div class={styles.settingsContent}>
+                  {/* Backup Section */}
+                  <div class={styles.backupSection}>
+                    <div class={styles.sectionTitle}>Backup & Recovery</div>
+                    <div class={styles.backupInfo}>
+                      <div class={styles.backupActions}>
+                        <ButtonSecondary onClick={handleExportWallet}>
+                          Export Wallet
+                        </ButtonSecondary>
+                        <ButtonSecondary onClick={handleRevealSeedPhrase}>
+                          Reveal Seed Phrase
+                        </ButtonSecondary>
+                        <ButtonSecondary onClick={handleSyncBackup}>
+                          Sync Backup to Relays
+                        </ButtonSecondary>
+                        <ButtonSecondary onClick={handleCheckRelayBackups}>
+                          Check Relay Backups
+                        </ButtonSecondary>
+                      </div>
+                      <Show
+                        when={sparkWallet.store.hasBackup}
+                        fallback={
+                          <div class={styles.backupStatus}>
+                            <div class={styles.backupIcon}>⚠️</div>
+                            <div class={styles.backupText}>
+                              <div class={styles.backupStatusLabel}>No relay backup found</div>
+                              <div class={styles.backupStatusDesc}>Click "Sync Backup to Relays" to enable multi-device sync</div>
+                            </div>
+                          </div>
+                        }
+                      >
+                        <div class={styles.backupStatus}>
+                          <div class={styles.backupIconSuccess}>✓</div>
+                          <div class={styles.backupText}>
+                            <div class={styles.backupStatusLabel}>Wallet backed up to Nostr relays</div>
+                            <Show when={sparkWallet.store.lastBackupSync}>
+                              <div class={styles.backupStatusDesc}>
+                                Last sync: {new Date(sparkWallet.store.lastBackupSync!).toLocaleString()}
+                              </div>
+                            </Show>
+                          </div>
+                        </div>
+                      </Show>
+                    </div>
+                  </div>
+
+                  {/* Wallet Management */}
+                  <div class={styles.walletSettings}>
+                    <div class={styles.sectionTitle}>Wallet Management</div>
+                    <div class={styles.settingsList}>
+                      <button class={styles.settingItem} onClick={handleDisconnect}>
+                        <div class={styles.settingInfo}>
+                          <div class={styles.settingLabel}>Disconnect Wallet</div>
+                          <div class={styles.settingDesc}>Disconnect from Breez SDK</div>
+                        </div>
+                        <div class={styles.settingArrow}></div>
+                      </button>
+                      <button class={styles.settingItem} onClick={handleRemoveWallet}>
+                        <div class={styles.settingInfo}>
+                          <div class={`${styles.settingLabel} ${styles.settingLabelDanger}`}>
+                            Remove Wallet
+                          </div>
+                          <div class={styles.settingDesc}>
+                            Permanently remove wallet (backup your seed first!)
+                          </div>
+                        </div>
+                        <div class={styles.settingArrow}></div>
+                      </button>
+                      <button class={styles.settingItem} onClick={handleDeleteRelayBackups}>
+                        <div class={styles.settingInfo}>
+                          <div class={`${styles.settingLabel} ${styles.settingLabelDanger}`}>
+                            Delete Relay Backups
+                          </div>
+                          <div class={styles.settingDesc}>
+                            Remove all backups from Nostr relays
+                          </div>
+                        </div>
+                        <div class={styles.settingArrow}></div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Show>
+            </div>
           </div>
         </Show>
       </div>
@@ -1295,17 +1412,19 @@ const WalletContent: Component = () => {
               <span>Enter your 12-24 word seed phrase to restore your wallet.</span>
             </div>
 
-            <TextField class={styles.mnemonicInput}>
-              <TextField.TextArea
-                value={mnemonic()}
-                onInput={(e) => setMnemonic(e.currentTarget.value)}
-                placeholder="Enter your 12-24 word mnemonic..."
-                rows={3}
-                disabled={sparkWallet.store.isConnecting}
-                autoResize
-                autofocus
-              />
-            </TextField>
+            <div class={styles.mnemonicInputWrapper}>
+              <TextField class={styles.mnemonicInput}>
+                <TextField.TextArea
+                  value={mnemonic()}
+                  onInput={(e) => setMnemonic(e.currentTarget.value)}
+                  placeholder="Enter your 12-24 word mnemonic..."
+                  rows={3}
+                  disabled={sparkWallet.store.isConnecting}
+                  autofocus
+                  classList={{ [styles.mnemonicHidden]: !showMnemonic() }}
+                />
+              </TextField>
+            </div>
 
             <div class={styles.checkboxContainer}>
               <input
