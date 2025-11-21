@@ -42,6 +42,7 @@ const WalletContent: Component = () => {
   const [showSettings, setShowSettings] = createSignal(false);
   const [hasBackedUpSeed, setHasBackedUpSeed] = createSignal(false);
   const [isRestoring, setIsRestoring] = createSignal(false);
+  const [dialogMode, setDialogMode] = createSignal<'create' | 'reveal'>('create');
 
   // Send payment state
   const [paymentInput, setPaymentInput] = createSignal('');
@@ -88,6 +89,7 @@ const WalletContent: Component = () => {
     setMnemonic(newMnemonic);
     setHasBackedUpSeed(false);
     setShowMnemonic(true);
+    setDialogMode('create');
     setOpenCreateDialog(true);
   };
 
@@ -118,7 +120,7 @@ const WalletContent: Component = () => {
     }
 
     try {
-      await sparkWallet.actions.connect(seed, true); // Enable backup
+      await sparkWallet.actions.connect(seed, false); // Backup is opt-in via "Sync Backup to Relays" button
       setMnemonic('');
       setHasBackedUpSeed(false);
       setOpenCreateDialog(false);
@@ -145,7 +147,7 @@ const WalletContent: Component = () => {
       if (data.mnemonic) {
         mnemonic = data.mnemonic;
       }
-      // Format 2: Encrypted mnemonic from Jumble/Sparkihonne
+      // Format 2: Encrypted mnemonic from Jumble/Sparkihonne/Primal (Versions 1 and 2)
       else if (data.encryptedMnemonic && data.type === 'spark-wallet-backup') {
         if (!account?.publicKey) {
           toast?.sendWarning('Please log in to decrypt wallet file');
@@ -154,9 +156,6 @@ const WalletContent: Component = () => {
         }
 
         try {
-          // Import NIP-04 decrypt function (version 1 uses NIP-04)
-          const { decrypt } = await import('../lib/nostrAPI');
-
           // The pubkey in the file should match the logged-in user
           if (data.pubkey && data.pubkey !== account.publicKey) {
             toast?.sendWarning('This wallet file belongs to a different Nostr account. Please log in with the correct account.');
@@ -164,12 +163,28 @@ const WalletContent: Component = () => {
             return;
           }
 
-          // Decrypt the mnemonic using NIP-04 (version 1 format)
-          // The encryptedMnemonic is encrypted with the user's own pubkey
-          const decrypted = await decrypt(account.publicKey, data.encryptedMnemonic);
-          mnemonic = decrypted;
+          // Detect version and encryption method
+          const version = data.version || 1;
+          const encryption = data.encryption || 'nip04'; // Default to nip04 for v1
 
-          toast?.sendInfo('Encrypted wallet file loaded and decrypted successfully');
+          console.log(`[WalletRestore] Detected backup version: ${version}, encryption: ${encryption}`);
+
+          // Decrypt based on encryption method
+          let decrypted: string;
+          if (encryption === 'nip44' || version === 2) {
+            // Version 2 or explicit NIP-44
+            const { decrypt44 } = await import('../lib/nostrAPI');
+            console.log('[WalletRestore] Using NIP-44 decryption...');
+            decrypted = await decrypt44(account.publicKey, data.encryptedMnemonic);
+          } else {
+            // Version 1 or NIP-04
+            const { decrypt } = await import('../lib/nostrAPI');
+            console.log('[WalletRestore] Using NIP-04 decryption (legacy)...');
+            decrypted = await decrypt(account.publicKey, data.encryptedMnemonic);
+          }
+
+          mnemonic = decrypted;
+          toast?.sendInfo(`Encrypted wallet file (v${version}) loaded and decrypted successfully`);
         } catch (decryptError) {
           console.error('Failed to decrypt wallet file:', decryptError);
           toast?.sendWarning('Failed to decrypt wallet file. Make sure you are logged in with the correct Nostr account.');
@@ -217,7 +232,7 @@ const WalletContent: Component = () => {
 
     try {
       // Connect and restore the wallet
-      await sparkWallet.actions.connect(seed, true); // Enable backup
+      await sparkWallet.actions.connect(seed, false); // Backup is opt-in via "Sync Backup to Relays" button
 
       // Force a balance refresh to ensure UI updates
       await sparkWallet.actions.refreshBalance();
@@ -490,15 +505,124 @@ const WalletContent: Component = () => {
   };
 
   const handleSyncBackup = async () => {
+    console.log('[WalletNew] 🔄 Starting backup sync to relays...');
     try {
       await sparkWallet.actions.syncBackupToRelays();
-      toast?.sendSuccess('Backup synced to relays');
+      console.log('[WalletNew] ✅ Backup sync completed successfully');
+      toast?.sendSuccess('Backup synced to relays. You can now restore from relays on another device.');
     } catch (error: any) {
-      toast?.sendWarning(`Failed to sync backup: ${error?.message}`);
+      console.error('[WalletNew] ❌ Backup sync error:', error);
+      toast?.sendWarning(`Failed to sync backup: ${error?.message || 'Unknown error'}. Try using Export Wallet instead.`);
+    }
+  };
+
+  const handleExportWallet = async () => {
+    if (!account?.publicKey) {
+      toast?.sendWarning('Please log in first');
+      return;
+    }
+
+    try {
+      // Load the decrypted seed from storage
+      const { loadEncryptedSeed } = await import('../lib/spark/sparkStorage');
+      const mnemonic = await loadEncryptedSeed(account.publicKey);
+
+      if (!mnemonic) {
+        toast?.sendWarning('No wallet found to export');
+        return;
+      }
+
+      // Try NIP-44 first, fall back to NIP-04 if not supported (Version 2 format)
+      const { encrypt, encrypt44 } = await import('../lib/nostrAPI');
+      let encryptedMnemonic: string;
+      let encryptionVersion: 'nip44' | 'nip04' = 'nip44';
+
+      try {
+        // Try NIP-44 encryption with timeout
+        const timeoutPromise = new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('NIP-44 encryption timeout')), 5000)
+        );
+        encryptedMnemonic = await Promise.race([
+          encrypt44(account.publicKey, mnemonic),
+          timeoutPromise
+        ]);
+        console.log('[WalletExport] ✓ NIP-44 encryption successful');
+      } catch (nip44Error) {
+        console.warn('[WalletExport] NIP-44 not available, falling back to NIP-04:', nip44Error);
+        encryptedMnemonic = await encrypt(account.publicKey, mnemonic);
+        encryptionVersion = 'nip04';
+        console.log('[WalletExport] ✓ NIP-04 encryption successful (fallback)');
+      }
+
+      // Create the backup file in Version 2 format (matching Jumble-Spark)
+      const backupData = {
+        version: 2,
+        type: 'spark-wallet-backup',
+        encryption: encryptionVersion,
+        pubkey: account.publicKey,
+        encryptedMnemonic,
+        createdAt: Date.now(),
+        createdBy: 'Primal',
+      };
+
+      // Download the file
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `spark-wallet-backup-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast?.sendSuccess('Wallet exported successfully');
+    } catch (error: any) {
+      console.error('Export failed:', error);
+      toast?.sendWarning(`Failed to export wallet: ${error?.message || 'Unknown error'}`);
+    }
+  };
+
+  const handleRevealSeedPhrase = async () => {
+    if (!account?.publicKey) {
+      toast?.sendWarning('Please log in first');
+      return;
+    }
+
+    if (!confirm('⚠️ WARNING: Your seed phrase controls your funds. Never share it with anyone!\n\nAre you sure you want to reveal your seed phrase?')) {
+      return;
+    }
+
+    try {
+      // Load and decrypt the seed
+      const { loadEncryptedSeed } = await import('../lib/spark/sparkStorage');
+      const seed = await loadEncryptedSeed(account.publicKey);
+
+      if (!seed) {
+        toast?.sendWarning('No wallet found');
+        return;
+      }
+
+      // Show the seed phrase in reveal mode
+      setMnemonic(seed);
+      setShowMnemonic(true);
+      setDialogMode('reveal');
+      setOpenCreateDialog(true);
+    } catch (error: any) {
+      console.error('Failed to reveal seed:', error);
+      toast?.sendWarning(`Failed to reveal seed: ${error?.message || 'Unknown error'}`);
     }
   };
 
   const handleRestoreFromBackup = async () => {
+    console.log('[WalletNew] handleRestoreFromBackup - account:', {
+      hasAccount: !!account,
+      hasPublicKey: !!account?.publicKey,
+      publicKey: account?.publicKey?.slice(0, 8),
+      hasRelays: !!account?.activeRelays,
+      relayCount: account?.activeRelays?.length
+    });
+
     if (!account?.publicKey) {
       toast?.sendWarning('Please log in first');
       return;
@@ -506,23 +630,29 @@ const WalletContent: Component = () => {
 
     try {
       setIsRestoring(true);
-      const success = await sparkWallet.actions.syncBackupFromRelays(false);
+      console.log('[WalletNew] Attempting to restore from relays...');
+      // Pass true to overwrite local wallet when explicitly restoring
+      const success = await sparkWallet.actions.syncBackupFromRelays(true);
+      console.log('[WalletNew] Restore result:', success);
+
       if (success) {
         toast?.sendSuccess('Backup restored from relays');
         // Reconnect with restored seed
         const { loadEncryptedSeed } = await import('../lib/spark/sparkStorage');
         const seed = await loadEncryptedSeed(account.publicKey);
         if (seed) {
+          console.log('[WalletNew] Seed loaded, connecting wallet...');
           await sparkWallet.actions.connect(seed, false);
           setRestoreMethod(null);
           setOpenRestoreDialog(false);
         }
       } else {
-        toast?.sendWarning('No backup found on relays. Please try manual restore instead.');
+        console.warn('[WalletNew] No backup found on relays');
+        toast?.sendWarning('No backup found on relays. Make sure you synced your wallet to relays first, or try manual restore with your seed phrase.');
       }
     } catch (error: any) {
-      console.error('Backup restore failed:', error);
-      toast?.sendWarning(`Failed to restore backup: ${error?.message || 'Unknown error'}`);
+      console.error('[WalletNew] Backup restore failed:', error);
+      toast?.sendWarning(`Failed to restore backup: ${error?.message || 'Unknown error'}. Try manual restore with your seed phrase instead.`);
     } finally {
       setIsRestoring(false);
     }
@@ -792,8 +922,11 @@ const WalletContent: Component = () => {
                       <ButtonSecondary onClick={handleSyncBackup}>
                         Sync Backup to Relays
                       </ButtonSecondary>
-                      <ButtonSecondary onClick={handleRestoreFromBackup}>
-                        Restore from Relays
+                      <ButtonSecondary onClick={handleExportWallet}>
+                        Export Wallet
+                      </ButtonSecondary>
+                      <ButtonSecondary onClick={handleRevealSeedPhrase}>
+                        Reveal Seed Phrase
                       </ButtonSecondary>
                     </div>
                   </div>
@@ -974,7 +1107,7 @@ const WalletContent: Component = () => {
         </Show>
       </div>
 
-      {/* Create Wallet Dialog */}
+      {/* Create/Reveal Wallet Dialog */}
       <AdvancedSearchDialog
         open={openCreateDialog()}
         setOpen={(open: boolean) => {
@@ -983,52 +1116,89 @@ const WalletContent: Component = () => {
             setMnemonic('');
             setShowMnemonic(false);
             setHasBackedUpSeed(false);
+            setDialogMode('create');
           }
         }}
         triggerClass="hidden"
-        title={<div>Create New Wallet</div>}
+        title={<div>{dialogMode() === 'create' ? 'Create New Wallet' : 'Your Seed Phrase'}</div>}
       >
         <div class={styles.dialogContent}>
-          <div class={styles.dialogDescription}>
-            Write down these 12 words and store them safely. This is the only way to recover your wallet.
-          </div>
+          <Show
+            when={dialogMode() === 'create'}
+            fallback={
+              <>
+                <div class={styles.dialogDescription}>
+                  ⚠️ WARNING: Never share your seed phrase with anyone. Anyone with access to this phrase can steal your funds.
+                </div>
 
-          <div class={styles.seedPhraseDisplay}>
-            {mnemonic()}
-          </div>
+                <div class={styles.seedPhraseDisplay}>
+                  {mnemonic()}
+                </div>
 
-          <div class={styles.checkboxContainer}>
-            <input
-              type="checkbox"
-              id="confirmBackupCreate"
-              checked={hasBackedUpSeed()}
-              onChange={(e) => setHasBackedUpSeed(e.currentTarget.checked)}
-            />
-            <label for="confirmBackupCreate">I have written down my seed phrase in a safe place</label>
-          </div>
+                <div class={styles.dialogInfo}>
+                  Write down these 12 words and store them in a secure location. This is the only way to recover your wallet if you lose access.
+                </div>
+              </>
+            }
+          >
+            <div class={styles.dialogDescription}>
+              Write down these 12 words and store them safely. This is the only way to recover your wallet.
+            </div>
 
-          <div class={styles.dialogInfo}>
-            Never share your seed phrase with anyone. Your seed will be encrypted and stored securely using your Nostr key.
-          </div>
+            <div class={styles.seedPhraseDisplay}>
+              {mnemonic()}
+            </div>
+
+            <div class={styles.checkboxContainer}>
+              <input
+                type="checkbox"
+                id="confirmBackupCreate"
+                checked={hasBackedUpSeed()}
+                onChange={(e) => setHasBackedUpSeed(e.currentTarget.checked)}
+              />
+              <label for="confirmBackupCreate">I have written down my seed phrase in a safe place</label>
+            </div>
+
+            <div class={styles.dialogInfo}>
+              Never share your seed phrase with anyone. Your seed will be encrypted and stored securely using your Nostr key.
+            </div>
+          </Show>
         </div>
 
         <div class={styles.dialogActions}>
-          <ButtonSecondary
-            onClick={() => {
-              setMnemonic('');
-              setShowMnemonic(false);
-              setHasBackedUpSeed(false);
-              setOpenCreateDialog(false);
-            }}
+          <Show
+            when={dialogMode() === 'create'}
+            fallback={
+              <ButtonPrimary
+                onClick={() => {
+                  setMnemonic('');
+                  setShowMnemonic(false);
+                  setOpenCreateDialog(false);
+                  setDialogMode('create');
+                }}
+              >
+                Close
+              </ButtonPrimary>
+            }
           >
-            Cancel
-          </ButtonSecondary>
-          <ButtonPrimary
-            onClick={handleCreateWallet}
-            disabled={sparkWallet.store.isConnecting || !mnemonic().trim() || !hasBackedUpSeed()}
-          >
-            {sparkWallet.store.isConnecting ? 'Creating...' : 'Create Wallet'}
-          </ButtonPrimary>
+            <ButtonSecondary
+              onClick={() => {
+                setMnemonic('');
+                setShowMnemonic(false);
+                setHasBackedUpSeed(false);
+                setOpenCreateDialog(false);
+                setDialogMode('create');
+              }}
+            >
+              Cancel
+            </ButtonSecondary>
+            <ButtonPrimary
+              onClick={handleCreateWallet}
+              disabled={sparkWallet.store.isConnecting || !mnemonic().trim() || !hasBackedUpSeed()}
+            >
+              {sparkWallet.store.isConnecting ? 'Creating...' : 'Create Wallet'}
+            </ButtonPrimary>
+          </Show>
         </div>
       </AdvancedSearchDialog>
 

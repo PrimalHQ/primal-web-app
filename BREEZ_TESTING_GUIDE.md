@@ -17,10 +17,12 @@ We've successfully integrated the Breez SDK Spark into Primal Web. This creates 
    - Payment direction tracking (send/receive)
 
 2. **Secure Storage** - `src/lib/breezStore.ts` & `src/lib/spark/`
-   - NIP-04 encrypted seed storage (version 1 format)
+   - NIP-44 encrypted seed storage with NIP-04 fallback (version 2 format)
    - Wallet configuration management
    - Import/export functionality compatible with Jumble-spark and Sparkihonne
-   - Nostr relay backup/restore support
+   - Production-ready Nostr relay backup/restore support
+   - Multi-device wallet sync via Nostr relays
+   - Backward compatible with version 1 backups
 
 3. **State Management** - `src/contexts/SparkWalletContext.tsx`
    - Full wallet state management with SolidJS stores
@@ -218,6 +220,33 @@ breezWallet.getState();
 - Clean Primal-style minimal backgrounds (transparent with 1px separators)
 - Proper color coding: red (#dc2626) for sent, green (#22c55e) for received
 - Consistent spacing and typography
+
+## Recent Updates (Session 3) - Relay Backup System
+
+### Production-Ready Nostr Relay Backup ✅
+- **NIP-44 Encryption with NIP-04 Fallback** - Modern encryption with automatic legacy fallback
+- **Proper Relay Publishing** - Fixed relay publish to wait for OK confirmation before showing success
+- **Direct Relay Connections** - Rewrote fetchBackup to use direct relay event handlers (onevent/oneose)
+- **Multi-Relay Redundancy** - Publishes to user relays + big public relays (relay.damus.io, relay.primal.net, nos.lol, etc.)
+- **Encryption Version Tracking** - Events include `["encryption", "nip44"]` tag for smart decryption
+- **Version 2 Backup Format** - Compatible with Jumble-Spark's latest backup format
+
+### Bug Fixes ✅
+- **Fixed relay publish confirmation** - Now properly waits for relay OK message before resolving
+- **Fixed fetchBackup event reception** - Replaced incompatible subsTo/relay.subscribe with direct relay connections
+- **Fixed d-tag mismatch** - check-relay-backups.ts was searching for wrong d-tag value
+- **Fixed file format compatibility** - Updated to Version 2 format matching Jumble-Spark
+
+### Multi-Device Sync Tested ✅
+Complete end-to-end workflow verified:
+1. Create wallet → Sync to relays → ✅ Backup confirmed on multiple relays
+2. Delete local wallet → Restore from relays → ✅ Wallet restored with balance
+3. Log out → Log in → Restore from relays → ✅ Multi-device sync working
+
+### Backward Compatibility ✅
+- Supports both Version 1 (legacy NIP-04) and Version 2 (NIP-44) backup files
+- Auto-detects encryption method from file version and encryption field
+- Can restore old Primal backups and new Jumble-Spark backups
 
 ## Known Limitations
 

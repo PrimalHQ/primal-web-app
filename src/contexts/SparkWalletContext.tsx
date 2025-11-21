@@ -279,6 +279,7 @@ export const SparkWalletProvider: ParentComponent = (props) => {
 
       // Reset store
       setStore('isConnected', false);
+      setStore('isConfigured', false);
       setStore('balance', 0);
       setStore('tokenBalances', new Map());
       setStore('lastSynced', undefined);
@@ -467,12 +468,22 @@ export const SparkWalletProvider: ParentComponent = (props) => {
     }
 
     try {
+      logInfo('[SparkWallet] Starting sync from relays...', {
+        pubkey: account.publicKey.slice(0, 8),
+        relayCount: account.activeRelays.length,
+        overwrite
+      });
+
       const success = await syncFromRelays(account.activeRelays, account.publicKey, overwrite);
+
+      logInfo('[SparkWallet] Sync from relays result:', success);
 
       if (success) {
         setStore('hasBackup', true);
         setStore('lastBackupSync', new Date());
         logInfo('[SparkWallet] Backup synced from relays');
+      } else {
+        logWarning('[SparkWallet] No backup found on relays');
       }
 
       return success;
