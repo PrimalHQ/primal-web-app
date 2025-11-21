@@ -194,3 +194,39 @@ This phase involves connecting your new breezWalletService to the Primal React c
   - QR code component with white background container and proper sizing (300x300px)
   - Validation logic for minimum (1K sats) and maximum (500K total wallet) amounts
   - Fee calculation and warning system for near-maximum sends
+
+### **Backup System Improvements (Latest)**
+- **Unified v2 Backup Format:**
+  - Refactored to single v2 format for both file exports and relay backups
+  - v2 format encrypts just the mnemonic (not JSON with config), making it simpler and smaller
+  - Fully compatible with Jumble-Spark and Sparkihonne backup formats
+  - Maintains backward compatibility: can still read v1 (legacy JSON) backups
+  - Benefits: simpler code, smaller relay events, consistent format everywhere
+
+- **Opt-in Relay Backup:**
+  - Added optional checkbox when creating or restoring wallet
+  - Checkbox appears in all wallet creation/restore flows (seed phrase and file upload)
+  - Unchecked by default (user must opt-in to relay backup)
+  - If checked, automatically syncs backup to relays after wallet creation/restoration
+  - Error handling: shows warning if relay backup fails but wallet creation succeeds
+
+- **Login Requirements:**
+  - Wallet creation and restoration now requires user to be logged in
+  - Shows warning toast if user attempts wallet operations without login
+  - Prevents wallet operations without valid Nostr public key
+
+- **UI/UX Improvements:**
+  - Immediate state updates after deleting relay backup (no refresh needed)
+  - Added `setHasBackup` action to directly update backup status in store
+  - Reordered wallet management buttons: Disconnect → Delete Relay Backups → Remove Wallet
+  - Added padding under "Choose Wallet File" button in restore dialog
+
+- **Technical Details:**
+  - `sparkBackup.ts`: Changed `BACKUP_VERSION` from 'v1' to `2`
+  - `BackupData` type now represents v2 format (simple encrypted mnemonic)
+  - Added `LegacyBackupData` type for backward compatibility with v1 backups
+  - `createBackupEvent`: Now encrypts just mnemonic string (not JSON object)
+  - `decryptBackupEvent`: Returns mnemonic string (not BackupData object)
+  - `fetchBackup`: Returns `string | null` instead of `BackupData | null`
+  - `restoreFromBackup`: Creates minimal config for v2 backups
+  - Cross-format compatibility: Detects and handles v1, v2, Jumble, and Sparkihonne formats

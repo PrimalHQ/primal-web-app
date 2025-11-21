@@ -73,6 +73,7 @@ export type SparkWalletActions = {
   syncBackupToRelays: () => Promise<void>;
   syncBackupFromRelays: (overwrite?: boolean) => Promise<boolean>;
   checkBackupStatus: () => Promise<boolean>;
+  setHasBackup: (value: boolean) => void;
 
   // Configuration
   updateConfig: (config: Partial<SparkWalletConfig>) => void;
@@ -701,6 +702,7 @@ export const SparkWalletProvider: ParentComponent = (props) => {
     syncBackupToRelays,
     syncBackupFromRelays,
     checkBackupStatus,
+    setHasBackup: (value: boolean) => setStore('hasBackup', value),
     updateConfig,
     setDisplayCurrency,
     toggleBalanceVisibility,

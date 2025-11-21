@@ -20,11 +20,22 @@ import { APP_ID } from '../../App';
 
 const BACKUP_EVENT_KIND = 30078;
 const BACKUP_D_TAG = 'spark-wallet-backup';
-const BACKUP_VERSION = 'v1';
+const BACKUP_VERSION = 2;
 
 export type BackupData = {
+  version: number;
+  type: string;
+  encryption: 'nip44' | 'nip04';
+  pubkey: string;
+  encryptedMnemonic: string;
+  createdAt: number;
+  createdBy: string;
+};
+
+// Legacy v1 format for backward compatibility
+export type LegacyBackupData = {
   version: string;
-  mnemonic: string; // BIP39 seed phrase
+  mnemonic: string;
   config: SparkWalletConfig;
   createdAt: number;
   lastModified: number;
@@ -33,15 +44,15 @@ export type BackupData = {
 export type BackupEvent = {
   kind: typeof BACKUP_EVENT_KIND;
   tags: string[][];
-  content: string; // NIP-44 encrypted BackupData JSON
+  content: string; // Encrypted mnemonic (v2) or encrypted BackupData JSON (v1/legacy)
   created_at: number;
 };
 
 /**
- * Create a backup event with encrypted wallet data
+ * Create a backup event with encrypted wallet data (v2 format)
  * @param pubkey - User's Nostr public key
  * @param mnemonic - BIP39 mnemonic to backup
- * @param config - Wallet configuration
+ * @param config - Wallet configuration (not used in v2, kept for compatibility)
  * @returns Promise of unsigned backup event
  */
 async function createBackupEvent(
@@ -49,33 +60,25 @@ async function createBackupEvent(
   mnemonic: string,
   config: SparkWalletConfig
 ): Promise<BackupEvent> {
-  const backupData: BackupData = {
-    version: BACKUP_VERSION,
-    mnemonic,
-    config,
-    createdAt: config.createdAt,
-    lastModified: Date.now(),
-  };
-
-  // Try NIP-44 first, fall back to NIP-04 if not supported (like Jumble-Spark)
-  let encryptedContent: string;
+  // v2 format: Just encrypt the mnemonic directly (like Jumble-Spark)
+  let encryptedMnemonic: string;
   let encryptionVersion: 'nip44' | 'nip04' = 'nip44';
 
-  logInfo('[SparkBackup] Encrypting mnemonic...');
+  logInfo('[SparkBackup] Encrypting mnemonic (v2 format)...');
   try {
     logInfo('[SparkBackup] Attempting NIP-44 encryption...');
     // Add timeout to prevent indefinite hanging
     const timeoutPromise = new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error('NIP-44 encryption timeout')), 5000)
     );
-    encryptedContent = await Promise.race([
-      encrypt44(pubkey, JSON.stringify(backupData)),
+    encryptedMnemonic = await Promise.race([
+      encrypt44(pubkey, mnemonic),
       timeoutPromise
     ]);
     logInfo('[SparkBackup] ✓ NIP-44 encryption successful');
   } catch (nip44Error) {
     logWarning('[SparkBackup] NIP-44 not available, falling back to NIP-04:', nip44Error);
-    encryptedContent = await encrypt(pubkey, JSON.stringify(backupData));
+    encryptedMnemonic = await encrypt(pubkey, mnemonic);
     encryptionVersion = 'nip04';
     logInfo('[SparkBackup] ✓ NIP-04 encryption successful (fallback)');
   }
@@ -85,11 +88,11 @@ async function createBackupEvent(
     tags: [
       ['d', BACKUP_D_TAG], // Parameterized replaceable event identifier
       ['title', 'Spark Wallet Backup'],
-      ['version', BACKUP_VERSION],
+      ['version', String(BACKUP_VERSION)], // v2
       ['client', 'primal-web-spark'],
       ['encryption', encryptionVersion], // Track which encryption was used
     ],
-    content: encryptedContent,
+    content: encryptedMnemonic, // Just the encrypted mnemonic, not JSON
     created_at: Math.floor(Date.now() / 1000),
   };
 
@@ -98,14 +101,15 @@ async function createBackupEvent(
 
 /**
  * Decrypt and parse backup event content
+ * Supports v2 (plain mnemonic), v1 (JSON with config), and Jumble/Sparkihonne formats
  * @param pubkey - User's Nostr public key
  * @param event - Backup event with encrypted content and encryption tag
- * @returns Decrypted backup data or null
+ * @returns Mnemonic string or null
  */
 async function decryptBackupEvent(
   pubkey: string,
   event: NostrRelaySignedEvent
-): Promise<BackupData | null> {
+): Promise<string | null> {
   try {
     // Check if this is a deleted backup event
     const deletedTag = event.tags.find(t => t[0] === 'deleted');
@@ -120,57 +124,42 @@ async function decryptBackupEvent(
       return null;
     }
 
-    // Detect encryption version from tags (default to nip04 for old backups)
+    // Detect version and encryption from tags
+    const versionTag = event.tags.find(t => t[0] === 'version');
+    const version = versionTag?.[1] || '1'; // Default to v1 for old backups
     const encryptionTag = event.tags.find(t => t[0] === 'encryption');
     const encryptionVersion = encryptionTag?.[1] || 'nip04';
 
-    logInfo(`[SparkBackup] Detected encryption version: ${encryptionVersion}`);
+    logInfo(`[SparkBackup] Detected version: ${version}, encryption: ${encryptionVersion}`);
 
     // Decrypt using appropriate method
     let decrypted: string;
     if (encryptionVersion === 'nip44') {
       decrypted = await decrypt44(pubkey, event.content);
     } else {
-      // Legacy NIP-04 backup
-      logInfo('[SparkBackup] Found legacy NIP-04 backup, decrypting...');
+      logInfo('[SparkBackup] Using NIP-04 decryption...');
       decrypted = await decrypt(pubkey, event.content);
     }
 
-    // Try to parse as JSON first (Primal format)
-    try {
-      const backupData: BackupData = JSON.parse(decrypted);
-
-      // Validate Primal backup data structure
-      if (backupData.version && backupData.mnemonic && backupData.config) {
-        logInfo('[SparkBackup] Found Primal-format backup');
-        return backupData;
-      }
-    } catch (jsonError) {
-      // Not JSON, might be plain mnemonic from Jumble/Sparkihonne
-    }
-
-    // Check if it's a plain mnemonic string (Jumble/Sparkihonne format)
-    // BIP39 mnemonics are 12-24 words separated by spaces
+    // v2 format: Plain mnemonic string (Primal v2, Jumble, Sparkihonne)
     const words = decrypted.trim().split(/\s+/);
     if (words.length >= 12 && words.length <= 24 && words.every(w => /^[a-z]+$/.test(w))) {
-      logInfo(`[SparkBackup] Found Jumble/Sparkihonne-format backup (plain mnemonic, ${words.length} words)`);
-
-      // Convert to Primal format
-      const backupData: BackupData = {
-        version: BACKUP_VERSION,
-        mnemonic: decrypted.trim(),
-        config: {
-          createdAt: event.created_at * 1000, // Use event timestamp
-          encryptionVersion: BACKUP_VERSION,
-        },
-        createdAt: event.created_at * 1000,
-        lastModified: event.created_at * 1000,
-      };
-
-      return backupData;
+      logInfo(`[SparkBackup] Found v2 format backup (plain mnemonic, ${words.length} words)`);
+      return decrypted.trim();
     }
 
-    logWarning('[SparkBackup] Invalid backup data structure - not Primal format or valid mnemonic');
+    // v1 format: JSON with config (legacy Primal)
+    try {
+      const legacyData: LegacyBackupData = JSON.parse(decrypted);
+      if (legacyData.version && legacyData.mnemonic && legacyData.config) {
+        logInfo('[SparkBackup] Found legacy v1 format backup (JSON with config)');
+        return legacyData.mnemonic;
+      }
+    } catch (jsonError) {
+      // Not valid JSON
+    }
+
+    logWarning('[SparkBackup] Invalid backup data - not v1, v2, or valid mnemonic format');
     return null;
   } catch (error) {
     logError('[SparkBackup] Failed to decrypt backup event:', error);
@@ -303,12 +292,12 @@ export async function publishBackup(
  * Fetch wallet backup from Nostr relays
  * @param relays - Relays to fetch from
  * @param pubkey - User's Nostr public key (optional, will fetch if not provided)
- * @returns Promise that resolves to backup data or null if not found
+ * @returns Promise that resolves to mnemonic string or null if not found
  */
 export async function fetchBackup(
   relays: Relay[],
   pubkey?: string
-): Promise<BackupData | null> {
+): Promise<string | null> {
   return new Promise(async (resolve) => {
     try {
       console.log('[SparkBackup] 🔍 Fetching wallet backup from relays...');
@@ -331,7 +320,7 @@ export async function fetchBackup(
       console.log(`[SparkBackup] Fetching from ${allRelayUrls.size} relays (including fallback relays)`);
       logInfo(`[SparkBackup] Fetching from ${allRelayUrls.size} relays (including fallback relays)`);
 
-      let latestBackup: BackupData | null = null;
+      let latestMnemonic: string | null = null;
       let latestTimestamp = 0;
       let eoseCount = 0;
       const totalRelays = allRelayUrls.size;
@@ -367,11 +356,11 @@ export async function fetchBackup(
                 });
 
                 try {
-                  // Decrypt backup
-                  const backupData = await decryptBackupEvent(userPubkey, event);
+                  // Decrypt backup - now returns just the mnemonic
+                  const mnemonic = await decryptBackupEvent(userPubkey, event);
 
-                  if (backupData && event.created_at > latestTimestamp) {
-                    latestBackup = backupData;
+                  if (mnemonic && event.created_at > latestTimestamp) {
+                    latestMnemonic = mnemonic;
                     latestTimestamp = event.created_at;
                     console.log(`[SparkBackup] ✅ Updated latest backup from ${url} (timestamp: ${event.created_at})`);
                     logInfo(`[SparkBackup] Updated latest backup (timestamp: ${event.created_at})`);
@@ -387,7 +376,7 @@ export async function fetchBackup(
                 eoseCount++;
 
                 // Resolve when all relays have sent EOSE or we found a backup
-                if (eoseCount >= totalRelays || latestBackup) {
+                if (eoseCount >= totalRelays || latestMnemonic) {
                   resolveRelay();
                 }
               }
@@ -409,7 +398,7 @@ export async function fetchBackup(
       // Wait for all relays to respond or timeout
       await Promise.all(relayPromises);
 
-      if (latestBackup) {
+      if (latestMnemonic) {
         console.log('[SparkBackup] ✅ Backup fetched successfully!');
         logInfo('[SparkBackup] Backup fetched successfully');
       } else {
@@ -417,7 +406,7 @@ export async function fetchBackup(
         logInfo('[SparkBackup] No backup found on relays');
       }
 
-      resolve(latestBackup);
+      resolve(latestMnemonic);
 
     } catch (error) {
       console.error('[SparkBackup] ❌ Failed to fetch backup:', error);
@@ -446,23 +435,23 @@ export async function restoreFromBackup(
       throw new Error('Cannot restore: No pubkey available');
     }
 
-    // Fetch backup from relays
-    const backupData = await fetchBackup(relays, userPubkey);
+    // Fetch backup from relays - now returns mnemonic string
+    const mnemonic = await fetchBackup(relays, userPubkey);
 
-    if (!backupData) {
+    if (!mnemonic) {
       logWarning('[SparkBackup] No backup found to restore');
       return false;
     }
 
-    // Validate backup version
-    if (backupData.version !== BACKUP_VERSION) {
-      logWarning(`[SparkBackup] Unsupported backup version: ${backupData.version}`);
-      return false;
-    }
-
     // Save to local storage
-    await saveEncryptedSeed(backupData.mnemonic, userPubkey);
-    saveSparkConfig(userPubkey, backupData.config);
+    await saveEncryptedSeed(mnemonic, userPubkey);
+
+    // Create minimal config for v2 backups
+    const config: SparkWalletConfig = {
+      createdAt: Date.now(),
+      encryptionVersion: String(BACKUP_VERSION),
+    };
+    saveSparkConfig(userPubkey, config);
 
     logInfo('[SparkBackup] Wallet restored successfully from backup');
     return true;

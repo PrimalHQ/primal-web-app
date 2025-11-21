@@ -39,6 +39,7 @@ const WalletContent: Component = () => {
   const [openRestoreDialog, setOpenRestoreDialog] = createSignal(false);
   const [restoreMethod, setRestoreMethod] = createSignal<'backup' | 'manual' | 'file' | null>(null);
   const [activeTab, setActiveTab] = createSignal<'payments' | 'topup'>('payments');
+  const [backupToRelays, setBackupToRelays] = createSignal(false);
   const [showSettings, setShowSettings] = createSignal(false);
   const [hasBackedUpSeed, setHasBackedUpSeed] = createSignal(false);
   const [isRestoring, setIsRestoring] = createSignal(false);
@@ -85,6 +86,11 @@ const WalletContent: Component = () => {
   });
 
   const handleCreateNewWallet = () => {
+    if (!account?.publicKey) {
+      toast?.sendWarning('Please log in first to create a wallet');
+      return;
+    }
+
     const newMnemonic = generateMnemonic(wordlist, 128); // 128 bits = 12 words
     setMnemonic(newMnemonic);
     setHasBackedUpSeed(false);
@@ -94,6 +100,11 @@ const WalletContent: Component = () => {
   };
 
   const handleOpenRestore = () => {
+    if (!account?.publicKey) {
+      toast?.sendWarning('Please log in first to restore a wallet');
+      return;
+    }
+
     setMnemonic('');
     setShowMnemonic(false);
     setRestoreMethod(null);
@@ -120,9 +131,21 @@ const WalletContent: Component = () => {
     }
 
     try {
-      await sparkWallet.actions.connect(seed, false); // Backup is opt-in via "Sync Backup to Relays" button
+      await sparkWallet.actions.connect(seed, false);
+
+      // If user opted to backup to relays, sync now
+      if (backupToRelays()) {
+        try {
+          await handleSyncBackup();
+        } catch (backupError) {
+          console.error('Relay backup failed:', backupError);
+          toast?.sendWarning('Wallet created but relay backup failed. You can backup later from settings.');
+        }
+      }
+
       setMnemonic('');
       setHasBackedUpSeed(false);
+      setBackupToRelays(false);
       setOpenCreateDialog(false);
       toast?.sendSuccess('Spark wallet created successfully');
     } catch (error: any) {
@@ -232,7 +255,17 @@ const WalletContent: Component = () => {
 
     try {
       // Connect and restore the wallet
-      await sparkWallet.actions.connect(seed, false); // Backup is opt-in via "Sync Backup to Relays" button
+      await sparkWallet.actions.connect(seed, false);
+
+      // If user opted to backup to relays, sync now
+      if (backupToRelays()) {
+        try {
+          await handleSyncBackup();
+        } catch (backupError) {
+          console.error('Relay backup failed:', backupError);
+          toast?.sendWarning('Wallet restored but relay backup failed. You can backup later from settings.');
+        }
+      }
 
       // Force a balance refresh to ensure UI updates
       await sparkWallet.actions.refreshBalance();
@@ -241,6 +274,7 @@ const WalletContent: Component = () => {
       await sparkWallet.actions.loadPaymentHistory();
 
       setMnemonic('');
+      setBackupToRelays(false);
       setRestoreMethod(null);
       setOpenRestoreDialog(false);
       toast?.sendSuccess('Wallet restored successfully');
@@ -697,8 +731,9 @@ const WalletContent: Component = () => {
       if (hasBackup) {
         await deleteBackup(relays, account.publicKey);
 
-        // Update local state to reflect that backup is deleted
-        await sparkWallet.actions.checkBackupStatus();
+        // Immediately update local state to show no backup
+        // (don't check relays again as deletion event may still be there)
+        sparkWallet.actions.setHasBackup(false);
 
         toast?.sendSuccess('Relay backup deleted successfully.');
       } else {
@@ -1193,17 +1228,6 @@ const WalletContent: Component = () => {
                         </div>
                         <div class={styles.settingArrow}></div>
                       </button>
-                      <button class={styles.settingItem} onClick={handleRemoveWallet}>
-                        <div class={styles.settingInfo}>
-                          <div class={`${styles.settingLabel} ${styles.settingLabelDanger}`}>
-                            Remove Wallet
-                          </div>
-                          <div class={styles.settingDesc}>
-                            Permanently remove wallet (backup your seed first!)
-                          </div>
-                        </div>
-                        <div class={styles.settingArrow}></div>
-                      </button>
                       <button class={styles.settingItem} onClick={handleDeleteRelayBackups}>
                         <div class={styles.settingInfo}>
                           <div class={`${styles.settingLabel} ${styles.settingLabelDanger}`}>
@@ -1211,6 +1235,17 @@ const WalletContent: Component = () => {
                           </div>
                           <div class={styles.settingDesc}>
                             Remove all backups from Nostr relays
+                          </div>
+                        </div>
+                        <div class={styles.settingArrow}></div>
+                      </button>
+                      <button class={styles.settingItem} onClick={handleRemoveWallet}>
+                        <div class={styles.settingInfo}>
+                          <div class={`${styles.settingLabel} ${styles.settingLabelDanger}`}>
+                            Remove Wallet
+                          </div>
+                          <div class={styles.settingDesc}>
+                            Permanently remove wallet (backup your seed first!)
                           </div>
                         </div>
                         <div class={styles.settingArrow}></div>
@@ -1233,6 +1268,7 @@ const WalletContent: Component = () => {
             setMnemonic('');
             setShowMnemonic(false);
             setHasBackedUpSeed(false);
+            setBackupToRelays(false);
             setDialogMode('create');
           }
         }}
@@ -1276,6 +1312,16 @@ const WalletContent: Component = () => {
               <label for="confirmBackupCreate">I have written down my seed phrase in a safe place</label>
             </div>
 
+            <div class={styles.checkboxContainer}>
+              <input
+                type="checkbox"
+                id="backupToRelaysCreate"
+                checked={backupToRelays()}
+                onChange={(e) => setBackupToRelays(e.currentTarget.checked)}
+              />
+              <label for="backupToRelaysCreate">Backup to Nostr relays (optional)</label>
+            </div>
+
             <div class={styles.dialogInfo}>
               Never share your seed phrase with anyone. Your seed will be encrypted and stored securely using your Nostr key.
             </div>
@@ -1303,6 +1349,7 @@ const WalletContent: Component = () => {
                 setMnemonic('');
                 setShowMnemonic(false);
                 setHasBackedUpSeed(false);
+                setBackupToRelays(false);
                 setOpenCreateDialog(false);
                 setDialogMode('create');
               }}
@@ -1327,6 +1374,7 @@ const WalletContent: Component = () => {
           if (!open) {
             setMnemonic('');
             setShowMnemonic(false);
+            setBackupToRelays(false);
             setRestoreMethod(null);
             setIsRestoring(false);
           }
@@ -1402,6 +1450,16 @@ const WalletContent: Component = () => {
               </div>
             </Show>
 
+            <div class={styles.checkboxContainer}>
+              <input
+                type="checkbox"
+                id="backupToRelaysFile"
+                checked={backupToRelays()}
+                onChange={(e) => setBackupToRelays(e.currentTarget.checked)}
+              />
+              <label for="backupToRelaysFile">Backup to Nostr relays (optional)</label>
+            </div>
+
             <div class={styles.dialogInfo}>
               Your wallet file will be encrypted and stored securely using your Nostr key.
             </div>
@@ -1436,6 +1494,16 @@ const WalletContent: Component = () => {
               <label for="showMnemonicRestore">Show seed phrase</label>
             </div>
 
+            <div class={styles.checkboxContainer}>
+              <input
+                type="checkbox"
+                id="backupToRelaysRestore"
+                checked={backupToRelays()}
+                onChange={(e) => setBackupToRelays(e.currentTarget.checked)}
+              />
+              <label for="backupToRelaysRestore">Backup to Nostr relays (optional)</label>
+            </div>
+
             <div class={styles.dialogInfo}>
               Never share your seed phrase with anyone. Your seed will be encrypted and stored securely using your Nostr key.
             </div>
@@ -1449,6 +1517,7 @@ const WalletContent: Component = () => {
                 setRestoreMethod(null);
                 setMnemonic('');
                 setShowMnemonic(false);
+                setBackupToRelays(false);
               } else {
                 setOpenRestoreDialog(false);
               }
