@@ -157,17 +157,17 @@ const LightningAddressCard: Component = () => {
     try {
       setIsUpdatingProfile(true);
 
-      // Get current profile metadata
-      const currentMetadata = account.activeUser.userStats;
+      // Get current profile metadata from msg.content (JSON string)
+      const currentProfile: Record<string, any> = JSON.parse(account.activeUser.msg?.content || '{}');
 
-      // Update lud16 field
+      // Preserve ALL existing profile fields and update only lud16
       const updatedMetadata = {
-        ...currentMetadata,
-        lud16: lightningAddress,
+        ...currentProfile,  // Preserve name, about, picture, banner, nip05, website, etc.
+        lud16: lightningAddress,  // Update Lightning address
       };
 
       // Publish updated profile
-      await sendProfile(updatedMetadata, false, account.activeRelays, account.relaySettings);
+      await sendProfile(updatedMetadata, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
 
       toast?.sendSuccess('Profile updated with new Lightning address!');
       setShowProfilePrompt(false);
