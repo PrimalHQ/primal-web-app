@@ -102,12 +102,6 @@ class BreezWalletService {
       // Get API key from environment or parameter
       const key = apiKey || import.meta.env.VITE_BREEZ_API_KEY;
 
-      // Debug logging
-      console.log('[BreezWallet DEBUG] apiKey param:', apiKey);
-      console.log('[BreezWallet DEBUG] import.meta.env.VITE_BREEZ_API_KEY:', import.meta.env.VITE_BREEZ_API_KEY);
-      console.log('[BreezWallet DEBUG] All env vars:', import.meta.env);
-      console.log('[BreezWallet DEBUG] Final key value:', key);
-
       if (!key || key === 'YOUR_BREEZ_API_KEY_HERE') {
         throw new Error('Breez API key not configured. Please set VITE_BREEZ_API_KEY in .env');
       }
