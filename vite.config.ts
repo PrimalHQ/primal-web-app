@@ -11,6 +11,10 @@ export default defineConfig(({ mode }) => {
   console.log('[VITE CONFIG] Mode:', mode);
   console.log('[VITE CONFIG] VITE_BREEZ_API_KEY from env:', env.VITE_BREEZ_API_KEY);
   console.log('[VITE CONFIG] First 20 chars:', env.VITE_BREEZ_API_KEY?.substring(0, 20));
+  console.log('[VITE CONFIG] PRIMAL_CACHE_URL:', env.PRIMAL_CACHE_URL);
+  console.log('[VITE CONFIG] PRIMAL_UPLOAD_URL:', env.PRIMAL_UPLOAD_URL);
+  console.log('[VITE CONFIG] PRIMAL_PRIORITY_RELAYS:', env.PRIMAL_PRIORITY_RELAYS);
+  console.log('[VITE CONFIG] VITE_USE_PRIMAL_NIP05:', env.VITE_USE_PRIMAL_NIP05);
 
   return {
     plugins: [
@@ -42,7 +46,11 @@ export default defineConfig(({ mode }) => {
     envPrefix: ['PRIMAL_', 'VITE_'], // Support both prefixes
     define: {
       'import.meta.env.PRIMAL_VERSION': JSON.stringify(packageJson.version),
+      'import.meta.env.PRIMAL_CACHE_URL': JSON.stringify(env.PRIMAL_CACHE_URL),
+      'import.meta.env.PRIMAL_UPLOAD_URL': JSON.stringify(env.PRIMAL_UPLOAD_URL),
+      'import.meta.env.PRIMAL_PRIORITY_RELAYS': JSON.stringify(env.PRIMAL_PRIORITY_RELAYS),
       'import.meta.env.VITE_BREEZ_API_KEY': JSON.stringify(env.VITE_BREEZ_API_KEY),
+      'import.meta.env.VITE_USE_PRIMAL_NIP05': JSON.stringify(env.VITE_USE_PRIMAL_NIP05 || 'false'),
     },
     esbuild: {
       keepNames: true,

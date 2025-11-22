@@ -230,7 +230,9 @@ export const getLikes = (pubkey: string | undefined, relays: Relay[], callback: 
 export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles> = async (vanityName: string) => {
   try {
     const name = vanityName.toLowerCase();
-    const origin = window.location.origin.startsWith('http://localhost') ? 'https://dev.primal.net' : window.location.origin;
+    // Use primal.net for NIP-05 lookups on localhost, or if VITE_USE_PRIMAL_NIP05 is set (for Vercel deployments)
+    const usePrimalNip05 = window.location.origin.startsWith('http://localhost') || import.meta.env.VITE_USE_PRIMAL_NIP05 === 'true';
+    const origin = usePrimalNip05 ? 'https://primal.net' : window.location.origin;
 
     const content = await fetch(`${origin}/.well-known/nostr.json?name=${name}`);
 
