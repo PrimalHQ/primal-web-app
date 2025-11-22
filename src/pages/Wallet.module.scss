@@ -1181,7 +1181,6 @@
 
 // Wallet disclaimer at bottom
 .walletDisclaimer {
-  margin-top: 32px;
   padding: 20px;
   text-align: left;
   font-size: 12px;
@@ -1194,5 +1193,36 @@
     &:last-child {
       margin-bottom: 0;
     }
+  }
+}
+
+// Syncing banner
+.syncingBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background-color: rgba(250, 177, 0, 0.1);
+  border: 1px solid rgba(250, 177, 0, 0.3);
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.syncingDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #fab100;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
   }
 }

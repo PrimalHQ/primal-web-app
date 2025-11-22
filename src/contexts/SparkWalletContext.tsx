@@ -142,13 +142,38 @@ export const SparkWalletProvider: ParentComponent = (props) => {
     }
   };
 
+  // Load cached balance
+  const loadCachedBalance = () => {
+    if (!account?.publicKey) return null;
+    try {
+      const cached = localStorage.getItem(`spark_balance_${account.publicKey}`);
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  };
+
+  // Save balance to cache
+  const saveCachedBalance = (balance: number, lastSynced: Date) => {
+    if (!account?.publicKey) return;
+    try {
+      localStorage.setItem(`spark_balance_${account.publicKey}`, JSON.stringify({
+        balance,
+        lastSynced: lastSynced.getTime()
+      }));
+    } catch (e) {
+      logError('[SparkWallet] Failed to cache balance:', e);
+    }
+  };
+
   // Initialize store
+  const cachedBalance = loadCachedBalance();
   const [store, setStore] = createStore<SparkWalletStore>({
     isConnected: false,
     isConnecting: false,
     isConfigured: false,
     isEnabled: loadWalletEnabled(),
-    balance: 0,
+    balance: cachedBalance?.balance || 0,
     tokenBalances: new Map(),
     config: null,
     network: 'mainnet',
@@ -183,17 +208,6 @@ export const SparkWalletProvider: ParentComponent = (props) => {
       const isConfigured = isSparkWalletConfigured(account.publicKey);
       setStore('isConfigured', isConfigured);
 
-      // Check backup status even if not configured
-      if (account.activeRelays) {
-        try {
-          const backupExists = await hasBackup(account.activeRelays, account.publicKey);
-          setStore('hasBackup', backupExists);
-          logInfo(`[SparkWallet] Backup status checked: ${backupExists}`);
-        } catch (error) {
-          logWarning('[SparkWallet] Failed to check backup status:', error);
-        }
-      }
-
       // Only auto-connect if wallet is enabled
       if (isConfigured && !store.isConnected && store.isEnabled) {
         logInfo('[SparkWallet] Wallet configured and enabled, auto-connecting...');
@@ -212,6 +226,18 @@ export const SparkWalletProvider: ParentComponent = (props) => {
         }
       } else if (isConfigured && !store.isEnabled) {
         logInfo('[SparkWallet] Wallet configured but disabled, skipping auto-connect');
+      }
+
+      // Check backup status AFTER connection (non-blocking, fire-and-forget)
+      if (account.activeRelays) {
+        hasBackup(account.activeRelays, account.publicKey)
+          .then(backupExists => {
+            setStore('hasBackup', backupExists);
+            logInfo(`[SparkWallet] Backup status checked: ${backupExists}`);
+          })
+          .catch(error => {
+            logWarning('[SparkWallet] Failed to check backup status:', error);
+          });
       }
     } catch (error) {
       logError('[SparkWallet] Auto-connect failed:', error);
@@ -338,8 +364,12 @@ export const SparkWalletProvider: ParentComponent = (props) => {
   const refreshBalance = async (): Promise<void> => {
     try {
       const balance = await breezWallet.getBalance();
+      const now = new Date();
       setStore('balance', balance);
-      setStore('lastSynced', new Date());
+      setStore('lastSynced', now);
+
+      // Cache balance for faster next load
+      saveCachedBalance(balance, now);
 
       // Update account context
       account?.actions.updateBreezWallet({
@@ -779,9 +809,10 @@ export const SparkWalletProvider: ParentComponent = (props) => {
    * Toggle balance visibility
    */
   const toggleBalanceVisibility = () => {
-    setStore('isBalanceHidden', !store.isBalanceHidden);
+    const newVisibility = !store.isBalanceHidden;
+    setStore('isBalanceHidden', newVisibility);
     try {
-      localStorage.setItem('spark_balance_hidden', String(!store.isBalanceHidden));
+      localStorage.setItem('spark_balance_hidden', String(newVisibility));
     } catch (error) {
       logError('[SparkWallet] Failed to save balance visibility preference:', error);
     }

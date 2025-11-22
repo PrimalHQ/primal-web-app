@@ -29,6 +29,7 @@ import { useAppContext } from '../../contexts/AppContext';
 import LiveEventSidebarSkeleton from '../Skeleton/LiveEventSidebarSkeleton';
 import { useSearchParams } from '@solidjs/router';
 import LivePill from '../LivePill/LivePill';
+import WalletBalanceWidget from '../WalletBalanceWidget/WalletBalanceWidget';
 
 const sidebarOptions = [
   {
@@ -311,6 +312,8 @@ const HomeSidebar: Component< { id?: string } > = (props) => {
 
   return (
     <div id={props.id}>
+      <WalletBalanceWidget />
+
       <Show when={liveEvents.length > 0}>
         <div class={styles.headingLive}>
           <div>

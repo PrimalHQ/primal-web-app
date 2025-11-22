@@ -115,6 +115,7 @@ class BreezWalletService {
       // Create default configuration
       const config: Config = defaultConfig(network);
       config.apiKey = key;
+      config.privateEnabledDefault = true; // Enable privacy mode by default
 
       // For web implementation, real-time sync is optional
       // Leave realTimeSyncServerUrl undefined to disable it

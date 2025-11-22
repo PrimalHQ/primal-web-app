@@ -318,6 +318,38 @@ Complete end-to-end workflow verified:
 7. **Write Unit Tests** - Test wallet service and storage
 8. **Update Documentation** - Complete user guide
 
+## Recent Updates (Session 5) - Performance, Privacy & Sidebar Widget
+
+### Major Performance Improvements ✅
+- **Balance Caching** - Wallet balance cached in localStorage for instant display (0.5-2s perceived load vs 5-8s before)
+- **Non-blocking Backup Check** - Backup status check moved to fire-and-forget (saves 1-2s on auto-connect)
+- **Progressive UI Loading** - Wallet UI shows immediately with cached data while connecting
+- **Syncing Indicator** - Yellow banner with pulsing dot shows when displaying cached data
+
+### Sidebar Wallet Widget ✅
+- **Compact Balance Display** - Shows wallet balance in right sidebar (desktop only)
+- **Currency Conversion** - Displays SATS or selected fiat currency with real-time conversion
+- **Privacy Toggle** - Eye icon to hide/show balance
+- **Quick Navigation** - Click widget to navigate to wallet page
+- **Responsive** - Hidden on mobile/tablet screens (<1087px)
+
+### Privacy & SDK Updates ✅
+- **Breez SDK v0.4.2** - Updated from v0.4.0-rc2 to latest stable version
+- **Privacy Mode Enabled** - `privateEnabledDefault: true` matches jumble-spark configuration
+- **Enhanced Privacy** - Better transaction privacy and reduced data exposure
+
+### UI/UX Fixes ✅
+- **Balance Visibility Bug** - Fixed toggle saving inverted value to localStorage
+- **Settings Chevron** - Updated to use proper SVG icon with smooth rotation animation
+- **Wallet Disclaimer** - Added version info and privacy note at bottom of wallet page
+- **Eye Button Styling** - Removed extra vertical spacing for cleaner alignment
+- **Font Improvements** - Use Nacelle font for balance displays
+
+### Bug Fixes ✅
+- **Incoming Payment Amount** - Fixed toast showing 0 sats (now correctly uses payment.amount)
+- **Balance Visibility** - Fixed default state and persistence across page refreshes
+- **Eye Button Layout** - Fixed inherited width causing layout breaks
+
 ## Support
 
 If you encounter issues:

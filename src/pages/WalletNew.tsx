@@ -874,7 +874,7 @@ const WalletContent: Component = () => {
 
       <div class={styles.walletContent}>
         <Show
-          when={sparkWallet.store.isConnected}
+          when={sparkWallet.store.isConnected || (sparkWallet.store.isConfigured && sparkWallet.store.balance > 0)}
           fallback={
             <Show
               when={sparkWallet.store.isConfigured}
@@ -930,6 +930,14 @@ const WalletContent: Component = () => {
           }
         >
           <div class={styles.walletConnected}>
+            {/* Syncing indicator when showing cached data */}
+            <Show when={!sparkWallet.store.isConnected}>
+              <div class={styles.syncingBanner}>
+                <div class={styles.syncingDot}></div>
+                <span>Syncing wallet...</span>
+              </div>
+            </Show>
+
             {/* Balance Section */}
             <div class={styles.balanceCard}>
               <div class={styles.balanceHeader}>
@@ -1364,6 +1372,7 @@ const WalletContent: Component = () => {
             {/* Wallet Disclaimer */}
             <div class={styles.walletDisclaimer}>
               <div>Breez SDK + Spark wallet integration</div>
+              <div>Version 0.4.2 with privacy mode enabled by default</div>
               <div>Recovery phrase encrypted with XChaCha20-Poly1305</div>
               <div>Saved locally and optionally backed up to Nostr relays</div>
               <div>Hot wallet - do not use with large amounts!</div>
