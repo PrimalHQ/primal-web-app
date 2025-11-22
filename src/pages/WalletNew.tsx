@@ -520,13 +520,19 @@ const WalletContent: Component = () => {
       return;
     }
 
-    // Check if we've already processed this payment
+    // Check if notification was already shown for this payment
+    if (lastReceived.notificationShown) {
+      return;
+    }
+
+    // Check if we've already processed this payment (local component state)
     if (lastReceived.invoice === lastProcessedPaymentInvoice()) {
       return;
     }
 
-    // Mark this payment as processed
+    // Mark this payment as processed locally and in the context
     setLastProcessedPaymentInvoice(lastReceived.invoice);
+    sparkWallet.actions.markPaymentNotificationShown();
 
     // Check if this payment matches our displayed invoice (Top Up flow)
     const isInvoicePayment = invoice && lastReceived.invoice === invoice;
@@ -920,10 +926,17 @@ const WalletContent: Component = () => {
                   <Loader />
                 </div>
                 <div class={styles.emptyTitle}>
-                  Connecting to wallet...
+                  Restoring wallet...
                 </div>
                 <div class={styles.emptyDescription}>
-                  Please wait while we connect to your Breez Spark wallet.
+                  <Show when={sparkWallet.store.connectionProgress}>
+                    <div style="margin-bottom: 8px; color: var(--text-primary);">
+                      {sparkWallet.store.connectionProgress}
+                    </div>
+                  </Show>
+                  Connecting to your Breez Spark wallet and syncing your balance.
+                  <br/>
+                  <strong>This may take up to a minute.</strong> Please be patient.
                 </div>
               </div>
             </Show>

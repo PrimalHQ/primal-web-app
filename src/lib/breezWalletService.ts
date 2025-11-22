@@ -95,9 +95,10 @@ class BreezWalletService {
   ): Promise<void> {
     try {
       // Initialize WASM first
+      logInfo('[BreezWallet] Step 1/4: Initializing WASM module...');
       await this.initWasm();
 
-      logInfo('[BreezWallet] Connecting to Breez SDK...');
+      logInfo('[BreezWallet] Step 2/4: Connecting to Breez SDK...');
 
       // Get API key from environment or parameter
       const key = apiKey || import.meta.env.VITE_BREEZ_API_KEY;
@@ -136,13 +137,17 @@ class BreezWalletService {
       this.state.isConnected = true;
       this.state.isInitialized = true;
 
-      logInfo('[BreezWallet] Connected successfully');
+      logInfo('[BreezWallet] Step 3/4: Connected to SDK, syncing balance...');
 
       // Initial balance sync
       await this.syncBalance();
 
+      logInfo('[BreezWallet] Step 4/4: Setting up event listeners...');
+
       // Set up default event listener for SDK events
       this.setupDefaultEventListener();
+
+      logInfo('[BreezWallet] ✓ Wallet restored successfully! Balance:', this.state.balance, 'sats');
 
     } catch (error) {
       logError('[BreezWallet] Connection failed:', error);

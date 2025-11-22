@@ -27,6 +27,7 @@ export type SparkWalletStore = {
   isConnecting: boolean;
   isConfigured: boolean;
   isEnabled: boolean;
+  connectionProgress?: string; // Progress message during connection
 
   // Wallet data
   balance: number; // sats
@@ -56,6 +57,7 @@ export type SparkWalletStore = {
     invoice: string;
     amount: number;
     timestamp: number;
+    notificationShown?: boolean; // Track if notification was already shown
   };
 
   // Display preferences
@@ -102,6 +104,9 @@ export type SparkWalletActions = {
   // Display preferences
   setDisplayCurrency: (currency: string) => void;
   toggleBalanceVisibility: () => void;
+
+  // Notification management
+  markPaymentNotificationShown: () => void;
 };
 
 export type SparkWalletContextType = {
@@ -254,9 +259,12 @@ export const SparkWalletProvider: ParentComponent = (props) => {
 
     try {
       setStore('isConnecting', true);
+      setStore('connectionProgress', 'Initializing wallet...');
 
       // Connect to Breez SDK
       await breezWallet.connect(mnemonic, store.network);
+
+      setStore('connectionProgress', 'Syncing balance...');
 
       // Save encrypted seed locally
       await saveEncryptedSeed(mnemonic, account.publicKey);
@@ -286,11 +294,14 @@ export const SparkWalletProvider: ParentComponent = (props) => {
       // Backup to Nostr relays if enabled
       if (enableBackup && account.activeRelays) {
         try {
+          setStore('connectionProgress', 'Backing up to relays...');
           await actions.enableBackup();
         } catch (error) {
           logWarning('[SparkWallet] Backup failed, continuing without backup:', error);
         }
       }
+
+      setStore('connectionProgress', 'Finalizing...');
 
       // Update account context
       account.actions.updateBreezWallet({
@@ -317,6 +328,7 @@ export const SparkWalletProvider: ParentComponent = (props) => {
       throw error;
     } finally {
       setStore('isConnecting', false);
+      setStore('connectionProgress', undefined);
     }
   };
 
@@ -819,6 +831,18 @@ export const SparkWalletProvider: ParentComponent = (props) => {
   };
 
   /**
+   * Mark the current payment notification as shown to prevent re-display
+   */
+  const markPaymentNotificationShown = () => {
+    if (store.lastReceivedPayment) {
+      setStore('lastReceivedPayment', {
+        ...store.lastReceivedPayment,
+        notificationShown: true,
+      });
+    }
+  };
+
+  /**
    * Enable Spark wallet for zaps
    */
   const enableWallet = () => {
@@ -883,6 +907,7 @@ export const SparkWalletProvider: ParentComponent = (props) => {
     updateConfig,
     setDisplayCurrency,
     toggleBalanceVisibility,
+    markPaymentNotificationShown,
   };
 
   return (
