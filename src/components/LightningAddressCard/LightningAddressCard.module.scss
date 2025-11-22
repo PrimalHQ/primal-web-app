@@ -386,3 +386,75 @@
     min-width: 200px;
   }
 }
+
+// Profile Update Prompt Modal
+.profilePrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  min-width: 400px;
+  max-width: 500px;
+  padding: 8px 0;
+
+  @media (max-width: 600px) {
+    min-width: 280px;
+    max-width: calc(100vw - 48px);
+  }
+}
+
+.promptIcon {
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.promptMessage {
+  font-size: 16px;
+  color: var(--text-primary);
+  text-align: center;
+  line-height: 1.5;
+
+  strong {
+    font-weight: 600;
+    color: var(--accent);
+    word-break: break-all;
+    display: block;
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-size: 14px;
+  }
+}
+
+.promptDescription {
+  font-size: 14px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.promptActions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: 8px;
+
+  button {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+}

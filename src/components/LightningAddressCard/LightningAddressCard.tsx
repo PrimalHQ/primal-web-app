@@ -1,16 +1,19 @@
 import { Component, createSignal, Show, createEffect } from 'solid-js';
 import { useToastContext } from '../Toaster/Toaster';
 import { useSparkWallet } from '../../contexts/SparkWalletContext';
+import { useAccountContext } from '../../contexts/AccountContext';
 import { TextField } from '@kobalte/core/text-field';
 import { Dialog } from '@kobalte/core/dialog';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import Loader from '../Loader/Loader';
+import { sendProfile } from '../../lib/profile';
 
 import styles from './LightningAddressCard.module.scss';
 
 const LightningAddressCard: Component = () => {
   const sparkWallet = useSparkWallet();
+  const account = useAccountContext();
   const toast = useToastContext();
 
   const [showRegisterForm, setShowRegisterForm] = createSignal(false);
@@ -20,6 +23,9 @@ const LightningAddressCard: Component = () => {
   const [isAvailable, setIsAvailable] = createSignal<boolean | null>(null);
   const [showQrCode, setShowQrCode] = createSignal(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = createSignal('');
+  const [showProfilePrompt, setShowProfilePrompt] = createSignal(false);
+  const [newLightningAddress, setNewLightningAddress] = createSignal('');
+  const [isUpdatingProfile, setIsUpdatingProfile] = createSignal(false);
 
   let checkTimeout: NodeJS.Timeout | undefined;
 
@@ -122,17 +128,61 @@ const LightningAddressCard: Component = () => {
 
     try {
       setIsRegistering(true);
-      await sparkWallet.actions.registerLightningAddress(user);
-      toast?.sendSuccess(`Lightning address registered: ${user}`);
+      const addressInfo = await sparkWallet.actions.registerLightningAddress(user);
+      toast?.sendSuccess(`Lightning address registered: ${user}@breez.tips`);
       setShowRegisterForm(false);
       setUsername('');
       setIsAvailable(null);
+
+      // Show prompt to update Nostr profile
+      setNewLightningAddress(addressInfo.lightningAddress);
+      setShowProfilePrompt(true);
     } catch (error: any) {
       console.error('Failed to register Lightning address:', error);
       toast?.sendWarning(`Failed to register: ${error?.message || 'Unknown error'}`);
     } finally {
       setIsRegistering(false);
     }
+  };
+
+  const handleUpdateProfile = async () => {
+    if (!account?.activeUser || !account.activeRelays) {
+      toast?.sendWarning('Please log in to update your profile');
+      return;
+    }
+
+    const lightningAddress = newLightningAddress();
+    if (!lightningAddress) return;
+
+    try {
+      setIsUpdatingProfile(true);
+
+      // Get current profile metadata
+      const currentMetadata = account.activeUser.userStats;
+
+      // Update lud16 field
+      const updatedMetadata = {
+        ...currentMetadata,
+        lud16: lightningAddress,
+      };
+
+      // Publish updated profile
+      await sendProfile(updatedMetadata, false, account.activeRelays, account.relaySettings);
+
+      toast?.sendSuccess('Profile updated with new Lightning address!');
+      setShowProfilePrompt(false);
+      setNewLightningAddress('');
+    } catch (error: any) {
+      console.error('Failed to update profile:', error);
+      toast?.sendWarning(`Failed to update profile: ${error?.message || 'Unknown error'}`);
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
+
+  const handleSkipProfileUpdate = () => {
+    setShowProfilePrompt(false);
+    setNewLightningAddress('');
   };
 
   const handleShowQrCode = () => {
@@ -307,6 +357,50 @@ const LightningAddressCard: Component = () => {
                     </ButtonPrimary>
                   </div>
                 </Show>
+              </Dialog.Description>
+            </Dialog.Content>
+          </div>
+        </Dialog.Portal>
+      </Dialog>
+
+      {/* Profile Update Prompt Modal */}
+      <Dialog open={showProfilePrompt()} onOpenChange={setShowProfilePrompt}>
+        <Dialog.Portal>
+          <Dialog.Overlay class={styles.dialogOverlay} />
+          <div class={styles.dialogContainer}>
+            <Dialog.Content class={styles.dialogContent}>
+              <div class={styles.dialogHeader}>
+                <Dialog.Title class={styles.dialogTitle}>
+                  Update Nostr Profile?
+                </Dialog.Title>
+              </div>
+              <Dialog.Description class={styles.profilePrompt}>
+                <div class={styles.promptIcon}>
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                </div>
+                <div class={styles.promptMessage}>
+                  Would you like to set <strong>{newLightningAddress()}</strong> as your Nostr profile's Lightning address?
+                </div>
+                <div class={styles.promptDescription}>
+                  This will update your profile so others can send you zaps to this address.
+                </div>
+                <div class={styles.promptActions}>
+                  <ButtonSecondary
+                    onClick={handleSkipProfileUpdate}
+                    disabled={isUpdatingProfile()}
+                  >
+                    Maybe Later
+                  </ButtonSecondary>
+                  <ButtonPrimary
+                    onClick={handleUpdateProfile}
+                    disabled={isUpdatingProfile()}
+                  >
+                    {isUpdatingProfile() ? <Loader /> : 'Yes, Update Profile'}
+                  </ButtonPrimary>
+                </div>
               </Dialog.Description>
             </Dialog.Content>
           </div>
