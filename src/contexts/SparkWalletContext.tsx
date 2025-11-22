@@ -48,6 +48,8 @@ export type SparkWalletStore = {
   // Payment history
   payments: BreezPaymentInfo[];
   paymentsLoading: boolean;
+  hasMorePayments: boolean;
+  paymentsOffset: number;
 
   // Last received payment (for notifications)
   lastReceivedPayment?: {
@@ -78,6 +80,7 @@ export type SparkWalletActions = {
   sendPayment: (invoice: string, recipientPubkey?: string) => Promise<BreezPaymentInfo>;
   createInvoice: (amountSats: number, description?: string) => Promise<string>;
   loadPaymentHistory: (limit?: number, offset?: number) => Promise<void>;
+  loadMorePayments: () => Promise<void>;
 
   // Lightning address operations
   loadLightningAddress: () => Promise<void>;
@@ -152,6 +155,8 @@ export const SparkWalletProvider: ParentComponent = (props) => {
     hasBackup: false,
     payments: [],
     paymentsLoading: false,
+    hasMorePayments: true,
+    paymentsOffset: 0,
     displayCurrency: loadDisplayCurrency(),
     isBalanceHidden: loadBalanceVisibility(),
   });
@@ -413,16 +418,44 @@ export const SparkWalletProvider: ParentComponent = (props) => {
   };
 
   /**
-   * Load payment history
+   * Load payment history (initial load - replaces existing)
    */
   const loadPaymentHistory = async (limit: number = 50, offset: number = 0): Promise<void> => {
     try {
       setStore('paymentsLoading', true);
       const payments = await breezWallet.getPaymentHistory(limit, offset);
       setStore('payments', payments);
+      setStore('paymentsOffset', payments.length);
+      setStore('hasMorePayments', payments.length === limit);
       logInfo(`[SparkWallet] Loaded ${payments.length} payments`);
     } catch (error) {
       logError('[SparkWallet] Failed to load payment history:', error);
+      throw error;
+    } finally {
+      setStore('paymentsLoading', false);
+    }
+  };
+
+  /**
+   * Load more payments (appends to existing)
+   */
+  const loadMorePayments = async (): Promise<void> => {
+    if (!store.hasMorePayments || store.paymentsLoading) {
+      return;
+    }
+
+    try {
+      setStore('paymentsLoading', true);
+      const limit = 50;
+      const newPayments = await breezWallet.getPaymentHistory(limit, store.paymentsOffset);
+
+      setStore('payments', [...store.payments, ...newPayments]);
+      setStore('paymentsOffset', store.paymentsOffset + newPayments.length);
+      setStore('hasMorePayments', newPayments.length === limit);
+
+      logInfo(`[SparkWallet] Loaded ${newPayments.length} more payments (total: ${store.payments.length})`);
+    } catch (error) {
+      logError('[SparkWallet] Failed to load more payments:', error);
       throw error;
     } finally {
       setStore('paymentsLoading', false);
@@ -662,25 +695,27 @@ export const SparkWalletProvider: ParentComponent = (props) => {
                 // Store the last received payment for UI notifications
                 const invoice = payment.details?.type === 'lightning' ? payment.details.invoice : undefined;
 
-                // Get amount in sats (amountSats or convert from amountMsat)
-                const amountSats = payment.amountSats || (payment.amountMsat ? Math.floor(payment.amountMsat / 1000) : 0);
+                // Get amount in sats (SDK Payment type uses 'amount' field)
+                const amountSats = Number(payment.amount) || 0;
 
                 if (invoice) {
                   setStore('lastReceivedPayment', {
                     invoice,
                     amount: amountSats,
-                    timestamp: payment.createdAt,
+                    timestamp: payment.timestamp,
                   });
-                  logInfo('[SparkWallet] Received payment for invoice');
+                  logInfo(`[SparkWallet] Received payment for invoice: ${amountSats} sats`);
                 }
 
                 handleIncomingZap(
                   {
                     id: payment.id,
                     amount: amountSats,
+                    fees: Number(payment.fees) || 0,
+                    paymentType: 'receive',
                     status: payment.status,
-                    timestamp: payment.createdAt,
-                    description: payment.description,
+                    timestamp: payment.timestamp,
+                    description: payment.details?.type === 'lightning' ? payment.details.description : undefined,
                     invoice: payment.details?.type === 'lightning' ? payment.details.invoice : undefined,
                     preimage: payment.details?.type === 'lightning' ? payment.details.preimage : undefined,
                     paymentHash: payment.details?.type === 'lightning' ? payment.details.paymentHash : undefined,
@@ -803,6 +838,7 @@ export const SparkWalletProvider: ParentComponent = (props) => {
     sendPayment,
     createInvoice,
     loadPaymentHistory,
+    loadMorePayments,
     loadLightningAddress,
     registerLightningAddress,
     checkLightningAddressAvailable,

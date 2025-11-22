@@ -1083,13 +1083,15 @@ const WalletContent: Component = () => {
                 <div class={styles.transactions}>
                   <div class={styles.sectionHeader}>
                     <div class={styles.sectionTitle}>Recent Payments</div>
-                    <button class={styles.refreshButton} onClick={() => sparkWallet.actions.loadPaymentHistory()}>
+                    <button type="button" class={styles.refreshButton} onClick={() => sparkWallet.actions.loadPaymentHistory()}>
                       Refresh
                     </button>
                   </div>
                   <SparkPaymentsList
                     payments={sparkWallet.store.payments}
                     loading={sparkWallet.store.paymentsLoading}
+                    hasMore={sparkWallet.store.hasMorePayments}
+                    onLoadMore={sparkWallet.actions.loadMorePayments}
                     isBalanceHidden={sparkWallet.store.isBalanceHidden}
                   />
                 </div>
@@ -1243,9 +1245,7 @@ const WalletContent: Component = () => {
               >
                 <div class={styles.settingsToggleIcon}></div>
                 <div class={styles.settingsToggleLabel}>Wallet Settings</div>
-                <div class={`${styles.settingsChevron} ${showSettings() ? styles.settingsChevronOpen : ''}`}>
-                  ▼
-                </div>
+                <div class={`${styles.settingsChevron} ${showSettings() ? styles.settingsChevronOpen : ''}`}></div>
               </button>
 
               <Show when={showSettings()}>
@@ -1359,6 +1359,14 @@ const WalletContent: Component = () => {
                   </div>
                 </div>
               </Show>
+            </div>
+
+            {/* Wallet Disclaimer */}
+            <div class={styles.walletDisclaimer}>
+              <div>Breez SDK + Spark wallet integration</div>
+              <div>Recovery phrase encrypted with XChaCha20-Poly1305</div>
+              <div>Saved locally and optionally backed up to Nostr relays</div>
+              <div>Hot wallet - do not use with large amounts!</div>
             </div>
           </div>
         </Show>

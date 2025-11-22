@@ -839,13 +839,18 @@
 }
 
 .settingsChevron {
-  font-size: 12px;
-  color: var(--text-tertiary);
+  width: 20px;
+  height: 20px;
+  background-color: var(--text-tertiary);
+  -webkit-mask: url(../assets/icons/chevron_right.svg) no-repeat center / contain;
+  mask: url(../assets/icons/chevron_right.svg) no-repeat center / contain;
+  flex-shrink: 0;
+  transform: rotate(90deg); // Point down
   transition: transform 0.2s;
 }
 
 .settingsChevronOpen {
-  transform: rotate(180deg);
+  transform: rotate(-90deg); // Point up
 }
 
 .settingsContent {
@@ -1166,5 +1171,28 @@
   to {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+// Prevent scroll on updates
+.tabContent {
+  overflow-anchor: none;
+}
+
+// Wallet disclaimer at bottom
+.walletDisclaimer {
+  margin-top: 32px;
+  padding: 20px;
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-tertiary);
+
+  div {
+    margin-bottom: 4px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 }

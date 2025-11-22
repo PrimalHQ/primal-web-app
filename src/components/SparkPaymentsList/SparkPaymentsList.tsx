@@ -7,6 +7,8 @@ import styles from './SparkPaymentsList.module.scss';
 type SparkPaymentsListProps = {
   payments: BreezPaymentInfo[];
   loading: boolean;
+  hasMore?: boolean;
+  onLoadMore?: () => Promise<void>;
   onRefreshPayment?: (paymentId: string) => Promise<void>;
   isBalanceHidden?: boolean;
 };
@@ -15,6 +17,7 @@ const SparkPaymentsList: Component<SparkPaymentsListProps> = (props) => {
   const toast = useToastContext();
   const [expandedPayments, setExpandedPayments] = createSignal<Set<string>>(new Set());
   const [refreshingPayments, setRefreshingPayments] = createSignal<Set<string>>(new Set());
+  const [isLoadingMore, setIsLoadingMore] = createSignal(false);
 
   const toggleExpanded = (paymentId: string) => {
     setExpandedPayments(prev => {
@@ -89,6 +92,44 @@ const SparkPaymentsList: Component<SparkPaymentsListProps> = (props) => {
 
   const isReceived = (payment: BreezPaymentInfo) => {
     return payment.paymentType === 'receive';
+  };
+
+  const handleLoadMore = async (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    if (!props.onLoadMore || isLoadingMore() || !props.hasMore) {
+      return;
+    }
+
+    // Save scroll position before loading
+    const savedScrollY = window.scrollY;
+    const savedScrollX = window.scrollX;
+
+    setIsLoadingMore(true);
+
+    try {
+      await props.onLoadMore();
+
+      // Restore scroll position after loading
+      window.scrollTo({
+        top: savedScrollY,
+        left: savedScrollX,
+        behavior: 'instant'
+      });
+    } catch (error) {
+      toast?.sendWarning('Failed to load more payments');
+
+      // Restore scroll position even on error
+      window.scrollTo({
+        top: savedScrollY,
+        left: savedScrollX,
+        behavior: 'instant'
+      });
+    } finally {
+      setIsLoadingMore(false);
+    }
   };
 
   return (
@@ -308,6 +349,22 @@ const SparkPaymentsList: Component<SparkPaymentsListProps> = (props) => {
               );
             }}
           </For>
+
+          {/* Load More indicator/button */}
+          <Show when={props.hasMore}>
+            <div class={styles.loadMoreContainer}>
+              <Show when={isLoadingMore()} fallback={
+                <button type="button" class={styles.loadMoreButton} onClick={handleLoadMore}>
+                  Load more
+                </button>
+              }>
+                <div class={styles.loadingMore}>
+                  <div class={styles.spinner}></div>
+                  <span>Loading more payments...</span>
+                </div>
+              </Show>
+            </div>
+          </Show>
         </div>
       </Show>
     </Show>
