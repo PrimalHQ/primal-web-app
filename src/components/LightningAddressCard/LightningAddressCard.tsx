@@ -157,14 +157,37 @@ const LightningAddressCard: Component = () => {
     try {
       setIsUpdatingProfile(true);
 
-      // Get current profile metadata from msg.content (JSON string)
+      // Get current profile from msg.content (raw Nostr event content)
       const currentProfile: Record<string, any> = JSON.parse(account.activeUser.msg?.content || '{}');
 
-      // Preserve ALL existing profile fields and update only lud16
-      const updatedMetadata = {
-        ...currentProfile,  // Preserve name, about, picture, banner, nip05, website, etc.
+      // Build updated metadata preserving ALL existing fields
+      const updatedMetadata: Record<string, any> = {
+        name: currentProfile.name || account.activeUser.name,
+        about: currentProfile.about || account.activeUser.about,
+        picture: currentProfile.picture || account.activeUser.picture,
+        nip05: currentProfile.nip05 || account.activeUser.nip05,
         lud16: lightningAddress,  // Update Lightning address
       };
+
+      // Include optional fields if they exist
+      if (currentProfile.display_name || account.activeUser.display_name) {
+        updatedMetadata.display_name = currentProfile.display_name || account.activeUser.display_name;
+      }
+      if (currentProfile.website || account.activeUser.website) {
+        updatedMetadata.website = currentProfile.website || account.activeUser.website;
+      }
+      if (currentProfile.banner || account.activeUser.banner) {
+        updatedMetadata.banner = currentProfile.banner || account.activeUser.banner;
+      }
+      if (currentProfile.lud06 || account.activeUser.lud06) {
+        updatedMetadata.lud06 = currentProfile.lud06 || account.activeUser.lud06;
+      }
+      if (currentProfile.bot) {
+        updatedMetadata.bot = currentProfile.bot;
+      }
+      if (currentProfile.location || account.activeUser.location) {
+        updatedMetadata.location = currentProfile.location || account.activeUser.location;
+      }
 
       // Publish updated profile
       await sendProfile(updatedMetadata, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
