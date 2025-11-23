@@ -1537,7 +1537,7 @@ const WalletContent: Component = () => {
                   Wallet File
                 </ButtonPrimary>
                 <div class={styles.restoreOptionDescription}>
-                  Import JSON file from jumble-spark or sparkihonne
+                  Import Breez Spark wallet JSON file
                 </div>
               </div>
             </div>
