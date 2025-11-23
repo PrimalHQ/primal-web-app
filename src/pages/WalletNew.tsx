@@ -1525,19 +1525,19 @@ const WalletContent: Component = () => {
                 </div>
               </div>
               <div class={styles.restoreOption}>
-                <ButtonPrimary onClick={() => setRestoreMethod('manual')}>
-                  Seed Phrase
-                </ButtonPrimary>
-                <div class={styles.restoreOptionDescription}>
-                  Enter your 12-24 word recovery phrase
-                </div>
-              </div>
-              <div class={styles.restoreOption}>
                 <ButtonPrimary onClick={() => setRestoreMethod('file')}>
                   Wallet File
                 </ButtonPrimary>
                 <div class={styles.restoreOptionDescription}>
                   Import Breez Spark wallet JSON file
+                </div>
+              </div>
+              <div class={styles.restoreOption}>
+                <ButtonPrimary onClick={() => setRestoreMethod('manual')}>
+                  Seed Phrase
+                </ButtonPrimary>
+                <div class={styles.restoreOptionDescription}>
+                  Enter your 12-24 word recovery phrase
                 </div>
               </div>
             </div>
@@ -1556,7 +1556,7 @@ const WalletContent: Component = () => {
 
           <Show when={restoreMethod() === 'file'}>
             <div class={styles.dialogDescription}>
-              <span>Upload a wallet file exported from jumble-spark or sparkihonne.</span>
+              <span>Upload a Breez Spark wallet backup file you previously exported.</span>
             </div>
 
             <div class={styles.fileUploadSection}>
