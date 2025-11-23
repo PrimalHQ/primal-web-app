@@ -346,6 +346,7 @@ const WalletContent: Component = () => {
 
       // Parse the input to determine what type it is
       const parsed = await breezWallet.parseInput(input);
+      console.log('[WalletNew] Full parsed object:', JSON.stringify(parsed, null, 2));
 
       if (parsed.type === 'lightningAddress' || parsed.type === 'lnurlPay') {
         // Handle Lightning address or LNURL pay
@@ -356,21 +357,16 @@ const WalletContent: Component = () => {
         }
 
         // Get the pay request details from parsed input
+        // For Lightning addresses, the data is nested in parsed.payRequest
         const payRequest = parsed.type === 'lightningAddress'
-          ? {
-              callback: parsed.callback,
-              minSendable: parsed.minSendable,
-              maxSendable: parsed.maxSendable,
-              metadataStr: parsed.metadataStr,
-              commentAllowed: parsed.commentAllowed || 0,
-              domain: parsed.domain,
-              allowsNostr: parsed.allowsNostr || false,
-              nostrPubkey: parsed.nostrPubkey,
-              lnurlpTag: parsed.tag,
-            }
+          ? parsed.payRequest
           : parsed;
 
         // Prepare the LNURL pay
+        console.log('[WalletNew] Preparing LNURL pay with:', {
+          amountSats,
+          payRequest: JSON.stringify(payRequest, null, 2),
+        });
         const prepareResponse = await breezWallet.prepareLnurlPay(amountSats, payRequest);
 
         // Execute the LNURL pay
@@ -1088,7 +1084,7 @@ const WalletContent: Component = () => {
                       onClick={handleSendPayment}
                       disabled={isSendingPayment() || !paymentInput() || (isLightningAddress() && !paymentAmount())}
                     >
-                      {isSendingPayment() ? <Loader /> : 'Send Payment'}
+                      {isSendingPayment() ? 'Sending...' : 'Send Payment'}
                     </ButtonPrimary>
                   </div>
                 </div>
