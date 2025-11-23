@@ -471,7 +471,6 @@ class BreezWalletService {
         request.comment = comment;
       }
 
-      console.log('[BreezWallet] prepareLnurlPay request:', JSON.stringify(request, null, 2));
       return await this.sdk!.prepareLnurlPay(request);
     } catch (error) {
       logError('[BreezWallet] Failed to prepare LNURL pay:', error);

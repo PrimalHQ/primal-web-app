@@ -346,7 +346,6 @@ const WalletContent: Component = () => {
 
       // Parse the input to determine what type it is
       const parsed = await breezWallet.parseInput(input);
-      console.log('[WalletNew] Full parsed object:', JSON.stringify(parsed, null, 2));
 
       if (parsed.type === 'lightningAddress' || parsed.type === 'lnurlPay') {
         // Handle Lightning address or LNURL pay
@@ -363,10 +362,6 @@ const WalletContent: Component = () => {
           : parsed;
 
         // Prepare the LNURL pay
-        console.log('[WalletNew] Preparing LNURL pay with:', {
-          amountSats,
-          payRequest: JSON.stringify(payRequest, null, 2),
-        });
         const prepareResponse = await breezWallet.prepareLnurlPay(amountSats, payRequest);
 
         // Execute the LNURL pay
