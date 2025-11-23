@@ -259,7 +259,7 @@ export const SparkWalletProvider: ParentComponent = (props) => {
 
     try {
       setStore('isConnecting', true);
-      setStore('connectionProgress', 'Initializing wallet...');
+      setStore('connectionProgress', 'Loading wallet...');
 
       // Connect to Breez SDK
       await breezWallet.connect(mnemonic, store.network);
