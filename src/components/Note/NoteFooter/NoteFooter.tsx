@@ -261,6 +261,15 @@ const NoteFooter: Component<{
       }
     }
 
+    const oneClickEnabled = settings?.oneClickReactions || false;
+
+    // If one-click reactions are DISABLED (default), immediately open picker on click
+    if (!oneClickEnabled) {
+      setShowEmojiPicker(true);
+      return;
+    }
+
+    // If one-click reactions are ENABLED, use long-press detection
     isLongPress = false;
     longPressTimer = window.setTimeout(() => {
       isLongPress = true;
@@ -277,9 +286,18 @@ const NoteFooter: Component<{
       longPressTimer = undefined;
     }
 
-    // If it wasn't a long press, it's a quick click → send ❤️
+    const oneClickEnabled = settings?.oneClickReactions || false;
+
+    // If one-click reactions are DISABLED, do nothing (picker was already opened)
+    if (!oneClickEnabled) {
+      isLongPress = false;
+      return;
+    }
+
+    // If one-click reactions are ENABLED and it wasn't a long press, send default emoji
     if (!isLongPress && account) {
-      await account.actions.addReaction(props.note, '❤️');
+      const defaultEmoji = settings?.defaultReactionEmoji || '❤️';
+      await account.actions.addReaction(props.note, defaultEmoji);
 
       if (props.updateState) {
         props.updateState('liked', () => true);
@@ -299,24 +317,15 @@ const NoteFooter: Component<{
   };
 
   const handleEmojiSelect = async (emoji: string) => {
-    console.log('[NoteFooter] handleEmojiSelect called with emoji:', emoji);
-
     if (!account) {
-      console.log('[NoteFooter] No account, returning');
       return;
     }
 
     const success = await account.actions.addReaction(props.note, emoji);
-    console.log('[NoteFooter] addReaction returned success:', success);
 
     if (success) {
-      console.log('[NoteFooter] Updating note state - incrementing likes');
       batch(() => {
-        // Update likes count (for backward compatibility and total reaction count)
-        props.updateState && props.updateState('likes', (l) => {
-          console.log('[NoteFooter] Updating likes from', l, 'to', l + 1);
-          return l + 1;
-        });
+        props.updateState && props.updateState('likes', (l) => l + 1);
         props.updateState && props.updateState('liked', () => true);
       });
     }
