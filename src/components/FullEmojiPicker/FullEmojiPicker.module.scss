@@ -4,9 +4,8 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: transparent;
   z-index: 1000;
-  backdrop-filter: blur(2px);
 }
 
 .pickerContainer {
@@ -33,7 +32,7 @@
   --search-icon-color: var(--text-tertiary);
   --skintone-border-radius: 4px;
 
-  width: min(352px, calc(100vw - 32px));
+  width: min(436px, calc(100vw - 32px));
   height: 435px;
   max-height: calc(100vh - 100px);
   border: 1px solid var(--devider);

@@ -26,7 +26,7 @@ const FullEmojiPicker: Component<FullEmojiPickerProps> = (props) => {
     // Position the picker relative to anchor
     if (props.anchorRef) {
       const rect = props.anchorRef.getBoundingClientRect();
-      const pickerWidth = Math.min(352, window.innerWidth - 32); // Responsive width
+      const pickerWidth = Math.min(436, window.innerWidth - 32); // Responsive width (436px to prevent scroll)
       const pickerHeight = Math.min(435, window.innerHeight - 100); // Responsive height
 
       let top = rect.bottom + 8;
