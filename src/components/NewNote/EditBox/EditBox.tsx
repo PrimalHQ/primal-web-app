@@ -994,72 +994,95 @@ const EditBox: Component<{
 
     return text.replace(regex, (token) => {
       const [space, term] = token.split('#');
-      const embeded = (
-        <span>
-          {space}
-          <span class={styles.userReference}>
-            #{term}
-          </span>
-        </span>
-      );
 
-      // @ts-ignore
-      return embeded.outerHTML;
+      // Create DOM elements imperatively to get proper outerHTML
+      const wrapper = document.createElement('span');
+      const spaceText = document.createTextNode(space);
+      const innerSpan = document.createElement('span');
+      innerSpan.className = styles.userReference;
+      innerSpan.textContent = `#${term}`;
+
+      wrapper.appendChild(spaceText);
+      wrapper.appendChild(innerSpan);
+
+      return wrapper.outerHTML;
     });
   }
 
   const parseUserMentions = (text: string) => {
     return text.replace(editMentionRegex, (url) => {
       const [_, name] = url.split('\`');
+
+      if (!name || !name.trim()) {
+        return url; // Return original if name is invalid
+      }
+
       const user = Object.values(userRefs).find(ref => userName(ref) === name);
 
-      const link = user ?
-        MentionedUserLink({ user, openInNewTab: true}) :
-        <span class='linkish'> @{name}</span>;
+      if (user) {
+        // Create anchor element imperatively
+        const link = document.createElement('a');
+        link.className = 'linkish'; // Use generic linkish class
+        link.href = `${window.location.origin}${app?.actions.profileLink(user.npub) || ''}`;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = `@${name}`;
 
-        // @ts-ignore
-      return ` ${link.outerHTML}` || ` @${name}`;
+        return ` ${link.outerHTML}`;
+      }
+
+      // Fallback for unknown users
+      const span = document.createElement('span');
+      span.className = 'linkish';
+      span.textContent = `@${name}`;
+      return ` ${span.outerHTML}`;
+    });
+  };
+
+  const parseNostrMentions = (text: string) => {
+    // Match nostr:npub or nostr:nprofile patterns
+    return text.replace(/(?:\s|^)(nostr:(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g, (fullMatch, nostrRef, type) => {
+      const npubId = nostrRef.replace('nostr:', '');
+
+      try {
+        const decoded = nip19.decode(npubId);
+        const hex = typeof decoded.data === 'string' ? decoded.data : (decoded.data as any).pubkey;
+
+        // Look up user in userRefs by hex pubkey
+        const user = userRefs[hex] || Object.values(userRefs).find(u => u.pubkey === hex);
+
+        const link = document.createElement('a');
+        link.className = 'linkish';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+
+        if (user) {
+          link.href = `${window.location.origin}${app?.actions.profileLink(user.npub) || ''}`;
+          link.textContent = `@${userName(user)}`;
+        } else {
+          // User not yet loaded, use truncated npub
+          link.href = `${window.location.origin}${app?.actions.profileLink(npubId) || ''}`;
+          link.textContent = `@${truncateNpub(npubId)}`;
+
+          // Trigger async fetch for this user
+          setTimeout(() => {
+            parseNpubLinks(text);
+          }, 0);
+        }
+
+        return fullMatch.startsWith(' ') ? ` ${link.outerHTML}` : link.outerHTML;
+      } catch (e) {
+        // If decode fails, return original
+        return fullMatch;
+      }
     });
   };
 
 
-  const subUserRef = (userId: string) => {
-
-    const parsed = parsedMessage().replace(profileRegexEdit, (url) => {
-
-      let id = url;
-
-      const idStart = url.search(profileRegexEdit);
-
-      if (idStart > 0) {
-        id = url.slice(idStart);
-      }
-
-      if (!id) {
-        return url;
-      }
-
-      try {
-        // const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
-
-        // const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
-        // const npub = hexToNpub(hex);
-
-        const user = userRefs[userId];
-
-        const link = user ?
-          <a href={`${window.location.origin}${app?.actions.profileLink(user.npub) || ''}`} target="_blank" class='linkish'>@{userName(user)}</a> :
-          <a href={`${window.location.origin}${app?.actions.profileLink(id) || ''}`} target="_blank" class='linkish'>@{truncateNpub(id)}</a>;
-
-        // @ts-ignore
-        return link.outerHTML || url;
-      } catch (e) {
-        return `<span class="${styles.error}">${url}</span>`;
-      }
-    });
-
+  const subUserRef = async (userId: string) => {
+    // Re-parse from original message to avoid double-encoding
+    const parsed = await parseForReferece(message());
     setParsedMessage(parsed);
-
   };
 
   const [addrRefs, setAddrRef] = createStore<Record<string, any>>({});
@@ -1182,63 +1205,8 @@ const EditBox: Component<{
   };
 
   const subNaddrRef = async (noteId: string) => {
-    const parsed = await replaceAsync(parsedMessage(), eventRegexG, async (url) => {
-      let id = url;
-
-      const idStart = url.search(addrRegex);
-
-      if (idStart > 0) {
-        id = url.slice(idStart);
-      }
-
-      const decId = decodeIdentifier(id);
-      const decNoteId = decodeIdentifier(noteId);
-
-      if (decId.type !== 'naddr' || decNoteId.type !== 'naddr') return url;
-
-      if (
-        // @ts-ignore
-        decId.data.identifier !== decNoteId.data.identifier ||
-        // @ts-ignore
-        decId.data.pubkey !== decNoteId.data.pubkey ||
-        // @ts-ignore
-        decId.data.kind !== decNoteId.data.kind
-      ) return url;
-
-      try {
-        let article = articleRefs[noteId];
-
-        if (!article) {
-          let stream = liveEventRefs[noteId];
-
-          if (!stream) return url;
-
-          const hostPubkey = stream.hosts?.[0] || stream.pubkey;
-
-          const user = await fetchUserProfile(account?.publicKey, hostPubkey, `missing_user_${APP_ID}`);
-
-          const link = stream ?
-            <div>
-              <LiveEventPreview stream={stream} user={user} />
-            </div> : <span class="linkish">{url}</span>;
-
-          // @ts-ignore
-          return link.outerHTML || url;
-        }
-
-        const link = <div class={styles.highlight}>
-          <SimpleArticlePreview article={article} noLink={true} />
-        </div>;
-
-        // @ts-ignore
-        return link.outerHTML || url;
-      } catch (e) {
-        logError('Bad Note reference: ', e);
-        return `<span class="${styles.error}">${url}</span>`;
-      }
-
-    });
-
+    // Re-parse from original message to avoid double-encoding
+    const parsed = await parseForReferece(message());
     setParsedMessage(parsed);
   };
 
@@ -1423,71 +1391,9 @@ const EditBox: Component<{
 
   };
 
-  const subNoteRef = (noteId: string) => {
-
-    const parsed = parsedMessage().replace(eventRegexG, (url) => {
-      // const [_, id] = url.split(':');
-
-      let id = url;
-
-      const idStart = url.search(noteRegex);
-
-      if (idStart > 0) {
-        id = url.slice(idStart);
-      }
-
-      if (!id) {
-        return url;
-      }
-
-      try {
-        let hex = '';
-
-        const decode = nip19.decode(id);
-
-        if (decode.type === 'nevent') {
-          hex = decode.data.id;
-        } else if (decode.type === 'note') {
-          hex = decode.data;
-        }
-
-        let note = noteRefs[hex];
-
-        if (!note) {
-          note = highlightRefs[id];
-
-          const link = note ?
-            <div>
-              <ArticleHighlight highlight={note} />
-            </div> : <span class="linkish">{url}</span>;
-
-          // @ts-ignore
-          return link.outerHTML || url;
-        }
-
-        const link = note ?
-          <div>
-            <TranslatorProvider>
-                <EmbeddedNote
-                  note={note}
-                  mentionedUsers={note.mentionedUsers || {}}
-                  includeEmbeds={true}
-                  hideFooter={true}
-                  noLinks="links"
-                />
-            </TranslatorProvider>
-          </div> :
-          <span class="linkish">{url}</span>;
-
-        // @ts-ignore
-        return link.outerHTML || url;
-      } catch (e) {
-        logError('Bad Note reference: ', e);
-        return `<span class="${styles.error}">${url}</span>`;
-      }
-
-    });
-
+  const subNoteRef = async (noteId: string) => {
+    // Re-parse from original message to avoid double-encoding
+    const parsed = await parseForReferece(message());
     setParsedMessage(parsed);
   };
 
@@ -1533,17 +1439,19 @@ const EditBox: Component<{
 
   const parseForReferece = async (value: string) => {
     const content = await replaceLinkPreviews(
-      parseUserMentions(
-        highlightHashtags(
-          parseNote1(value, media?.actions.getMediaUrl)
+      highlightHashtags(
+        parseUserMentions(
+          parseNostrMentions(
+            parseNote1(value, media?.actions.getMediaUrl)
+          )
         )
       )
     );
 
 
     parseNaddr(content);
-    parseNpubLinks(content);
     parseNoteLinks(content);
+    // Note: nostr:npub mentions are now handled inline by parseNostrMentions()
 
     const ret = await parseExternalLiveStreams(content);
 
@@ -1650,6 +1558,12 @@ const EditBox: Component<{
     setMentioning(false);
 
     const name = userName(user);
+
+    // Prevent storing users with invalid names
+    if (!name || name.trim() === '') {
+      console.warn('[EditBox] Cannot mention user with invalid name:', user);
+      return;
+    }
 
     setUserRefs((refs) => ({
       ...refs,
