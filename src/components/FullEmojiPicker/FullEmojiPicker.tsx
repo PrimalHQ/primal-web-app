@@ -74,10 +74,7 @@ const FullEmojiPicker: Component<FullEmojiPickerProps> = (props) => {
       <div ref={backdropRef} class={styles.backdrop} />
       <div
         class={styles.pickerContainer}
-        style={{
-          top: `${position().top}px`,
-          left: `${position().left}px`,
-        }}
+        style={`top: ${position().top}px; left: ${position().left}px;`}
       >
         <emoji-picker ref={pickerRef} class={styles.picker} />
       </div>
