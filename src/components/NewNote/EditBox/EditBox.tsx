@@ -1079,52 +1079,10 @@ const EditBox: Component<{
   };
 
 
-  const subUserRef = (userId: string) => {
-
-    const parsed = parsedMessage().replace(profileRegexEdit, (url) => {
-
-      let id = url;
-
-      const idStart = url.search(profileRegexEdit);
-
-      if (idStart > 0) {
-        id = url.slice(idStart);
-      }
-
-      if (!id) {
-        return url;
-      }
-
-      try {
-        // const profileId = nip19.decode(id).data as string | nip19.ProfilePointer;
-
-        // const hex = typeof profileId === 'string' ? profileId : profileId.pubkey;
-        // const npub = hexToNpub(hex);
-
-        const user = userRefs[userId];
-
-        // Create anchor element imperatively to avoid JSX outerHTML issues
-        const link = document.createElement('a');
-        link.className = 'linkish';
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-
-        if (user) {
-          link.href = `${window.location.origin}${app?.actions.profileLink(user.npub) || ''}`;
-          link.textContent = `@${userName(user)}`;
-        } else {
-          link.href = `${window.location.origin}${app?.actions.profileLink(id) || ''}`;
-          link.textContent = `@${truncateNpub(id)}`;
-        }
-
-        return link.outerHTML || url;
-      } catch (e) {
-        return `<span class="${styles.error}">${url}</span>`;
-      }
-    });
-
+  const subUserRef = async (userId: string) => {
+    // Re-parse from original message to avoid double-encoding
+    const parsed = await parseForReferece(message());
     setParsedMessage(parsed);
-
   };
 
   const [addrRefs, setAddrRef] = createStore<Record<string, any>>({});
@@ -1247,63 +1205,8 @@ const EditBox: Component<{
   };
 
   const subNaddrRef = async (noteId: string) => {
-    const parsed = await replaceAsync(parsedMessage(), eventRegexG, async (url) => {
-      let id = url;
-
-      const idStart = url.search(addrRegex);
-
-      if (idStart > 0) {
-        id = url.slice(idStart);
-      }
-
-      const decId = decodeIdentifier(id);
-      const decNoteId = decodeIdentifier(noteId);
-
-      if (decId.type !== 'naddr' || decNoteId.type !== 'naddr') return url;
-
-      if (
-        // @ts-ignore
-        decId.data.identifier !== decNoteId.data.identifier ||
-        // @ts-ignore
-        decId.data.pubkey !== decNoteId.data.pubkey ||
-        // @ts-ignore
-        decId.data.kind !== decNoteId.data.kind
-      ) return url;
-
-      try {
-        let article = articleRefs[noteId];
-
-        if (!article) {
-          let stream = liveEventRefs[noteId];
-
-          if (!stream) return url;
-
-          const hostPubkey = stream.hosts?.[0] || stream.pubkey;
-
-          const user = await fetchUserProfile(account?.publicKey, hostPubkey, `missing_user_${APP_ID}`);
-
-          const link = stream ?
-            <div>
-              <LiveEventPreview stream={stream} user={user} />
-            </div> : <span class="linkish">{url}</span>;
-
-          // @ts-ignore
-          return link.outerHTML || url;
-        }
-
-        const link = <div class={styles.highlight}>
-          <SimpleArticlePreview article={article} noLink={true} />
-        </div>;
-
-        // @ts-ignore
-        return link.outerHTML || url;
-      } catch (e) {
-        logError('Bad Note reference: ', e);
-        return `<span class="${styles.error}">${url}</span>`;
-      }
-
-    });
-
+    // Re-parse from original message to avoid double-encoding
+    const parsed = await parseForReferece(message());
     setParsedMessage(parsed);
   };
 
@@ -1488,71 +1391,9 @@ const EditBox: Component<{
 
   };
 
-  const subNoteRef = (noteId: string) => {
-
-    const parsed = parsedMessage().replace(eventRegexG, (url) => {
-      // const [_, id] = url.split(':');
-
-      let id = url;
-
-      const idStart = url.search(noteRegex);
-
-      if (idStart > 0) {
-        id = url.slice(idStart);
-      }
-
-      if (!id) {
-        return url;
-      }
-
-      try {
-        let hex = '';
-
-        const decode = nip19.decode(id);
-
-        if (decode.type === 'nevent') {
-          hex = decode.data.id;
-        } else if (decode.type === 'note') {
-          hex = decode.data;
-        }
-
-        let note = noteRefs[hex];
-
-        if (!note) {
-          note = highlightRefs[id];
-
-          const link = note ?
-            <div>
-              <ArticleHighlight highlight={note} />
-            </div> : <span class="linkish">{url}</span>;
-
-          // @ts-ignore
-          return link.outerHTML || url;
-        }
-
-        const link = note ?
-          <div>
-            <TranslatorProvider>
-                <EmbeddedNote
-                  note={note}
-                  mentionedUsers={note.mentionedUsers || {}}
-                  includeEmbeds={true}
-                  hideFooter={true}
-                  noLinks="links"
-                />
-            </TranslatorProvider>
-          </div> :
-          <span class="linkish">{url}</span>;
-
-        // @ts-ignore
-        return link.outerHTML || url;
-      } catch (e) {
-        logError('Bad Note reference: ', e);
-        return `<span class="${styles.error}">${url}</span>`;
-      }
-
-    });
-
+  const subNoteRef = async (noteId: string) => {
+    // Re-parse from original message to avoid double-encoding
+    const parsed = await parseForReferece(message());
     setParsedMessage(parsed);
   };
 
