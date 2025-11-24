@@ -334,16 +334,38 @@ export const sendContentReport = async (noteId: string, pubkey: string, reason: 
 
 }
 
-export const sendLike = async (note: PrimalNote | PrimalArticle | PrimalDVM, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+/**
+ * Send an emoji reaction to a note (NIP-25 and NIP-30)
+ * @param note - The note to react to
+ * @param emoji - The emoji to react with (or '+' for like)
+ * @param shouldProxy - Whether to proxy through Primal
+ * @param relays - Relays to publish to
+ * @param relaySettings - Relay settings
+ * @param customEmoji - Optional custom emoji metadata (NIP-30)
+ */
+export const sendReaction = async (
+  note: PrimalNote | PrimalArticle | PrimalDVM,
+  emoji: string,
+  shouldProxy: boolean,
+  relays: Relay[],
+  relaySettings?: NostrRelays,
+  customEmoji?: { shortcode: string; imageUrl: string }
+) => {
   const event = {
-    content: '+',
+    content: emoji,
     kind: Kind.Reaction,
     tags: [
       ['e', note.id],
       ['p', note.pubkey],
+      ['k', String(note.post?.noteKind || 1)], // NIP-25: kind of reacted event
     ],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
+
+  // NIP-30: Custom emoji support
+  if (customEmoji) {
+    event.tags.push(['emoji', customEmoji.shortcode, customEmoji.imageUrl]);
+  }
 
   // @ts-ignore
   if (note.coordinate) {
@@ -352,7 +374,14 @@ export const sendLike = async (note: PrimalNote | PrimalArticle | PrimalDVM, sho
   }
 
   return await sendEvent(event, relays, relaySettings, shouldProxy);
+};
 
+/**
+ * Legacy function for backward compatibility
+ * @deprecated Use sendReaction instead
+ */
+export const sendLike = async (note: PrimalNote | PrimalArticle | PrimalDVM, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+  return sendReaction(note, '+', shouldProxy, relays, relaySettings);
 }
 
 export const sendRepost = async (note: PrimalNote, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {

@@ -80,6 +80,38 @@
     }
   }
 
+  .reactionsBreakdown {
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--subtile-devider);
+  }
+
+  .reactionPickerSection {
+    padding: 16px;
+    border-bottom: 1px solid var(--subtile-devider);
+    position: relative;
+  }
+
+  .addReactionButton {
+    padding: 8px 16px;
+    background: var(--accent);
+    color: var(--text-primary-button);
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      opacity: 0.9;
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
 }
 
 .likeItem {
@@ -95,6 +127,16 @@
   &:hover {
     background-color: var(--subtile-devider);
     text-decoration: none;
+  }
+
+  .reactionEmoji {
+    font-size: 20px;
+    line-height: 1;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .likeIcon {

@@ -1,0 +1,41 @@
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.pickerContainer {
+  position: fixed;
+  z-index: 1001;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.picker {
+  --background: var(--background-input);
+  --border-color: var(--devider);
+  --button-active-background: var(--accent);
+  --button-hover-background: var(--subtile-devider);
+  --category-button-color: var(--text-secondary);
+  --category-button-active-color: var(--accent);
+  --indicator-color: var(--accent);
+  --input-border-color: var(--devider);
+  --input-font-color: var(--text-primary);
+  --input-placeholder-color: var(--text-tertiary);
+  --outline-color: var(--accent);
+  --search-background: var(--background);
+  --search-icon-color: var(--text-tertiary);
+  --skintone-border-radius: 4px;
+
+  width: min(352px, calc(100vw - 32px));
+  height: 435px;
+  max-height: calc(100vh - 100px);
+  border: 1px solid var(--devider);
+  border-radius: 8px;
+}

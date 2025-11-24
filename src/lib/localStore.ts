@@ -13,7 +13,8 @@ export type LocalStore = {
   streamMutedPrivate: string,
   streamMutedSince: number,
   relaySettings: NostrRelays,
-  likes: string[],
+  likes: string[], // Deprecated: Use reactions instead (kept for migration)
+  reactions: Record<string, string[]>, // noteId -> emoji[] mapping
   feeds: PrimalFeed[];
   homeFeeds: PrimalArticleFeed[],
   readsFeeds: PrimalArticleFeed[],
@@ -254,6 +255,45 @@ export const saveLikes = (pubkey: string | undefined, likes: string[]) => {
   store.likes = [ ...likes ];
 
   setStorage(pubkey, store);
+};
+
+/**
+ * Save emoji reactions to local storage
+ * Format: { noteId: ['❤️', '🔥', ...], ... }
+ */
+export const saveReactions = (pubkey: string | undefined, reactions: Record<string, string[]>) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.reactions = { ...reactions };
+
+  setStorage(pubkey, store);
+};
+
+/**
+ * Migrate old likes format to new reactions format
+ * Converts likes: ['noteId1', 'noteId2'] to reactions: { 'noteId1': ['+'], 'noteId2': ['+'] }
+ */
+export const migrateLikesToReactions = (pubkey: string): Record<string, string[]> => {
+  const store = getStorage(pubkey);
+  const reactions: Record<string, string[]> = {};
+
+  // If reactions already exist, use them
+  if (store.reactions && Object.keys(store.reactions).length > 0) {
+    return store.reactions;
+  }
+
+  // Otherwise, migrate from old likes format
+  if (store.likes && store.likes.length > 0) {
+    for (const noteId of store.likes) {
+      reactions[noteId] = ['+'];  // Old likes become '+' reactions
+    }
+  }
+
+  return reactions;
 };
 
 export const saveFeeds = (pubkey: string | undefined, feeds: PrimalFeed[]) => {

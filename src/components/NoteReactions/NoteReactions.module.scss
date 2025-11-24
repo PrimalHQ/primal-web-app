@@ -1,0 +1,55 @@
+.reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 0 12px;
+}
+
+.reactionsCompact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.reactionItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--background-input);
+  border: 1px solid var(--subtile-devider);
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--subtile-devider);
+    border-color: var(--accent);
+  }
+
+  &.userReacted {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--text-primary-button);
+
+    .count {
+      color: var(--text-primary-button);
+      font-weight: 600;
+    }
+  }
+}
+
+.emoji {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.count {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1;
+}

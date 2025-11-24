@@ -6,6 +6,8 @@ import styles from './NoteFooter.module.scss';
 import { useAccountContext } from '../../../contexts/AccountContext';
 import { useToastContext } from '../../Toaster/Toaster';
 import { useIntl } from '@cookbook/solid-intl';
+import FullEmojiPicker from '../../FullEmojiPicker/FullEmojiPicker';
+import { normalizeReactionEmoji } from '../../../lib/reactions';
 
 import { truncateNumber } from '../../../lib/notifications';
 import { canUserReceiveZaps, lastZapError, zapNote } from '../../../lib/zap';
@@ -49,13 +51,35 @@ const NoteFooter: Component<{
   const app = useAppContext();
   const navigate = useNavigate();
 
+
   let medZapAnimation: HTMLElement | undefined;
 
   let quickZapDelay = 0;
   let footerDiv: HTMLDivElement | undefined;
   let repostMenu: HTMLDivElement | undefined;
+  let likeButtonRef: HTMLButtonElement | undefined;
+
+  const [showEmojiPicker, setShowEmojiPicker] = createSignal(false);
+  const [userReactionEmoji, setUserReactionEmoji] = createSignal<string | undefined>(undefined);
+
+  // Long-press detection
+  let longPressTimer: number | undefined;
+  let isLongPress = false;
 
   const size = () => props.size ?? 'normal';
+
+  // Initialize and watch for changes to user's reaction
+  createEffect(() => {
+    if (account?.reactions) {
+      const noteReactions = account.reactions[props.note.post.id];
+      if (noteReactions && noteReactions.length > 0) {
+        const emoji = normalizeReactionEmoji(noteReactions[0]);
+        setUserReactionEmoji(emoji);
+      } else {
+        setUserReactionEmoji(undefined);
+      }
+    }
+  });
 
   const repostItem = (): MenuItem => {
     return props.state.reposted ? {
@@ -220,19 +244,15 @@ const NoteFooter: Component<{
 
   };
 
-  const doLike = async (e: MouseEvent) => {
+  const startLongPress = (e: MouseEvent | TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!account) {
-      return;
-    }
-
+    if (!account) return;
     if (!account.hasPublicKey()) {
       account.actions.showGetStarted();
       return;
     }
-
     if (!account.sec || account.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
@@ -241,21 +261,67 @@ const NoteFooter: Component<{
       }
     }
 
-    // if (!account.proxyThroughPrimal && account.relays.length === 0) {
-    //   toast?.sendWarning(
-    //     intl.formatMessage(t.noRelaysConnected),
-    //   );
-    //   return;
-    // }
+    isLongPress = false;
+    longPressTimer = window.setTimeout(() => {
+      isLongPress = true;
+      setShowEmojiPicker(true);
+    }, 400); // 400ms for long press
+  };
 
-    const success = await account.actions.addLike(props.note);
+  const endLongPress = async (e: MouseEvent | TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = undefined;
+    }
+
+    // If it wasn't a long press, it's a quick click → send ❤️
+    if (!isLongPress && account) {
+      await account.actions.addReaction(props.note, '❤️');
+
+      if (props.updateState) {
+        props.updateState('liked', () => true);
+        props.updateState('likes', (likes) => likes + 1);
+      }
+    }
+
+    isLongPress = false;
+  };
+
+  const cancelLongPress = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = undefined;
+    }
+    isLongPress = false;
+  };
+
+  const handleEmojiSelect = async (emoji: string) => {
+    console.log('[NoteFooter] handleEmojiSelect called with emoji:', emoji);
+
+    if (!account) {
+      console.log('[NoteFooter] No account, returning');
+      return;
+    }
+
+    const success = await account.actions.addReaction(props.note, emoji);
+    console.log('[NoteFooter] addReaction returned success:', success);
 
     if (success) {
+      console.log('[NoteFooter] Updating note state - incrementing likes');
       batch(() => {
-        props.updateState && props.updateState('likes', (l) => l + 1);
+        // Update likes count (for backward compatibility and total reaction count)
+        props.updateState && props.updateState('likes', (l) => {
+          console.log('[NoteFooter] Updating likes from', l, 'to', l + 1);
+          return l + 1;
+        });
         props.updateState && props.updateState('liked', () => true);
       });
     }
+
+    setShowEmojiPicker(false);
   };
 
   const startZap = (e: MouseEvent | TouchEvent) => {
@@ -498,16 +564,23 @@ const NoteFooter: Component<{
         noteType={props.noteType}
       />
 
-      <NoteFooterActionButton
-        note={props.note}
-        onClick={doLike}
-        type="like"
-        highlighted={props.state.liked}
-        label={props.state.likes === 0 ? '' : truncateNumber(props.state.likes, 2)}
-        title={props.state.likes.toLocaleString()}
-        large={props.large}
-        noteType={props.noteType}
-      />
+      <div ref={likeButtonRef}>
+        <NoteFooterActionButton
+          note={props.note}
+          onMouseDown={startLongPress}
+          onMouseUp={endLongPress}
+          onTouchStart={startLongPress}
+          onTouchEnd={endLongPress}
+          onMouseLeave={cancelLongPress}
+          type="like"
+          highlighted={props.state.liked}
+          label={props.state.likes === 0 ? '' : truncateNumber(props.state.likes, 2)}
+          title={props.state.likes.toLocaleString()}
+          large={props.large}
+          noteType={props.noteType}
+          reactionEmoji={userReactionEmoji()}
+        />
+      </div>
 
       <button
         id={`btn_repost_${props.note.post.id}`}
@@ -545,6 +618,14 @@ const NoteFooter: Component<{
           right={true}
         />
       </div>
+
+      <Show when={showEmojiPicker()}>
+        <FullEmojiPicker
+          onSelect={handleEmojiSelect}
+          onClose={() => setShowEmojiPicker(false)}
+          anchorRef={likeButtonRef}
+        />
+      </Show>
 
     </div>
   )

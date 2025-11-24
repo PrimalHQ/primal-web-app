@@ -205,6 +205,7 @@ type ConvertToNotes = (page: FeedPage | undefined, topZaps?: Record<string, TopZ
 const noActions = (id: string) => ({
   event_id: id,
   liked: false,
+  reactions: [],
   replied: false,
   reposted: false,
   zapped: false,

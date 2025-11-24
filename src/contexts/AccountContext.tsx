@@ -29,11 +29,12 @@ import {
 } from '../types/primal';
 import { Kind, pinEncodePrefix, primalBlossom, relayConnectingTimeout, sevenDays, supportedBookmarkTypes } from "../constants";
 import { isConnected, refreshSocketListeners, removeSocketListeners, socket, reset, subTo, readData, subsTo } from "../sockets";
-import { getReplacableEvent, sendBlossomEvent, sendContacts, sendEvent, sendLike, sendMuteList, sendStreamMuteList, triggerImportEvents } from "../lib/notes";
+import { getReplacableEvent, sendBlossomEvent, sendContacts, sendEvent, sendLike, sendReaction, sendMuteList, sendStreamMuteList, triggerImportEvents } from "../lib/notes";
 import { generatePrivateKey, Relay, getPublicKey as nostrGetPubkey, nip19, utils, relayInit } from "../lib/nTools";
 import { APP_ID } from "../App";
 import { getLikes, getFilterlists, getProfileContactList, getProfileMuteList, getUserProfiles, sendFilterlists, getAllowlist, sendAllowList, getRelays, sendRelays, extractRelayConfigFromTags, getBookmarks } from "../lib/profile";
-import { clearSec, getStorage, getStoredProfile, readBookmarks, readEmojiHistory, readPremiumReminder, readPrimalRelaySettings, readSecFromStorage, saveBookmarks, saveEmojiHistory, saveFollowing, saveLikes, saveMuted, saveMuteList, savePremiumReminder, savePrimalRelaySettings, saveRelaySettings, saveStreamMuted, setStoredProfile, storeSec } from "../lib/localStore";
+import { clearSec, getStorage, getStoredProfile, readBookmarks, readEmojiHistory, readPremiumReminder, readPrimalRelaySettings, readSecFromStorage, saveBookmarks, saveEmojiHistory, saveFollowing, saveLikes, saveReactions, migrateLikesToReactions, saveMuted, saveMuteList, savePremiumReminder, savePrimalRelaySettings, saveRelaySettings, saveStreamMuted, setStoredProfile, storeSec } from "../lib/localStore";
+import { invalidateCache } from "../lib/reactionCache";
 import { connectRelays, connectToRelay, getDefaultRelays, getPreConfiguredRelays } from "../lib/relays";
 import { getPublicKey } from "../lib/nostrAPI";
 import EnterPinModal from "../components/EnterPinModal/EnterPinModal";
@@ -57,7 +58,8 @@ export type FollowData = {
 };
 
 export type AccountContextStore = {
-  likes: string[],
+  likes: string[], // Deprecated: Use reactions instead (kept for backward compatibility)
+  reactions: Record<string, string[]>, // noteId -> emoji[] mapping
   defaultRelays: string[],
   relays: Relay[],
   suspendedRelays: Relay[],
@@ -108,6 +110,8 @@ export type AccountContextStore = {
     hideNewNoteForm: () => void,
     setActiveUser: (user: PrimalUser) => void,
     addLike: (note: PrimalNote | PrimalArticle | PrimalDVM) => Promise<boolean>,
+    addReaction: (note: PrimalNote | PrimalArticle | PrimalDVM, emoji: string, customEmoji?: { shortcode: string; imageUrl: string }) => Promise<boolean>,
+    removeReaction: (note: PrimalNote | PrimalArticle | PrimalDVM, emoji: string) => Promise<boolean>,
     setPublicKey: (pubkey: string | undefined) => void,
     updateAccountProfile: (pubkey: string) => void,
     addFollow: (pubkey: string, cb?: (remove: boolean, pubkey: string) => void) => void,
@@ -171,6 +175,7 @@ export type AccountContextStore = {
 
 const initialData = {
   likes: [],
+  reactions: {},
   defaultRelays: [],
   relays: [],
   activeRelays: [],
@@ -767,6 +772,80 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
 
     return success;
+  };
+
+  /**
+   * Add an emoji reaction to a note (NIP-25/NIP-30)
+   */
+  const addReaction = async (
+    note: PrimalNote | PrimalArticle | PrimalDVM,
+    emoji: string,
+    customEmoji?: { shortcode: string; imageUrl: string }
+  ) => {
+    const noteReactions = store.reactions[note.id] || [];
+
+    // Only allow ONE reaction per note - block all subsequent reactions
+    if (noteReactions.length > 0) {
+      console.log('[addReaction] Already reacted to this note', {
+        noteId: note.id,
+        existingEmoji: noteReactions[0],
+        attemptedEmoji: emoji
+      });
+      return false;
+    }
+
+    console.log('[addReaction] Sending reaction...', {
+      noteId: note.id,
+      emoji,
+      pubkey: store.publicKey,
+      relayCount: store.activeRelays.length,
+    });
+
+    const { success } = await sendReaction(
+      note,
+      emoji,
+      store.proxyThroughPrimal,
+      store.activeRelays,
+      store.relaySettings,
+      customEmoji
+    );
+
+    console.log('[addReaction] Reaction sent:', { success, noteId: note.id, emoji });
+
+    if (success) {
+      updateStore('reactions', note.id, (reacts) => [...(reacts || []), emoji]);
+      saveReactions(store.publicKey, store.reactions);
+
+      // Invalidate cache to force fresh fetch on next view
+      invalidateCache(note.id, store.publicKey);
+      console.log('[addReaction] Cache invalidated for note:', note.id);
+    }
+
+    return success;
+  };
+
+  /**
+   * Remove an emoji reaction from a note
+   * TODO: Implement deletion by finding and deleting the kind 7 event
+   */
+  const removeReaction = async (
+    note: PrimalNote | PrimalArticle | PrimalDVM,
+    emoji: string
+  ) => {
+    const noteReactions = store.reactions[note.id] || [];
+
+    if (!noteReactions.includes(emoji)) {
+      return false;
+    }
+
+    // TODO: Find the reaction event and delete it (kind 5)
+    // For now, just update local state
+    updateStore('reactions', note.id, (reacts) =>
+      (reacts || []).filter(e => e !== emoji)
+    );
+    saveReactions(store.publicKey, store.reactions);
+
+    return true;
   };
 
   const addRelay = (url: string) => {
@@ -1915,6 +1994,15 @@ export function AccountProvider(props: { children: JSXElement }) {
     }
   });
 
+  // Migrate likes to reactions format on first load
+  createEffect(() => {
+    if (store.isKeyLookupDone && hasPublicKey() && store.publicKey) {
+      const migratedReactions = migrateLikesToReactions(store.publicKey);
+      updateStore('reactions', () => migratedReactions);
+      saveReactions(store.publicKey, migratedReactions);
+    }
+  });
+
   createEffect(() => {
     setTimeout(() => {
       connectedRelaysCopy = [...store.relays];
@@ -2174,6 +2262,8 @@ const [store, updateStore] = createStore<AccountContextStore>({
     hideNewNoteForm,
     setActiveUser,
     addLike,
+    addReaction,
+    removeReaction,
     setPublicKey,
     updateAccountProfile,
     addFollow,

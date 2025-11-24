@@ -23,6 +23,7 @@ import Loader from '../Loader/Loader';
 import Note from '../Note/Note';
 import Paginator from '../Paginator/Paginator';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
+import { normalizeReactionEmoji } from '../../lib/reactions';
 
 import styles from './ReactionsModal.module.scss';
 import DOMPurify from 'dompurify';
@@ -32,6 +33,7 @@ const ReactionsModal: Component<{
   id?: string,
   noteId: string | undefined,
   stats: ReactionStats;
+  note?: PrimalNote;
   onClose?: () => void,
 }> = (props) => {
 
@@ -130,11 +132,17 @@ const ReactionsModal: Component<{
   });
 
   const getLikes = (offset = 0) => {
-    if (!props.noteId) return;
+    console.log('[ReactionsModal] getLikes called with noteId:', props.noteId);
+
+    if (!props.noteId) {
+      console.log('[ReactionsModal] ❌ No noteId provided, returning early');
+      return;
+    }
 
     const subId = `nr_l_${props.noteId}_${APP_ID}`;
 
-    const users: any[] = [];
+    const usersMap: Record<string, any> = {};
+    const reactionsMap: Record<string, string> = {}; // pubkey -> emoji
 
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
@@ -148,11 +156,53 @@ const ReactionsModal: Component<{
           user.npub = hexToNpub(content.pubkey);
           user.created_at = content.created_at;
 
-          users.push(user);
+          usersMap[content.pubkey] = user;
+        }
+
+        // FIXED: Primal's cache DOES return kind 7 events - extract emoji from content
+        if (content?.kind === Kind.Reaction) {
+          const emoji = normalizeReactionEmoji(content.content || '+');
+          reactionsMap[content.pubkey] = emoji;
         }
       },
       onEose: () => {
-        setLikeList((likes) => [ ...likes, ...users ]);
+        // Combine users with their reaction emojis from cache
+        const usersWithEmojis = Object.keys(usersMap).map(pubkey => ({
+          ...usersMap[pubkey],
+          emoji: reactionsMap[pubkey] || '❤️',
+        }));
+
+        console.log('[ReactionsModal] Users from cache:', usersWithEmojis.length);
+        console.log('[ReactionsModal] Reactions map:', reactionsMap);
+
+        // SUPPLEMENT: Add current user's reaction from localStorage if not in cache yet
+        if (account?.publicKey && account?.reactions) {
+          const noteReactions = account.reactions[props.noteId || ''];
+          console.log('[ReactionsModal] Current user reactions from localStorage:', noteReactions);
+
+          if (noteReactions && noteReactions.length > 0) {
+            const currentUserInList = usersWithEmojis.find(u => u.pubkey === account.publicKey);
+            console.log('[ReactionsModal] Current user in cache?', !!currentUserInList);
+
+            if (!currentUserInList && account.activeUser) {
+              // User reacted but not in cache yet - add from localStorage
+              const userEmoji = normalizeReactionEmoji(noteReactions[0]);
+              console.log('[ReactionsModal] ✅ Adding current user from localStorage with emoji:', userEmoji);
+
+              usersWithEmojis.unshift({
+                ...account.activeUser,
+                pubkey: account.publicKey,
+                npub: hexToNpub(account.publicKey),
+                emoji: userEmoji,
+                created_at: Date.now() / 1000,
+              });
+            } else if (currentUserInList) {
+              console.log('[ReactionsModal] Current user emoji in cache:', currentUserInList.emoji);
+            }
+          }
+        }
+
+        setLikeList((likes) => [ ...likes, ...usersWithEmojis ]);
         loadedLikes = likeList.length;
         setIsFetching(() => false);
         unsub();
@@ -160,6 +210,7 @@ const ReactionsModal: Component<{
     });
 
     setIsFetching(() => true);
+    // Use Primal's cache (standard architecture)
     getEventReactions(props.noteId, Kind.Reaction, subId, offset);
   };
 
@@ -452,7 +503,7 @@ const ReactionsModal: Component<{
                     class={styles.likeItem}
                     onClick={props.onClose}
                   >
-                    <div class={styles.likeIcon}></div>
+                    <div class={styles.reactionEmoji}>{admirer.emoji}</div>
                     <Avatar
                       user={admirer}
                       src={admirer.picture}

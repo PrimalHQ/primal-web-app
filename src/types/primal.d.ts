@@ -16,6 +16,22 @@ export type TopZap = {
   eventId: string,
 }
 
+// NIP-25 and NIP-30: Emoji Reactions
+export type EmojiReaction = {
+  emoji: string;           // Unicode emoji or :shortcode:
+  count: number;
+  users: string[];         // pubkeys who reacted
+  isCustom: boolean;
+  imageUrl?: string;       // For custom emojis (NIP-30)
+  userReacted: boolean;    // Current user has used this reaction
+};
+
+export type ReactionSummary = {
+  reactions: Map<string, EmojiReaction>;
+  totalCount: number;
+  userReactions: string[]; // Emojis the current user has used
+};
+
 export type NostrNoteContent = {
   kind: Kind.Text | Kind.Repost | Kind.LongForm | Kind.LongFormShell | Kind.Draft | Kind.LiveEvent,
   content: string,
@@ -636,7 +652,8 @@ export type NostrNotice = [
 
 export type NoteActions = {
   event_id: string,
-  liked: boolean,
+  liked: boolean, // Deprecated: Use reactions instead (kept for backward compatibility)
+  reactions: string[], // Array of emoji reactions the user has made
   replied: boolean,
   reposted: boolean,
   zapped: boolean,
