@@ -1651,6 +1651,12 @@ const EditBox: Component<{
 
     const name = userName(user);
 
+    // Prevent storing users with invalid names
+    if (!name || name.trim() === '') {
+      console.warn('[EditBox] Cannot mention user with invalid name:', user);
+      return;
+    }
+
     setUserRefs((refs) => ({
       ...refs,
       [name]: user,

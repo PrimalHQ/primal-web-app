@@ -89,9 +89,13 @@ export const userName = (user: PrimalUser | undefined, pubkey?: string) => {
     user.name ||
     truncateNpub(npub);
 
-  return name ?
-    name :
-    truncateNpub(hexToNpub(user.pubkey) || '');
+  // Ensure we always return a valid string, fallback to npub
+  if (name && name.trim()) {
+    return name;
+  }
+
+  const fallbackNpub = hexToNpub(user.pubkey);
+  return fallbackNpub ? truncateNpub(fallbackNpub) : 'Unknown User';
 };
 
 export const authorName = (user: PrimalUser | undefined) => {
