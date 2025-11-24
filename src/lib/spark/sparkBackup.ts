@@ -188,12 +188,12 @@ export async function publishBackup(
   pubkey?: string
 ): Promise<void> {
   try {
-    console.log('[SparkBackup] 🚀 PUBLISHING WALLET BACKUP TO RELAYS...');
+    logInfo('[SparkBackup] 🚀 PUBLISHING WALLET BACKUP TO RELAYS...');
     logInfo('[SparkBackup] Publishing wallet backup to relays...');
 
     // Get pubkey if not provided
     const userPubkey = pubkey || await getPublicKey();
-    console.log('[SparkBackup] Got pubkey:', userPubkey?.slice(0, 8));
+    logInfo('[SparkBackup] Got pubkey:', userPubkey?.slice(0, 8));
     if (!userPubkey) {
       throw new Error('Cannot publish backup: No pubkey available');
     }
@@ -206,7 +206,7 @@ export async function publishBackup(
 
     // Create backup event
     const backupEvent = await createBackupEvent(userPubkey, mnemonic, config);
-    console.log('[SparkBackup] Created backup event:', {
+    logInfo('[SparkBackup] Created backup event:', {
       kind: backupEvent.kind,
       tags: backupEvent.tags,
       contentLength: backupEvent.content.length,
@@ -218,14 +218,14 @@ export async function publishBackup(
     if (!signedEvent) {
       throw new Error('Failed to sign backup event');
     }
-    console.log('[SparkBackup] Signed event:', {
+    logInfo('[SparkBackup] Signed event:', {
       id: signedEvent.id,
       pubkey: signedEvent.pubkey?.slice(0, 8),
       kind: signedEvent.kind,
       tags: signedEvent.tags,
       sig: signedEvent.sig?.slice(0, 16)
     });
-    console.log('[SparkBackup] Full event for debugging:', JSON.stringify(signedEvent, null, 2));
+    logInfo('[SparkBackup] Full event for debugging:', JSON.stringify(signedEvent, null, 2));
 
     // Add big relays as fallbacks (they accept all event kinds)
     const allRelayUrls = new Set([
@@ -242,30 +242,30 @@ export async function publishBackup(
 
     const publishPromises = Array.from(allRelayUrls).map(async (url) => {
       try {
-        console.log(`[SparkBackup] 📡 Attempting to publish to ${url}...`);
+        logInfo(`[SparkBackup] 📡 Attempting to publish to ${url}...`);
         // Create new relay instance using RelayFactory
         const relay = new RelayFactory(url);
         relay.publishTimeout = 10000; // 10 second timeout (like Jumble-Spark)
 
         // Connect to relay
-        console.log(`[SparkBackup] Connecting to ${url}...`);
+        logInfo(`[SparkBackup] Connecting to ${url}...`);
         await relay.connect();
-        console.log(`[SparkBackup] Connected to ${url}`);
+        logInfo(`[SparkBackup] Connected to ${url}`);
 
         // Publish event and wait for OK message from relay
-        console.log(`[SparkBackup] Publishing event to ${url}...`);
+        logInfo(`[SparkBackup] Publishing event to ${url}...`);
         await relay.publish(signedEvent);
-        console.log(`[SparkBackup] Event published to ${url}`);
+        logInfo(`[SparkBackup] Event published to ${url}`);
 
         // Success!
         successCount++;
-        console.log(`[SparkBackup] ✓ SUCCESS: Published to ${url}`);
+        logInfo(`[SparkBackup] ✓ SUCCESS: Published to ${url}`);
         logInfo(`[SparkBackup] ✓ Published to ${url}`);
       } catch (error: any) {
         failCount++;
         const errorMsg = error?.message || String(error);
         errors.push(`${url}: ${errorMsg}`);
-        console.error(`[SparkBackup] ✗ FAILED to publish to ${url}:`, errorMsg);
+        logError(`[SparkBackup] ✗ FAILED to publish to ${url}:`, errorMsg);
         logWarning(`[SparkBackup] ✗ Failed to publish to ${url}:`, errorMsg);
       }
     });
@@ -300,7 +300,7 @@ export async function fetchBackup(
 ): Promise<string | null> {
   return new Promise(async (resolve) => {
     try {
-      console.log('[SparkBackup] 🔍 Fetching wallet backup from relays...');
+      logInfo('[SparkBackup] 🔍 Fetching wallet backup from relays...');
       logInfo('[SparkBackup] Fetching wallet backup from relays...');
 
       // Get pubkey if not provided
@@ -317,7 +317,7 @@ export async function fetchBackup(
         ...BIG_RELAY_URLS
       ]);
 
-      console.log(`[SparkBackup] Fetching from ${allRelayUrls.size} relays (including fallback relays)`);
+      logInfo(`[SparkBackup] Fetching from ${allRelayUrls.size} relays (including fallback relays)`);
       logInfo(`[SparkBackup] Fetching from ${allRelayUrls.size} relays (including fallback relays)`);
 
       let latestMnemonic: string | null = null;
@@ -331,7 +331,7 @@ export async function fetchBackup(
         '#d': [BACKUP_D_TAG],
       };
 
-      console.log('[SparkBackup] Filter:', {
+      logInfo('[SparkBackup] Filter:', {
         kinds: filter.kinds,
         authors: [userPubkey.slice(0, 8)],
         '#d': filter['#d'],
@@ -341,14 +341,14 @@ export async function fetchBackup(
       const relayPromises = Array.from(allRelayUrls).map(async (url) => {
         try {
           const relay = new RelayFactory(url);
-          console.log(`[SparkBackup] 📡 Connecting to ${url}...`);
+          logInfo(`[SparkBackup] 📡 Connecting to ${url}...`);
           await relay.connect();
-          console.log(`[SparkBackup] ✓ Connected to ${url}`);
+          logInfo(`[SparkBackup] ✓ Connected to ${url}`);
 
           return new Promise<void>((resolveRelay) => {
             const sub = relay.subscribe([filter], {
               onevent: async (event: any) => {
-                console.log(`[SparkBackup] 📥 Received event from ${url}:`, {
+                logInfo(`[SparkBackup] 📥 Received event from ${url}:`, {
                   kind: event.kind,
                   pubkey: event.pubkey?.slice(0, 8),
                   id: event.id,
@@ -362,16 +362,16 @@ export async function fetchBackup(
                   if (mnemonic && event.created_at > latestTimestamp) {
                     latestMnemonic = mnemonic;
                     latestTimestamp = event.created_at;
-                    console.log(`[SparkBackup] ✅ Updated latest backup from ${url} (timestamp: ${event.created_at})`);
+                    logInfo(`[SparkBackup] ✅ Updated latest backup from ${url} (timestamp: ${event.created_at})`);
                     logInfo(`[SparkBackup] Updated latest backup (timestamp: ${event.created_at})`);
                   }
                 } catch (error) {
-                  console.error(`[SparkBackup] Failed to decrypt event from ${url}:`, error);
+                  logError(`[SparkBackup] Failed to decrypt event from ${url}:`, error);
                   logWarning('[SparkBackup] Failed to decrypt backup event:', error);
                 }
               },
               oneose: () => {
-                console.log(`[SparkBackup] 🏁 EOSE from ${url}`);
+                logInfo(`[SparkBackup] 🏁 EOSE from ${url}`);
                 sub.close();
                 eoseCount++;
 
@@ -385,12 +385,12 @@ export async function fetchBackup(
             // Timeout for this relay after 5 seconds
             setTimeout(() => {
               sub.close();
-              console.log(`[SparkBackup] ⏱️ Timeout for ${url}`);
+              logInfo(`[SparkBackup] ⏱️ Timeout for ${url}`);
               resolveRelay();
             }, 5000);
           });
         } catch (error) {
-          console.error(`[SparkBackup] ✗ Failed to query ${url}:`, error);
+          logError(`[SparkBackup] ✗ Failed to query ${url}:`, error);
           logWarning(`[SparkBackup] Failed to subscribe to ${url}:`, error);
         }
       });
@@ -399,17 +399,17 @@ export async function fetchBackup(
       await Promise.all(relayPromises);
 
       if (latestMnemonic) {
-        console.log('[SparkBackup] ✅ Backup fetched successfully!');
+        logInfo('[SparkBackup] ✅ Backup fetched successfully!');
         logInfo('[SparkBackup] Backup fetched successfully');
       } else {
-        console.log('[SparkBackup] ❌ No backup found on any relay');
+        logInfo('[SparkBackup] ❌ No backup found on any relay');
         logInfo('[SparkBackup] No backup found on relays');
       }
 
       resolve(latestMnemonic);
 
     } catch (error) {
-      console.error('[SparkBackup] ❌ Failed to fetch backup:', error);
+      logError('[SparkBackup] ❌ Failed to fetch backup:', error);
       logError('[SparkBackup] Failed to fetch backup:', error);
       resolve(null);
     }
@@ -511,30 +511,30 @@ export async function syncFromRelays(
   overwriteLocal: boolean = false
 ): Promise<boolean> {
   try {
-    console.log('[SparkBackup] 🔄 syncFromRelays called', { overwriteLocal, relayCount: relays.length });
+    logInfo('[SparkBackup] 🔄 syncFromRelays called', { overwriteLocal, relayCount: relays.length });
     logInfo('[SparkBackup] Syncing wallet from relays...');
 
     const userPubkey = pubkey || await getPublicKey();
-    console.log('[SparkBackup] Got pubkey:', userPubkey?.slice(0, 8));
+    logInfo('[SparkBackup] Got pubkey:', userPubkey?.slice(0, 8));
     if (!userPubkey) {
       throw new Error('Cannot sync: No pubkey available');
     }
 
     // Check if local wallet exists
     const localSeed = await loadEncryptedSeed(userPubkey);
-    console.log('[SparkBackup] Local seed exists:', !!localSeed, 'overwriteLocal:', overwriteLocal);
+    logInfo('[SparkBackup] Local seed exists:', !!localSeed, 'overwriteLocal:', overwriteLocal);
 
     if (localSeed && !overwriteLocal) {
       logWarning('[SparkBackup] ⚠️ Local wallet already exists, use overwriteLocal=true to replace');
       return false;
     }
 
-    console.log('[SparkBackup] ✓ Proceeding to fetch backup from relays...');
+    logInfo('[SparkBackup] ✓ Proceeding to fetch backup from relays...');
 
     // Restore from backup
     const success = await restoreFromBackup(relays, userPubkey);
 
-    console.log('[SparkBackup] Restore from backup result:', success);
+    logInfo('[SparkBackup] Restore from backup result:', success);
 
     if (success) {
       logInfo('[SparkBackup] ✅ Sync from relays completed');
@@ -544,7 +544,7 @@ export async function syncFromRelays(
 
     return success;
   } catch (error) {
-    console.error('[SparkBackup] ❌ Failed to sync from relays:', error);
+    logError('[SparkBackup] ❌ Failed to sync from relays:', error);
     logError('[SparkBackup] Failed to sync from relays:', error);
     return false;
   }
@@ -561,7 +561,7 @@ export async function deleteBackup(
   pubkey?: string
 ): Promise<void> {
   try {
-    console.log('[SparkBackup] 🗑️ Deleting wallet backup from relays...');
+    logInfo('[SparkBackup] 🗑️ Deleting wallet backup from relays...');
     logInfo('[SparkBackup] Deleting wallet backup from relays...');
 
     const userPubkey = pubkey || await getPublicKey();
@@ -587,13 +587,13 @@ export async function deleteBackup(
       created_at: Math.floor(Date.now() / 1000),
     };
 
-    console.log('[SparkBackup] Signing deletion event...');
+    logInfo('[SparkBackup] Signing deletion event...');
     const signedDeletion = await signEvent(deletionEvent as any);
     if (!signedDeletion) {
       throw new Error('Failed to sign deletion event');
     }
 
-    console.log('[SparkBackup] Publishing deletion event to relays...');
+    logInfo('[SparkBackup] Publishing deletion event to relays...');
 
     // Publish deletion event to all relays
     let successCount = 0;
@@ -604,20 +604,20 @@ export async function deleteBackup(
         await relay.connect();
         await relay.publish(signedDeletion);
         successCount++;
-        console.log(`[SparkBackup] ✓ Deletion published to ${url}`);
+        logInfo(`[SparkBackup] ✓ Deletion published to ${url}`);
         logInfo(`[SparkBackup] Deletion published to ${url}`);
       } catch (error) {
-        console.error(`[SparkBackup] ✗ Failed to publish deletion to ${url}:`, error);
+        logError(`[SparkBackup] ✗ Failed to publish deletion to ${url}:`, error);
         logWarning(`[SparkBackup] Failed to publish deletion to ${url}:`, error);
       }
     });
 
     await Promise.all(publishPromises);
 
-    console.log(`[SparkBackup] ✅ Deletion event published to ${successCount}/${allRelayUrls.size} relays`);
+    logInfo(`[SparkBackup] ✅ Deletion event published to ${successCount}/${allRelayUrls.size} relays`);
     logInfo(`[SparkBackup] Backup deletion completed (${successCount}/${allRelayUrls.size} relays)`);
   } catch (error) {
-    console.error('[SparkBackup] ❌ Failed to delete backup:', error);
+    logError('[SparkBackup] ❌ Failed to delete backup:', error);
     logError('[SparkBackup] Failed to delete backup:', error);
     throw error;
   }
