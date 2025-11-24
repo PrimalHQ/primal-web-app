@@ -994,31 +994,87 @@ const EditBox: Component<{
 
     return text.replace(regex, (token) => {
       const [space, term] = token.split('#');
-      const embeded = (
-        <span>
-          {space}
-          <span class={styles.userReference}>
-            #{term}
-          </span>
-        </span>
-      );
 
-      // @ts-ignore
-      return embeded.outerHTML;
+      // Create DOM elements imperatively to get proper outerHTML
+      const wrapper = document.createElement('span');
+      const spaceText = document.createTextNode(space);
+      const innerSpan = document.createElement('span');
+      innerSpan.className = styles.userReference;
+      innerSpan.textContent = `#${term}`;
+
+      wrapper.appendChild(spaceText);
+      wrapper.appendChild(innerSpan);
+
+      return wrapper.outerHTML;
     });
   }
 
   const parseUserMentions = (text: string) => {
     return text.replace(editMentionRegex, (url) => {
       const [_, name] = url.split('\`');
+
+      if (!name || !name.trim()) {
+        return url; // Return original if name is invalid
+      }
+
       const user = Object.values(userRefs).find(ref => userName(ref) === name);
 
-      const link = user ?
-        MentionedUserLink({ user, openInNewTab: true}) :
-        <span class='linkish'> @{name}</span>;
+      if (user) {
+        // Create anchor element imperatively
+        const link = document.createElement('a');
+        link.className = 'linkish'; // Use generic linkish class
+        link.href = `${window.location.origin}${app?.actions.profileLink(user.npub) || ''}`;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = `@${name}`;
 
-        // @ts-ignore
-      return ` ${link.outerHTML}` || ` @${name}`;
+        return ` ${link.outerHTML}`;
+      }
+
+      // Fallback for unknown users
+      const span = document.createElement('span');
+      span.className = 'linkish';
+      span.textContent = `@${name}`;
+      return ` ${span.outerHTML}`;
+    });
+  };
+
+  const parseNostrMentions = (text: string) => {
+    // Match nostr:npub or nostr:nprofile patterns
+    return text.replace(/(?:\s|^)(nostr:(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g, (fullMatch, nostrRef, type) => {
+      const npubId = nostrRef.replace('nostr:', '');
+
+      try {
+        const decoded = nip19.decode(npubId);
+        const hex = typeof decoded.data === 'string' ? decoded.data : (decoded.data as any).pubkey;
+
+        // Look up user in userRefs by hex pubkey
+        const user = userRefs[hex] || Object.values(userRefs).find(u => u.pubkey === hex);
+
+        const link = document.createElement('a');
+        link.className = 'linkish';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+
+        if (user) {
+          link.href = `${window.location.origin}${app?.actions.profileLink(user.npub) || ''}`;
+          link.textContent = `@${userName(user)}`;
+        } else {
+          // User not yet loaded, use truncated npub
+          link.href = `${window.location.origin}${app?.actions.profileLink(npubId) || ''}`;
+          link.textContent = `@${truncateNpub(npubId)}`;
+
+          // Trigger async fetch for this user
+          setTimeout(() => {
+            parseNpubLinks(text);
+          }, 0);
+        }
+
+        return fullMatch.startsWith(' ') ? ` ${link.outerHTML}` : link.outerHTML;
+      } catch (e) {
+        // If decode fails, return original
+        return fullMatch;
+      }
     });
   };
 
@@ -1047,11 +1103,20 @@ const EditBox: Component<{
 
         const user = userRefs[userId];
 
-        const link = user ?
-          <a href={`${window.location.origin}${app?.actions.profileLink(user.npub) || ''}`} target="_blank" class='linkish'>@{userName(user)}</a> :
-          <a href={`${window.location.origin}${app?.actions.profileLink(id) || ''}`} target="_blank" class='linkish'>@{truncateNpub(id)}</a>;
+        // Create anchor element imperatively to avoid JSX outerHTML issues
+        const link = document.createElement('a');
+        link.className = 'linkish';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
 
-        // @ts-ignore
+        if (user) {
+          link.href = `${window.location.origin}${app?.actions.profileLink(user.npub) || ''}`;
+          link.textContent = `@${userName(user)}`;
+        } else {
+          link.href = `${window.location.origin}${app?.actions.profileLink(id) || ''}`;
+          link.textContent = `@${truncateNpub(id)}`;
+        }
+
         return link.outerHTML || url;
       } catch (e) {
         return `<span class="${styles.error}">${url}</span>`;
@@ -1533,17 +1598,19 @@ const EditBox: Component<{
 
   const parseForReferece = async (value: string) => {
     const content = await replaceLinkPreviews(
-      parseUserMentions(
-        highlightHashtags(
-          parseNote1(value, media?.actions.getMediaUrl)
+      highlightHashtags(
+        parseUserMentions(
+          parseNostrMentions(
+            parseNote1(value, media?.actions.getMediaUrl)
+          )
         )
       )
     );
 
 
     parseNaddr(content);
-    parseNpubLinks(content);
     parseNoteLinks(content);
+    // Note: nostr:npub mentions are now handled inline by parseNostrMentions()
 
     const ret = await parseExternalLiveStreams(content);
 
