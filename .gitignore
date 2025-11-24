@@ -1,3 +1,6 @@
 node_modules
 dist
 .DS_Store
+.dev-notes-breez-integration.md
+.dev-notes-breez-spark-integration.md
+CLAUDE.md
