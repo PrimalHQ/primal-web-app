@@ -67,6 +67,7 @@
     "d3-format": "3.1.0",
     "dayjs": "1.11.11",
     "dompurify": "3.0.5",
+    "emoji-picker-element": "^1.28.0",
     "fuse.js": "7.0.0",
     "highlight.js": "11.9.0",
     "hls-video-element": "1.5.6",

@@ -26,6 +26,7 @@ const NoteFooterActionButton: Component<{
   title?: string,
   large?: boolean,
   noteType?: 'primary',
+  reactionEmoji?: string, // Custom emoji to show instead of icon
 }> = (props) => {
 
   return (
@@ -40,10 +41,22 @@ const NoteFooterActionButton: Component<{
       disabled={props.disabled}
     >
       <div class={`${buttonTypeClasses[props.type]} ${props.large ? styles.large : ''}`}>
-        <div
-          class={`${styles.icon} ${props.large ? styles.large : ''}`}
-          style={props.hidden ? 'visibility: hidden': 'visibility: visible'}
-        ></div>
+        <Show
+          when={props.reactionEmoji}
+          fallback={
+            <div
+              class={`${styles.icon} ${props.large ? styles.large : ''}`}
+              style={props.hidden ? 'visibility: hidden': 'visibility: visible'}
+            ></div>
+          }
+        >
+          <div
+            class={`${styles.reactionEmoji} ${props.large ? styles.large : ''}`}
+            style={props.hidden ? 'visibility: hidden': 'visibility: visible'}
+          >
+            {props.reactionEmoji}
+          </div>
+        </Show>
         <Show when={!(isPhone() && props.noteType === 'primary')}>
           <div class={styles.statNumber}>{props.label || ''}</div>
         </Show>

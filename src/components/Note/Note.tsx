@@ -254,6 +254,7 @@ const Note: Component<NoteProps> = (props) => {
       reposts: reactionsState.reposts,
       quotes: reactionsState.quoteCount,
       openOn,
+      note: props.note,
     });
   };
 

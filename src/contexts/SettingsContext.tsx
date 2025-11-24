@@ -70,6 +70,8 @@ export type SettingsContextStore = {
   contentModeration: ContentModeration[],
   mobileReleases: MobileReleases,
   recomendedBlossomServers: string[],
+  oneClickReactions: boolean,
+  defaultReactionEmoji: string,
   actions: {
     setTheme: (theme: PrimalTheme | null) => void,
     setThemeByName: (theme: string | null, temp?: boolean) => void,
@@ -109,6 +111,8 @@ export type SettingsContextStore = {
     setAnimation: (isAnimated: boolean, temp?: boolean) => void,
     getRecomendedBlossomServers: () => void,
     setUseSystemTheme: (v: boolean) => void,
+    setOneClickReactions: (enabled: boolean, temp?: boolean) => void,
+    setDefaultReactionEmoji: (emoji: string, temp?: boolean) => void,
   }
 }
 
@@ -135,6 +139,8 @@ export const initialData = {
     android: { date: `${andRD}`, version: andVersion },
   },
   recomendedBlossomServers: [],
+  oneClickReactions: false,
+  defaultReactionEmoji: '❤️',
 };
 
 export type FeedType = 'home' | 'reads';
@@ -266,6 +272,18 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     saveAnimated(account?.publicKey, isAnimated);
     updateStore('isAnimated', () => isAnimated);
+
+    !temp && saveSettings();
+  };
+
+  const setOneClickReactions = (enabled: boolean, temp?: boolean) => {
+    updateStore('oneClickReactions', () => enabled);
+
+    !temp && saveSettings();
+  };
+
+  const setDefaultReactionEmoji = (emoji: string, temp?: boolean) => {
+    updateStore('defaultReactionEmoji', () => emoji);
 
     !temp && saveSettings();
   };
@@ -666,6 +684,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       contentModeration: store.contentModeration,
       proxyThroughPrimal: account?.proxyThroughPrimal || false,
       animated: store.isAnimated,
+      oneClickReactions: store.oneClickReactions,
+      defaultReactionEmoji: store.defaultReactionEmoji,
     };
 
     const subid = `save_settings_${APP_ID}`;
@@ -770,6 +790,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             applyContentModeration,
             contentModeration,
             proxyThroughPrimal,
+            oneClickReactions,
+            defaultReactionEmoji,
           } = JSON.parse(content.content || '{}');
 
           if (store.useSystemTheme) {
@@ -789,6 +811,14 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           }
 
           setAnimation(animated, true);
+
+          // Load reaction preferences
+          if (oneClickReactions !== undefined) {
+            setOneClickReactions(oneClickReactions, true);
+          }
+          if (defaultReactionEmoji) {
+            setDefaultReactionEmoji(defaultReactionEmoji, true);
+          }
 
           // If new setting is missing, merge with the old setting
           if (zapDefault) {
@@ -1093,6 +1123,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
       getRecomendedBlossomServers,
       setUseSystemTheme,
+      setOneClickReactions,
+      setDefaultReactionEmoji,
     },
   });
 
