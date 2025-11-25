@@ -857,19 +857,41 @@ const WalletContent: Component = () => {
   };
 
   return (
-    <div class={styles.walletPage}>
-      {/* Lightning flash animation for incoming payments */}
-      <Show when={showPaymentFlash()}>
-        <LightningFlash duration={1000} active={showPaymentFlash()} />
-      </Show>
+    <Show
+      when={(account?.showPin || '').length === 0}
+      fallback={
+        <div class={styles.walletPage}>
+          <PageTitle title="Lightning Wallet" />
+          <PageCaption>
+            <div>Breez Spark Wallet</div>
+          </PageCaption>
+          <div class={styles.walletContent}>
+            <div class={styles.walletEmpty}>
+              <Loader />
+              <div class={styles.emptyTitle}>
+                PIN Required
+              </div>
+              <div class={styles.emptyMessage}>
+                Please enter your PIN to access the wallet
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <div class={styles.walletPage}>
+        {/* Lightning flash animation for incoming payments */}
+        <Show when={showPaymentFlash()}>
+          <LightningFlash duration={1000} active={showPaymentFlash()} />
+        </Show>
 
-      <PageTitle title="Lightning Wallet" />
+        <PageTitle title="Lightning Wallet" />
 
-      <PageCaption>
-        <div>Breez Spark Wallet</div>
-      </PageCaption>
+        <PageCaption>
+          <div>Breez Spark Wallet</div>
+        </PageCaption>
 
-      <div class={styles.walletContent}>
+        <div class={styles.walletContent}>
         <Show
           when={sparkWallet.store.isConnected || (sparkWallet.store.isConfigured && sparkWallet.store.balance > 0)}
           fallback={
@@ -1670,7 +1692,8 @@ const WalletContent: Component = () => {
           </Show>
         </div>
       </AdvancedSearchDialog>
-    </div>
+      </div>
+    </Show>
   );
 };
 

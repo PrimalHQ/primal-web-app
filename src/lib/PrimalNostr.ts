@@ -84,7 +84,14 @@ export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
     let sec: string = pk || readSecFromStorage() || tempNsec() || generateNsec();
 
     if (sec.startsWith(pinEncodePrefix)) {
-      sec = await decryptWithPin(currentPin(), sec);
+      const pin = currentPin();
+
+      // Check if PIN is required but not yet provided
+      if (!pin || pin.length === 0) {
+        throw('pin-required');
+      }
+
+      sec = await decryptWithPin(pin, sec);
     }
 
     const decoded = nip19.decode(sec);
