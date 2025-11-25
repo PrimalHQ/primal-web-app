@@ -3,6 +3,13 @@ import { convertToUser, userName } from "../stores/profile";
 import { EmojiOption, NostrRelays, NostrStats, PrimalArticleFeed, PrimalDVM, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
 import { StreamingData } from "./streaming";
 
+export type ZapAnimationSettings = {
+  enabled: boolean;           // Enable zap animations
+  triggerMode: 'all' | 'min'; // All zaps or minimum threshold
+  minAmount: number;          // Minimum sats (default 1000)
+  direction: 'both' | 'incoming'; // Both directions or incoming only
+};
+
 export type LocalStore = {
   following: string[],
   followingSince: number,
@@ -52,6 +59,7 @@ export type LocalStore = {
   useSystemDarkMode: boolean | undefined,
   liveStreams: StreamingData[] | undefined,
   liveAuthors: PrimalUser[] | undefined,
+  zapAnimations: ZapAnimationSettings | undefined,
 };
 
 export type UploadTime = {
@@ -109,6 +117,13 @@ export const emptyStorage: LocalStore = {
   nwcActive: undefined,
   useSystemDarkMode: false,
   liveStreams: undefined,
+  liveAuthors: undefined,
+  zapAnimations: {
+    enabled: true,
+    triggerMode: 'all',
+    minAmount: 1000,
+    direction: 'both',
+  },
 }
 
 export const storageName = (pubkey?: string) => {
@@ -341,6 +356,34 @@ export const saveAnimated = (pubkey: string | undefined, animated: boolean) => {
   store.animated = animated;
 
   setStorage(pubkey, store);
+};
+
+export const saveZapAnimationSettings = (
+  pubkey: string | undefined,
+  settings: ZapAnimationSettings
+) => {
+  if (!pubkey) return;
+  const store = getStorage(pubkey);
+  store.zapAnimations = settings;
+  setStorage(pubkey, store);
+};
+
+export const loadZapAnimationSettings = (
+  pubkey: string | undefined
+): ZapAnimationSettings => {
+  if (!pubkey) return {
+    enabled: true,
+    triggerMode: 'all',
+    minAmount: 1000,
+    direction: 'both',
+  };
+  const store = getStorage(pubkey);
+  return store.zapAnimations || {
+    enabled: true,
+    triggerMode: 'all',
+    minAmount: 1000,
+    direction: 'both',
+  };
 };
 
 export const saveRecomendedUsers = (pubkey: string | undefined, recomended: { profiles: PrimalUser[], stats: Record<string, UserStats> }) => {

@@ -289,22 +289,29 @@ const NostrWalletConnect: Component = () => {
               <div class={styles.sparkName}>Breez Spark Wallet</div>
               <div class={styles.sparkDesc}>Self-custodial Lightning wallet</div>
             </div>
-            <Switch
-              class={styles.sparkToggle}
-              checked={sparkWallet.store.isEnabled}
-              onChange={(checked) => {
-                if (checked) {
-                  sparkWallet.actions.enableWallet();
-                } else {
-                  sparkWallet.actions.disableWallet();
-                }
-              }}
-            >
-              <Switch.Input class={styles.sparkToggleInput} />
-              <Switch.Control class={styles.sparkToggleControl}>
-                <Switch.Thumb class={styles.sparkToggleThumb} />
-              </Switch.Control>
-            </Switch>
+            <div class={styles.sparkActions}>
+              {sparkWallet.store.isEnabled && !sparkWallet.store.isConnected && (
+                <A href="/wallet" class={styles.sparkActionLink}>
+                  create/restore
+                </A>
+              )}
+              <Switch
+                class={styles.sparkToggle}
+                checked={sparkWallet.store.isEnabled}
+                onChange={(checked) => {
+                  if (checked) {
+                    sparkWallet.actions.enableWallet();
+                  } else {
+                    sparkWallet.actions.disableWallet();
+                  }
+                }}
+              >
+                <Switch.Input class={styles.sparkToggleInput} />
+                <Switch.Control class={styles.sparkToggleControl}>
+                  <Switch.Thumb class={styles.sparkToggleThumb} />
+                </Switch.Control>
+              </Switch>
+            </div>
           </div>
         </div>
       </div>

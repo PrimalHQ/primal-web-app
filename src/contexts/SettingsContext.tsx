@@ -34,7 +34,7 @@ import {
   updateAvailableFeedsTop
 } from "../lib/availableFeeds";
 import { useAccountContext } from "./AccountContext";
-import { readSystemDarkMode, saveAnimated, saveHomeFeeds, saveNWC, saveNWCActive, saveReadsFeeds, saveSystemDarkMode, saveTheme } from "../lib/localStore";
+import { readSystemDarkMode, saveAnimated, saveHomeFeeds, saveNWC, saveNWCActive, saveReadsFeeds, saveSystemDarkMode, saveTheme, saveZapAnimationSettings, loadZapAnimationSettings, ZapAnimationSettings } from "../lib/localStore";
 import { getDefaultSettings, getHomeSettings, getNWCSettings, getReadsSettings, getSettings, sendSettings, setHomeSettings, setReadsSettings } from "../lib/settings";
 import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
@@ -56,6 +56,7 @@ export type SettingsContextStore = {
   themes: PrimalTheme[],
   useSystemTheme: boolean,
   isAnimated: boolean,
+  zapAnimations: ZapAnimationSettings,
   availableFeeds: PrimalFeed[],
   readsFeeds: PrimalArticleFeed[],
   homeFeeds: PrimalArticleFeed[],
@@ -107,6 +108,7 @@ export type SettingsContextStore = {
     removeFeed: (feed: PrimalArticleFeed, feedType: FeedType) => void,
     isFeedAdded: (feed: PrimalArticleFeed, destination: 'home' | 'reads') => boolean,
     setAnimation: (isAnimated: boolean, temp?: boolean) => void,
+    setZapAnimationSettings: (settings: ZapAnimationSettings) => void,
     getRecomendedBlossomServers: () => void,
     setUseSystemTheme: (v: boolean) => void,
   }
@@ -118,6 +120,12 @@ export const initialData = {
   themes,
   useSystemTheme: false,
   isAnimated: true,
+  zapAnimations: {
+    enabled: true,
+    triggerMode: 'all',
+    minAmount: 1000,
+    direction: 'both',
+  },
   availableFeeds: [],
   readsFeeds: [],
   homeFeeds: [],
@@ -268,6 +276,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     updateStore('isAnimated', () => isAnimated);
 
     !temp && saveSettings();
+  };
+
+  const setZapAnimationSettings = (settings: ZapAnimationSettings) => {
+    saveZapAnimationSettings(account?.publicKey, settings);
+    updateStore('zapAnimations', () => settings);
+    saveSettings();
   };
 
   const setApplyContentModeration = (flag = true) => {
@@ -666,6 +680,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       contentModeration: store.contentModeration,
       proxyThroughPrimal: account?.proxyThroughPrimal || false,
       animated: store.isAnimated,
+      zapAnimations: store.zapAnimations,
     };
 
     const subid = `save_settings_${APP_ID}`;
@@ -770,6 +785,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             applyContentModeration,
             contentModeration,
             proxyThroughPrimal,
+            zapAnimations,
           } = JSON.parse(content.content || '{}');
 
           if (store.useSystemTheme) {
@@ -789,6 +805,14 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           }
 
           setAnimation(animated, true);
+
+          // Load zap animations settings or use default
+          if (zapAnimations) {
+            updateStore('zapAnimations', () => ({ ...zapAnimations }));
+          } else {
+            const loadedSettings = loadZapAnimationSettings(pubkey);
+            updateStore('zapAnimations', () => loadedSettings);
+          }
 
           // If new setting is missing, merge with the old setting
           if (zapDefault) {
@@ -1090,6 +1114,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       isFeedAdded,
 
       setAnimation,
+      setZapAnimationSettings,
 
       getRecomendedBlossomServers,
       setUseSystemTheme,

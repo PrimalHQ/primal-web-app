@@ -1098,6 +1098,69 @@
   line-height: 16px;
 }
 
+.appearanceSection {
+  margin-top: 32px;
+}
+
+.appearanceSectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.appearanceDescription {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.appearanceNote {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  font-style: italic;
+  margin-top: 12px;
+}
+
+.zapAnimationOptions {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.optionGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.optionLabel {
+  font-size: 14px;
+  color: var(--text-secondary);
+  min-width: 140px;
+}
+
+.selectInput, .numberInput {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--devider);
+  background: var(--background-input);
+  color: var(--text-primary);
+  font-size: 14px;
+  min-width: 200px;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+}
+
+.numberInput {
+  min-width: 120px;
+}
+
 
 .devToolsList {
   display: flex;
@@ -1166,6 +1229,38 @@
   font-weight: 400;
   line-height: 12px;
   color: var(--text-secondary);
+}
+
+.sparkActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sparkActionLink {
+  display: inline;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: fit-content;
+  border: none;
+  border-radius: 6px;
+  margin: 0px;
+  padding: 0px;
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 400;
+  background: none;
+  color: var(--accent-links);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
 }
 
 .sparkToggle {
