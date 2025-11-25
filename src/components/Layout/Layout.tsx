@@ -33,6 +33,8 @@ import LiveStreamContextMenu from '../Note/LiveStreamContextMenu';
 import ProfileQrCodeModal from '../ProfileQrCodeModal/ProfileQrCodeModal';
 import ReportContentModal from '../ReportContentModal/ReportContentModal';
 import NoteVideoContextMenu from '../Note/NoteVideoContextMenu';
+import LightningFlash from '../LightningFlash/LightningFlash';
+import { useZapNotification } from '../../contexts/ZapNotificationContext';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -40,6 +42,12 @@ const Layout: Component<any> = (props) => {
 
   const account = useAccountContext();
   const home = useHomeContext();
+  const zapNotification = useZapNotification();
+
+  // Debug: Monitor showAnimation state changes
+  createEffect(() => {
+    console.log('[Layout] showAnimation changed to:', zapNotification?.store.showAnimation);
+  });
   const profile = useProfileContext();
   const location = useLocation();
   const params = useParams();
@@ -125,6 +133,14 @@ const Layout: Component<any> = (props) => {
           <ZapAnimation src={zapMD} />
         </div>
         <div id="modal" class={styles.modal}></div>
+
+        <Show when={zapNotification?.store.showAnimation}>
+          {() => {
+            console.log('[Layout] Rendering LightningFlash component');
+            return <LightningFlash duration={1000} active={true} />;
+          }}
+        </Show>
+
         <Show
           when={isPhone()}
           fallback={

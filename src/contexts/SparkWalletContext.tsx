@@ -5,6 +5,7 @@ import { loadEncryptedSeed, saveEncryptedSeed, loadSparkConfig, saveSparkConfig,
 import { publishBackup, fetchBackup, syncToRelays, syncFromRelays, hasBackup } from '../lib/spark/sparkBackup';
 import { publishZapReceiptForPayment, handleIncomingZap } from '../lib/spark/sparkZapReceipt';
 import { useAccountContext } from './AccountContext';
+import { useZapNotification } from './ZapNotificationContext';
 import { logError, logInfo, logWarning } from '../lib/logger';
 import type { LightningAddressInfo } from '@breeztech/breez-sdk-spark/web';
 
@@ -118,6 +119,7 @@ const SparkWalletContext = createContext<SparkWalletContextType>();
 
 export const SparkWalletProvider: ParentComponent = (props) => {
   const account = useAccountContext();
+  const zapNotification = useZapNotification();
 
   // Load preferences from localStorage
   const loadDisplayCurrency = () => {
@@ -720,6 +722,8 @@ export const SparkWalletProvider: ParentComponent = (props) => {
             break;
 
           case 'paymentSucceeded':
+            logInfo('[SparkWallet] paymentSucceeded event received');
+
             // Refresh balance and history
             refreshBalance().catch(error => {
               logError('[SparkWallet] Failed to refresh balance on event:', error);
@@ -732,6 +736,7 @@ export const SparkWalletProvider: ParentComponent = (props) => {
             // Check if this was an incoming payment and publish zap receipt
             if (event.payment && account?.activeRelays && account.publicKey) {
               const payment = event.payment;
+              logInfo(`[SparkWallet] Payment type: ${payment.paymentType}, amount: ${payment.amount}`);
 
               if (payment.paymentType === 'receive') {
                 // Store the last received payment for UI notifications
@@ -747,6 +752,13 @@ export const SparkWalletProvider: ParentComponent = (props) => {
                     timestamp: payment.timestamp,
                   });
                   logInfo(`[SparkWallet] Received payment for invoice: ${amountSats} sats`);
+
+                  // Trigger zap animation for incoming payment
+                  zapNotification?.actions.triggerZapAnimation({
+                    amount: amountSats,
+                    direction: 'incoming',
+                    timestamp: payment.timestamp,
+                  });
                 }
 
                 handleIncomingZap(
@@ -767,6 +779,13 @@ export const SparkWalletProvider: ParentComponent = (props) => {
                 ).catch(error => {
                   logWarning('[SparkWallet] Failed to handle incoming zap:', error);
                 });
+              } else if (payment.paymentType === 'send') {
+                // Outgoing payment confirmed
+                const amountSats = Number(payment.amount) || 0;
+                logInfo(`[SparkWallet] Sent payment confirmed: ${amountSats} sats`);
+
+                // Note: Animation is triggered immediately on button click in NoteFooter,
+                // not here when payment is confirmed
               }
             }
             break;
