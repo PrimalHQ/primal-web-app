@@ -705,6 +705,17 @@ export const SparkWalletProvider: ParentComponent = (props) => {
    * Set up event listener for SDK events
    */
   const setupEventListener = async (): Promise<void> => {
+    // Remove existing listener if present to prevent duplicates
+    if (eventListenerId) {
+      try {
+        await breezWallet.removeEventListener(eventListenerId);
+        eventListenerId = null;
+        logInfo('[SparkWallet] Removed existing event listener before adding new one');
+      } catch (error) {
+        logWarning('[SparkWallet] Failed to remove existing event listener:', error);
+      }
+    }
+
     try {
       eventListenerId = await breezWallet.addEventListener((event) => {
         switch (event.type) {
@@ -746,19 +757,28 @@ export const SparkWalletProvider: ParentComponent = (props) => {
                 const amountSats = Number(payment.amount) || 0;
 
                 if (invoice) {
-                  setStore('lastReceivedPayment', {
-                    invoice,
-                    amount: amountSats,
-                    timestamp: payment.timestamp,
-                  });
-                  logInfo(`[SparkWallet] Received payment for invoice: ${amountSats} sats`);
+                  // Check if we've already shown notification for this payment
+                  const isDuplicate = store.lastReceivedPayment?.invoice === invoice &&
+                                     store.lastReceivedPayment?.notificationShown;
 
-                  // Trigger zap animation for incoming payment
-                  zapNotification?.actions.triggerZapAnimation({
-                    amount: amountSats,
-                    direction: 'incoming',
-                    timestamp: payment.timestamp,
-                  });
+                  if (!isDuplicate) {
+                    setStore('lastReceivedPayment', {
+                      invoice,
+                      amount: amountSats,
+                      timestamp: payment.timestamp,
+                      notificationShown: true, // Mark as shown immediately
+                    });
+                    logInfo(`[SparkWallet] Received payment for invoice: ${amountSats} sats`);
+
+                    // Trigger zap animation for incoming payment
+                    zapNotification?.actions.triggerZapAnimation({
+                      amount: amountSats,
+                      direction: 'incoming',
+                      timestamp: payment.timestamp,
+                    });
+                  } else {
+                    logInfo(`[SparkWallet] Skipping duplicate notification for invoice: ${invoice}`);
+                  }
                 }
 
                 handleIncomingZap(
