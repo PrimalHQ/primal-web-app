@@ -137,7 +137,7 @@
   margin-top: 7px;
   transform-origin: top left;
   animation: contentHide 150ms ease-in forwards;
-  z-index: var(--z-index-lifted);
+  z-index: 100;
 
   >ul {
     overflow-y: scroll;

@@ -119,6 +119,8 @@
 }
 
 .rightColumn {
+  position: relative;
+  z-index: 100;
   display: grid;
   width: var(--right-col-w);
   grid-template-rows: var(--header-height) 1fr;
