@@ -10,12 +10,22 @@ import PageTitle from '../../components/PageTitle/PageTitle';
 import CheckBox from '../../components/Checkbox/CheckBox';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { useSparkWallet } from '../../contexts/SparkWalletContext';
+import { useAccountContext } from '../../contexts/AccountContext';
 
 const Appearance: Component = () => {
 
   const settings = useSettingsContext();
   const sparkWallet = useSparkWallet();
+  const account = useAccountContext();
   const intl = useIntl();
+
+  // Check if user has any wallet connected (Breez Spark or NWC)
+  const hasWalletConnected = () => {
+    return sparkWallet?.store.isEnabled || account?.activeWalletType === 'nwc' || (account?.activeNWC && account.activeNWC.length > 0);
+  };
+
+  // Check if user is using Breez Spark wallet specifically
+  const isBreezWallet = () => sparkWallet?.store.isEnabled;
 
   return (
     <div>
@@ -53,67 +63,83 @@ const Appearance: Component = () => {
           </CheckBox>
         </div>
 
-        <Show when={sparkWallet?.store.isEnabled}>
+        <Show when={hasWalletConnected()}>
           <div class={styles.appearanceSection}>
             <div class={styles.appearanceSectionTitle}>Zap Animations</div>
             <div class={styles.appearanceDescription}>
-              Lightning flash animation when sending or receiving zaps (Breez Spark wallet only)
+              <Show when={isBreezWallet()} fallback={
+                "Lightning flash animation when sending zaps"
+              }>
+                Lightning flash animation when sending or receiving zaps (Breez Spark wallet)
+              </Show>
             </div>
 
             <Show when={settings?.isAnimated}>
               <div class={styles.zapAnimationOptions}>
-              <div class={styles.optionGroup}>
-                <label class={styles.optionLabel}>Trigger for incoming:</label>
-                <select
-                  class={styles.selectInput}
-                  value={settings?.zapAnimations.triggerMode}
-                  onChange={(e) => {
-                    settings?.actions.setZapAnimationSettings({
-                      ...settings.zapAnimations,
-                      triggerMode: e.currentTarget.value as 'all' | 'min',
-                    });
-                  }}
-                >
-                  <option value="all">All amounts</option>
-                  <option value="min">Above minimum amount</option>
-                </select>
-              </div>
 
-              <Show when={settings?.zapAnimations.triggerMode === 'min'}>
+              {/* Only show incoming zap options for Breez wallet */}
+              <Show when={isBreezWallet()}>
                 <div class={styles.optionGroup}>
-                  <label class={styles.optionLabel}>Minimum amount (sats):</label>
-                  <input
-                    type="number"
-                    class={styles.numberInput}
-                    value={settings?.zapAnimations.minAmount}
-                    min="1"
-                    step="100"
+                  <label class={styles.optionLabel}>Trigger for incoming:</label>
+                  <select
+                    class={styles.selectInput}
+                    value={settings?.zapAnimations.triggerMode}
                     onChange={(e) => {
                       settings?.actions.setZapAnimationSettings({
                         ...settings.zapAnimations,
-                        minAmount: parseInt(e.currentTarget.value) || 1000,
+                        triggerMode: e.currentTarget.value as 'all' | 'min',
                       });
                     }}
-                  />
+                  >
+                    <option value="all">All amounts</option>
+                    <option value="min">Above minimum amount</option>
+                  </select>
+                </div>
+
+                <Show when={settings?.zapAnimations.triggerMode === 'min'}>
+                  <div class={styles.optionGroup}>
+                    <label class={styles.optionLabel}>Minimum amount (sats):</label>
+                    <input
+                      type="number"
+                      class={styles.numberInput}
+                      value={settings?.zapAnimations.minAmount}
+                      min="1"
+                      step="100"
+                      onChange={(e) => {
+                        settings?.actions.setZapAnimationSettings({
+                          ...settings.zapAnimations,
+                          minAmount: parseInt(e.currentTarget.value) || 1000,
+                        });
+                      }}
+                    />
+                  </div>
+                </Show>
+
+                <div class={styles.optionGroup}>
+                  <label class={styles.optionLabel}>Show animations for:</label>
+                  <select
+                    class={styles.selectInput}
+                    value={settings?.zapAnimations.direction}
+                    onChange={(e) => {
+                      settings?.actions.setZapAnimationSettings({
+                        ...settings.zapAnimations,
+                        direction: e.currentTarget.value as 'both' | 'incoming',
+                      });
+                    }}
+                  >
+                    <option value="both">Sent and received zaps</option>
+                    <option value="incoming">Only sent zaps</option>
+                  </select>
                 </div>
               </Show>
 
-              <div class={styles.optionGroup}>
-                <label class={styles.optionLabel}>Show animations for:</label>
-                <select
-                  class={styles.selectInput}
-                  value={settings?.zapAnimations.direction}
-                  onChange={(e) => {
-                    settings?.actions.setZapAnimationSettings({
-                      ...settings.zapAnimations,
-                      direction: e.currentTarget.value as 'both' | 'incoming',
-                    });
-                  }}
-                >
-                  <option value="both">Sent and received zaps</option>
-                  <option value="incoming">Only received zaps</option>
-                </select>
-              </div>
+              {/* For non-Breez wallets, just show a simple note */}
+              <Show when={!isBreezWallet()}>
+                <div class={styles.appearanceNote}>
+                  Outgoing zap animations are always enabled. Incoming zap animations require Breez Spark wallet.
+                </div>
+              </Show>
+
             </div>
           </Show>
 
