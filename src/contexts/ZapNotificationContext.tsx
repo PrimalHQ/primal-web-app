@@ -48,7 +48,11 @@ export const ZapNotificationProvider: Component<{children: JSXElement}> = (props
     // Check if payment is too old (more than 60 seconds ago)
     // This prevents animation spam when coming back online after being away
     const now = Date.now();
-    const paymentAge = now - notification.timestamp;
+    // Convert timestamp to milliseconds if it appears to be in seconds
+    const timestampMs = notification.timestamp < 10000000000
+      ? notification.timestamp * 1000
+      : notification.timestamp;
+    const paymentAge = now - timestampMs;
     const MAX_AGE_MS = 60 * 1000; // 60 seconds
 
     if (paymentAge > MAX_AGE_MS) {
