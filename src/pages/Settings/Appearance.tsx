@@ -74,7 +74,21 @@ const Appearance: Component = () => {
               </Show>
             </div>
 
-            <Show when={settings?.isAnimated}>
+            <div>
+              <CheckBox
+                checked={settings?.zapAnimations.enabled !== undefined ? settings.zapAnimations.enabled : true}
+                onChange={(enabled: boolean) => {
+                  settings?.actions.setZapAnimationSettings({
+                    ...settings.zapAnimations,
+                    enabled,
+                  });
+                }}
+              >
+                <div class={styles.appearanceCheckLabel}>Enable zap animations</div>
+              </CheckBox>
+            </div>
+
+            <Show when={settings?.isAnimated && settings?.zapAnimations.enabled}>
               <div class={styles.zapAnimationOptions}>
 
               {/* Only show incoming zap options for Breez wallet */}
@@ -133,10 +147,10 @@ const Appearance: Component = () => {
                 </div>
               </Show>
 
-              {/* For non-Breez wallets, just show a simple note */}
+              {/* For non-Breez wallets, show note about incoming limitations */}
               <Show when={!isBreezWallet()}>
                 <div class={styles.appearanceNote}>
-                  Outgoing zap animations are always enabled. Incoming zap animations require Breez Spark wallet.
+                  Note: Incoming zap animations require Breez Spark wallet
                 </div>
               </Show>
 
