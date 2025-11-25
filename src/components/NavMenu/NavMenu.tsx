@@ -53,7 +53,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
       label: 'Wallet',
       icon: 'walletIcon',
       bubble: () => !sparkWallet?.store.isConfigured ? 1 : 0,
-      hidden: () => !sparkWallet?.store.isEnabled,
+      hidden: () => !sparkWallet?.store.isEnabled || (account?.showPin || '').length > 0,
     },
     {
       to: '/bookmarks',
