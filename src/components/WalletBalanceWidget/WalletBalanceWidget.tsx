@@ -61,7 +61,7 @@ const WalletBalanceWidget: Component = () => {
         <div class={styles.header}>
           <div class={styles.label}>
             <div class={styles.walletIcon}></div>
-            <span>Wallet</span>
+            <span>Balance</span>
           </div>
           <button
             type="button"
