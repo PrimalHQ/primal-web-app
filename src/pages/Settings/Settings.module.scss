@@ -1231,6 +1231,38 @@
   color: var(--text-secondary);
 }
 
+.sparkActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sparkActionLink {
+  display: inline;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: fit-content;
+  border: none;
+  border-radius: 6px;
+  margin: 0px;
+  padding: 0px;
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: 400;
+  background: none;
+  color: var(--accent-links);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
+}
+
 .sparkToggle {
   display: flex;
   align-items: center;
