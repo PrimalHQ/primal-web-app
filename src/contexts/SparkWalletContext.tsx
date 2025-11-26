@@ -61,6 +61,13 @@ export type SparkWalletStore = {
     notificationShown?: boolean; // Track if notification was already shown
   };
 
+  // Pending payment (shown until balance updates)
+  pendingPayment?: {
+    amount: number;
+    direction: 'incoming' | 'outgoing';
+    timestamp: number;
+  };
+
   // Display preferences
   displayCurrency: string; // SATS, USD, EUR, etc.
   isBalanceHidden: boolean;
@@ -108,6 +115,10 @@ export type SparkWalletActions = {
 
   // Notification management
   markPaymentNotificationShown: () => void;
+
+  // Pending payment indicator
+  setPendingPayment: (amount: number, direction: 'incoming' | 'outgoing') => void;
+  clearPendingPayment: () => void;
 };
 
 export type SparkWalletContextType = {
@@ -382,6 +393,11 @@ export const SparkWalletProvider: ParentComponent = (props) => {
       setStore('balance', balance);
       setStore('lastSynced', now);
 
+      // Clear pending payment indicator after a brief delay to ensure user sees it
+      setTimeout(() => {
+        setStore('pendingPayment', undefined);
+      }, 1500);
+
       // Cache balance for faster next load
       saveCachedBalance(balance, now);
 
@@ -417,6 +433,18 @@ export const SparkWalletProvider: ParentComponent = (props) => {
    */
   const sendPayment = async (invoice: string, recipientPubkey?: string): Promise<BreezPaymentInfo> => {
     try {
+      // Parse invoice to get amount for pending payment indicator
+      try {
+        const { parseInvoice } = await import('@breeztech/breez-sdk-spark/web');
+        const parsedInvoice = await parseInvoice(invoice);
+        const amountSats = parsedInvoice.amountMsat ? Number(parsedInvoice.amountMsat) / 1000 : 0;
+
+        // Set pending payment before sending
+        setPendingPayment(amountSats, 'outgoing');
+      } catch (error) {
+        logWarning('[SparkWallet] Failed to parse invoice for pending indicator:', error);
+      }
+
       const payment = await breezWallet.sendPayment(invoice);
 
       // Refresh balance and history
@@ -768,6 +796,14 @@ export const SparkWalletProvider: ParentComponent = (props) => {
                       timestamp: payment.timestamp,
                       notificationShown: true, // Mark as shown immediately
                     });
+
+                    // Set pending payment for UI indicator
+                    setStore('pendingPayment', {
+                      amount: amountSats,
+                      direction: 'incoming',
+                      timestamp: payment.timestamp,
+                    });
+
                     logInfo(`[SparkWallet] Received payment for invoice: ${amountSats} sats`);
 
                     // Trigger zap animation for incoming payment
@@ -882,6 +918,24 @@ export const SparkWalletProvider: ParentComponent = (props) => {
   };
 
   /**
+   * Set pending payment indicator (shown until balance updates)
+   */
+  const setPendingPayment = (amount: number, direction: 'incoming' | 'outgoing') => {
+    setStore('pendingPayment', {
+      amount,
+      direction,
+      timestamp: Date.now(),
+    });
+  };
+
+  /**
+   * Clear pending payment indicator
+   */
+  const clearPendingPayment = () => {
+    setStore('pendingPayment', undefined);
+  };
+
+  /**
    * Enable Spark wallet for zaps
    */
   const enableWallet = () => {
@@ -947,10 +1001,18 @@ export const SparkWalletProvider: ParentComponent = (props) => {
     setDisplayCurrency,
     toggleBalanceVisibility,
     markPaymentNotificationShown,
+    setPendingPayment,
+    clearPendingPayment,
   };
 
+  // Expose context globally for use in non-component functions (like zap.ts)
+  const contextValue = { store, actions };
+  if (typeof window !== 'undefined') {
+    (window as any).__sparkWalletContext = contextValue;
+  }
+
   return (
-    <SparkWalletContext.Provider value={{ store, actions }}>
+    <SparkWalletContext.Provider value={contextValue}>
       {props.children}
     </SparkWalletContext.Provider>
   );

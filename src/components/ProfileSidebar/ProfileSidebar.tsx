@@ -21,6 +21,7 @@ import { StreamingData } from '../../lib/streaming';
 import { createStore } from 'solid-js/store';
 import LivePill from '../LivePill/LivePill';
 import LiveEventSidebarSkeleton from '../Skeleton/LiveEventSidebarSkeleton';
+import WalletBalanceWidget from '../WalletBalanceWidget/WalletBalanceWidget';
 
 
 const ProfileSidebar: Component<{
@@ -41,6 +42,7 @@ const ProfileSidebar: Component<{
 
   return (
     <div id={props.id} class="animated">
+      <WalletBalanceWidget />
 
       <Show when={streams().length > 0}>
         <div class={styles.headingTrending}>

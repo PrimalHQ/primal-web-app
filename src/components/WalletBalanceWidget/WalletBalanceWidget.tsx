@@ -74,10 +74,18 @@ const WalletBalanceWidget: Component = () => {
         </div>
 
         <div class={styles.balanceContainer}>
-          <div class={styles.primaryAmount}>
-            {primaryAmount()}
-            <Show when={!isFiatMode() && !sparkWallet.store.isBalanceHidden}>
-              <span class={styles.unit}> sats</span>
+          <div class={styles.balanceRow}>
+            <div class={styles.primaryAmount}>
+              {primaryAmount()}
+              <Show when={!isFiatMode() && !sparkWallet.store.isBalanceHidden}>
+                <span class={styles.unit}> sats</span>
+              </Show>
+            </div>
+
+            <Show when={sparkWallet.store.pendingPayment?.direction === 'outgoing' && !sparkWallet.store.isBalanceHidden}>
+              <div class={styles.pendingAmount}>
+                ↑ {sparkWallet.store.pendingPayment.amount.toLocaleString()}
+              </div>
             </Show>
           </div>
 

@@ -3,7 +3,7 @@ import { nip04, nip19, nip47, nip57, Relay, relayInit, utils } from "../lib/nToo
 import { Tier } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
 import { Kind } from "../constants";
 import { MegaFeedPage, NostrRelaySignedEvent, NostrUserZaps, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, PrimalZap, TopZap } from "../types/primal";
-import { logError } from "./logger";
+import { logError, logWarning } from "./logger";
 import { decrypt, enableWebLn, encrypt, sendPayment, signEvent } from "./nostrAPI";
 import { decodeNWCUri } from "./wallet";
 import { hexToBytes, parseBolt11 } from "../utils";
@@ -21,6 +21,23 @@ export const zapOverBreez = async (invoice: string, recipientPubkey?: string): P
       logError('Breez wallet not connected');
       lastZapError = 'Breez wallet not connected';
       return false;
+    }
+
+    // Decode invoice to get amount BEFORE sending
+    let amountSats = 0;
+    try {
+      const decodedAmount = parseBolt11(invoice);
+      // parseBolt11 returns the amount in satoshis already
+      amountSats = decodedAmount ? Math.floor(decodedAmount) : 0;
+
+      // Set pending payment indicator BEFORE sending
+      if ((window as any).__sparkWalletContext) {
+        (window as any).__sparkWalletContext.actions.setPendingPayment(amountSats, 'outgoing');
+      } else {
+        logWarning('[Zap] Spark wallet context not found on window');
+      }
+    } catch (error) {
+      logError('[Zap] Failed to decode invoice:', error);
     }
 
     // Send payment via Breez SDK
