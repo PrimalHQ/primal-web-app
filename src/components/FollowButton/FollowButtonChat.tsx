@@ -47,7 +47,6 @@ const FollowButtonChat: Component<{
       <div id={props.id} class={styles.followChat}>
         <ButtonFlip
           onClick={onFollow}
-          disabled={accountStore.followInProgress !== ''}
           when={isFollowed()}
           fallback={intl.formatMessage(t.follow)}
         >

@@ -55,7 +55,6 @@ const FollowButton: Component<{
       <div id={props.id} class={klass()}>
         <ButtonFlip
           onClick={onFollow}
-          disabled={accountStore.followInProgress !== ''}
           when={isFollowed()}
           light={props.light}
           fallback={intl.formatMessage(t.follow)}
