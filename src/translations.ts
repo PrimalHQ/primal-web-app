@@ -106,7 +106,7 @@ export const login = {
   tabs: {
     simple: {
       id: 'login.tabs.simple',
-      defaultMessage: 'Nsec Bunker',
+      defaultMessage: 'Remote Signer',
       description: 'Simple login',
     },
     extension: {
