@@ -1716,7 +1716,7 @@ const EditBox: Component<{
   };
 
   const isSupportedFileType = (file: File) => {
-    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/') && !file.type.startsWith('audio/')) {
       toast?.sendWarning(intl.formatMessage(tToast.fileTypeUpsupported));
       return false;
     }
