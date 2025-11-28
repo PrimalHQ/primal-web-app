@@ -1,25 +1,27 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, createEffect, createSignal, Match, Show, Switch } from 'solid-js';
 
-import { login as tLogin, actions as tActions } from '../../translations';
+import { login as tLogin } from '../../translations';
 
 import styles from './LoginModal.module.scss';
 import { hookForDev } from '../../lib/devTools';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
-import CreatePinModal from '../CreatePinModal/CreatePinModal';
 import { nip19, nip46, SimplePool } from '../../lib/nTools';
 import { storeSec } from '../../lib/localStore';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
-import { accountStore, doAfterLogin, loginUsingExtension, loginUsingLocalNsec, loginUsingNpub, setLoginType, setPublicKey, setSec } from '../../stores/accountStore';
+import { doAfterLogin, loginUsingExtension, loginUsingLocalNsec, loginUsingNpub, setLoginType, setPublicKey, setSec } from '../../stores/accountStore';
 import { Tabs } from '@kobalte/core/tabs';
 
 import { useToastContext } from '../Toaster/Toaster';
 import QrCode from '../QrCode/QrCode';
 import { useAppContext } from '../../contexts/AppContext';
-import { appSigner, generateClientConnectionUrl, getAppSK, setAppSigner, storeBunker } from '../../lib/PrimalNip46';
+import { appSigner, generateClientConnectionUrl, getAppSK, storeBunker } from '../../lib/PrimalNip46';
 import { logWarning } from '../../lib/logger';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { encryptWithPin, setCurrentPin } from '../../lib/PrimalNostr';
+
+
+export const BUNKER_RESPONSE_TIMEOUT = 8_000;
 
 const LoginModal: Component<{
   id?: string,
@@ -44,6 +46,8 @@ const LoginModal: Component<{
   const [copying, setCopying] = createSignal(false);
 
   const [isPinInvalid, setPinInvalid] = createSignal(false);
+
+  const [isLoggingInProgress, setIsLoggingInProgress] = createSignal(false);
 
   let nsecInput: HTMLInputElement | undefined;
   let npubInput: HTMLInputElement | undefined;
@@ -229,7 +233,21 @@ const LoginModal: Component<{
         throw new Error('no-app-signer');
       }
 
-      const pubkey = await appSigner.getPublicKey();
+      setIsLoggingInProgress(true);
+      const pubkey = await (new Promise<string>((res) => {
+        let tO = setTimeout(() => res('unreachable-bunker'), BUNKER_RESPONSE_TIMEOUT);
+
+        appSigner.getPublicKey().then((pk: string) => {
+          clearTimeout(tO);
+          res(pk);
+        });
+      }))
+
+      setIsLoggingInProgress(false);
+
+      if (pubkey === 'unreachable-bunker') {
+        throw new Error('unreachable-bunker');
+      }
 
       setLoginType('nip46');
       setPublicKey(pubkey);
@@ -239,6 +257,7 @@ const LoginModal: Component<{
     } catch (e) {
       logWarning('FAILED TO LOGIN: ', e)
       setLoginType('guest');
+      toaster?.sendWarning(`Login failed: ${e}`);
     }
   }
 
@@ -336,7 +355,13 @@ const LoginModal: Component<{
                             // errorMessage={intl.formatMessage(tLogin.invalidNsec)}
                             // inputClass={styles.nsecInput}
                           />
-                          <ButtonPrimary onClick={() => onBunkerLogin()}>Login</ButtonPrimary>
+                          <ButtonPrimary
+                            disabled={isLoggingInProgress()}
+                            onClick={() => onBunkerLogin()}
+                            loading={isLoggingInProgress()}
+                          >
+                            Login
+                          </ButtonPrimary>
                         </div>
                       </Show>
                     </div>
