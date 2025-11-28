@@ -38,6 +38,7 @@
     border-radius: 20px;
     padding-block: 0;
     padding-left: 4px;
+    padding-right: 8px;
     margin: 0;
     text-transform: lowercase;
 
@@ -46,17 +47,17 @@
       align-items: center;
       height: 40px;
       .avatar {
-        border: solid 2px var(--text-primary);
-        border-radius: 50%;
-        width: 30px;
-        height: 30px;
+        // border: solid 2px var(--text-primary);
+        // border-radius: 50%;
+        // width: 30px;
+        // height: 30px;
         transition: margin-right 0.2s;
         margin-right: -9px;
       }
     }
 
     .counter {
-      margin-left: 24px;
+      // margin-left: 24px;
     }
   }
 
