@@ -43,12 +43,12 @@ const QrCode: Component<{
       height: props.height || 280,
       type: "svg",
       data: props.data,
-      margin: 1,
+      margin: 0,
       image: qrType(),
       qrOptions: {
         typeNumber: 0,
         mode: "Byte",
-        errorCorrectionLevel :"Q",
+        errorCorrectionLevel: props.ecl || "Q",
       },
       imageOptions: {
         hideBackgroundDots: false,

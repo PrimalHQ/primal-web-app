@@ -312,6 +312,7 @@ const LoginModal: Component<{
                             data={clientUrl()}
                             width={200}
                             height={200}
+                            ecl="H"
                           />
                         </div>
                         <button
