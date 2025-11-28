@@ -293,11 +293,17 @@
     outline: none;
     border: none;
     box-shadow: none;
+
+    &::placeholder {
+      opacity: 0;
+      transition: opacity 0.1s ease;
+    }
   }
 
   &.invalid {
     border: 1px solid var(--warning-bright);
   }
+
 }
 
 .nsecInput {
@@ -403,9 +409,9 @@
 
   .bunkerShow {
     color: var(--accent-links);
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 400;
-    line-height: 32px;
+    line-height: 28px;
     width: fit-content;
   }
 
