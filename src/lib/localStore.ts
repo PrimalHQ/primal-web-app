@@ -7,7 +7,7 @@ export type ZapAnimationSettings = {
   enabled: boolean;           // Enable zap animations
   triggerMode: 'all' | 'min'; // All zaps or minimum threshold
   minAmount: number;          // Minimum sats (default 1000)
-  direction: 'both' | 'incoming'; // Both directions or incoming only
+  direction: 'both' | 'incoming' | 'outgoing'; // Both, incoming only, or outgoing only
 };
 
 export type LocalStore = {

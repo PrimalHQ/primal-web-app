@@ -67,6 +67,9 @@ export const ZapNotificationProvider: Component<{children: JSXElement}> = (props
     if (settings.zapAnimations.direction === 'incoming' && notification.direction === 'outgoing') {
       return false;
     }
+    if (settings.zapAnimations.direction === 'outgoing' && notification.direction === 'incoming') {
+      return false;
+    }
 
     // Check minimum amount (only for incoming zaps)
     if (notification.direction === 'incoming' && settings.zapAnimations.triggerMode === 'min') {

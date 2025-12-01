@@ -137,12 +137,12 @@ const Appearance: Component = () => {
                     onChange={(e) => {
                       settings?.actions.setZapAnimationSettings({
                         ...settings.zapAnimations,
-                        direction: e.currentTarget.value as 'both' | 'incoming',
+                        direction: e.currentTarget.value as 'both' | 'incoming' | 'outgoing',
                       });
                     }}
                   >
                     <option value="both">Sent and received zaps</option>
-                    <option value="incoming">Only sent zaps</option>
+                    <option value="outgoing">Only sent zaps</option>
                   </select>
                 </div>
               </Show>
