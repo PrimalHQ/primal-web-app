@@ -416,9 +416,7 @@ const LoginModal: Component<{
                     <div class={styles.nsecDesc}>
                       <div class={styles.nsecWarning}>
                         <span class={styles.bold}>Warning: </span>
-                        <span>
                           This login method is insecure. If you must use a private key to login, we recommend setting a password to encrypt your key.
-                        </span>
                       </div>
 
                       <div class={styles.inputGroup}>
