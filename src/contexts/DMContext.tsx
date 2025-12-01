@@ -772,6 +772,21 @@ createEffect(on(() => store.lastConversationContact?.dmInfo.cnt, (v, p) => {
   getConversationNewMessages(store.lastConversationContact?.pubkey)
 }));
 
+
+createEffect(() => {
+  const pk = accountStore.publicKey;
+
+  if (!pk) {
+    unsubFromDMCount && unsubFromDMCount();
+    unsubFromDMCount = undefined;
+    updateStore('dmCount', () => 0);
+    return;
+  }
+
+  if (!unsubFromDMCount) {
+    subToMessagesStats();
+  }
+})
 // STORES ---------------------------------------
 
 

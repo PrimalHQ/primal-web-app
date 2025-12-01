@@ -744,7 +744,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     getRecomendedBlossomServers();
   };
 
-  const loadSettings = (pubkey: string | undefined, then?: () => void) => {
+  const loadSettings = async (pubkey: string | undefined, then?: () => void) => {
     if (!pubkey) {
       return;
     }
@@ -892,7 +892,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     if (pubkey) {
       updateStore('readsFeedsReloaded', () => false);
-      getHomeSettings(settingsHomeSubId);
+      const ok = await getHomeSettings(settingsHomeSubId);
+
+      if (!ok) {
+        unsubHomeSettings();
+        getDefaultHomeFeeds();
+      }
     }
 
     const unsubReadsSettings = subsTo(settingsReadsSubId, {
@@ -913,7 +918,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     if (pubkey) {
       updateStore('readsFeedsReloaded', () => false);
-      getReadsSettings(settingsReadsSubId);
+      const ok = await getReadsSettings(settingsReadsSubId);
+
+      if (!ok) {
+        unsubReadsSettings();
+        getDefaultReadsFeeds();
+      }
     }
 
     let nwcList: string[][] = [];

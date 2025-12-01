@@ -196,7 +196,10 @@ export const NotificationsProvider = (props: { children: ContextChildren }) => {
       });
 
       getLastSeen(pk as string, subid);
+      return;
     }
+
+    updateStore('notificationCount', () => 0);
   });
 
   onCleanup(() => {
