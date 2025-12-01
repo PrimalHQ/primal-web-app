@@ -1716,7 +1716,12 @@ const EditBox: Component<{
   };
 
   const isSupportedFileType = (file: File) => {
-    if (!file.type.startsWith('image/') && !file.type.startsWith('video/') && !file.type.startsWith('audio/')) {
+    if (
+      !file.type.startsWith('image/') &&
+      !file.type.startsWith('video/') &&
+      !file.type.startsWith('audio/') &&
+      !file.type.startsWith('application/pdf')
+    ) {
       toast?.sendWarning(intl.formatMessage(tToast.fileTypeUpsupported));
       return false;
     }
@@ -2018,7 +2023,7 @@ const EditBox: Component<{
               onChange={onUpload}
               ref={fileUpload}
               hidden={true}
-              accept="image/*,video/*,audio/*"
+              accept="image/*,video/*,audio/*,application/pdf"
             />
             <label for={`upload-${instanceId}`} class={`attach_icon ${styles.attachIcon}`}>
             </label>
