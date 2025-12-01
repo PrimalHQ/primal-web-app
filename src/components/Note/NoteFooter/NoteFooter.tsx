@@ -26,6 +26,7 @@ import { readSecFromStorage } from '../../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../../constants';
 import { APP_ID } from '../../../App';
+import { useZapNotification } from '../../../contexts/ZapNotificationContext';
 
 export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
@@ -48,6 +49,7 @@ const NoteFooter: Component<{
   const settings = useSettingsContext();
   const app = useAppContext();
   const navigate = useNavigate();
+  const zapNotification = useZapNotification();
 
   let medZapAnimation: HTMLElement | undefined;
 
@@ -401,6 +403,13 @@ const NoteFooter: Component<{
       props.updateState && props.updateState('showZapAnim', () => true);
     });
 
+    // Trigger global zap animation immediately
+    zapNotification?.actions.triggerZapAnimation({
+      amount,
+      direction: 'outgoing',
+      timestamp: Date.now(),
+    });
+
     props.onZapAnim && props.onZapAnim({ amount, message, emoji })
 
     setTimeout(async () => {
@@ -411,6 +420,7 @@ const NoteFooter: Component<{
         message,
         account.activeRelays,
         account.activeNWC,
+        account.activeWalletType,
       );
 
       props.updateState && props.updateState('isZapping', () => false);

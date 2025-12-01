@@ -17,6 +17,7 @@ import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import NoteContextTrigger from './NoteContextTrigger';
 import { date, veryLongDate } from '../../lib/dates';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { useZapNotification } from '../../contexts/ZapNotificationContext';
 import { isPhone, uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
@@ -74,6 +75,7 @@ const Note: Component<NoteProps> = (props) => {
   const threadContext = useThreadContext();
   const app = useAppContext();
   const account = useAccountContext();
+  const zapNotification = useZapNotification();
 
   createEffect(() => {
     if (props.quoteCount) {
@@ -197,6 +199,13 @@ const Note: Component<NoteProps> = (props) => {
     const pubkey = account?.publicKey;
 
     if (!pubkey) return;
+
+    // Trigger global zap animation for custom zaps
+    zapNotification?.actions.triggerZapAnimation({
+      amount: zapOption.amount || 0,
+      direction: 'outgoing',
+      timestamp: Date.now(),
+    });
 
     batch(() => {
       updateReactionsState('zapCount', (z) => z + 1);

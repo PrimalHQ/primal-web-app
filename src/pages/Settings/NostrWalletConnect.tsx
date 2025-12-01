@@ -9,13 +9,17 @@ import PageTitle from '../../components/PageTitle/PageTitle';
 
 import logo from "../../assets/icons/logo.svg";
 import nwc from "../../assets/icons/nwc.svg";
+import sparkLogo from "../../assets/icons/spark-logo.svg";
 import NWCItem from '../../components/NWCItem/NWCItem';
 import AdvancedSearchDialog from '../../components/AdvancedSearch/AdvancedSearchDialog';
 import { TextField } from '@kobalte/core/text-field';
+import { Switch } from '@kobalte/core/switch';
 import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
 import { logInfo } from '../../lib/logger';
 import { useAccountContext } from '../../contexts/AccountContext';
+import { useSparkWallet } from '../../contexts/SparkWalletContext';
+import { useSettingsContext } from '../../contexts/SettingsContext';
 import { checkPrimalWalletActive, connectPrimalWalletActive, decodeNWCUri, sendNWCInfoEvent } from '../../lib/wallet';
 import { createStore } from 'solid-js/store';
 import { encrypt, decrypt } from '../../lib/nostrAPI';
@@ -31,6 +35,8 @@ const NostrWalletConnect: Component = () => {
 
   const intl = useIntl();
   const account = useAccountContext();
+  const sparkWallet = useSparkWallet();
+  const settings = useSettingsContext();
 
   const [openNewWallet, setOpenNewWallet] = createSignal(false);
   const [newNWC, setNewNWC] = createSignal('');
@@ -273,6 +279,40 @@ const NostrWalletConnect: Component = () => {
               status="none"
               onConnect={() => setOpenNewWallet(true)}
             />
+          <div class={styles.sparkWalletRow}>
+            <img
+              src={sparkLogo}
+              class={styles.sparkLogo}
+              classList={{ sunrise: settings?.theme === 'sunrise' }}
+            />
+            <div class={styles.sparkInfo}>
+              <div class={styles.sparkName}>Breez Spark Wallet</div>
+              <div class={styles.sparkDesc}>Self-custodial Lightning wallet</div>
+            </div>
+            <div class={styles.sparkActions}>
+              {sparkWallet.store.isEnabled && !sparkWallet.store.isConnected && (
+                <A href="/wallet" class={styles.sparkActionLink}>
+                  create/restore
+                </A>
+              )}
+              <Switch
+                class={styles.sparkToggle}
+                checked={sparkWallet.store.isEnabled}
+                onChange={(checked) => {
+                  if (checked) {
+                    sparkWallet.actions.enableWallet();
+                  } else {
+                    sparkWallet.actions.disableWallet();
+                  }
+                }}
+              >
+                <Switch.Input class={styles.sparkToggleInput} />
+                <Switch.Control class={styles.sparkToggleControl}>
+                  <Switch.Thumb class={styles.sparkToggleThumb} />
+                </Switch.Control>
+              </Switch>
+            </div>
+          </div>
         </div>
       </div>
 

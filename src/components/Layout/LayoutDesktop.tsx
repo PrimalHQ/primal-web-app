@@ -5,6 +5,7 @@ import styles from './Layout.module.scss';
 import { useLocation } from '@solidjs/router';
 import NavMenu from '../NavMenu/NavMenu';
 import ProfileWidget from '../ProfileWidget/ProfileWidget';
+import BreezWalletWidget from '../BreezWalletWidget/BreezWalletWidget';
 import NewNote from '../NewNote/NewNote';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { SendNoteResult } from '../../types/primal';

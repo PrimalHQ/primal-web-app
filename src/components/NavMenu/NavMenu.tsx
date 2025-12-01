@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from '@solidjs/router';
 import { Component, For, Match, Show, Switch } from 'solid-js';
 import { useAccountContext } from '../../contexts/AccountContext';
 import { useNotificationsContext } from '../../contexts/NotificationsContext';
+import { useSparkWallet } from '../../contexts/SparkWalletContext';
 import { navBar as t, actions as tActions, placeholders as tPlaceholders } from '../../translations';
 import NavLink from '../NavLink/NavLink';
 
@@ -18,13 +19,14 @@ const NavMenu: Component< { id?: string } > = (props) => {
   const account = useAccountContext();
   const notifications = useNotificationsContext();
   const dms = useDMContext();
+  const sparkWallet = useSparkWallet();
   const intl = useIntl();
   const loc = useLocation();
   const media = useMediaContext();
   const app = useAppContext();
   const navigate = useNavigate();
 
-  const links = [
+  const allLinks = [
     {
       to: '/home',
       label: intl.formatMessage(t.home),
@@ -45,6 +47,13 @@ const NavMenu: Component< { id?: string } > = (props) => {
       label: intl.formatMessage(t.messages),
       icon: 'messagesIcon',
       bubble: () => dms?.dmCount || 0,
+    },
+    {
+      to: '/wallet',
+      label: 'Wallet',
+      icon: 'walletIcon',
+      bubble: () => !sparkWallet?.store.isConfigured ? 1 : 0,
+      hidden: () => !sparkWallet?.store.isEnabled || (account?.showPin || '').length > 0,
     },
     {
       to: '/bookmarks',
@@ -80,6 +89,9 @@ const NavMenu: Component< { id?: string } > = (props) => {
     },
   ];
 
+  // Filter out hidden links
+  const links = () => allLinks.filter(link => !link.hidden || !link.hidden());
+
   const isBigScreen = () => (media?.windowSize.w || 0) > 1300;
 
   const noReadsConfirm: ConfirmInfo = {
@@ -98,7 +110,7 @@ const NavMenu: Component< { id?: string } > = (props) => {
   return (
     <div id={props.id} class={styles.navMenu}>
       <nav class={styles.sideNav}>
-        <For each={links}>
+        <For each={links()}>
           {({ to, label, icon, bubble, hiddenOnSmallScreens }) => {
             return <NavLink
               to={to}

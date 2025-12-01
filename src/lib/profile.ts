@@ -230,7 +230,9 @@ export const getLikes = (pubkey: string | undefined, relays: Relay[], callback: 
 export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles> = async (vanityName: string) => {
   try {
     const name = vanityName.toLowerCase();
-    const origin = window.location.origin.startsWith('http://localhost') ? 'https://dev.primal.net' : window.location.origin;
+    // Use primal.net for NIP-05 lookups on localhost for development
+    const usePrimalNip05 = window.location.origin.startsWith('http://localhost');
+    const origin = usePrimalNip05 ? 'https://primal.net' : window.location.origin;
 
     const content = await fetch(`${origin}/.well-known/nostr.json?name=${name}`);
 

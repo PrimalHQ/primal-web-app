@@ -266,7 +266,7 @@ const FeedMarketItem: Component<{
 
     setTimeout(async () => {
       if (!props.dvm || !props.author) return;
-      const success = await zapDVM(props.dvm, props.author, account.publicKey, amount, message, account.activeRelays);
+      const success = await zapDVM(props.dvm, props.author, account.publicKey, amount, message, account.activeRelays, account.activeNWC, account.activeWalletType);
 
       setState('isZapping', () => false);
 

@@ -27,6 +27,7 @@ import { isIOS, isPhone } from '../utils';
 import { logWarning } from '../lib/logger';
 import { noteIdToHex } from '../lib/keys';
 import { useToastContext } from '../components/Toaster/Toaster';
+import WalletBalanceWidget from '../components/WalletBalanceWidget/WalletBalanceWidget';
 
 
 const NoteThread: Component<{ noteId: string }> = (props) => {
@@ -206,13 +207,16 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
         </Wormhole>
 
         <Wormhole to='right_sidebar'>
-          <PeopleList
-            note={primaryNote()}
-            people={people()}
-            label={intl.formatMessage(t.sidebar)}
-            mentionLabel={intl.formatMessage(t.sidebarMentions)}
-            sortBy="legend"
-          />
+          <div>
+            <WalletBalanceWidget />
+            <PeopleList
+              note={primaryNote()}
+              people={people()}
+              label={intl.formatMessage(t.sidebar)}
+              mentionLabel={intl.formatMessage(t.sidebarMentions)}
+              sortBy="legend"
+            />
+          </div>
         </Wormhole>
       </Show>
 

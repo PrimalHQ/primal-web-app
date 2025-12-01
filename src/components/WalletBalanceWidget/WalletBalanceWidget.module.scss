@@ -1,0 +1,140 @@
+.widget {
+  width: 100%;
+  max-width: 300px;
+  padding: 16px;
+  background-color: var(--background-input);
+  border-radius: 12px;
+  margin-bottom: 24px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: var(--background-input-hover);
+  }
+
+  // Hide on mobile/tablet
+  @media (max-width: 1087px) {
+    display: none;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.walletIcon {
+  width: 18px;
+  height: 18px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/wallet_outline.svg) no-repeat center / contain;
+  mask: url(../../assets/icons/wallet_outline.svg) no-repeat center / contain;
+}
+
+.eyeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  line-height: 0;
+  min-height: unset;
+  min-width: unset;
+
+  &:hover {
+    background-color: var(--background-input);
+  }
+}
+
+.eyeIcon,
+.eyeSlashIcon {
+  width: 16px;
+  height: 16px;
+  background-color: var(--text-secondary);
+  -webkit-mask: no-repeat center / contain;
+  mask: no-repeat center / contain;
+}
+
+.eyeIcon {
+  -webkit-mask-image: url(../../assets/icons/toolbar_eye.svg);
+  mask-image: url(../../assets/icons/toolbar_eye.svg);
+}
+
+.eyeSlashIcon {
+  -webkit-mask-image: url(../../assets/icons/toolbar_eye_slash.svg);
+  mask-image: url(../../assets/icons/toolbar_eye_slash.svg);
+}
+
+.balanceContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.balanceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.primaryAmount {
+  font-size: 24px;
+  font-weight: 700;
+  font-family: 'Nacelle', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.pendingAmount {
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Nacelle', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text-tertiary);
+  animation: pulse 1.5s ease-in-out infinite;
+  white-space: nowrap;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.unit {
+  font-size: 14px;
+  font-weight: 400;
+  font-family: 'Nacelle', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text-secondary);
+  margin-left: 4px;
+}
+
+.secondaryAmount {
+  font-size: 13px;
+  font-weight: 400;
+  font-family: 'Nacelle', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
