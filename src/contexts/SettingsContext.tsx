@@ -892,6 +892,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     if (pubkey) {
       updateStore('readsFeedsReloaded', () => false);
+
       const ok = await getHomeSettings(settingsHomeSubId);
 
       if (!ok) {
@@ -1052,9 +1053,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   });
 
   // Initial setup for a user with a public key
-  createEffect(() => {
+  createEffect(on(() => accountStore.isKeyLookupDone, (isDone) => {
+    if (!isDone) return;
     const pubkey = accountStore.publicKey;
-    // if (!isDone) return;
 
     if (!pubkey) {
       updateStore('homeFeeds', () => [])
@@ -1068,7 +1069,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     loadSettings(pubkey, () => {
     });
-  });
+  }));
 
   createEffect(() => {
     const html: HTMLElement | null = document.querySelector('html');

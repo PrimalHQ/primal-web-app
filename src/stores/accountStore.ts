@@ -2026,6 +2026,8 @@ export const initAccountStore: AccountStore = {
     const win = window as NostrWindow;
     const nostr = win.nostr;
 
+    updateAccountStore('isKeyLookupDone', () => false);
+
     if (!nostr) {
       if (extensionAttempt > 4) {
         logInfo('Nostr extension not found');
