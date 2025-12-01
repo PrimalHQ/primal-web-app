@@ -1,4 +1,4 @@
-import { createContext, useContext } from "solid-js";
+import { createContext, createEffect, on, useContext } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { APP_ID } from "../App";
 import { minKnownProfiles } from "../constants";
@@ -19,8 +19,9 @@ import {
   SelectionOption,
 } from "../types/primal";
 import { calculateReadsOffset } from "../utils";
-import { saveStoredFeed } from "../lib/localStore";
+import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
 import { accountStore } from "../stores/accountStore";
+import { useSettingsContext } from "./SettingsContext";
 
 
 type ReadsContextStore = {
@@ -139,6 +140,8 @@ const initialHomeData = {
 export const ReadsContext = createContext<ReadsContextStore>();
 
 export const ReadsProvider = (props: { children: ContextChildren }) => {
+
+  const settings = useSettingsContext();
 
 // ACTIONS --------------------------------------
 
@@ -322,6 +325,14 @@ const removeEvent = (id: string) => {
     updateStore('articleHeights', id, () => height);
   }
 
+
+  createEffect(on(() => settings?.readsFeedsReloaded, (reloaded) => {
+    if (!reloaded) return;
+
+    const feed = fetchStoredFeed(accountStore.publicKey, 'reads') || settings?.readsFeeds[0];
+
+    selectFeed(feed);
+  }));
 
 // STORES ---------------------------------------
 

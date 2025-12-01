@@ -55,7 +55,9 @@ export type SettingsContextStore = {
   isAnimated: boolean,
   availableFeeds: PrimalFeed[],
   readsFeeds: PrimalArticleFeed[],
+  readsFeedsReloaded: boolean,
   homeFeeds: PrimalArticleFeed[],
+  homeFeedsReloaded: boolean,
   defaultFeed: PrimalFeed,
   defaultZap: ZapOption,
   availableZapOptions: ZapOption[],
@@ -118,7 +120,9 @@ export const initialData = {
   isAnimated: true,
   availableFeeds: [],
   readsFeeds: [],
+  readsFeedsReloaded: false,
   homeFeeds: [],
+  homeFeedsReloaded: false,
   defaultFeed: defaultFeeds[0],
   defaultZap: defaultZap,
   availableZapOptions: defaultZapOptions,
@@ -147,7 +151,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-  const isLightTheme = () => {
+  const isLightTheme = (): boolean => {
     return ['sunrise', 'ice'].includes(store.theme);
   }
 
@@ -741,13 +745,19 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const loadSettings = (pubkey: string | undefined, then?: () => void) => {
-
     if (!pubkey) {
       return;
     }
 
+    updateStore('homeFeedsReloaded', () => false);
+    updateStore('readsFeedsReloaded', () => false);
+
     updateStore('homeFeeds', () => [ ...loadHomeFeeds(pubkey) ])
     updateStore('readsFeeds', () => [ ...loadReadsFeeds(pubkey) ])
+
+    updateStore('homeFeedsReloaded', () => true);
+    updateStore('readsFeedsReloaded', () => true);
+
 
     const settingsSubId = `load_settings_${APP_ID}`;
     const settingsHomeSubId = `load_home_settings_${APP_ID}`;
@@ -875,11 +885,15 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           getDefaultHomeFeeds();
         }
         saveHomeFeeds(pubkey, store.homeFeeds);
+        updateStore('homeFeedsReloaded', () => true);
         unsubHomeSettings();
       }
     });
 
-    pubkey && getHomeSettings(settingsHomeSubId);
+    if (pubkey) {
+      updateStore('readsFeedsReloaded', () => false);
+      getHomeSettings(settingsHomeSubId);
+    }
 
     const unsubReadsSettings = subsTo(settingsReadsSubId, {
       onEvent: (_, content) => {
@@ -892,11 +906,15 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           getDefaultReadsFeeds();
         }
         saveReadsFeeds(pubkey, store.readsFeeds);
+        updateStore('readsFeedsReloaded', () => true);
         unsubReadsSettings();
       }
     });
 
-    pubkey && getReadsSettings(settingsReadsSubId);
+    if (pubkey) {
+      updateStore('readsFeedsReloaded', () => false);
+      getReadsSettings(settingsReadsSubId);
+    }
 
     let nwcList: string[][] = [];
     let activeNWC: string[] = [];
@@ -951,6 +969,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       onEose: () => {
         unsub();
         initReadsFeeds(accountStore.publicKey, store.readsFeeds);
+        updateStore('readsFeedsReloaded', () => true);
       },
     });
 
@@ -968,10 +987,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       },
       onEose: () => {
         unsub();
-        initHomeFeeds(accountStore.publicKey, store.homeFeeds)
+        initHomeFeeds(accountStore.publicKey, store.homeFeeds);
+        updateStore('homeFeedsReloaded', () => true);
       },
     });
 
+    updateStore('homeFeedsReloaded', () => false);
     fetchDefaultHomeFeeds(subId);
   }
 
@@ -1021,11 +1042,14 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   });
 
   // Initial setup for a user with a public key
-  createEffect(on(() => accountStore.isKeyLookupDone, () => {
-    if (!accountStore.isKeyLookupDone) return;
-
+  createEffect(() => {
     const pubkey = accountStore.publicKey;
+    // if (!isDone) return;
+
     if (!pubkey) {
+      updateStore('homeFeeds', () => [])
+      updateStore('readsFeeds', () => [])
+
       loadDefaults();
       return;
     }
@@ -1034,7 +1058,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     loadSettings(pubkey, () => {
     });
-  }));
+  });
 
   createEffect(() => {
     const html: HTMLElement | null = document.querySelector('html');

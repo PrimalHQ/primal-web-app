@@ -1,4 +1,4 @@
-import { createContext, useContext } from "solid-js";
+import { createContext, createEffect, on, useContext } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { APP_ID } from "../App";
 import { minKnownProfiles } from "../constants";
@@ -11,9 +11,10 @@ import {
   SelectionOption,
 } from "../types/primal";
 import { emptyPaging, fetchMegaFeed, fetchScoredContent, filterAndSortNotes, PaginationInfo } from "../megaFeeds";
-import { saveStoredFeed } from "../lib/localStore";
+import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
 import { calculateNotesOffset } from "../utils";
 import { accountStore } from "../stores/accountStore";
+import { useSettingsContext } from "./SettingsContext";
 
 type HomeContextStore = {
   notes: PrimalNote[],
@@ -118,6 +119,7 @@ const initialHomeData = {
 export const HomeContext = createContext<HomeContextStore>();
 
 export const HomeProvider = (props: { children: ContextChildren }) => {
+  const settings = useSettingsContext();
 
 // ACTIONS --------------------------------------
 
@@ -291,6 +293,12 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   };
 
 
+  createEffect(on(() => settings?.homeFeedsReloaded, (reloaded) => {
+    if (!reloaded) return;
+
+    const feed = fetchStoredFeed(accountStore.publicKey, 'home') || settings?.homeFeeds[0];
+    selectFeed(feed);
+  }));
 // STORES ---------------------------------------
 
   const [store, updateStore] = createStore<HomeContextStore>({

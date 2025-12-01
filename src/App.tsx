@@ -51,21 +51,12 @@ const App: Component = () => {
 
   createEffect(() => {
     const relays = Object.keys(accountStore.relaySettings);
-    console.log('RELAY SETTINGS CHANGE: ', Object.entries(accountStore.relaySettings));
 
     if (relays.length === 0) {
-      console.log('NO RELAYS, UPDATE THEM!')
       setTimeout(() => {
         updateRelays();
       }, 200);
     }
-  });
-  createEffect(() => {
-    console.log('ACTIVE RELAYS CHANGE: ', [ ...accountStore.activeRelays ]);
-  });
-
-  createEffect(() => {
-    console.log('EVENT QUEUE: ', accountStore.eventQueue.length);
   });
 
   const initRelayWorker = () => {

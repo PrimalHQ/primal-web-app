@@ -247,7 +247,6 @@ export const initAccountStore: AccountStore = {
     const pubkey = accountStore.publicKey;
     if (!pubkey || accountStore.eventQueue.find(e => e.id === event.id)) return;
 
-    console.log('ENQUEUE EVENT: ', event)
     updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...event }));
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
@@ -258,7 +257,6 @@ export const initAccountStore: AccountStore = {
 
     if (!quedEvent || !pubkey) return;
 
-    console.log('DEQUEUE EVENT: ', event)
     updateAccountStore('eventQueue', (que) => que.filter(e => e.id !== event.id));
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
@@ -289,7 +287,6 @@ export const initAccountStore: AccountStore = {
   }
 
   export const startEventQueueMonitor = () => {
-    console.log('START MONITORING QUEUE: ')
     const pubkey = accountStore.publicKey;
     if (!pubkey) return;
 
@@ -298,14 +295,12 @@ export const initAccountStore: AccountStore = {
     monitorInterval = setInterval(async () => {
       const queue = unwrap(accountStore.eventQueue);
 
-      console.log('PROCCESS QUEUE: ', queue)
       if (queue.length === 0) {
         clearInterval(monitorInterval);
         return;
       }
 
       const newQueue = await processArrayUntilFailure<NostrRelaySignedEvent>(queue, (item) => {
-        console.log('SENDING EVENT: ', item)
         return new Promise<void>((resolve, reject) => {
           let timeout = setTimeout(
             () => reject('relay_send_timeout'),
@@ -321,9 +316,6 @@ export const initAccountStore: AccountStore = {
         });
       });
 
-
-      console.log('NEW QUEUE: ', newQueue);
-
       updateAccountStore('eventQueue', () => [ ...newQueue ]);
       saveEventQueue(pubkey, accountStore.eventQueue);
 
@@ -333,7 +325,6 @@ export const initAccountStore: AccountStore = {
   export const suspendRelays = () => {
     relayWorker.onmessage = (e: MessageEvent) => {
       if (e.data !== 'RELAYS_CLOSED') return;
-      console.log('UPDATE ACTIVE RELAYS: SUSPEND');
       updateAccountStore('activeRelays', () => []);
     };
 
@@ -529,7 +520,6 @@ export const initAccountStore: AccountStore = {
         if (settings[url]) {
           continue;
         }
-        console.log('UPDATE RELAY SETTINGS: CLOSE 1 ', url);
         updateAccountStore('relaySettings', () => ({[url]: undefined}));
         relaysToClose.add(url);
       }
@@ -538,10 +528,8 @@ export const initAccountStore: AccountStore = {
         if (e.data !== 'RELAYS_CLOSED') return;
 
         const filtered = accountStore.activeRelays.filter(r => !relaysToClose.has(r));
-        console.log('UPDATE ACTIVE RELAYS: CLOSE: ', [...relaysToClose]);
         updateAccountStore('activeRelays', () => filtered);
 
-        console.log('UPDATE RELAY SETTINGS: CLOSE 2 ', { ...settings });
         updateAccountStore('relaySettings', () => ({...settings}));
 
         connectToRelays(settings)
@@ -565,7 +553,6 @@ export const initAccountStore: AccountStore = {
       return true;
     }
 
-    console.log('UPDATE RELAY SETTINGS: SET ', toSave);
     updateAccountStore('relaySettings', () => ({ ...toSave }));
     saveRelaySettings(accountStore.publicKey, toSave);
     return true;
@@ -630,7 +617,6 @@ export const initAccountStore: AccountStore = {
       if (type !== 'RELAY_OPENED' || ! relay) return;
       if (accountStore.activeRelays.find(ar => ar === relay)) return;
 
-      console.log('UPDATE ACTIVE RELAYS: CONNECT ', relay);
       updateAccountStore('activeRelays', accountStore.activeRelays.length, () => relay);
     };
 
@@ -707,10 +693,8 @@ export const initAccountStore: AccountStore = {
       if (e.data !== 'RELAYS_CLOSED') return;
 
       const filtered = accountStore.activeRelays.filter(r => r !== normalUrl);
-      console.log('UPDATE ACTIVE RELAYS: REMOVE ', normalUrl);
       updateAccountStore('activeRelays', () => filtered);
 
-      console.log('UPDATE RELAY SETTINGS: REMOVE ', normalUrl, {...accountStore.relaySettings});
       const newSettings = Object.keys(accountStore.relaySettings).reduce<NostrRelays>(
         (acc, key) => {
           const normalKey = utils.normalizeURL(key);
@@ -1903,7 +1887,6 @@ export const initAccountStore: AccountStore = {
       relaySettings = attachDefaultRelays(relaySettings);
     }
 
-    console.log('UPDATE RELAY SETTINGS: AFTER LOGIN ', storage.relaySettings);
     updateAccountStore('relaySettings', () => ({ ...storage.relaySettings }));
     connectToRelays(relaySettings);
 
@@ -1964,6 +1947,10 @@ export const initAccountStore: AccountStore = {
 // ==================================================
 
     fetchBookmarks();
+
+
+// ==================================================
+
 
   }
 
