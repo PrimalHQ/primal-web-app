@@ -477,9 +477,7 @@ const LoginModal: Component<{
                     <div class={styles.npubDesc}>
                       <div class={styles.npubWarning}>
                         <span class={styles.bold}>Be aware: </span>
-                        <span>
                           Logging in with your public key will allow you to browse Nostr in ready-only mode.
-                        </span>
                       </div>
                       <div class={styles.inputGroup}>
                         <div class={styles.description}>

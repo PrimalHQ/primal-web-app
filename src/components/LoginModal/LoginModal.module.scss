@@ -329,20 +329,18 @@
 }
 
 .npubWarning {
-  padding: 4px 8px;
+  padding: 8px 16px;
 
   border-radius: 12px;
   background-color: var(--devider);
 
-  span {
-    color: var(--text-tertiary);
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 16px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
 
-    &.bold {
-      font-weight: 700;
-    }
+  span.bold {
+    font-weight: 700;
   }
 }
 
