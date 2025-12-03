@@ -317,7 +317,7 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
           {props.iconInfo}
         </div>
 
-        <Show when={[NotificationType.LIVE_EVENT_HAPPENING].includes(props.notification.type)}>
+        <Show when={[NotificationType.LIVE_EVENT_HAPPENING].includes(props.type)}>
           <div class={styles.iconLiveInfo}>
             LIVE
           </div>
