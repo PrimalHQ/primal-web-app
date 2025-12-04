@@ -909,12 +909,14 @@ export const loadMembershipStatus = (pubkey: string | undefined) => {
 
 
 export const loadEventQueue = (pubkey: string) => {
+  console.log('LOAD EVENT QUEUE')
   const store = getStorage(pubkey);
 
   return store.eventQueue || [];
 };
 
 export const saveEventQueue = (pubkey: string, eventQueue: NostrRelaySignedEvent[]) => {
+  console.log('SAVE EVENT QUEUE: ', eventQueue)
   let store = getStorage(pubkey);
 
   store.eventQueue = [ ...eventQueue ];

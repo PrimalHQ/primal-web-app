@@ -758,23 +758,35 @@ export const sendEvent = async (event: NostrEvent, callbacks?: { success?: (even
   const relaySettings = accountStore.relaySettings;
   const shouldProxy = accountStore.proxyThroughPrimal;
 
-  let signedNote: NostrRelaySignedEvent | undefined;
+  signEvent(event).then(async (signedNote) => {
+    if (!signedNote) return { success: false , reasons: ['event_not_signed']} as SendNoteResult;
 
-  try {
-    signedNote = await signEvent(event);
-    if (!signedNote) throw('event_not_signed');
-  } catch (reason) {
-    logError('Failed to send event: ', reason);
-    return { success: false , reasons: [reason]} as SendNoteResult;
-  }
+    if (shouldProxy) {
+      proxyEvent(signedNote, relays, relaySettings);
+    }
 
-  if (shouldProxy) {
-    return await proxyEvent(signedNote, relays, relaySettings);
-  }
+    sendSignedEvent(signedNote, callbacks);
+  });
 
-  sendSignedEvent(signedNote, callbacks);
+  return { success: true, note: event } as SendNoteResult;
 
-  return { success: true, note: signedNote } as SendNoteResult;
+  // let signedNote: NostrRelaySignedEvent | undefined;
+
+  // try {
+  //   signedNote = await signEvent(event);
+  //   if (!signedNote) throw('event_not_signed');
+  // } catch (reason) {
+  //   logError('Failed to send event: ', reason);
+  //   return { success: false , reasons: [reason]} as SendNoteResult;
+  // }
+
+  // if (shouldProxy) {
+  //   return await proxyEvent(signedNote, relays, relaySettings);
+  // }
+
+  // sendSignedEvent(signedNote, callbacks);
+
+  // return { success: true, note: signedNote } as SendNoteResult;
 }
 
 export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: string, then?: () => void) => {

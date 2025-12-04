@@ -30,6 +30,7 @@ import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import { sendSignedEvent } from '../lib/notes';
 import { saveEventQueue } from '../lib/localStore';
 import BookmarkEvent from '../components/Events/BookmarkEvent';
+import GenericEvent from '../components/Events/GenericEvent';
 
 const EventQueuePage: Component = () => {
   const intl = useIntl();
@@ -245,6 +246,7 @@ const EventQueuePage: Component = () => {
     });
 
     updateAccountStore('eventQueue', () => [ ...newQueue ]);
+    console.log('EVENT RETRY SELECTED');
     saveEventQueue(accountStore.publicKey, accountStore.eventQueue);
   }
 
@@ -305,40 +307,9 @@ const EventQueuePage: Component = () => {
                   }}
                 />
               </div>
-              <Switch>
-                <Match when={[Kind.Text, Kind.Repost].includes(queuedEvent.kind) && parsedEvents[queuedEvent.id] !== undefined}>
-                  <Note
-                    note={parsedEvents[queuedEvent.id]}
-                    shorten={true}
-                    hideFooter={true}
-                    hideContext={true}
-                  />
-                </Match>
-
-                <Match when={queuedEvent.kind === Kind.LongForm && parsedEvents[queuedEvent.id] !== undefined}>
-                  <ArticlePreview
-                    article={parsedEvents[queuedEvent.id]}
-                    hideFooter={true}
-                    hideContext={true}
-                  />
-                </Match>
-
-                <Match when={queuedEvent.kind === Kind.Reaction && parsedEvents[queuedEvent.id] !== undefined}>
-                  <ReactionEvent
-                    reactionEvent={parsedEvents[queuedEvent.id]}
-                  />
-                </Match>
-
-                <Match when={queuedEvent.kind === Kind.Bookmarks && parsedEvents[queuedEvent.id] !== undefined}>
-                  <BookmarkEvent
-                    reactionEvent={parsedEvents[queuedEvent.id]}
-                  />
-                </Match>
-
-                <Match when={true}>
-                  <div class={styles.unknownEvents}>{queuedEvent.kind} | {queuedEvent.content}</div>
-                </Match>
-              </Switch>
+              <GenericEvent
+                event={queuedEvent}
+              />
             </div>
           }
         </For>

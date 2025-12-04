@@ -240,7 +240,7 @@ export const initAccountStore: AccountStore = {
     following: [],
   },
   eventQueue: [],
-  eventQueueRetry: 0,
+  eventQueueRetry: 16,
   // @ts-ignore
   // relayPool: new SimplePool({ enablePing: true, enableReconnect: true }),
 };
@@ -266,8 +266,8 @@ export const initAccountStore: AccountStore = {
     if (!quedEvent || !pubkey) return;
 
     const queue = accountStore.eventQueue.filter(e => e.id !== event.id);
-    console.log('DEQUEUE EVENT: ', event);
     updateAccountStore('eventQueue', () => [...queue]);
+    console.log('DEQUEUE EVENT: ', event);
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
@@ -278,18 +278,18 @@ export const initAccountStore: AccountStore = {
 
     if (quedEvent.length === 0 || !pubkey) return;
 
-    console.log('DEQUE MULTIPLE: ', events);
     updateAccountStore('eventQueue', (que) => que.filter(e => !ids.includes(e.id)));
+    console.log('DEQUE MULTIPLE: ', events);
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
   export const enqueUnsignedEvent = (event: NostrRelayEvent, id: string) => {
     const pubkey = accountStore.publicKey;
-    const ev = { ...event, id }
+    const ev = { ...event, id, pubkey }
     if (!pubkey || accountStore.eventQueue.find(e => e.id === ev.id)) return;
 
-    console.log('ENQUEUE UNSIGNED EVENT: ', event);
     updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...ev }));
+    console.log('ENQUEUE UNSIGNED EVENT: ', event);
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
@@ -297,12 +297,11 @@ export const initAccountStore: AccountStore = {
     const pubkey = accountStore.publicKey;
     const quedEvent = accountStore.eventQueue.find(e => e.id === id);
 
-
     if (!quedEvent || !pubkey) return;
 
     const queue = accountStore.eventQueue.filter(e => e.id !== id);
-    console.log('DEQ UNSIGNED: ',id, queue.map(e => e.id))
     updateAccountStore('eventQueue', () => queue);
+    console.log('DEQ UNSIGNED: ',id, queue.map(e => e.id))
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
@@ -334,12 +333,12 @@ export const initAccountStore: AccountStore = {
     return [ ...success ];
   }
 
-  export const refereshQueue = async () => {
+  export const refreshQueue = async () => {
     const pubkey = accountStore.publicKey;
     if (!pubkey) return;
     clearInterval(countdownInterval);
 
-    const queue = unwrap(accountStore.eventQueue);
+    let queue = unwrap(accountStore.eventQueue);
 
     console.log('MONITOR QUEUE 1: ', queue)
 
@@ -1939,21 +1938,24 @@ export const initAccountStore: AccountStore = {
   }
 
   export const doAfterLogin = async (pubkey: string) => {
-    updateAccountStore('isKeyLookupDone', true);
     const storage = getStorage(pubkey);
-
-    updateAccountProfile(pubkey);
 
 // ===========================================
 
     const eventQueue = loadEventQueue(pubkey);
 
-    console.log('INIT EVENT QUEUE: ', eventQueue);
+    console.log('INIT EVENT QUEUE: ', accountStore.isKeyLookupDone, eventQueue);
     updateAccountStore('eventQueue', () => [ ...eventQueue]);
 
     if (eventQueue.length > 0) {
       startEventQueueMonitor();
     }
+
+    updateAccountStore('isKeyLookupDone', true);
+
+// ===========================================
+
+    updateAccountProfile(pubkey);
 
 // ===========================================
 
@@ -2051,7 +2053,10 @@ export const initAccountStore: AccountStore = {
     }
 
     const isStored = fetchNostrKey();
-    updateAccountStore('isKeyLookupDone', () => isStored);
+    if (isStored) {
+      doAfterLogin(isStored);
+    }
+    // updateAccountStore('isKeyLookupDone', () => isStored);
 
     switch (type) {
       case 'npub':
@@ -2231,7 +2236,7 @@ export const initAccountStore: AccountStore = {
   export const fetchNostrKey = () => {
     const storedKey = localStorage.getItem('pubkey');
 
-    if (!storedKey) return false;
+    if (!storedKey) return undefined;
 
     setPublicKey(storedKey);
 
@@ -2252,7 +2257,7 @@ export const initAccountStore: AccountStore = {
     // Fetch it anyway, maybe there is an update
     updateAccountProfile(storedKey);
 
-    return true;
+    return storedKey;
 
   };
 

@@ -122,7 +122,7 @@ const enqueueNostr = async <T>(action: (nostr: NostrExtension) => Promise<T>) =>
 
 export const SIGN_TIMEOUT = 12_000;
 
-export const timeoutPromise = (timeout = 12_000) => {
+export const timeoutPromise = (timeout = 8_000) => {
   return new Promise((_resolve, reject) => {
     setTimeout(() => {
       reject(new Error('promise_timeout'));
@@ -138,7 +138,7 @@ export const signEvent = async (event: NostrRelayEvent) => {
         const signed = await Promise.race([
           nostr.signEvent(event),
           timeoutPromise(),
-        ]) as Promise<NostrRelaySignedEvent>;
+        ]) as NostrRelaySignedEvent;
         // const signed = await nostr.signEvent(event);
 
         console.log('DEQUEUE SIGNED: ', signed, tempId);

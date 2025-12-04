@@ -11,3 +11,42 @@
     width: 42px;
   }
 }
+
+.genericEvent {
+  display: flex;
+  min-height: 58px;
+  gap: 8px;
+  padding-inline: 8px;
+  justify-content: flex-start;
+  align-items: center;
+
+  .eventIcon {
+    width: 20px;
+    height: 20px;
+    margin-inline: 6px;
+
+    div {
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: var(--text-secondary);
+
+      mask-image: var(--mask-url);
+      -webkit-mask-image: var(--mask-url); /* For broader browser support */
+
+      /* Add other masking properties as needed */
+      mask-repeat: no-repeat;
+      mask-size: contain;
+      // -webkit-mask: url(var(--mask-url)) no-repeat center;
+      // mask: url(var(--mask-url)) no-repeat center;
+    }
+  }
+
+  .eventDescription {
+    color: var(--text-primary);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 18px;
+  }
+}

@@ -37,6 +37,7 @@
 .queueItem {
   display: flex;
   width: 100%;
+  align-items: center;
 
   .check {
     display: flex;
@@ -45,7 +46,6 @@
     justify-content: center;
     gap: 6px;
     margin-left: 12px;
-    margin-top: 12px;
   }
 }
 

@@ -4,6 +4,7 @@ import { NostrExtension, NostrRelayEvent, NostrRelays, NostrRelaySignedEvent } f
 import { uuidv4 } from '../utils';
 import { logWarning } from './logger';
 import primalLogo from '../assets/icons/logo_fire_roster.png';
+import { timeoutPromise } from './nostrAPI';
 
 export let appSigner: nip46.BunkerSigner | undefined;
 
@@ -106,13 +107,18 @@ export const PrimalNip46: (pk?: string) => NostrExtension = (pk?: string) => {
   const signEvent = async (event: NostrRelayEvent) => {
     if (!appSigner) throw('no-bunker-found');
 
-    let evt = await appSigner.signEvent(event);
+    const evt = await Promise.race([
+      appSigner.signEvent(event),
+      timeoutPromise(),
+    ]) as NostrRelaySignedEvent;
 
-    const isVerified = verifyEvent(evt);
+    // let evt = await appSigner.signEvent(event);
 
-    if (!isVerified) throw('event-sig-not-verified');
+    // const isVerified = verifyEvent(evt);
 
-    return evt as NostrRelaySignedEvent;
+    // if (!isVerified) throw('event-sig-not-verified');
+
+    return evt;
   };
 
   return {

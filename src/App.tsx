@@ -19,11 +19,9 @@ import 'media-chrome';
 import "media-chrome/media-theme-element";
 import 'hls-video-element';
 import 'videojs-video-element';
-import { nip46 } from './lib/nTools';
 import { generateAppKeys } from './lib/PrimalNip46';
-import { accountStore, dequeEvent, enqueEvent, refereshQueue, startEventQueueMonitor, updateRelays } from './stores/accountStore';
+import { accountStore, dequeEvent, enqueEvent, refreshQueue, startEventQueueMonitor, updateRelays } from './stores/accountStore';
 import { triggerImportEvents } from './lib/notes';
-import { unwrap } from 'solid-js/store';
 
 
 export const version = import.meta.env.PRIMAL_VERSION;
@@ -84,7 +82,7 @@ const App: Component = () => {
   createEffect(on(() => accountStore.eventQueueRetry, (countdown) => {
     if (countdown > 0) return;
 
-    refereshQueue();
+    refreshQueue();
   }));
 
   return (
