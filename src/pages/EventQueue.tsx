@@ -31,6 +31,7 @@ import { sendSignedEvent } from '../lib/notes';
 import { saveEventQueue } from '../lib/localStore';
 import BookmarkEvent from '../components/Events/BookmarkEvent';
 import GenericEvent from '../components/Events/GenericEvent';
+import { signEvent } from '../lib/nostrAPI';
 
 const EventQueuePage: Component = () => {
   const intl = useIntl();
@@ -230,7 +231,17 @@ const EventQueuePage: Component = () => {
     const queue = unwrap(selectedEvents);
 
     const newQueue = await processArrayUntilFailure<NostrRelaySignedEvent>(queue, (item) => {
-      return new Promise<void>((resolve, reject) => {
+      return new Promise<void>(async (resolve, reject) => {
+        if (!item.sig) {
+          try {
+            const event = await signEvent(item);
+
+            item = { ...event };
+          } catch (reason) {
+            reject('relay_send_timeout');
+          }
+        }
+
         let timeout = setTimeout(
           () => reject('relay_send_timeout'),
           8_000,
@@ -248,6 +259,32 @@ const EventQueuePage: Component = () => {
     updateAccountStore('eventQueue', () => [ ...newQueue ]);
     console.log('EVENT RETRY SELECTED');
     saveEventQueue(accountStore.publicKey, accountStore.eventQueue);
+  }
+
+  const retrySigning = (item: NostrRelaySignedEvent) => {
+    if (item.sig) return;
+
+    return new Promise<void>(async (resolve, reject) => {
+      try {
+        const event = await signEvent(item);
+
+        item = { ...event };
+      } catch (reason) {
+        reject('relay_send_timeout');
+      }
+
+      let timeout = setTimeout(
+        () => reject('relay_send_timeout'),
+        8_000,
+      );
+
+      sendSignedEvent(item, {
+        success: () => {
+          clearTimeout(timeout);
+          resolve();
+        },
+      });
+    });
   }
 
 
@@ -309,6 +346,7 @@ const EventQueuePage: Component = () => {
               </div>
               <GenericEvent
                 event={queuedEvent}
+                onResign={retrySigning}
               />
             </div>
           }

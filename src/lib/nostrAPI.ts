@@ -149,7 +149,7 @@ export const signEvent = async (event: NostrRelayEvent) => {
       }
     })
   } catch (reason) {
-    console.log('CAUGHT SIGN: ', reason);
+    console.log('CAUGHT EVENT SIGN: ', reason);
     enqueUnsignedEvent(event, tempId);
     eventQueue.abortCurrent();
     throw(reason);

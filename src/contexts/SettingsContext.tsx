@@ -872,6 +872,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       },
     });
 
+    console.log('EVENT GET SETTINGS')
     pubkey && getSettings(pubkey, settingsSubId);
 
     const unsubHomeSettings = subsTo(settingsHomeSubId, {

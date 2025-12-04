@@ -255,7 +255,6 @@ export const initAccountStore: AccountStore = {
 
     console.log('ENQUEUE EVENT: ', event);
     updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...event }));
-    console.log('EVENT QUEUED: ', unwrap(accountStore.eventQueue))
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
@@ -350,6 +349,7 @@ export const initAccountStore: AccountStore = {
     const processedEvents = await processArrayUntilFailure<NostrRelaySignedEvent>([...queue], (item) => {
       return new Promise<void>(async (resolve, reject) => {
         if (!item.sig) {
+          return;
           try {
             const event = await signEvent(item);
 
@@ -2052,10 +2052,10 @@ export const initAccountStore: AccountStore = {
       type = storedLoginType;
     }
 
-    const isStored = fetchNostrKey();
-    if (isStored) {
-      doAfterLogin(isStored);
-    }
+    const storedPk = fetchNostrKey();
+    // if (isStored) {
+    //   doAfterLogin(isStored);
+    // }
     // updateAccountStore('isKeyLookupDone', () => isStored);
 
     switch (type) {
@@ -2063,13 +2063,16 @@ export const initAccountStore: AccountStore = {
         loginUsingNpub();
         break;
       case 'extension':
+        if (storedPk) {
+          doAfterLogin(storedPk);
+        }
         loginUsingExtension();
         break;
       case 'local':
         loginUsingLocalNsec();
         break;
       case 'nip46':
-        loginUsingNip46();
+        loginUsingNip46(storedPk);
         break;
       case 'guest':
         loginGuest();
@@ -2200,7 +2203,7 @@ export const initAccountStore: AccountStore = {
     doAfterLogin(pk);
   };
 
-  export const loginUsingNip46 = async () => {
+  export const loginUsingNip46 = async (pk?: string) => {
     setLoginType('nip46');
 
     const sec = getAppSK();
@@ -2211,6 +2214,7 @@ export const initAccountStore: AccountStore = {
       return;
     }
 
+    console.log('EVENT BUNKER: ', bunkerUrl)
     const bunkerPointer = await nip46.parseBunkerInput(bunkerUrl)
 
     if (!bunkerPointer) {
@@ -2227,7 +2231,9 @@ export const initAccountStore: AccountStore = {
       return;
     }
 
-    const pubkey = await appSigner.getPublicKey()
+    const pubkey = pk || await appSigner.getPublicKey()
+
+    console.log('EVENT BUNKER POINTER: ', bunkerPointer)
 
     setPublicKey(pubkey);
     doAfterLogin(pubkey);

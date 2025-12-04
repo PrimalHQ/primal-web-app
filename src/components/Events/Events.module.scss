@@ -13,12 +13,14 @@
 }
 
 .genericEvent {
+  position: relative;
   display: flex;
   min-height: 58px;
   gap: 8px;
   padding-inline: 8px;
   justify-content: flex-start;
   align-items: center;
+  width: 100%;
 
   .eventIcon {
     width: 20px;
@@ -48,5 +50,27 @@
     font-size: 15px;
     font-weight: 400;
     line-height: 18px;
+  }
+
+  .resignButton {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 4px;
+    border-radius: 8px;
+
+    width: fit-content;
+
+    background-color: var(--warning-dim);
+
+    color: var(--warning-bright);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+    z-index: 5;
+
+    &:hover {
+      background-color: var(--warning-bright-shadow);
+    }
   }
 }

@@ -25,6 +25,7 @@ import genericIcon from '../../assets/icons/nav/messages.svg';
 
 const GenericEvent: Component<{
   event: NostrRelaySignedEvent,
+  onResign: (event: NostrRelaySignedEvent) => void,
 }> = (props) => {
 
 // 1. Send DM
@@ -145,6 +146,14 @@ const GenericEvent: Component<{
       <div class={styles.eventDescription}>
         {description()}
       </div>
+      <Show when={!props.event.sig}>
+        <button
+          class={styles.resignButton}
+          onClick={() => props.onResign(props.event)}
+        >
+          Retry Signing
+        </button>
+      </Show>
     </div>
   )
 }
