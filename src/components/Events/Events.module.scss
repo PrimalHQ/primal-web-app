@@ -1,0 +1,13 @@
+.reactionEvent {
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  padding: 12px;
+  width: 100%;
+
+  .icon {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 42px;
+  }
+}

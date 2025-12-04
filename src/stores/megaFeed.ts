@@ -488,6 +488,86 @@ export const convertToUsersMega = (page: MegaFeedPage) => {
   return Object.values(page.users).map(u => convertToUser(u, u.pubkey, stats));
 };
 
+export const convertSingleNoteMega = (pageNote: NostrNoteContent, page: MegaFeedPage) => {
+    // If this is a repost, parse it for the originsl note.
+    const note = pageNote.kind === Kind.Repost ? parseRepost(pageNote) : pageNote;
+
+    // if this is a repost extract repost info
+    const repost = pageNote.kind === Kind.Repost ? extractRepostInfo(page, pageNote) : undefined;
+
+    const author = convertToUser(page.users[note.pubkey], note.pubkey);
+    const stat = page.noteStats[note.id];
+    const topZaps = page.topZaps[note.id] || [];
+
+    const tags = note.tags || [];
+    const replyTo = extractReplyTo(tags);
+
+    // Parse mentions
+    let {
+      mentionedNotes,
+      mentionedArticles,
+      mentionedUsers,
+      mentionedHighlights,
+      mentionedZaps,
+      mentionedLiveEvents,
+    } = extractMentions(page, note);
+
+    const eventPointer: nip19.EventPointer = {
+      id: note.id,
+      author: note.pubkey,
+      kind: note.kind,
+      relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 2),
+    };
+
+    const eventPointerShort: nip19.EventPointer = {
+      id: note.id,
+    };
+
+    const newNote: PrimalNote = {
+      user: author,
+      post: {
+        id: note.id,
+        pubkey: note.pubkey,
+        created_at: note.created_at || 0,
+        tags: note.tags,
+        content: sanitize(note.content),
+        kind: note.kind,
+        sig: note.sig,
+        likes: stat?.likes || 0,
+        mentions: stat?.mentions || 0,
+        reposts: stat?.reposts || 0,
+        replies: stat?.replies || 0,
+        zaps: stat?.zaps || 0,
+        score: stat?.score || 0,
+        score24h: stat?.score24h || 0,
+        satszapped: stat?.satszapped || 0,
+        noteId: nip19.neventEncode(eventPointer),
+        noteIdShort: nip19.neventEncode(eventPointerShort),
+        noteActions: (page.noteActions && page.noteActions[note.id]) ?? noActions(note.id),
+        relayHints: page.relayHints,
+      },
+      repost,
+      msg: note,
+      mentionedNotes,
+      mentionedUsers,
+      mentionedHighlights,
+      mentionedArticles,
+      mentionedZaps,
+      mentionedLiveEvents,
+      replyTo: replyTo && replyTo[1],
+      tags: note.tags,
+      id: note.id,
+      noteId: nip19.neventEncode(eventPointer),
+      noteIdShort: nip19.neventEncode(eventPointerShort),
+      pubkey: note.pubkey,
+      topZaps,
+      content: sanitize(note.content),
+      relayHints: page.relayHints,
+    };
+
+    return newNote;
+}
+
 export const convertToNotesMega = (page: MegaFeedPage) => {
 
   if (page === undefined) {
@@ -581,6 +661,111 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
   }
   return notes;
 };
+
+export const convertSingleReadMega = (read: NostrNoteContent, page: MegaFeedPage) => {
+
+  const { coordinate, naddr } = encodeCoordinate(read, Kind.LongForm);
+  const [kind, pubkey, identifier] = coordinate.split(':');
+  const naddrShort = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
+  const author = convertToUser(page.users[read.pubkey], read.pubkey);
+  const stat = page.noteStats[read.id];
+  const topZaps = page.topZaps[naddrShort] || page.topZaps[read.id] || [];
+  const wordCount = (page.wordCount || {})[read.id] || 0;
+
+  const repost = read.kind === Kind.Repost ? extractRepostInfo(page, read) : undefined;
+  const tags = read.tags || [];
+  const userMentionIds = tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
+  const replyTo = extractReplyTo(tags);
+
+  // include senders of top zaps into mentioned users
+  for(let i=0; i<topZaps.length; i++) {
+    if (userMentionIds.includes(topZaps[i].pubkey)) continue;
+    userMentionIds.push(topZaps[i].pubkey);
+  }
+
+  // Parse mentions
+  const {
+    mentionedNotes,
+    mentionedArticles,
+    mentionedUsers,
+    mentionedHighlights,
+    mentionedZaps,
+    mentionedLiveEvents,
+  } = extractMentions(page, read, naddrShort);
+
+  const published = read.tags.reduce<number>((acc, t) => {
+    if (t[0] !== 'published_at') return acc;
+
+    const time = parseInt(t[1]);
+    return time > acc ? time : acc;
+  }, 0);
+
+  let newRead: PrimalArticle = {
+    id: read.id,
+    pubkey: read.pubkey,
+    title: '',
+    summary: '',
+    image: '',
+    tags: [],
+    published: published || read.created_at || 0,
+    content: sanitize(read.content || ''),
+    user: author,
+    topZaps,
+    naddr,
+    noteId: naddr,
+    noteIdShort: naddrShort,
+    coordinate,
+    msg: {
+      ...read,
+      kind: Kind.LongForm,
+    },
+    mentionedNotes,
+    mentionedUsers,
+    mentionedHighlights,
+    mentionedArticles,
+    mentionedZaps,
+    mentionedLiveEvents,
+    wordCount,
+    noteActions: (page.noteActions && page.noteActions[read.id]) ?? noActions(read.id),
+    bookmarks: stat?.bookmarks || 0,
+    likes: stat?.likes || 0,
+    mentions: stat?.mentions || 0,
+    reposts: stat?.reposts || 0,
+    replies: stat?.replies || 0,
+    zaps: stat?.zaps || 0,
+    score: stat?.score || 0,
+    score24h: stat?.score24h || 0,
+    satszapped: stat?.satszapped || 0,
+    relayHints: page.relayHints,
+  };
+
+  tags.forEach(tag => {
+    switch (tag[0]) {
+      case 't':
+        newRead.tags.push(tag[1]);
+        break;
+      case 'title':
+        newRead.title = tag[1];
+        break;
+      case 'summary':
+        newRead.summary = tag[1];
+        break;
+      case 'image':
+        newRead.image = tag[1];
+        break;
+      case 'published':
+        newRead.published = parseInt(tag[1]);
+        break;
+      case 'client':
+        newRead.client = tag[1];
+        break;
+      default:
+        break;
+    }
+  });
+
+  return newRead;
+}
 
 export const convertToReadsMega = (page: MegaFeedPage) => {
   if (page === undefined) {

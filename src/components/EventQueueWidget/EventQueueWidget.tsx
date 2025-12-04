@@ -12,9 +12,10 @@ const EventQueueWidget: Component<{ id?: string, hideName?: boolean }> = (props)
   let queueTimeout = 0;
 
   createEffect(on(() => accountStore.eventQueue.length, (len) => {
+    clearTimeout(queueTimeout);
+
     if (len === 0) {
-      clearTimeout(queueTimeout);
-      setQueueLength(len);
+      setQueueLength(0);
       return;
     }
 
@@ -27,12 +28,12 @@ const EventQueueWidget: Component<{ id?: string, hideName?: boolean }> = (props)
   return (
     <div id={props.id}>
       <Show when={queueLength() > 0}>
-        <div class={styles.publishQueueInfo}>
+        <a href="/pending" class={styles.publishQueueInfo}>
           <div class={styles.clockIcon}></div>
           <div>
             Publish pending ({queueLength()})
           </div>
-        </div>
+        </a>
       </Show>
     </div>
   );

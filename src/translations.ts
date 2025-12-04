@@ -1566,6 +1566,39 @@ export const search = {
   },
 };
 
+export const eventQueue = {
+  title: {
+    id: 'eventQueue.title',
+    defaultMessage: 'Publish Pending',
+    description: 'Title of the event queue page',
+  },
+  caption: {
+    id: 'eventQueue.caption',
+    defaultMessage: 'Publish Pending ({number})',
+    description: 'Caption of the event queue page',
+  },
+  label: {
+    id: 'eventQueue.label',
+    defaultMessage: 'These actions failed to publish:',
+    description: 'Label of the event queue page',
+  },
+  retry: {
+    id: 'eventQueue.retry',
+    defaultMessage: 'Retrying in {seconds} seconds...',
+    description: 'Retry label of the event queue page',
+  },
+  retrying: {
+    id: 'eventQueue.retrying',
+    defaultMessage: 'Retrying...',
+    description: 'Retry label of the event queue page',
+  },
+  empty: {
+    id: 'eventQueue.empty',
+    defaultMessage: 'No events pending',
+    description: 'Retry label of the event queue page',
+  },
+}
+
 export const settings = {
   index: {
     title: {

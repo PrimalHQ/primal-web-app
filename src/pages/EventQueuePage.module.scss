@@ -1,0 +1,78 @@
+.queueContainer {
+  background-color: var(--background-card);
+  min-height: 100vh;
+  padding-bottom: 20px;
+}
+
+.eventQueueHeader {
+  padding: 18px 20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+
+  .label {
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+
+  .retry {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+}
+
+.unknownEvents {
+  color: var(--text-tertiary);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.queueItem {
+  display: flex;
+  width: 100%;
+
+  .check {
+    display: flex;
+    width: 20px;
+    height: 20px;
+    justify-content: center;
+    gap: 6px;
+    margin-left: 12px;
+    margin-top: 12px;
+  }
+}
+
+.actionFooter {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  gap: 12px;
+}
+
+// 1. Send DM
+// 2. Send Highlight
+// 3. Send Remove Highlight
+// 4. Send Report
+// -5. Send Like
+// -6. Send Repost
+// 7. Send Article Repost
+// 8. Send Blossom Event
+// -9. Send Note
+// -10. Send Article
+// 11. Send Delete Event
+// 12. Send Draft
+// 13. Send Contacts
+// 14. Send Mute List
+// 15. Send Stream Mute List
+// 16. Send Profile
+// 17. Send Filter Lists
+// 18. Send Allow List
+// 19. Send Relays
+// 20. Send Stream Message

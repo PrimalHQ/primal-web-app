@@ -6,8 +6,8 @@
   width: 148px;
   height: 30px;
   border-radius: 99px;
-  border: 1px solid var(--background-input);
-  color: var(--text-tertiary-2);
+  border: 1px solid var(--subtile-devider);
+  color: var(--text-secondary);
   font-size: 12px;
   font-weight: 400;
   line-height: 13px;
@@ -15,10 +15,11 @@
 
   &:hover {
     border: 1px solid var(--subtile-devider);
-    color: var(--text-secondary-2);
+    color: var(--text-secondary);
+    background-color: var(--background-header-input);
 
     .clockIcon {
-      background-color: var(--text-secondary-2);
+      background-color: var(--text-secondary);
     }
   }
 }
@@ -28,7 +29,7 @@
   height: 14px;
   display: inline-block;
   margin: 0px 0px;
-  background-color: var(--text-tertiary-2);
+  background-color: var(--text-secondary);
   -webkit-mask: url(../../assets/icons/clock.svg) no-repeat center;
   mask: url(../../assets/icons/clock.svg) no-repeat center;
 }

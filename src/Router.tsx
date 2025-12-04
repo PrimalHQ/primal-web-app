@@ -55,6 +55,7 @@ const Menu = lazy(() => import('./pages/Settings/Menu'));
 const BlossomSettings = lazy(() => import('./pages/Settings/Blossom'));
 // const Landing = lazy(() => import('./pages/Landing'));
 const AppDownloadQr = lazy(() => import('./pages/appDownloadQr'));
+const EventQueuePage = lazy(() => import('./pages/EventQueue'));
 
 const Terms = lazy(() => import('./pages/Terms'));
 const Privacy = lazy(() => import('./pages/Privacy'));
@@ -193,6 +194,7 @@ const AppRouter: Component = () => {
             <Route path="/live/:streamId?" component={Streaming} />
             <Route path="/:identifier" component={Thread} preload={getKnownProfiles} />
           </Route>
+          <Route path="/pending" component={EventQueuePage} />
           <Route path="/rc/:code?" component={() => <Navigate href='/app-download-qr' />}/>
           {/* <Route path="/citadel_stream" component={CitadelPage} /> */}
           <Route path="/404" component={NotFound} />

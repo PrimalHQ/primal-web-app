@@ -1,4 +1,4 @@
-import { Component, createEffect, onCleanup, onMount } from 'solid-js';
+import { Component, createEffect, on, onCleanup, onMount } from 'solid-js';
 import { connect, disconnect } from './sockets';
 import Toaster from './components/Toaster/Toaster';
 import { HomeProvider } from './contexts/HomeContext';
@@ -21,8 +21,9 @@ import 'hls-video-element';
 import 'videojs-video-element';
 import { nip46 } from './lib/nTools';
 import { generateAppKeys } from './lib/PrimalNip46';
-import { accountStore, dequeEvent, enqueEvent, startEventQueueMonitor, updateRelays } from './stores/accountStore';
+import { accountStore, dequeEvent, enqueEvent, refereshQueue, startEventQueueMonitor, updateRelays } from './stores/accountStore';
 import { triggerImportEvents } from './lib/notes';
+import { unwrap } from 'solid-js/store';
 
 
 export const version = import.meta.env.PRIMAL_VERSION;
@@ -79,6 +80,12 @@ const App: Component = () => {
 
     relayWorker.postMessage({type: 'INIT'});
   }
+
+  createEffect(on(() => accountStore.eventQueueRetry, (countdown) => {
+    if (countdown > 0) return;
+
+    refereshQueue();
+  }));
 
   return (
     <AppProvider>

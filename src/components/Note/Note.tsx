@@ -57,6 +57,8 @@ export type NoteProps = {
   size?: 'xwide' | 'wide' | 'normal' | 'short',
   defaultParentAuthor?: PrimalUser,
   onRemove?: (id: string, isRepost?: boolean) => void,
+  hideContext?: boolean,
+  hideFooter?: boolean,
 }
 
 export const renderNote = (props: NoteProps) => (
@@ -341,16 +343,18 @@ const Note: Component<NoteProps> = (props) => {
                 />
               </div>
 
-              <div class={styles.footer}>
-                <NoteFooter
-                  note={props.note}
-                  state={reactionsState}
-                  updateState={updateReactionsState}
-                  customZapInfo={customZapInfo()}
-                  size="notif"
-                  onDelete={props.onRemove}
-                />
-              </div>
+              <Show when={!props.hideFooter}>
+                <div class={styles.footer}>
+                  <NoteFooter
+                    note={props.note}
+                    state={reactionsState}
+                    updateState={updateReactionsState}
+                    customZapInfo={customZapInfo()}
+                    size="notif"
+                    onDelete={props.onRemove}
+                  />
+                </div>
+              </Show>
             </div>
           </div>
         </a>
@@ -369,12 +373,14 @@ const Note: Component<NoteProps> = (props) => {
             <NoteHeader note={props.note} primary={true} />
           </div>
 
-          <div class={styles.upRightFloater}>
-            <NoteContextTrigger
-              ref={noteContextMenu}
-              onClick={onContextMenuTrigger}
-            />
-          </div>
+          <Show when={!props.hideContext}>
+            <div class={styles.upRightFloater}>
+              <NoteContextTrigger
+                ref={noteContextMenu}
+                onClick={onContextMenuTrigger}
+              />
+            </div>
+          </Show>
 
           <div class={styles.content}>
 
@@ -459,19 +465,21 @@ const Note: Component<NoteProps> = (props) => {
               </Show>
             </div>
 
-            <div class={styles.footer}>
-              <NoteFooter
-                note={props.note}
-                state={reactionsState}
-                updateState={updateReactionsState}
-                customZapInfo={customZapInfo()}
-                size="wide"
-                large={true}
-                onZapAnim={addTopZap}
-                noteType="primary"
-                onDelete={props.onRemove}
-              />
-            </div>
+            <Show when={!props.hideFooter}>
+              <div class={styles.footer}>
+                <NoteFooter
+                  note={props.note}
+                  state={reactionsState}
+                  updateState={updateReactionsState}
+                  customZapInfo={customZapInfo()}
+                  size="wide"
+                  large={true}
+                  onZapAnim={addTopZap}
+                  noteType="primary"
+                  onDelete={props.onRemove}
+                />
+              </div>
+            </Show>
           </div>
         </div>
       </Match>
@@ -502,12 +510,14 @@ const Note: Component<NoteProps> = (props) => {
               time={props.note.post.created_at}
             />
 
-            <div class={styles.upRightFloater}>
-              <NoteContextTrigger
-                ref={noteContextMenu}
-                onClick={onContextMenuTrigger}
-              />
-            </div>
+            <Show when={!props.hideContext}>
+              <div class={styles.upRightFloater}>
+                <NoteContextTrigger
+                  ref={noteContextMenu}
+                  onClick={onContextMenuTrigger}
+                />
+              </div>
+            </Show>
           </a>
 
           <NoteReplyToHeader note={props.note} defaultParentAuthor={props.defaultParentAuthor} />
@@ -532,15 +542,17 @@ const Note: Component<NoteProps> = (props) => {
             topZapLimit={4}
           />
 
-          <NoteFooter
-            note={props.note}
-            state={reactionsState}
-            updateState={updateReactionsState}
-            customZapInfo={customZapInfo()}
-            onZapAnim={addTopZapFeed}
-            size={size()}
-            onDelete={props.onRemove}
-          />
+          <Show when={!props.hideFooter}>
+            <NoteFooter
+              note={props.note}
+              state={reactionsState}
+              updateState={updateReactionsState}
+              customZapInfo={customZapInfo()}
+              onZapAnim={addTopZapFeed}
+              size={size()}
+              onDelete={props.onRemove}
+            />
+          </Show>
         </div>
       </Match>
 
@@ -579,12 +591,14 @@ const Note: Component<NoteProps> = (props) => {
                 />
               </a>
 
-              <div class={styles.upRightFloater}>
-                <NoteContextTrigger
-                  ref={noteContextMenu}
-                  onClick={onContextMenuTrigger}
-                />
-              </div>
+              <Show when={!props.hideContext}>
+                <div class={styles.upRightFloater}>
+                  <NoteContextTrigger
+                    ref={noteContextMenu}
+                    onClick={onContextMenuTrigger}
+                  />
+                </div>
+              </Show>
 
               <NoteReplyToHeader note={props.note} defaultParentAuthor={props.defaultParentAuthor} />
 
@@ -615,17 +629,19 @@ const Note: Component<NoteProps> = (props) => {
                 topZapLimit={4}
               />
 
-              <div class={styles.footer}>
-                <NoteFooter
-                  note={props.note}
-                  state={reactionsState}
-                  updateState={updateReactionsState}
-                  customZapInfo={customZapInfo()}
-                  onZapAnim={addTopZapFeed}
-                  size="short"
-                  onDelete={props.onRemove}
-                />
-              </div>
+              <Show when={!props.hideFooter}>
+                <div class={styles.footer}>
+                  <NoteFooter
+                    note={props.note}
+                    state={reactionsState}
+                    updateState={updateReactionsState}
+                    customZapInfo={customZapInfo()}
+                    onZapAnim={addTopZapFeed}
+                    size="short"
+                    onDelete={props.onRemove}
+                  />
+                </div>
+              </Show>
             </div>
           </div>
         </div>

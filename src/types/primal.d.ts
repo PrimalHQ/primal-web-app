@@ -687,6 +687,8 @@ export type FeedPage = {
   sortBy?: string,
   wordCount?: Record<string, number>,
   elements?: string[],
+  streams?: StreamingData[],
+  userStats?: Record<string, { followers_count: number }>,
 };
 
 export type TopicStats = Record<string, number>;
@@ -766,6 +768,7 @@ export type NostrRelay = { read: boolean, write: boolean };
 export type NostrRelays = Record<string, NostrRelay>;
 
 export type NostrRelayEvent = {
+  id?: string,
   kind: number,
   content: any,
   created_at: number,

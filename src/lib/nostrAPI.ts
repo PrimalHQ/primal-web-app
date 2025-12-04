@@ -1,4 +1,4 @@
-import { accountStore } from "../stores/accountStore";
+import { accountStore, dequeUnsignedEvent, enqueUnsignedEvent } from "../stores/accountStore";
 import {
   NostrExtension,
   NostrRelayEvent,
@@ -8,6 +8,7 @@ import {
   SendPaymentResponse,
   WebLnExtension,
  } from "../types/primal";
+import { uuidv4 } from "../utils";
 import { PrimalNip46 } from "./PrimalNip46";
 import { PrimalNostr } from "./PrimalNostr";
 
@@ -56,6 +57,10 @@ export class Queue {
     }
 
     return true;
+  }
+
+  abortCurrent() {
+    return this.#items.shift();
   }
 
   get size() {
@@ -115,16 +120,38 @@ const enqueueNostr = async <T>(action: (nostr: NostrExtension) => Promise<T>) =>
   return await eventQueue.enqueue<T>(() => action(nostr));
 }
 
+export const SIGN_TIMEOUT = 12_000;
+
+export const timeoutPromise = (timeout = 12_000) => {
+  return new Promise((_resolve, reject) => {
+    setTimeout(() => {
+      reject(new Error('promise_timeout'));
+    }, timeout);
+  });
+}
+
 export const signEvent = async (event: NostrRelayEvent) => {
+  const tempId = event.id || `${uuidv4()}`;
   try {
     return await enqueueNostr<NostrRelaySignedEvent>(async (nostr) => {
       try {
-        return await nostr.signEvent(event);
+        const signed = await Promise.race([
+          nostr.signEvent(event),
+          timeoutPromise(),
+        ]) as Promise<NostrRelaySignedEvent>;
+        // const signed = await nostr.signEvent(event);
+
+        console.log('DEQUEUE SIGNED: ', signed, tempId);
+        dequeUnsignedEvent(event, tempId);
+        return signed;
       } catch(reason) {
         throw(reason);
       }
     })
   } catch (reason) {
+    console.log('CAUGHT SIGN: ', reason);
+    enqueUnsignedEvent(event, tempId);
+    eventQueue.abortCurrent();
     throw(reason);
   }
 };

@@ -5,10 +5,12 @@ import { getMembershipStatus } from "../lib/membership";
 import {
   areUrlsSame,
   handleSubscription,
+  uuidv4,
 } from "../utils";
 
 import {
   getPublicKey,
+  signEvent,
 } from "../lib/nostrAPI";
 
 import { NostrEventContent,
@@ -26,6 +28,7 @@ import { NostrEventContent,
   NostrWindow,
   NostrBlossom,
   NostrRelaySignedEvent,
+  NostrRelayEvent,
 } from "../types/primal";
 
 import {
@@ -116,6 +119,7 @@ import {
 import { fetchPeople } from "../megaFeeds";
 import { appSigner, getAppSK, setAppSigner } from "../lib/PrimalNip46";
 import { updateStore } from "../services/StoreService";
+import { createSignal } from "solid-js";
 
 
 export type FollowData = {
@@ -177,6 +181,7 @@ export type AccountStore = {
   nwcList: string[][],
   blossomServers: string[],
   mirrorBlossom: boolean,
+  eventQueueRetry: number,
 }
 
 let relaysExplicitlyClosed: string[] = [];
@@ -235,6 +240,7 @@ export const initAccountStore: AccountStore = {
     following: [],
   },
   eventQueue: [],
+  eventQueueRetry: 0,
   // @ts-ignore
   // relayPool: new SimplePool({ enablePing: true, enableReconnect: true }),
 };
@@ -247,7 +253,9 @@ export const initAccountStore: AccountStore = {
     const pubkey = accountStore.publicKey;
     if (!pubkey || accountStore.eventQueue.find(e => e.id === event.id)) return;
 
+    console.log('ENQUEUE EVENT: ', event);
     updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...event }));
+    console.log('EVENT QUEUED: ', unwrap(accountStore.eventQueue))
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
@@ -257,23 +265,63 @@ export const initAccountStore: AccountStore = {
 
     if (!quedEvent || !pubkey) return;
 
-    updateAccountStore('eventQueue', (que) => que.filter(e => e.id !== event.id));
+    const queue = accountStore.eventQueue.filter(e => e.id !== event.id);
+    console.log('DEQUEUE EVENT: ', event);
+    updateAccountStore('eventQueue', () => [...queue]);
+    saveEventQueue(pubkey, accountStore.eventQueue);
+  }
+
+  export const dequeEvents = (events: NostrRelaySignedEvent[]) => {
+    const pubkey = accountStore.publicKey;
+    const ids = events.map(e => e.id);
+    const quedEvent = accountStore.eventQueue.filter(e => ids.includes(e.id));
+
+    if (quedEvent.length === 0 || !pubkey) return;
+
+    console.log('DEQUE MULTIPLE: ', events);
+    updateAccountStore('eventQueue', (que) => que.filter(e => !ids.includes(e.id)));
+    saveEventQueue(pubkey, accountStore.eventQueue);
+  }
+
+  export const enqueUnsignedEvent = (event: NostrRelayEvent, id: string) => {
+    const pubkey = accountStore.publicKey;
+    const ev = { ...event, id }
+    if (!pubkey || accountStore.eventQueue.find(e => e.id === ev.id)) return;
+
+    console.log('ENQUEUE UNSIGNED EVENT: ', event);
+    updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...ev }));
+    saveEventQueue(pubkey, accountStore.eventQueue);
+  }
+
+  export const dequeUnsignedEvent = (event: NostrRelayEvent, id: string) => {
+    const pubkey = accountStore.publicKey;
+    const quedEvent = accountStore.eventQueue.find(e => e.id === id);
+
+
+    if (!quedEvent || !pubkey) return;
+
+    const queue = accountStore.eventQueue.filter(e => e.id !== id);
+    console.log('DEQ UNSIGNED: ',id, queue.map(e => e.id))
+    updateAccountStore('eventQueue', () => queue);
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
   let monitorInterval = 0;
+  let countdownInterval = 0;
 
   export const processArrayUntilFailure = async <T>(
     items: T[],
     sendToAPI: (item: T) => Promise<void>
   ): Promise<T[]> => {
     let queue = [...items];
+    let success: T[] = [];
 
     while (queue.length > 0) {
       const item = queue[0];
 
       try {
         await sendToAPI(item);
+        success.push(item)
         // Success - remove the item and continue
         queue.shift();
       } catch (error) {
@@ -283,43 +331,79 @@ export const initAccountStore: AccountStore = {
       }
     }
 
-    return [ ...queue ];
+    return [ ...success ];
+  }
+
+  export const refereshQueue = async () => {
+    const pubkey = accountStore.publicKey;
+    if (!pubkey) return;
+    clearInterval(countdownInterval);
+
+    const queue = unwrap(accountStore.eventQueue);
+
+    console.log('MONITOR QUEUE 1: ', queue)
+
+    if (queue.length === 0) {
+      // clearTimeout(monitorInterval);
+      return;
+    }
+
+    const processedEvents = await processArrayUntilFailure<NostrRelaySignedEvent>([...queue], (item) => {
+      return new Promise<void>(async (resolve, reject) => {
+        if (!item.sig) {
+          try {
+            const event = await signEvent(item);
+
+            item = { ...event };
+          } catch (reason) {
+            reject('relay_send_timeout');
+          }
+        }
+
+        let timeout = setTimeout(
+          () => reject('relay_send_timeout'),
+          8_000,
+        );
+
+        sendSignedEvent(item, {
+          success: () => {
+            clearTimeout(timeout);
+            resolve();
+          },
+        });
+      });
+    });
+
+    const processedIds = processedEvents.map(e => e.id);
+
+    console.log('PROCESSING DONE!!!');
+    const newQueue = accountStore.eventQueue.filter(e => !processedIds.includes(e.id));
+    updateAccountStore('eventQueue', () => [ ...newQueue ]);
+    saveEventQueue(pubkey, accountStore.eventQueue);
+    startEventQueueMonitor();
   }
 
   export const startEventQueueMonitor = () => {
     const pubkey = accountStore.publicKey;
     if (!pubkey) return;
 
-    clearInterval(monitorInterval);
+    // clearTimeout(monitorInterval);
+    clearInterval(countdownInterval);
 
-    monitorInterval = setInterval(async () => {
-      const queue = unwrap(accountStore.eventQueue);
+    if (accountStore.eventQueue.length === 0) return;
 
-      if (queue.length === 0) {
-        clearInterval(monitorInterval);
-        return;
-      }
+    let countdown = 16;
 
-      const newQueue = await processArrayUntilFailure<NostrRelaySignedEvent>(queue, (item) => {
-        return new Promise<void>((resolve, reject) => {
-          let timeout = setTimeout(
-            () => reject('relay_send_timeout'),
-            8_000,
-          );
+    countdownInterval = setInterval(() => {
+      if (countdown === 0) countdown = 16;
+      countdown--;
 
-          sendSignedEvent(item, {
-            success: () => {
-              clearTimeout(timeout);
-              resolve();
-            },
-          });
-        });
-      });
+      updateAccountStore('eventQueueRetry', () => countdown);
+    }, 1_000);
 
-      updateAccountStore('eventQueue', () => [ ...newQueue ]);
-      saveEventQueue(pubkey, accountStore.eventQueue);
-
-    }, 16_000);
+    // monitorInterval = setTimeout(() => {
+    //   refereshQueue();
+    // }, 16_000);
   }
 
   export const suspendRelays = () => {
@@ -945,6 +1029,7 @@ export const initAccountStore: AccountStore = {
         if (accountStore.following.filter(f => f !== pubkey).length === 0) {
           const date = Math.floor((new Date()).getTime() / 1000);
           const tags = [['p', pubkey]];
+
           resolveContacts(pubkey, [pubkey], date, tags, accountStore.activeRelays[0], cb);
         }
         updateAccountStore('followInProgress', () => '');
@@ -1863,6 +1948,7 @@ export const initAccountStore: AccountStore = {
 
     const eventQueue = loadEventQueue(pubkey);
 
+    console.log('INIT EVENT QUEUE: ', eventQueue);
     updateAccountStore('eventQueue', () => [ ...eventQueue]);
 
     if (eventQueue.length > 0) {
