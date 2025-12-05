@@ -526,6 +526,7 @@ export const initAccountStore: AccountStore = {
     updateAccountStore('sec', () => undefined);
     clearSec();
     setPublicKey(undefined);
+    updateAccountStore('eventQueue', () => []);
 
     localStorage.removeItem('bunkerUrl');
     localStorage.removeItem('clientConnectionUrl');

@@ -125,7 +125,7 @@ export const SIGN_TIMEOUT = 12_000;
 export const timeoutPromise = (timeout = 8_000) => {
   return new Promise((_resolve, reject) => {
     setTimeout(() => {
-      reject(new Error('promise_timeout'));
+      reject('promise_timeout');
     }, timeout);
   });
 }
@@ -150,8 +150,13 @@ export const signEvent = async (event: NostrRelayEvent) => {
     })
   } catch (reason) {
     console.log('CAUGHT EVENT SIGN: ', reason);
-    enqueUnsignedEvent(event, tempId);
     eventQueue.abortCurrent();
+
+    if (reason === 'user rejected') {
+      dequeUnsignedEvent(event, tempId);
+      return;
+    }
+    enqueUnsignedEvent(event, tempId);
     throw(reason);
   }
 };

@@ -10,7 +10,7 @@ import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { encrypt44, signEvent } from "./nostrAPI";
 import { ArticleEdit } from "../pages/ReadsEditor";
 import { APP_ID, relayWorker } from "../App";
-import { accountStore } from "../stores/accountStore";
+import { accountStore, dequeUnsignedEvent } from "../stores/accountStore";
 import { DecodedNaddr } from "nostr-tools/lib/types/nip19";
 
 const getLikesStorageKey = () => {
@@ -767,7 +767,7 @@ export const sendEvent = async (event: NostrEvent, callbacks?: { success?: (even
 
     sendSignedEvent(signedNote, callbacks);
   }).catch((reason) => {
-    console.log('EVENT FAILED REASON: ', reason);
+    logWarning('EVENT FAILED REASON: ', reason);
   })
 
   return { success: true, note: event } as SendNoteResult;
