@@ -101,7 +101,7 @@ export const PrimalNip46: (pk?: string) => NostrExtension = (pk?: string) => {
   const decrypt44: (pubkey: string, message: string) => Promise<string> =
     async (pubkey, message) => {
       if (!appSigner) throw('no-bunker-found');
-      return appSigner.nip44Encrypt(pubkey, message);
+      return appSigner.nip44Decrypt(pubkey, message);
     };
 
   const signEvent = async (event: NostrRelayEvent) => {
