@@ -30,7 +30,7 @@ const EventQueueWidget: Component<{ id?: string, hideName?: boolean }> = (props)
       <Show when={queueLength() > 0}>
         <a href="/pending" class={styles.publishQueueInfo}>
           <div class={styles.clockIcon}></div>
-          <div>
+          <div class={styles.label}>
             Publish pending ({queueLength()})
           </div>
         </a>

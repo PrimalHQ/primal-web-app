@@ -33,3 +33,14 @@
   -webkit-mask: url(../../assets/icons/clock.svg) no-repeat center;
   mask: url(../../assets/icons/clock.svg) no-repeat center;
 }
+
+@media only screen and (max-width: 1300px) {
+  .publishQueueInfo {
+    width: fit-content;
+    padding-inline: 6px;
+    margin-left: 6px;
+    .label {
+      display: none;
+    }
+  }
+}

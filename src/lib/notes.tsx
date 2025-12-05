@@ -766,7 +766,9 @@ export const sendEvent = async (event: NostrEvent, callbacks?: { success?: (even
     }
 
     sendSignedEvent(signedNote, callbacks);
-  });
+  }).catch((reason) => {
+    console.log('EVENT FAILED REASON: ', reason);
+  })
 
   return { success: true, note: event } as SendNoteResult;
 
