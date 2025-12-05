@@ -17,6 +17,7 @@
   margin: 0px;
   min-width: 120px;
   vertical-align: bottom;
+  gap: 16px;
 
   div {
     display: inline-block;
@@ -46,6 +47,7 @@
     flex-direction: row-reverse;
     text-align: left;
     justify-content: flex-end;
+    gap: 0;
     span {
       margin-left: 12px;
     }
