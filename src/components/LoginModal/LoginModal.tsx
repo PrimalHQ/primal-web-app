@@ -15,7 +15,7 @@ import { Tabs } from '@kobalte/core/tabs';
 import { useToastContext } from '../Toaster/Toaster';
 import QrCode from '../QrCode/QrCode';
 import { useAppContext } from '../../contexts/AppContext';
-import { appSigner, generateClientConnectionUrl, getAppSK, storeBunker } from '../../lib/PrimalNip46';
+import { appSigner, generateAppKeys, generateClientConnectionUrl, getAppSK, storeBunker } from '../../lib/PrimalNip46';
 import { logWarning } from '../../lib/logger';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { encryptWithPin, setCurrentPin } from '../../lib/PrimalNostr';
@@ -177,6 +177,7 @@ const LoginModal: Component<{
   });
 
   const setupSigner = async () => {
+    generateAppKeys();
     const cUrl = generateClientConnectionUrl();
 
     if (cUrl.length === 0) return;

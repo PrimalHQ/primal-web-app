@@ -19,7 +19,6 @@ import 'media-chrome';
 import "media-chrome/media-theme-element";
 import 'hls-video-element';
 import 'videojs-video-element';
-import { generateAppKeys } from './lib/PrimalNip46';
 import { accountStore, dequeEvent, enqueEvent, refreshQueue, startEventQueueMonitor, updateRelays } from './stores/accountStore';
 import { triggerImportEvents } from './lib/notes';
 
@@ -39,7 +38,6 @@ const App: Component = () => {
 
   onMount(() => {
     connect();
-    generateAppKeys();
     initRelayWorker();
   });
 
