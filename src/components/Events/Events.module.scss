@@ -14,13 +14,32 @@
 
 .genericEvent {
   position: relative;
-  display: flex;
-  min-height: 58px;
-  gap: 8px;
-  padding-inline: 8px;
-  justify-content: flex-start;
-  align-items: center;
+  // display: flex;
+  // min-height: 58px;
+  // gap: 8px;
+  // padding-inline: 8px;
+  // justify-content: flex-start;
+  // align-items: center;
   width: 100%;
+
+  .label {
+    position: relative;
+    display: flex;
+    min-height: 58px;
+    gap: 8px;
+    padding-inline: 8px;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+  }
+
+  .details {
+    max-width: 588px;
+    pre {
+      background-color: var(--background-site);
+      color: var(--text-tertiary);
+    }
+  }
 
   .eventIcon {
     width: 20px;
@@ -54,23 +73,23 @@
 
   .resignButton {
     position: absolute;
-    top: 8px;
-    right: 8px;
-    padding: 4px;
+    top: 13px;
+    right: 0px;
+    padding: 8px;
     border-radius: 8px;
 
     width: fit-content;
 
-    background-color: var(--warning-dim);
+    background-color: var(--background-input);
+    color: var(--text-secondary);
 
-    color: var(--warning-bright);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 400;
-    line-height: 20px;
+    line-height: 16px;
     z-index: 5;
 
     &:hover {
-      background-color: var(--warning-bright-shadow);
+      background-color: var(--background-header-input);
     }
   }
 }

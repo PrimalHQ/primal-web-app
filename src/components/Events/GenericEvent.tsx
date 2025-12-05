@@ -22,6 +22,7 @@ import profileIcon from '../../assets/icons/profile.svg';
 import settingsIcon from '../../assets/icons/settings.svg';
 
 import genericIcon from '../../assets/icons/nav/messages.svg';
+import { Collapsible } from '@kobalte/core/collapsible';
 
 const GenericEvent: Component<{
   event: NostrRelaySignedEvent,
@@ -133,28 +134,37 @@ const GenericEvent: Component<{
   }
 
   return (
-    <div
+    <Collapsible
       class={styles.genericEvent}
       data-event={props.event.id}
       data-event-kind={props.event.kind}
     >
-      <div class={styles.eventIcon}>
-        <div
-          style={`--mask-url: url(${eventIcon()});`}
-        />
-      </div>
-      <div class={styles.eventDescription}>
-        {description()}
-      </div>
-      <Show when={!props.event.sig}>
-        <button
-          class={styles.resignButton}
-          onClick={() => props.onResign(props.event)}
-        >
-          Retry Signing
-        </button>
-      </Show>
-    </div>
+      <Collapsible.Trigger class={styles.label}>
+        <div class={styles.eventIcon}>
+          <div
+            style={`--mask-url: url(${eventIcon()});`}
+          />
+        </div>
+        <div class={styles.eventDescription}>
+          {description()}
+        </div>
+        <Show when={!props.event.sig}>
+          <button
+            class={styles.resignButton}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              props.onResign(props.event);
+            }}
+          >
+            Retry Signing
+          </button>
+        </Show>
+      </Collapsible.Trigger>
+      <Collapsible.Content class={styles.details}>
+        <pre>{JSON.stringify(props.event || '{}', null, 2)}</pre>
+      </Collapsible.Content>
+    </Collapsible>
   )
 }
 

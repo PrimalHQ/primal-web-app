@@ -527,10 +527,10 @@ export const initAccountStore: AccountStore = {
     clearSec();
     setPublicKey(undefined);
 
-    if (accountStore.loginType == 'nip46') {
-      localStorage.removeItem('bunkerUrl');
-      localStorage.removeItem('clientConnectionUrl');
-    }
+    localStorage.removeItem('bunkerUrl');
+    localStorage.removeItem('clientConnectionUrl');
+    localStorage.removeItem('appNsec');
+    localStorage.removeItem('appPubkey');
 
     setLoginType('guest');
   };

@@ -25,6 +25,10 @@
   }
 }
 
+.eventList {
+  margin-bottom: 72px;
+}
+
 .unknownEvents {
   color: var(--text-tertiary);
   font-size: 14px;
@@ -37,7 +41,9 @@
 .queueItem {
   display: flex;
   width: 100%;
-  align-items: center;
+  align-items: flex-start;
+  padding-left: 20px;
+  padding-right: 12px;
 
   .check {
     display: flex;
@@ -45,15 +51,24 @@
     height: 20px;
     justify-content: center;
     gap: 6px;
-    margin-left: 12px;
+    margin-top: 20px;
+  }
+
+  &:has([data-expanded]) {
+    background-color: var(--background-input);
   }
 }
 
 .actionFooter {
+  position: fixed;
+  bottom: 0;
+  width: 640px;
   display: flex;
   justify-content: flex-end;
   padding: 16px 20px;
   gap: 12px;
+  background-color: var(--background-site);
+  z-index: 5;
 }
 
 // 1. Send DM

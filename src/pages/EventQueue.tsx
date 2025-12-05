@@ -328,29 +328,31 @@ const EventQueuePage: Component = () => {
             </div>
           </Show>
         </div>
-        <For each={accountStore.eventQueue}>
-          {queuedEvent =>
-            <div class={styles.queueItem}>
-              <div class={styles.check}>
-                <CheckBox
-                  checked={selectedEvents.find(e => queuedEvent.id === e.id)}
-                  onChange={() => {
-                    if (selectedEvents.find(e => queuedEvent.id === e.id)) {
-                      setSelectedEvents((evs => evs.filter(e => e.id !== queuedEvent.id)));
-                      return;
-                    }
+        <div class={styles.eventList}>
+          <For each={accountStore.eventQueue}>
+            {queuedEvent =>
+              <div class={styles.queueItem}>
+                <div class={styles.check}>
+                  <CheckBox
+                    checked={selectedEvents.find(e => queuedEvent.id === e.id)}
+                    onChange={() => {
+                      if (selectedEvents.find(e => queuedEvent.id === e.id)) {
+                        setSelectedEvents((evs => evs.filter(e => e.id !== queuedEvent.id)));
+                        return;
+                      }
 
-                    setSelectedEvents(selectedEvents.length, () => ({ ...queuedEvent }));
-                  }}
+                      setSelectedEvents(selectedEvents.length, () => ({ ...queuedEvent }));
+                    }}
+                  />
+                </div>
+                <GenericEvent
+                  event={queuedEvent}
+                  onResign={retrySigning}
                 />
               </div>
-              <GenericEvent
-                event={queuedEvent}
-                onResign={retrySigning}
-              />
-            </div>
-          }
-        </For>
+            }
+          </For>
+        </div>
         <div class={styles.actionFooter}>
           <ButtonSecondary
             onClick={abortSelected}
