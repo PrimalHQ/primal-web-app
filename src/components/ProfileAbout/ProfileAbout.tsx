@@ -249,8 +249,12 @@ const ProfileAbout: Component<{about: string | undefined, onParseComplete?: () =
 
     do {
       m = profileRegexG.exec(about);
-      if (m) {
-        userMentions.push(npubToHex(m[1]))
+      if (m && m[1]) {
+        let npub = m[1].startsWith('nostr:') ?
+          m[1].slice(6):
+          m[1];
+
+        userMentions.push(npubToHex(npub));
       }
     } while (m);
 
