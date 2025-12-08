@@ -349,11 +349,12 @@ export const initAccountStore: AccountStore = {
     const processedEvents = await processArrayUntilFailure<NostrRelaySignedEvent>([...queue], (item) => {
       return new Promise<void>(async (resolve, reject) => {
         if (!item.sig) {
-          return;
           try {
             const event = await signEvent(item);
 
-            item = { ...event };
+            if (event) {
+              item = { ...event };
+            }
           } catch (reason) {
             reject('relay_send_timeout');
           }

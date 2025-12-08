@@ -1,3 +1,4 @@
+import { unwrap } from "solid-js/store";
 import { accountStore, dequeUnsignedEvent, enqueUnsignedEvent } from "../stores/accountStore";
 import {
   NostrExtension,
@@ -136,13 +137,13 @@ export const signEvent = async (event: NostrRelayEvent) => {
     return await enqueueNostr<NostrRelaySignedEvent>(async (nostr) => {
       try {
         const signed = await Promise.race([
-          nostr.signEvent(event),
+          nostr.signEvent(unwrap(event)),
           timeoutPromise(),
         ]) as NostrRelaySignedEvent;
         // const signed = await nostr.signEvent(event);
 
         console.log('DEQUEUE SIGNED: ', signed, tempId);
-        dequeUnsignedEvent(event, tempId);
+        dequeUnsignedEvent(unwrap(event), tempId);
         return signed;
       } catch(reason) {
         throw(reason);
@@ -153,10 +154,10 @@ export const signEvent = async (event: NostrRelayEvent) => {
     eventQueue.abortCurrent();
 
     if (reason === 'user rejected') {
-      dequeUnsignedEvent(event, tempId);
+      dequeUnsignedEvent(unwrap(event), tempId);
       return;
     }
-    enqueUnsignedEvent(event, tempId);
+    enqueUnsignedEvent(unwrap(event), tempId);
     throw(reason);
   }
 };

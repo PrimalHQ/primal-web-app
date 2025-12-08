@@ -1,5 +1,5 @@
 import { Relay } from "../lib/nTools";
-import { createStore } from "solid-js/store";
+import { createStore, unwrap } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
 import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegexLocal, profileRegex, rumbleRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, tidalEmbedRegex, twitchPlayerRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex, zapStreamEmbedRegex } from "../constants";
 import { sendMessage, subsTo } from "../sockets";
@@ -749,8 +749,7 @@ export const sendSignedEvent = (event: NostrRelaySignedEvent, callbacks?: { succ
     relayWorker.addEventListener('message', onSuccess);
   }
 
-
-  relayWorker.postMessage({type: 'SEND_EVENT', eventData: { event, relays: allRelays }});
+  relayWorker.postMessage({type: 'SEND_EVENT', eventData: { event: unwrap(event), relays: allRelays }});
 }
 
 export const sendEvent = async (event: NostrEvent, callbacks?: { success?: (event?: NostrRelaySignedEvent) => void, fail?: (event?: NostrRelaySignedEvent) => void}) => {
