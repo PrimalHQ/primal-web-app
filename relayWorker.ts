@@ -19,7 +19,7 @@ self.addEventListener('message', (e: MessageEvent<WorkerMessageType>) => {
 
   if (type === 'INIT' || !relayPool) {
     // @ts-ignore
-    relayPool = new SimplePool({ enablePing: true, enableReconnect: true });
+    relayPool = new SimplePool({ enablePing: false, enableReconnect: true });
   }
 
   if (type === 'OPEN_RELAYS' && relays) {
