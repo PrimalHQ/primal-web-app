@@ -86,6 +86,8 @@ const GenericEvent: Component<{
         return dmIcon;
       case Kind.Settings:
         return settingsIcon;
+      case Kind.Draft:
+        return downloadIcon;
       default:
         return genericIcon;
     }
@@ -101,7 +103,7 @@ const GenericEvent: Component<{
       case Kind.Highlight:
         return 'Highlight';
       case Kind.ReportContent:
-        return 'Repost Content';
+        return 'Report Content';
       case Kind.Reaction:
         return 'Reaction';
       case Kind.Repost:
@@ -128,6 +130,8 @@ const GenericEvent: Component<{
         return 'Send Live Stream Message';
       case Kind.Settings:
         return 'Sync Settings';
+      case Kind.Draft:
+        return `Save Draft`;
       default:
         return 'Unknown Event';
     }

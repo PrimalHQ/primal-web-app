@@ -5,12 +5,12 @@ import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRege
 import { sendMessage, subsTo } from "../sockets";
 import { EventCoordinate, MediaSize, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, SendNoteResult } from "../types/primal";
 import { decodeIdentifier, npubToHex } from "./keys";
-import { logError, logInfo, logWarning } from "./logger";
+import { logError, logWarning } from "./logger";
 import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { encrypt44, signEvent } from "./nostrAPI";
 import { ArticleEdit } from "../pages/ReadsEditor";
 import { APP_ID, relayWorker } from "../App";
-import { accountStore, dequeUnsignedEvent } from "../stores/accountStore";
+import { accountStore } from "../stores/accountStore";
 import { DecodedNaddr } from "nostr-tools/lib/types/nip19";
 
 const getLikesStorageKey = () => {

@@ -1152,7 +1152,7 @@ export const initAccountStore: AccountStore = {
         unsub();
 
         if (muteKind === 'user') {
-          if (accountStore.muted.includes(pubkey)) return;
+          // if (accountStore.muted.includes(pubkey)) return;
 
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = [...unwrap(accountStore.muted), pubkey];
@@ -1247,7 +1247,7 @@ export const initAccountStore: AccountStore = {
         unsub();
 
         if (muteKind === 'user') {
-          if (!accountStore.muted.includes(pubkey)) return;
+          // if (!accountStore.muted.includes(pubkey)) return;
 
           const date = Math.floor((new Date()).getTime() / 1000);
           const muted = unwrap(accountStore.muted).filter(m => m !== pubkey);
