@@ -69,25 +69,9 @@
   gap: 12px;
   background-color: var(--background-site);
   z-index: 5;
+
+  button {
+    padding-inline: 18px !important;
+  }
 }
 
-// 1. Send DM
-// 2. Send Highlight
-// 3. Send Remove Highlight
-// 4. Send Report
-// -5. Send Like
-// -6. Send Repost
-// 7. Send Article Repost
-// 8. Send Blossom Event
-// -9. Send Note
-// -10. Send Article
-// 11. Send Delete Event
-// 12. Send Draft
-// 13. Send Contacts
-// 14. Send Mute List
-// 15. Send Stream Mute List
-// 16. Send Profile
-// 17. Send Filter Lists
-// 18. Send Allow List
-// 19. Send Relays
-// 20. Send Stream Message
