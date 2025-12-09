@@ -148,12 +148,12 @@ export const signEvent = async (event: NostrRelayEvent) => {
         throw(reason);
       }
     })
-  } catch (reason) {
+  } catch (reason: any) {
     eventQueue.abortCurrent();
 
-    if (reason === 'user rejected') {
+    if (reason === 'user rejected' || reason?.message?.includes('denied') || reason?.message?.includes('reject')) {
       dequeUnsignedEvent(unwrap(event), tempId);
-      return;
+      throw(reason);
     }
     enqueUnsignedEvent(unwrap(event), tempId);
     throw(reason);

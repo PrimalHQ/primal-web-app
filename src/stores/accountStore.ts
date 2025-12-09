@@ -253,6 +253,10 @@ export const initAccountStore: AccountStore = {
     const pubkey = accountStore.publicKey;
     if (!pubkey || accountStore.eventQueue.find(e => e.id === event.id)) return;
 
+    if (accountStore.eventQueue.length === 0) {
+      startEventQueueMonitor();
+    }
+
     updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...event }));
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
@@ -284,6 +288,10 @@ export const initAccountStore: AccountStore = {
     const pubkey = accountStore.publicKey;
     const ev = { ...event, id, pubkey }
     if (!pubkey || accountStore.eventQueue.find(e => e.id === ev.id)) return;
+
+    if (accountStore.eventQueue.length === 0) {
+      startEventQueueMonitor();
+    }
 
     updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...ev }));
 
@@ -353,6 +361,7 @@ export const initAccountStore: AccountStore = {
             }
           } catch (reason) {
             reject('relay_send_timeout');
+            return;
           }
         }
 
@@ -385,7 +394,7 @@ export const initAccountStore: AccountStore = {
     // clearTimeout(monitorInterval);
     clearInterval(countdownInterval);
 
-    if (accountStore.eventQueue.length === 0) return;
+    // if (accountStore.eventQueue.length === 0) return;
 
     let countdown = 16;
 

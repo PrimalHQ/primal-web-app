@@ -265,6 +265,7 @@ const EventQueuePage: Component = () => {
         item = { ...event };
       } catch (reason) {
         reject('relay_send_timeout');
+        return;
       }
 
       let timeout = setTimeout(
@@ -341,7 +342,7 @@ const EventQueuePage: Component = () => {
                 </div>
                 <GenericEvent
                   event={queuedEvent}
-                  onResign={retrySigning}
+                  onResign={() => retrySigning(queuedEvent)?.catch(e => {})}
                 />
               </div>
             }
