@@ -253,7 +253,6 @@ export const initAccountStore: AccountStore = {
     const pubkey = accountStore.publicKey;
     if (!pubkey || accountStore.eventQueue.find(e => e.id === event.id)) return;
 
-    console.log('ENQUEUE EVENT: ', event);
     updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...event }));
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
@@ -266,7 +265,6 @@ export const initAccountStore: AccountStore = {
 
     const queue = accountStore.eventQueue.filter(e => e.id !== event.id);
     updateAccountStore('eventQueue', () => [...queue]);
-    console.log('DEQUEUE EVENT: ', event);
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
@@ -278,7 +276,7 @@ export const initAccountStore: AccountStore = {
     if (quedEvent.length === 0 || !pubkey) return;
 
     updateAccountStore('eventQueue', (que) => que.filter(e => !ids.includes(e.id)));
-    console.log('DEQUE MULTIPLE: ', events);
+
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
@@ -288,7 +286,7 @@ export const initAccountStore: AccountStore = {
     if (!pubkey || accountStore.eventQueue.find(e => e.id === ev.id)) return;
 
     updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...ev }));
-    console.log('ENQUEUE UNSIGNED EVENT: ', event);
+
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
@@ -300,7 +298,7 @@ export const initAccountStore: AccountStore = {
 
     const queue = accountStore.eventQueue.filter(e => e.id !== id);
     updateAccountStore('eventQueue', () => queue);
-    console.log('DEQ UNSIGNED: ',id, queue.map(e => e.id))
+
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
@@ -339,8 +337,6 @@ export const initAccountStore: AccountStore = {
 
     let queue = unwrap(accountStore.eventQueue);
 
-    console.log('MONITOR QUEUE 1: ', queue)
-
     if (queue.length === 0) {
       // clearTimeout(monitorInterval);
       return;
@@ -376,7 +372,6 @@ export const initAccountStore: AccountStore = {
 
     const processedIds = processedEvents.map(e => e.id);
 
-    console.log('PROCESSING DONE!!!');
     const newQueue = accountStore.eventQueue.filter(e => !processedIds.includes(e.id));
     updateAccountStore('eventQueue', () => [ ...newQueue ]);
     saveEventQueue(pubkey, accountStore.eventQueue);
@@ -1946,7 +1941,6 @@ export const initAccountStore: AccountStore = {
 
     const eventQueue = loadEventQueue(pubkey);
 
-    console.log('INIT EVENT QUEUE: ', accountStore.isKeyLookupDone, eventQueue);
     updateAccountStore('eventQueue', () => [ ...eventQueue]);
 
     if (eventQueue.length > 0) {
@@ -2216,7 +2210,6 @@ export const initAccountStore: AccountStore = {
       return;
     }
 
-    console.log('EVENT BUNKER: ', bunkerUrl)
     const bunkerPointer = await nip46.parseBunkerInput(bunkerUrl)
 
     if (!bunkerPointer) {
@@ -2234,8 +2227,6 @@ export const initAccountStore: AccountStore = {
     }
 
     const pubkey = pk || await appSigner.getPublicKey()
-
-    console.log('EVENT BUNKER POINTER: ', bunkerPointer)
 
     setPublicKey(pubkey);
     doAfterLogin(pubkey);

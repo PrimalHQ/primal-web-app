@@ -142,7 +142,6 @@ export const signEvent = async (event: NostrRelayEvent) => {
         ]) as NostrRelaySignedEvent;
         // const signed = await nostr.signEvent(event);
 
-        console.log('DEQUEUE SIGNED: ', signed, tempId);
         dequeUnsignedEvent(unwrap(event), tempId);
         return signed;
       } catch(reason) {
@@ -150,7 +149,6 @@ export const signEvent = async (event: NostrRelayEvent) => {
       }
     })
   } catch (reason) {
-    console.log('CAUGHT EVENT SIGN: ', reason);
     eventQueue.abortCurrent();
 
     if (reason === 'user rejected') {

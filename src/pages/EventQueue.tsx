@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, createSignal, For, onMount, Show } from 'solid-js';
 import { eventQueue as tEventQueue } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 
@@ -9,27 +9,23 @@ import Wormhole from '../components/Wormhole/Wormhole';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import SettingsSidebar from '../components/SettingsSidebar/SettingsSidebar';
 import PageCaption from '../components/PageCaption/PageCaption';
-import { accountStore, dequeEvent, dequeEvents, processArrayUntilFailure, startEventQueueMonitor, updateAccountStore } from '../stores/accountStore';
+import { accountStore, dequeEvents, processArrayUntilFailure, startEventQueueMonitor, updateAccountStore } from '../stores/accountStore';
 import { getEvents } from '../lib/feed';
 import { APP_ID } from '../App';
 import { subsTo } from '../sockets';
-import { StreamingData } from '../lib/streaming';
-import { emptyPage, Kind } from '../constants';
-import { FeedPage, MegaFeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrRelaySignedEvent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, NoteActions, PrimalUser } from '../types/primal';
-import { emptyMegaFeedPage, emptyMegaFeedResults, MegaFeedResults, pageResolve, updateFeedPage } from '../megaFeeds';
-import Note from '../components/Note/Note';
+import { Kind } from '../constants';
+import { MegaFeedPage, NostrNoteContent, NostrRelaySignedEvent, NostrUserContent } from '../types/primal';
+import { emptyMegaFeedPage, updateFeedPage } from '../megaFeeds';
 import { createStore, unwrap } from 'solid-js/store';
-import { convertSingleNoteMega, convertSingleReadMega, encodeCoordinate } from '../stores/megaFeed';
+import { convertSingleNoteMega, convertSingleReadMega } from '../stores/megaFeed';
 import { getUserProfiles } from '../lib/profile';
-import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
 import { likes } from '../components/Notifications/NotificationItemOld';
-import ReactionEvent, { ReactionEventType } from '../components/Events/ReactionEvent';
+import { ReactionEventType } from '../components/Events/ReactionEvent';
 import CheckBox from '../components/Checkbox/CheckBox';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import { sendSignedEvent } from '../lib/notes';
 import { saveEventQueue } from '../lib/localStore';
-import BookmarkEvent from '../components/Events/BookmarkEvent';
 import GenericEvent from '../components/Events/GenericEvent';
 import { signEvent } from '../lib/nostrAPI';
 
@@ -48,20 +44,20 @@ const EventQueuePage: Component = () => {
 
   const [fetchingDone, setFetchingDone] = createStore<string[]>([]);
 
-  createEffect(() => {
-    const q = unwrap(accountStore.eventQueue);
-    console.log('CHECK QUEUE: ', q);
-    // const eventsPage = page();
-    // if (!eventsPage) return;
+  // createEffect(() => {
+  //   const q = unwrap(accountStore.eventQueue);
+  //   console.log('CHECK QUEUE: ', q);
+  //   // const eventsPage = page();
+  //   // if (!eventsPage) return;
 
-    // parseEvents(eventsPage);
+  //   // parseEvents(eventsPage);
 
-    // const noteEvents = accountStore.eventQueue.filter(e => e.kind === Kind.Text);
+  //   // const noteEvents = accountStore.eventQueue.filter(e => e.kind === Kind.Text);
 
-    // const notes = noteEvents.reduce<Record<string, any>>((acc, n) => ({ ...acc, [n.id]: convertSingleNoteMega(n, eventsPage)}), {});
+  //   // const notes = noteEvents.reduce<Record<string, any>>((acc, n) => ({ ...acc, [n.id]: convertSingleNoteMega(n, eventsPage)}), {});
 
-    // setParsedEvents(() => ({ ...notes }))
-  })
+  //   // setParsedEvents(() => ({ ...notes }))
+  // })
 
   const convertSingleReaction = (event: NostrNoteContent, page: MegaFeedPage): ReactionEventType | undefined => {
     const icon = likes.find(l => l === event.content) || likes[1];
@@ -116,7 +112,6 @@ const EventQueuePage: Component = () => {
 
   const parseEvents = (eventsPage: MegaFeedPage) => {
     const queue = [ ...accountStore.eventQueue ];
-    console.log('QUEUE: ', queue);
 
     const parsedEvents: Record<string, any> = {}
 
@@ -257,7 +252,6 @@ const EventQueuePage: Component = () => {
     });
 
     updateAccountStore('eventQueue', () => [ ...newQueue ]);
-    console.log('EVENT RETRY SELECTED');
     saveEventQueue(accountStore.publicKey, accountStore.eventQueue);
   }
 
