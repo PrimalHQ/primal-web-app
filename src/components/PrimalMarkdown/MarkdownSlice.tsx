@@ -53,11 +53,14 @@ const MarkdownSlice: Component<{
 
       const regex = /(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/g;
 
-      const cont = props.content.replace(regex, (e) => {
+      let cont = props.content.replace(regex, (e) => {
         const arr = e.split('@');
 
         return `${arr[0]}&#8203;@${arr[1]}`;
       });
+
+      // Replace single line breaks with spaces
+      cont = cont.replace(/([^\n])\n([^\n])/g, '$1 $2');
 
       insert(cont)(e.ctx);
       setHtml(() => getHTML()(e.ctx));
