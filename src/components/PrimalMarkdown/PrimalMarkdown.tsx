@@ -348,7 +348,13 @@ const PrimalMarkdown: Component<{
     if (token.type === 'md') {
       const orig = convertHtmlEntityToAngleBrackets(token.value);
 
-      const prepped = orig.replace(profileRegexG, (r: string) => {
+      const linkRegex = /\[([^\]]+)\]\(nostr:((npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\)/g;
+
+      let prepped = orig.replace(linkRegex, '[@$1]($2)')
+
+      const nonLinkRegex = /(?<!\]\()((nostr:)?(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
+
+      prepped = prepped.replace(nonLinkRegex, (r: string) => {
 
         let npub = r;
         let end = '';
