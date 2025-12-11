@@ -137,6 +137,10 @@ const SelectionBox2: Component<{
       defaultValue={defaultValue()}
       value={value()}
       onChange={onOptionSelect}
+      gutter={8}
+      sameWidth={false}
+      placement="bottom-start"
+      shift={-8}
     >
       <Select.Trigger class={props.big ? styles.triggerBig : styles.trigger}>
           <Select.Value<SelectionOption>>
@@ -148,17 +152,19 @@ const SelectionBox2: Component<{
             </Show>
           </Select.Icon>
       </Select.Trigger>
-      <Select.Content class={styles.selectionContent}>
-        <Show when={hasCaption()}>
-          <div class={styles.caption}>
-            <div class={styles.title}>
-              {props.caption && `${props.caption}:`}
+      <Select.Portal>
+        <Select.Content class={styles.selectionContent}>
+          <Show when={hasCaption()}>
+            <div class={styles.caption}>
+              <div class={styles.title}>
+                {props.caption && `${props.caption}:`}
+              </div>
+              {props.captionAction}
             </div>
-            {props.captionAction}
-          </div>
-        </Show>
-        <Select.Listbox class={`${styles.listbox} ${hasCaption() ? styles.withCaption : '' }`}/>
-      </Select.Content>
+          </Show>
+          <Select.Listbox class={`${styles.listbox} ${hasCaption() ? styles.withCaption : '' }`}/>
+        </Select.Content>
+      </Select.Portal>
     </Select>
   );
 }
