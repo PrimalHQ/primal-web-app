@@ -72,6 +72,10 @@ const FeedMarketItem: Component<{
     e.preventDefault();
     e.stopPropagation();
 
+    if (state.liked) {
+      return;
+    }
+
     if (!accountStore || !props.dvm) {
       return;
     }
