@@ -118,7 +118,7 @@ import {
 import { fetchPeople } from "../megaFeeds";
 import { appSigner, getAppSK, setAppSigner } from "../lib/PrimalNip46";
 import { updateStore } from "../services/StoreService";
-import { createSignal } from "solid-js";
+import { batch, createSignal } from "solid-js";
 
 
 export type FollowData = {
@@ -273,7 +273,17 @@ export const initAccountStore: AccountStore = {
     const index = eventInQueueIndex(event)
 
     if (index > -1) {
-      updateAccountStore('eventQueue', index, () => ({ ...event }));
+      updateAccountStore('eventQueue', (events) => {
+        const updatedEvents = [
+          ...events.slice(0, index),
+          { ...event },
+          ...events.slice(index + 1),
+        ];
+
+        return updatedEvents;
+      });
+
+      // updateAccountStore('eventQueue', index, () => ({ ...event }));
       saveEventQueue(pubkey, accountStore.eventQueue);
       return;
     }
@@ -311,13 +321,23 @@ export const initAccountStore: AccountStore = {
 
   export const enqueUnsignedEvent = (event: NostrRelayEvent, id: string) => {
     const pubkey = accountStore.publicKey;
-    const ev = { ...event, id, pubkey }
+    const ev = { ...event, id, pubkey } as NostrRelaySignedEvent;
     if (!pubkey) return;
 
     const index = eventInQueueIndex(ev)
 
     if (index > -1) {
-      updateAccountStore('eventQueue', index, () => ({ ...ev }));
+
+      updateAccountStore('eventQueue', (events) => {
+        const updatedEvents = [
+          ...events.slice(0, index),
+          { ...ev },
+          ...events.slice(index + 1),
+        ];
+
+        return updatedEvents;
+      });
+      // updateAccountStore('eventQueue', index, () => ({ ...ev }));
       saveEventQueue(pubkey, accountStore.eventQueue);
       return;
     }

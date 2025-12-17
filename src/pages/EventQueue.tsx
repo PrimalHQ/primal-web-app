@@ -1,4 +1,4 @@
-import { Component, createSignal, For, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, For, on, onMount, Show } from 'solid-js';
 import { eventQueue as tEventQueue } from '../translations';
 import { useIntl } from '@cookbook/solid-intl';
 
@@ -9,7 +9,7 @@ import Wormhole from '../components/Wormhole/Wormhole';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import SettingsSidebar from '../components/SettingsSidebar/SettingsSidebar';
 import PageCaption from '../components/PageCaption/PageCaption';
-import { accountStore, dequeEvents, processArrayUntilFailure, startEventQueueMonitor, updateAccountStore } from '../stores/accountStore';
+import { accountStore, dequeEvents, eventInQueueIndex, processArrayUntilFailure, startEventQueueMonitor, updateAccountStore } from '../stores/accountStore';
 import { getEvents } from '../lib/feed';
 import { APP_ID } from '../App';
 import { subsTo } from '../sockets';
@@ -37,14 +37,32 @@ const EventQueuePage: Component = () => {
   onMount(() => {
     // fetchEvents()
     fetchRelatedStuff();
+    // setQueuedEvents(() => accountStore.eventQueue.map(event => ({ selected: true, event })))
   });
 
+  createEffect(() => {
+    const queue = accountStore.eventQueue;
+    setQueuedEvents((qes) => {
+      return queue.map(event => {
+        const index = eventInQueueIndex(event, qes.map(qe => qe.event))
+
+        if (index > -1) {
+          const qe = qes[index];
+          return { selected: qe ? qe.selected : true, event }
+        }
+
+        return { selected: true, event };
+      });
+
+    })
+  });
+
+  const [queuedEvents, setQueuedEvents] = createStore<{selected: boolean, event: NostrRelaySignedEvent}[]>([])
   const [parsedEvents, setParsedEvents] = createStore<Record<string, any>>({});
-  const [selectedEvents, setSelectedEvents] = createStore<NostrRelaySignedEvent[]>([]);
 
   const [fetchingDone, setFetchingDone] = createStore<string[]>([]);
 
-  // createEffect(() => {
+  // createEffect(() => {t: 1px
   //   const q = unwrap(accountStore.eventQueue);
   //   console.log('CHECK QUEUE: ', q);
   //   // const eventsPage = page();
@@ -215,14 +233,15 @@ const EventQueuePage: Component = () => {
   }
 
   const abortSelected = () => {
-    dequeEvents([...selectedEvents]);
-    setSelectedEvents([]);
+    const selectedEvents = queuedEvents.reduce<NostrRelaySignedEvent[]>((acc, qe) => qe.selected ? [...acc, { ...qe.event }] : [...acc],[]);
+
+    dequeEvents([...unwrap(selectedEvents)]);
     startEventQueueMonitor();
   };
 
   const retrySelected = async () => {
     if (!accountStore.publicKey) return;
-
+    const selectedEvents = queuedEvents.reduce<NostrRelaySignedEvent[]>((acc, qe) => qe.selected ? [...acc, { ...qe.event }] : [...acc],[]);
     const queue = unwrap(selectedEvents);
 
     const newQueue = await processArrayUntilFailure<NostrRelaySignedEvent>(queue, (item) => {
@@ -283,6 +302,7 @@ const EventQueuePage: Component = () => {
   }
 
 
+
   return (
     <div class={styles.settingsContainer}>
       <PageTitle title={intl.formatMessage(tEventQueue.title)} />
@@ -324,25 +344,20 @@ const EventQueuePage: Component = () => {
           </Show>
         </div>
         <div class={styles.eventList}>
-          <For each={accountStore.eventQueue}>
+          <For each={queuedEvents}>
             {queuedEvent =>
               <div class={styles.queueItem}>
                 <div class={styles.check}>
                   <CheckBox
-                    checked={selectedEvents.find(e => queuedEvent.id === e.id)}
+                    checked={queuedEvent.selected}
                     onChange={() => {
-                      if (selectedEvents.find(e => queuedEvent.id === e.id)) {
-                        setSelectedEvents((evs => evs.filter(e => e.id !== queuedEvent.id)));
-                        return;
-                      }
-
-                      setSelectedEvents(selectedEvents.length, () => ({ ...queuedEvent }));
+                      setQueuedEvents(ev => ev.event.id === queuedEvent.event.id, 'selected', (v) => !v);
                     }}
                   />
                 </div>
                 <GenericEvent
-                  event={queuedEvent}
-                  onResign={() => retrySigning(queuedEvent)?.catch(e => {})}
+                  event={queuedEvent.event}
+                  onResign={() => retrySigning(queuedEvent.event)?.catch(e => {})}
                 />
               </div>
             }
@@ -351,11 +366,11 @@ const EventQueuePage: Component = () => {
         <div class={styles.actionFooter}>
           <ButtonSecondary
             onClick={abortSelected}
-            disabled={selectedEvents.length === 0}
+            disabled={queuedEvents.filter(qe => qe.selected).length === 0}
           >Abort Selected</ButtonSecondary>
           <ButtonPrimary
             onClick={retrySelected}
-            disabled={selectedEvents.length === 0}
+            disabled={queuedEvents.filter(qe => qe.selected).length === 0}
           >Retry Selected</ButtonPrimary>
         </div>
       </div>

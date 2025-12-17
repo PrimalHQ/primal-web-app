@@ -11,17 +11,17 @@ const EventQueueWidget: Component<{ id?: string, hideName?: boolean }> = (props)
 
   let queueTimeout = 0;
 
-  createEffect(on(() => accountStore.eventQueue.length, (len) => {
+  createEffect(on(() => accountStore.eventQueue, (queue) => {
     clearTimeout(queueTimeout);
 
-    if (len === 0) {
+    if (queue.length === 0) {
       setQueueLength(0);
       return;
     }
 
     // Giv some time for the event to be published
     queueTimeout = setTimeout(() => {
-      setQueueLength(len);
+      setQueueLength(queue.length);
     }, EVENT_PUBLISH_DELAY);
   }));
 
