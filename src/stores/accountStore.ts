@@ -5,7 +5,6 @@ import { getMembershipStatus } from "../lib/membership";
 import {
   areUrlsSame,
   handleSubscription,
-  uuidv4,
 } from "../utils";
 
 import {
@@ -249,9 +248,35 @@ export const initAccountStore: AccountStore = {
 
 // ACTIONS ---------------------------------------------------------------------
 
+  export const eventInQueueIndex = (event: NostrRelaySignedEvent | NostrRelayEvent) => {
+    const index = accountStore.eventQueue.findIndex(e => {
+      if (e.id === event.id) return true;
+
+      if (event.kind === Kind.Settings) {
+        const dTag = e.tags.find(t => t[0] === 'd');
+        const eventDtag = event.tags.find(t => t[0] === 'd');
+        return e.kind === event.kind &&
+          e.content === event.content &&
+          (dTag && eventDtag ? dTag[1] === eventDtag[1] : true);
+      }
+
+      return false
+    });
+
+    return index;
+  }
+
   export const enqueEvent = (event: NostrRelaySignedEvent) => {
     const pubkey = accountStore.publicKey;
-    if (!pubkey || accountStore.eventQueue.find(e => e.id === event.id)) return;
+    if (!pubkey) return;
+
+    const index = eventInQueueIndex(event)
+
+    if (index > -1) {
+      updateAccountStore('eventQueue', index, () => ({ ...event }));
+      saveEventQueue(pubkey, accountStore.eventQueue);
+      return;
+    }
 
     if (accountStore.eventQueue.length === 0) {
       startEventQueueMonitor();
@@ -287,14 +312,21 @@ export const initAccountStore: AccountStore = {
   export const enqueUnsignedEvent = (event: NostrRelayEvent, id: string) => {
     const pubkey = accountStore.publicKey;
     const ev = { ...event, id, pubkey }
-    if (!pubkey || accountStore.eventQueue.find(e => e.id === ev.id)) return;
+    if (!pubkey) return;
+
+    const index = eventInQueueIndex(ev)
+
+    if (index > -1) {
+      updateAccountStore('eventQueue', index, () => ({ ...ev }));
+      saveEventQueue(pubkey, accountStore.eventQueue);
+      return;
+    }
 
     if (accountStore.eventQueue.length === 0) {
       startEventQueueMonitor();
     }
 
     updateAccountStore('eventQueue', accountStore.eventQueue.length, () => ({ ...ev }));
-
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 

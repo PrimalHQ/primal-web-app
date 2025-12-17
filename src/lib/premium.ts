@@ -1,5 +1,5 @@
 import { APP_ID } from "../App";
-import { Kind } from "../constants";
+import { Kind, settingsDescription } from "../constants";
 import { LeaderboardSort } from "../pages/Premium/PremiumLegendLeaderboard";
 import { sendMessage, subTo } from "../sockets";
 import { signEvent } from "./nostrAPI";
@@ -52,7 +52,7 @@ export const changePremiumName = async (name: string, subId: string, socket: Web
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [["d", settingsDescription.changePremiumName]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       name,
@@ -89,7 +89,7 @@ export const getPremiumQRCode = async (pubkey: string | undefined, name: string,
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.getPremiumQRCode]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       name,
@@ -163,7 +163,7 @@ export const getLegendQRCode = async (pubkey: string | undefined, name: string, 
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.getLegendQRCode]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       name,
@@ -239,7 +239,7 @@ export const getPremiumStatus = async (pubkey: string | undefined, subId: string
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.getPremiumStatus]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({}),
   };
@@ -277,7 +277,7 @@ export const getPremiumMediaStats = async (pubkey: string | undefined, subId: st
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.getPremiumMediaStats]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "get media stats'"}`,
   };
@@ -313,7 +313,7 @@ export const getPremiumMediaList = async (pubkey: string | undefined, until: num
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.getPremiumMediaList]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "get media list"}`,
   };
@@ -364,7 +364,7 @@ export const deletePremiumMedia = async (pubkey: string | undefined, url: string
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.deletePremiumMedia]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "url": "${url}"}`,
   };
@@ -404,7 +404,7 @@ export const getContactListHistory = async (pubkey: string | undefined, until: n
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.getContactListHistory]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "get contacts history list"}`,
   };
@@ -455,7 +455,7 @@ export const getContentListHistory = async (pubkey: string | undefined, subId: s
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.getContentListHistory]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "get content list"}`,
   };
@@ -495,7 +495,7 @@ export const getContentDownloadData = async (pubkey: string | undefined, kinds: 
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.getContentDownloadData]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "get content download data"}`,
   };
@@ -540,7 +540,7 @@ export const startContentBroadcast = async (pubkey: string | undefined, kinds: n
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.startContentBroadcast]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "broadcats content data"}`,
   };
@@ -585,7 +585,7 @@ export const cancelContentBroadcast = async (pubkey: string | undefined, subId: 
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.cancelContentBroadcast]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "broadcats content data"}`,
   };
@@ -625,7 +625,7 @@ export const startListeningForContentBroadcastStaus = async (pubkey: string | un
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.startListeningForContentBroadcastStaus]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "broadcast content status"}`,
   };
@@ -703,7 +703,7 @@ export const getOrderListHistory = async (pubkey: string | undefined, until: num
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.getOrderListHistory]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify(content),
   };
@@ -744,7 +744,7 @@ export const setLegendCutumization = async (pubkey: string | undefined, config: 
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.setLegendCustumization]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify(config),
   };
@@ -907,7 +907,7 @@ export const initStripe = async (pubkey: string | undefined, name: string, produ
 
     const event = {
       kind: Kind.Settings,
-      tags: [['p', pubkey]],
+      tags: [['p', pubkey], ['d', settingsDescription.initStripe]],
       created_at: Math.floor((new Date()).getTime() / 1000),
       content: JSON.stringify({
         name,
@@ -973,9 +973,10 @@ export const resolveStripe = async (pubkey: string | undefined, session_id: stri
       }
     });
 
+
     const event = {
       kind: Kind.Settings,
-      tags: [['p', pubkey]],
+      tags: [['p', pubkey], ['d', settingsDescription.resolveStripe]],
       created_at: Math.floor((new Date()).getTime() / 1000),
       content: JSON.stringify({ session_id }),
     };

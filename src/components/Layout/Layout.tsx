@@ -213,7 +213,15 @@ const Layout: Component<any> = (props) => {
         />
         <LoginModal
           open={accountStore.showLogin}
-          onAbort={() => setFlag('showLogin', false)}
+          onAbort={() => {
+            setFlag('showLogin', false);
+            if (accountStore.loginType !== 'nip46') {
+              localStorage.removeItem('bunkerUrl');
+              localStorage.removeItem('clientConnectionUrl');
+              localStorage.removeItem('appNsec');
+              localStorage.removeItem('appPubkey');
+            }
+          }}
         />
         <ConfirmModal
           open={accountStore.followData.openDialog}

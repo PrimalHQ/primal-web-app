@@ -1,4 +1,5 @@
-import { Kind } from "../constants";
+import { Kind, settingsDescription } from "../constants";
+import { logError } from "./logger";
 import { signEvent } from "./nostrAPI";
 
 export const getMembershipStatus = async (pubkey: string | undefined, subId: string, socket: WebSocket) => {
@@ -6,28 +7,46 @@ export const getMembershipStatus = async (pubkey: string | undefined, subId: str
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsDescription.getMembershipStatus]],
     created_at: Math.floor((new Date()).getTime() / 1000),
-    content: JSON.stringify({}),
+    content: JSON.stringify({ desription: 'Get Primal memebeship status'}),
   };
 
   try {
-    const signedNote = await signEvent(event);
+    signEvent(event).then(signedNote => {
+      const message = JSON.stringify([
+        "REQ",
+        subId,
+        {cache: ["membership_status", { event_from_user: signedNote }]},
+      ]);
 
-    const message = JSON.stringify([
-      "REQ",
-      subId,
-      {cache: ["membership_status", { event_from_user: signedNote }]},
-    ]);
+      if (socket) {
+        const e = new CustomEvent('send', { detail: { message, ws: socket }});
 
-    if (socket) {
-      const e = new CustomEvent('send', { detail: { message, ws: socket }});
+        socket.send(message);
+        socket.dispatchEvent(e);
+      } else {
+        throw('no_socket');
+      }
+    }).catch(reason => {
+      logError('ENQUEUE Failed get membership status: ', reason);
+    })
+    // const signedNote = await signEvent(event);
 
-      socket.send(message);
-      socket.dispatchEvent(e);
-    } else {
-      throw('no_socket');
-    }
+    // const message = JSON.stringify([
+    //   "REQ",
+    //   subId,
+    //   {cache: ["membership_status", { event_from_user: signedNote }]},
+    // ]);
+
+    // if (socket) {
+    //   const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+    //   socket.send(message);
+    //   socket.dispatchEvent(e);
+    // } else {
+    //   throw('no_socket');
+    // }
 
 
     return true;

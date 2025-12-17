@@ -177,30 +177,34 @@ const LoginModal: Component<{
   });
 
   const setupSigner = async () => {
-    generateAppKeys();
-    const cUrl = generateClientConnectionUrl();
+    try {
+      generateAppKeys();
+      const cUrl = generateClientConnectionUrl();
 
-    if (cUrl.length === 0) return;
+      if (cUrl.length === 0) return;
 
-    setClientUrl(cUrl);
+      setClientUrl(cUrl);
 
-    const sec = getAppSK();
+      const sec = getAppSK();
 
-    if (!sec) return;
+      if (!sec) return;
 
-    if (!signer) {
-      pool = new SimplePool();
-      signer = await nip46.BunkerSigner.fromURI(sec, cUrl, { pool });
+      if (!signer) {
+        pool = new SimplePool();
+        signer = await nip46.BunkerSigner.fromURI(sec, cUrl, { pool });
+      }
+
+      storeBunker(signer);
+      const pk = await signer.getPublicKey();
+
+      setLoginType('nip46');
+      setPublicKey(pk);
+      doAfterLogin(pk);
+
+      props.onAbort && props.onAbort();
+    } catch (reason) {
+      logWarning('Failed to setup signer: ', reason)
     }
-
-    storeBunker(signer);
-    const pk = await signer.getPublicKey();
-
-    setLoginType('nip46');
-    setPublicKey(pk);
-    doAfterLogin(pk);
-
-    props.onAbort && props.onAbort();
   }
 
   const onBunkerLogin = async () => {

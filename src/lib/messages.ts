@@ -1,4 +1,4 @@
-import { Kind } from "../constants";
+import { Kind, settingsDescription } from "../constants";
 import { sendMessage } from "../sockets";
 import { UserRelation } from "../types/primal";
 import { signEvent } from "./nostrAPI";
@@ -21,10 +21,11 @@ export const unsubscribeToMessagesStats = (subid: string) => {
 }
 
 export const resetMessageCount = async (sender: string, subid: string) => {
+
   const event = {
     content: `{ "description": "reset messages from '${sender}'"}`,
     kind: Kind.Settings,
-    tags: [["d", "Primal-Web App"]],
+    tags: [["d", settingsDescription.resetDirectMessages]],
     created_at: Math.ceil((new Date()).getTime() / 1000),
   };
 
@@ -112,20 +113,21 @@ export const markAllAsRead = async (subid: string) => {
   const event = {
     content: `{ "description": "mark all messages as read"}`,
     kind: Kind.Settings,
-    tags: [["d", "Primal-Web App"]],
+    tags: [["d", settingsDescription.markAllAsRead]],
     created_at: Math.ceil((new Date()).getTime() / 1000),
   };
 
   try {
-    const signedEvent = await signEvent(event);
+    signEvent(event).then(signedEvent => {
+      sendMessage(JSON.stringify([
+        "REQ",
+        subid,
+        {cache: ["reset_directmsg_counts", {
+          event_from_user: signedEvent,
+        }]},
+      ]));
+    });
 
-    sendMessage(JSON.stringify([
-      "REQ",
-      subid,
-      {cache: ["reset_directmsg_counts", {
-        event_from_user: signedEvent,
-      }]},
-    ]));
 
     return true;
   } catch (reason) {

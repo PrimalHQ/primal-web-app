@@ -1,5 +1,7 @@
-import { Kind } from "../constants";
+import { unwrap } from "solid-js/store";
+import { Kind, settingsDescription } from "../constants";
 import { sendMessage } from "../sockets";
+import { accountStore } from "../stores/accountStore";
 import { PrimalArticleFeed, PrimalFeed } from "../types/primal";
 import { signEvent } from "./nostrAPI";
 
@@ -10,12 +12,13 @@ type PrimalSettings = {
 };
 
 export const sendSettings = async (settings: PrimalSettings, subid: string) => {
+
   const content = { description: 'Sync app settings', ...settings };
 
   const event = {
     content: JSON.stringify(content),
     kind: Kind.Settings,
-    tags: [["d", "Primal-Web App"]],
+    tags: [["d", settingsDescription.sendSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -35,10 +38,12 @@ export const sendSettings = async (settings: PrimalSettings, subid: string) => {
 };
 
 export const getSettings = async (pubkey: string | undefined, subid: string) => {
+  const content = '{ "description": "Sync app settings" }';
+
   const event = {
-    content: '{ "description": "Sync app settings" }',
+    content,
     kind: Kind.Settings,
-    tags: [["d", "Primal-Web App"]],
+    tags: [["d", settingsDescription.getSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -60,10 +65,12 @@ export const getSettings = async (pubkey: string | undefined, subid: string) => 
 };
 
 export const getHomeSettings = async (subid: string) => {
+  const content = JSON.stringify({ subkey: "user-home-feeds" });
+
   const event = {
-    content: JSON.stringify({ subkey: "user-home-feeds" }),
+    content,
     kind: Kind.Settings,
-    tags: [["d", "Primal-Web App"]],
+    tags: [["d", settingsDescription.getHomeSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -85,13 +92,15 @@ export const getHomeSettings = async (subid: string) => {
 };
 
 export const setHomeSettings = async (subid: string, feeds: PrimalArticleFeed[]) => {
+  const content = JSON.stringify({
+    subkey: "user-home-feeds",
+    settings: feeds,
+  });
+
   const event = {
-    content: JSON.stringify({
-      subkey: "user-home-feeds",
-      settings: feeds,
-    }),
+    content,
     kind: Kind.Settings,
-    tags: [["d", "Primal-Web App"]],
+    tags: [["d", settingsDescription.setHomeSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -113,10 +122,12 @@ export const setHomeSettings = async (subid: string, feeds: PrimalArticleFeed[])
 };
 
 export const getReadsSettings = async (subid: string) => {
+  const content = JSON.stringify({ subkey: "user-reads-feeds" });
+
   const event = {
-    content: JSON.stringify({ subkey: "user-reads-feeds" }),
+    content,
     kind: Kind.Settings,
-    tags: [["d", "Primal-Web App"]],
+    tags: [["d", settingsDescription.getReadsSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -138,13 +149,15 @@ export const getReadsSettings = async (subid: string) => {
 };
 
 export const setReadsSettings = async (subid: string, feeds: PrimalArticleFeed[]) => {
+  const content = JSON.stringify({
+    subkey: "user-reads-feeds",
+    settings: feeds,
+  });
+
   const event = {
-    content: JSON.stringify({
-      subkey: "user-reads-feeds",
-      settings: feeds,
-    }),
+    content,
     kind: Kind.Settings,
-    tags: [["d", "Primal-Web App"]],
+    tags: [["d", settingsDescription.setReadsSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -176,10 +189,12 @@ export const getDefaultSettings = async (subid: string) => {
 
 
 export const getNWCSettings = async (subid: string) => {
+  const content = JSON.stringify({ subkey: "user-nwc" });
+
   const event = {
-    content: JSON.stringify({ subkey: "user-nwc" }),
+    content,
     kind: Kind.Settings,
-    tags: [["d", "Primal-Web App"]],
+    tags: [["d", settingsDescription.getNWCSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -201,13 +216,15 @@ export const getNWCSettings = async (subid: string) => {
 };
 
 export const setNWCSettings = async (subid: string, nwcSettings: { nwcList: string[][], nwcActive: string[]}) => {
+  const content = JSON.stringify({
+    subkey: "user-nwc",
+    settings: { ...nwcSettings },
+  });
+
   const event = {
-    content: JSON.stringify({
-      subkey: "user-nwc",
-      settings: { ...nwcSettings },
-    }),
+    content,
     kind: Kind.Settings,
-    tags: [["d", "Primal-Web App"]],
+    tags: [["d", settingsDescription.setNWCSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 

@@ -540,3 +540,40 @@ export const floatingPoints: Record<string,number> = {
 export const sevenDays = 7 * 24 * 60 * 60 * 1_000;
 
 export const primalBlossom = 'https://blossom.primal.net';
+
+
+export const settingsDescription = {
+  resetDirectMessages: 'Primal-Web App | reset_direct_message_count',
+  markAllAsRead: 'Primal-Web App | mark_all_dms_as_read',
+  nofiticationsLastSeen: 'Primal-Web App | notifications_laste_seen',
+  changePremiumName: 'Primal-Web App | change_premium_name',
+
+  getMembershipStatus: 'Primal-Web App | get_membership_status',
+  getPremiumQRCode: 'Primal-Web App | membership_purchase_premium',
+  getLegendQRCode: 'Primal-Web App | membership_purchase_legend',
+  getPremiumStatus: 'Primal-Web App | membership_status',
+  getPremiumMediaStats: 'Primal-Web App | membership_media_management_stats',
+  getPremiumMediaList: 'Primal-Web App | membership_media_management_uploads',
+  deletePremiumMedia: 'Primal-Web App | membership_media_management_delete',
+  getContactListHistory: 'Primal-Web App | membership_recovery_contact_lists',
+  getContentDownloadData: 'Primal-Web App | membership_content_backup',
+  getContentListHistory: 'Primal-Web App | membership_content_stats',
+  startContentBroadcast: 'Primal-Web App | membership_content_rebroadcast_start',
+  cancelContentBroadcast: 'Primal-Web App | membership_content_rebroadcast_cancel',
+  startListeningForContentBroadcastStaus: 'Primal-Web App | rebroadcasting_status',
+  getOrderListHistory: 'Primal-Web App | membership_purchase_history',
+  setLegendCustumization: 'Primal-Web App | membership_legend_customization',
+  initStripe: 'Primal-Web App | membership_purchase_product',
+  resolveStripe: 'Primal-Web App | membership_stripe_checkout_session_check_status',
+
+  reportUser: 'Primal-Web App | report_user',
+
+  sendSettings: 'Primal-Web App | set_app_settings',
+  getSettings: 'Primal-Web App | get_app_settings',
+  getHomeSettings: 'Primal-Web App | get_app_subsettings_home',
+  setHomeSettings: 'Primal-Web App | set_app_subsettings_home',
+  getReadsSettings: 'Primal-Web App | get_app_subsettings_reads',
+  setReadsSettings: 'Primal-Web App | set_app_subsettings_reads',
+  getNWCSettings: 'Primal-Web App | get_app_subsettings_nwc',
+  setNWCSettings: 'Primal-Web App | set_app_subsettings_nwc',
+}

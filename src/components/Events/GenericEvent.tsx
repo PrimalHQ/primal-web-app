@@ -4,7 +4,7 @@ import { hookForDev } from '../../lib/devTools';
 import { NostrRelaySignedEvent, NostrUserContent, PrimalArticle, PrimalNote } from '../../types/primal';
 
 import styles from './Events.module.scss';
-import { Kind } from '../../constants';
+import { Kind, settingsDescription } from '../../constants';
 import Note from '../Note/Note';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
 
@@ -129,11 +129,83 @@ const GenericEvent: Component<{
       case Kind.LiveChatMessage:
         return 'Send Live Stream Message';
       case Kind.Settings:
-        return 'Sync Settings';
+        return resolveSettingsEvent(props.event);
       case Kind.Draft:
         return `Save Draft`;
       default:
         return 'Unknown Event';
+    }
+  }
+
+  const resolveSettingsEvent = (ev: NostrRelaySignedEvent) => {
+    const d = (ev.tags.find(t => t[0] === 'd') || ['d', ''])[1];
+
+    switch (d) {
+      case settingsDescription.getMembershipStatus:
+        return 'Get Membership Status';
+      case settingsDescription.changePremiumName:
+        return 'Change Premium Name';
+      case settingsDescription.getPremiumQRCode:
+        return 'Get Premium QR Code';
+      case settingsDescription.getLegendQRCode:
+        return 'Get Legend QR Code';
+      case settingsDescription.getPremiumStatus:
+        return 'Get Premium Status';
+      case settingsDescription.getPremiumMediaStats:
+        return 'Get Premium Media Stats';
+      case settingsDescription.getPremiumMediaList:
+        return 'Get Premium Media List';
+      case settingsDescription.deletePremiumMedia:
+        return 'Delete Premium Media';
+      case settingsDescription.getContactListHistory:
+        return 'Get Contact List History';
+      case settingsDescription.getContentListHistory:
+        return 'Get Content List';
+      case settingsDescription.getContentDownloadData:
+        return 'Content Backup';
+      case settingsDescription.startContentBroadcast:
+        return 'Start Content Broadcast';
+      case settingsDescription.cancelContentBroadcast:
+        return 'Cancel Content Broadcast';
+      case settingsDescription.startListeningForContentBroadcastStaus:
+        return 'Listen for Content Broadcast';
+      case settingsDescription.getOrderListHistory:
+        return 'Get Purchase History';
+      case settingsDescription.setLegendCustumization:
+        return 'Update Legend Look';
+      case settingsDescription.initStripe:
+        return 'Initialize Stripe';
+      case settingsDescription.resolveStripe:
+        return 'Resolve Stripe';
+
+      case settingsDescription.reportUser:
+        return 'Report User';
+
+      case settingsDescription.sendSettings:
+        return 'Send Settings';
+      case settingsDescription.getSettings:
+        return 'Get Settings';
+      case settingsDescription.setHomeSettings:
+        return 'Send Home Settings';
+      case settingsDescription.getHomeSettings:
+        return 'Get Home Settings';
+      case settingsDescription.setReadsSettings:
+        return 'Send Reads Settings';
+      case settingsDescription.getReadsSettings:
+        return 'Get Reads Settings';
+      case settingsDescription.setNWCSettings:
+        return 'Send NWC Settings';
+      case settingsDescription.getNWCSettings:
+        return 'Get NWC Settings';
+
+      case settingsDescription.nofiticationsLastSeen:
+        return 'Update Notifications Last Seen';
+      case settingsDescription.markAllAsRead:
+        return 'Mark All DMs as Read';
+      case settingsDescription.resetDirectMessages:
+        return 'Reset Unread DM Count';
+      default:
+        return 'Sync Settings';
     }
   }
 
