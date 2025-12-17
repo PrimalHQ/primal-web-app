@@ -10,7 +10,7 @@ import { getMediaUrl as getMediaUrlDefault } from "./media";
 import { encrypt44, signEvent } from "./nostrAPI";
 import { ArticleEdit } from "../pages/ReadsEditor";
 import { APP_ID, relayWorker } from "../App";
-import { accountStore } from "../stores/accountStore";
+import { accountStore, dequeEvent, enqueEvent } from "../stores/accountStore";
 import { DecodedNaddr } from "nostr-tools/lib/types/nip19";
 
 const getLikesStorageKey = () => {
@@ -766,12 +766,15 @@ export const sendEvent = async (event: NostrEvent, callbacks?: { success?: (even
 
     if (shouldProxy) {
       try {
+        enqueEvent(signedNote);
         await proxyEvent(signedNote, relays, relaySettings);
+        dequeEvent(signedNote);
         callbacks?.success && callbacks.success(signedNote);
       }
       catch (reasons) {
         callbacks?.fail && callbacks.fail(signedNote);
       }
+      return;
     }
 
     sendSignedEvent(signedNote, callbacks);
