@@ -48,6 +48,7 @@ export type LocalStore = {
   premiumReminder: number,
   dvms: PrimalDVM[] | undefined,
   usePrimalRelay: boolean | undefined,
+  usePrimalProxy: boolean | undefined,
   nwc: string[][] | undefined,
   nwcActive: string[] | undefined,
   useSystemDarkMode: boolean | undefined,
@@ -109,6 +110,7 @@ export const emptyStorage: LocalStore = {
   premiumReminder: 0,
   dvms: undefined,
   usePrimalRelay: false,
+  usePrimalProxy: false,
   nwc: [],
   nwcActive: undefined,
   useSystemDarkMode: false,
@@ -260,6 +262,29 @@ export const readPrimalRelaySettings = (pubkey: string | undefined) => {
   const store = getStorage(pubkey);
 
   return store.usePrimalRelay || false;
+}
+
+
+export const savePrimalProxySettings = (pubkey: string | undefined, usePrimalProxy: boolean) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.usePrimalProxy = usePrimalProxy;
+
+  setStorage(pubkey, store);
+}
+
+export const readPrimalProxySettings = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return false;
+  }
+
+  const store = getStorage(pubkey);
+
+  return store.usePrimalProxy || false;
 }
 
 export const saveLikes = (pubkey: string | undefined, likes: string[]) => {

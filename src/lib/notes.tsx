@@ -486,11 +486,15 @@ export const sendNote = (text: string, tags: string[][]) => {
     sendEvent(event, {
       success: (noteEvent) => {
         if (noteEvent) {
+          triggerImportEvents([noteEvent], `import_${APP_ID}`)
           resolve({ success: true, note: noteEvent });
           return;
         }
 
         resolve({ success: false, reasons: ['failed-to-publish']});
+      },
+      fail: (noteEvent) => {
+        resolve({ success: false, note: noteEvent });
       }
     });
   })
@@ -761,7 +765,13 @@ export const sendEvent = async (event: NostrEvent, callbacks?: { success?: (even
     if (!signedNote) return { success: false , reasons: ['event_not_signed']} as SendNoteResult;
 
     if (shouldProxy) {
-      proxyEvent(signedNote, relays, relaySettings);
+      try {
+        await proxyEvent(signedNote, relays, relaySettings);
+        callbacks?.success && callbacks.success(signedNote);
+      }
+      catch (reasons) {
+        callbacks?.fail && callbacks.fail(signedNote);
+      }
     }
 
     sendSignedEvent(signedNote, callbacks);

@@ -65,6 +65,7 @@ import {
   readRelaySettings,
   saveEventQueue,
   loadEventQueue,
+  readPrimalProxySettings,
 } from "../lib/localStore";
 
 import {
@@ -248,8 +249,8 @@ export const initAccountStore: AccountStore = {
 
 // ACTIONS ---------------------------------------------------------------------
 
-  export const eventInQueueIndex = (event: NostrRelaySignedEvent | NostrRelayEvent) => {
-    const index = accountStore.eventQueue.findIndex(e => {
+  export const eventInQueueIndex = (event: NostrRelaySignedEvent | NostrRelayEvent, queue = accountStore.eventQueue) => {
+    const index = queue.findIndex(e => {
       if (e.id === event.id) return true;
 
       if (event.kind === Kind.Settings) {
@@ -2023,6 +2024,8 @@ export const initAccountStore: AccountStore = {
     fetchBookmarks();
 
 // ===========================================
+    const useProxy = readPrimalProxySettings(pubkey);
+    updateAccountStore('proxyThroughPrimal', useProxy);
 
     let relaySettings = readRelaySettings(pubkey) || {};
 

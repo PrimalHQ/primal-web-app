@@ -304,7 +304,9 @@ const Network: Component = () => {
           <CheckBox
             id='proxyEvents'
             label=""
-            onChange={() => {settings?.actions.setProxyThroughPrimal(!accountStore.proxyThroughPrimal)}}
+            onChange={() => {
+              settings?.actions.setProxyThroughPrimal(!accountStore.proxyThroughPrimal)
+            }}
             checked={accountStore.proxyThroughPrimal}
           />
           <span>{intl.formatMessage(t.network.proxyEvents)}</span>

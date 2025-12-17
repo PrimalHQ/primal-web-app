@@ -30,7 +30,7 @@ import {
   updateAvailableFeeds,
   updateAvailableFeedsTop
 } from "../lib/availableFeeds";
-import { readSystemDarkMode, saveAnimated, saveHomeFeeds, saveNWC, saveNWCActive, saveReadsFeeds, saveSystemDarkMode, saveTheme } from "../lib/localStore";
+import { readSystemDarkMode, saveAnimated, saveHomeFeeds, saveNWC, saveNWCActive, savePrimalProxySettings, saveReadsFeeds, saveSystemDarkMode, saveTheme } from "../lib/localStore";
 import { getDefaultSettings, getHomeSettings, getNWCSettings, getReadsSettings, getSettings, sendSettings, setHomeSettings, setReadsSettings } from "../lib/settings";
 import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
@@ -185,7 +185,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   const setTheProxyThroughPrimal = (shouldProxy: boolean, temp?: boolean) => {
     setProxyThroughPrimal(shouldProxy);
 
-    !temp && saveSettings();
+    if (!temp) {
+      saveSettings();
+      savePrimalProxySettings(accountStore.publicKey, shouldProxy)
+    }
   }
 
   const setDefaultZapAmount = (option: ZapOption, temp?: boolean) => {
