@@ -60,7 +60,7 @@ const MarkdownSlice: Component<{
       });
 
       // Replace single line breaks with spaces
-      cont = cont.replace(/([^\n])\n([^\n])/g, '$1 $2');
+      // cont = cont.replace(/([^\n])\n([^\n])/g, '$1 $2');
 
       insert(cont)(e.ctx);
       setHtml(() => getHTML()(e.ctx));
