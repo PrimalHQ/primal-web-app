@@ -8,7 +8,7 @@
 }
 
 .modal {
-  width: 750px;
+  width: fit-content;
   color: var(--text-secondary);
   background-color: var(--background-input);
   border-radius: 12px;
@@ -24,11 +24,19 @@
     justify-content: flex-start;
     align-items: flex-start;
 
-    img {
-      width: 234px;
-      height: 234px;
+    .qrCode {
+      max-width: 234px;
+      max-height: 234px;
       overflow: hidden;
       border-radius: 12px;
+      flex-grow: 1;
+
+      .actualQr {
+        width: 234px;
+        height: 234px;
+        overflow: hidden;
+        border-radius: 12px;
+      }
     }
 
     .loginSteps {

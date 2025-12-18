@@ -1,22 +1,19 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component } from 'solid-js';
-import Modal from '../Modal/Modal';
 
 import { account as t, actions as tActions } from '../../translations';
 
 import styles from './CreateAccountModal.module.scss';
 import { hookForDev } from '../../lib/devTools';
-import ButtonPrimary from '../Buttons/ButtonPrimary';
-import ButtonLink from '../Buttons/ButtonLink';
-import { useNavigate } from '@solidjs/router';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
-import { loginUsingExtension, logUserIn, setLoginType, showLogin } from '../../stores/accountStore';
+import { showGetStarted } from '../../stores/accountStore';
 
-import { appStoreLink, playstoreLink, apkLink } from '../../constants';
+import { appStoreLink, playstoreLink } from '../../constants';
 
 import appstoreImg from '../../assets/images/appstore_download.svg';
 import playstoreImg from '../../assets/images/playstore_download.svg';
 import primalQr from '../../assets/images/primal_qr.png';
+import QrCode from '../QrCode/QrCode';
 
 const CreateAccountModal: Component<{
   id?: string,
@@ -25,8 +22,6 @@ const CreateAccountModal: Component<{
 }> = (props) => {
 
   const intl = useIntl();
-  const navigate = useNavigate();
-
 
   return (
     <AdvancedSearchDialog
@@ -41,7 +36,16 @@ const CreateAccountModal: Component<{
     >
       <div id={props.id} class={styles.modal}>
         <div class={styles.infoWrapper}>
-          <img src={primalQr}></img>
+            <div class={styles.qrCode}>
+              <div class={styles.actualQr}>
+                <QrCode
+                  data={'https://primal.net/app-download-qr'}
+                  width={234}
+                  height={234}
+                  ecl="H"
+                />
+              </div>
+            </div>
           <div class={styles.loginSteps}>
             <div class={styles.loginExplain}>
               {intl.formatMessage(t.createNewDescription)}
@@ -68,7 +72,7 @@ const CreateAccountModal: Component<{
                   <button
                     onClick={() => {
                       props.onAbort && props.onAbort();
-                      showLogin();
+                      showGetStarted();
                     }}
                   >login page</button>
                   <span> and scan the QR code</span>
@@ -99,7 +103,7 @@ const CreateAccountModal: Component<{
             {intl.formatMessage(t.alreadyHaveAccount)}&nbsp;
             <button onClick={() => {
               props.onAbort && props.onAbort();
-              showLogin();
+              showGetStarted();
             }}>{intl.formatMessage(tActions.loginNow)}</button>
           </div>
         </div>

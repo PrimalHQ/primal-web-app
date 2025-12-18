@@ -11,8 +11,8 @@
   font-size: 20px;
   font-weight: 600;
   line-height: 24px;
-  margin-left: 32px;
-  margin-top: 20px;
+  margin-left: 26px;
+  margin-top: 16px;
 }
 
 .modal {
@@ -364,21 +364,24 @@
 
 .getStartedDialog {
   display: flex;
-  gap: 40px;
+  gap: 28px;
   padding-inline: 16px;
   padding-bottom: 8px;
   width: fit-content;
+  margin-top: -12px;
 
   .img {
     width: 248px;
     height: 482px;
 
     &.ssDark {
-      background-image: url(../../assets/images/signer_screenshot_dark.png);
+      background-image: url(../../assets/images/signer_screenshot_dark_hq.png);
+      background-size: contain;
     }
 
     &.ssLight {
-      background-image: url(../../assets/images/signer_screenshot_dark.png);
+      background-image: url(../../assets/images/signer_screenshot_light_hq.png);
+      background-size: contain;
     }
   }
 }
@@ -388,7 +391,6 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  flex-grow: 1;
 
   .loginExplain {
     color: var(--text-secondary);
@@ -396,12 +398,14 @@
     font-style: normal;
     font-weight: 400;
     line-height: 24px;
+    margin-top: 16px;
   }
 
   .loginList {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 6px;
+    margin-bottom: 12px;
 
     .loginListItem {
       display: flex;
@@ -434,7 +438,7 @@
 
   .qrCode {
     min-width: 200px;
-    height: fit-content;
+    max-height: 200px;
     overflow: hidden;
     border-radius: 12px;
     flex-grow: 1;
@@ -453,6 +457,8 @@
     justify-content: space-between;
     width: 100%;
     gap: 18px;
+    margin-top: auto;
+    margin-bottom: 20px;
 
     .newToPrimal {
       display: flex;
