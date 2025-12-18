@@ -40,8 +40,8 @@ const CreateAccountModal: Component<{
               <div class={styles.actualQr}>
                 <QrCode
                   data={'https://primal.net/app-download-qr'}
-                  width={234}
-                  height={234}
+                  width={200}
+                  height={200}
                   ecl="H"
                 />
               </div>

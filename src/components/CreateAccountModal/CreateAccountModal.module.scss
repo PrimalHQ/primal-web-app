@@ -29,11 +29,12 @@
       max-height: 234px;
       overflow: hidden;
       border-radius: 12px;
-      flex-grow: 1;
+      background-color: white;
+      padding: 17px;
 
       .actualQr {
-        width: 234px;
-        height: 234px;
+        width: 200px;
+        height: 200px;
         overflow: hidden;
         border-radius: 12px;
       }
