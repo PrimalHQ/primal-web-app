@@ -54,11 +54,16 @@ const NoteYouTube: Component<{
         events: {
           onReady: (event: any) => {
             setIsPlayerReady(true);
+            try {
+              event.target.mute();
+            } catch (e) {
+            }
             if (containerEl) {
               const rect = containerEl.getBoundingClientRect();
               const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
               if (isVisible) {
                 setTimeout(() => {
+                  event.target.mute();
                   event.target.playVideo();
                 }, 300);
               }
@@ -85,6 +90,7 @@ const NoteYouTube: Component<{
 
       if (entry.isIntersecting) {
         try {
+          player.mute();
           player.playVideo();
         } catch (e) {
         }
