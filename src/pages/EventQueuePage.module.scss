@@ -53,10 +53,11 @@
   .check {
     display: flex;
     width: 20px;
-    height: 20px;
+    height: 58px;
     justify-content: center;
+    align-items: center;
     gap: 6px;
-    margin-top: 20px;
+    margin-top: 2px;
   }
 
   &:has([data-expanded]) {
