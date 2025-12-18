@@ -34,6 +34,7 @@ import ReportContentModal from '../ReportContentModal/ReportContentModal';
 import NoteVideoContextMenu from '../Note/NoteVideoContextMenu';
 import { accountStore, checkNostrKey, doAfterLogin, loginUsingLocalNsec, logout, resolveContacts, setFlag, setFollowData, setSec, setString } from '../../stores/accountStore';
 import { storeSec } from '../../lib/localStore';
+import GetStartedModal from '../LoginModal/GetStartedModal';
 
 export const [isHome, setIsHome] = createSignal(false);
 
@@ -204,11 +205,19 @@ const Layout: Component<any> = (props) => {
           }}
         />
         <CreateAccountModal
+          open={accountStore.showCreateAccount}
+          onAbort={() => setFlag('showCreateAccount', false)}
+        />
+        <GetStartedModal
           open={accountStore.showGettingStarted}
-          onAbort={() => setFlag('showGettingStarted', false)}
-          onLogin={() => {
+          onAbort={() => {
             setFlag('showGettingStarted', false);
-            setFlag('showLogin', true);
+            if (accountStore.loginType !== 'nip46') {
+              localStorage.removeItem('bunkerUrl');
+              localStorage.removeItem('clientConnectionUrl');
+              localStorage.removeItem('appNsec');
+              localStorage.removeItem('appPubkey');
+            }
           }}
         />
         <LoginModal

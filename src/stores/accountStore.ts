@@ -170,6 +170,7 @@ export type AccountStore = {
   showForgot: boolean,
   showGettingStarted: boolean,
   showLogin: boolean,
+  showCreateAccount: boolean,
   emojiHistory: EmojiOption[],
   membershipStatus: MembershipStatus,
   bookmarks: string[],
@@ -222,6 +223,7 @@ export const initAccountStore: AccountStore = {
   showForgot: false,
   showGettingStarted: false,
   showLogin: false,
+  showCreateAccount: false,
   emojiHistory: [],
   membershipStatus: {},
   bookmarks: [],
@@ -576,8 +578,15 @@ export const initAccountStore: AccountStore = {
   }
 
   export const showGetStarted = () => {
+    updateAccountStore('showGettingStarted', () => true);
+  }
+
+  export const showLogin = () => {
     updateAccountStore('showLogin', () => true);
-    // updateAccountStore('showGettingStarted', () => true);
+  }
+
+  export const showCreateAccount = () => {
+    updateAccountStore('showCreateAccount', () => true);
   }
 
   export const logout = () => {

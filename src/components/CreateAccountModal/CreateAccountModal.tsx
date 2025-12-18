@@ -10,7 +10,7 @@ import ButtonPrimary from '../Buttons/ButtonPrimary';
 import ButtonLink from '../Buttons/ButtonLink';
 import { useNavigate } from '@solidjs/router';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
-import { loginUsingExtension, logUserIn, setLoginType } from '../../stores/accountStore';
+import { loginUsingExtension, logUserIn, setLoginType, showLogin } from '../../stores/accountStore';
 
 import { appStoreLink, playstoreLink, apkLink } from '../../constants';
 
@@ -21,17 +21,12 @@ import primalQr from '../../assets/images/primal_qr.png';
 const CreateAccountModal: Component<{
   id?: string,
   open?: boolean,
-  onLogin?: () => void,
   onAbort?: () => void,
 }> = (props) => {
 
   const intl = useIntl();
   const navigate = useNavigate();
 
-  const onCreateAccount = () => {
-    props.onAbort && props.onAbort();
-    navigate('/new');
-  };
 
   return (
     <AdvancedSearchDialog
@@ -70,7 +65,12 @@ const CreateAccountModal: Component<{
                 <div class={styles.number}>3</div>
                 <div class={styles.itemLabel}>
                   <span>Go to the </span>
-                  <button onClick={props.onLogin}>login page</button>
+                  <button
+                    onClick={() => {
+                      props.onAbort && props.onAbort();
+                      showLogin();
+                    }}
+                  >login page</button>
                   <span> and scan the QR code</span>
                 </div>
               </div>
@@ -97,7 +97,10 @@ const CreateAccountModal: Component<{
 
           <div class={styles.loginNow}>
             {intl.formatMessage(t.alreadyHaveAccount)}&nbsp;
-            <button onClick={props.onLogin}>{intl.formatMessage(tActions.loginNow)}</button>
+            <button onClick={() => {
+              props.onAbort && props.onAbort();
+              showLogin();
+            }}>{intl.formatMessage(tActions.loginNow)}</button>
           </div>
         </div>
       </div>

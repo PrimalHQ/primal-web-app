@@ -51,7 +51,7 @@ export const account = {
   },
   createNewDescription: {
     id: 'account.createNewDescription',
-    defaultMessage: 'It will only take a minute to login to primal.net securely.',
+    defaultMessage: 'It will only take a minute:',
     description: 'Label inviting users to join Nostr',
   },
   getStartedSteps: {
@@ -233,7 +233,7 @@ export const actions = {
   },
   getStartedTitle: {
     id: 'actions.getStartedTitle',
-    defaultMessage: 'Get Started - Download the Primal Mobile App',
+    defaultMessage: 'Create Account – Download the Primal Mobile App',
     description: 'Get Started action title',
   },
   forgotPin: {

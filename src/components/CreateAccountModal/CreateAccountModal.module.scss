@@ -1,24 +1,26 @@
 .title {
   color: var(--text-primary);
-  font-size: 32px;
+  font-size: 20px;
+  font-style: normal;
   font-weight: 600;
-  line-height: 32px;
-  margin-left: 36px;
+  line-height: 24px;
+  margin-left: 16px;
 }
 
 .modal {
-  width: 945px;
+  width: 750px;
   color: var(--text-secondary);
   background-color: var(--background-input);
-  border-radius: 8px;
+  border-radius: 12px;
 
   display: flex;
   flex-direction: column;
-  padding: 36px;
+  padding-inline: 16px;
+  padding-bottom: 8px;
 
   .infoWrapper {
     display: flex;
-    gap:48px;
+    gap: 40px;
     justify-content: flex-start;
     align-items: flex-start;
 
@@ -32,11 +34,11 @@
     .loginSteps {
       display: flex;
       flex-direction: column;
-      gap: 50px;
+      gap: 28px;
 
       .loginExplain {
         color: var(--text-secondary);
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 400;
         line-height: 24px;
       }
@@ -44,7 +46,8 @@
       .loginList {
         display: flex;
         flex-direction: column;
-        gap: 32px;
+        gap: 10px;
+        padding-bottom: 40px;
 
         .loginListItem {
           display: flex;
@@ -53,21 +56,28 @@
 
           .number {
             color: var(--accent-links);
-            font-size: 24px;
-            font-weight: 700;
-            line-height: 24px;
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 26px;
           }
 
           .itemLabel {
             color: var(--text-primary);
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 400;
-            line-height: 24px;
+            line-height: 26px;
 
             button {
               display: inline;
               width: fit-content;
               color: var(--accent-links);
+              font-size: 18px;
+              font-weight: 400;
+              line-height: 26px;
+              margin: 0;
+              padding: 0;
+              border: none;
+              outline: 0;
             }
           }
         }
@@ -96,7 +106,7 @@
 
     .loginNow {
       color: var(--text-secondary);
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 400;
       line-height: 24px;
 
@@ -104,6 +114,9 @@
         display: inline;
         width: fit-content;
         color: var(--accent-links);
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 24px;
       }
     }
   }

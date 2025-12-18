@@ -6,9 +6,27 @@
   margin-left: 24px;
   margin-top: 20px;
 }
+.gstitle {
+  color: var(--text-primary);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 24px;
+  margin-left: 32px;
+  margin-top: 20px;
+}
 
 .modal {
   width: 720px;
+  color: var(--text-secondary);
+  background-color: var(--background-input);
+  border-radius: 12px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.gsmodal {
+  width: fit-content;
   color: var(--text-secondary);
   background-color: var(--background-input);
   border-radius: 12px;
@@ -344,14 +362,38 @@
   }
 }
 
+.getStartedDialog {
+  display: flex;
+  gap: 40px;
+  padding-inline: 16px;
+  padding-bottom: 8px;
+  width: fit-content;
+
+  .img {
+    width: 248px;
+    height: 482px;
+
+    &.ssDark {
+      background-image: url(../../assets/images/signer_screenshot_dark.png);
+    }
+
+    &.ssLight {
+      background-image: url(../../assets/images/signer_screenshot_dark.png);
+    }
+  }
+}
+
+
 .simpleDesc {
   display: flex;
   flex-direction: column;
-  gap: 50px;
+  gap: 16px;
+  flex-grow: 1;
 
   .loginExplain {
     color: var(--text-secondary);
-    font-size: 18px;
+    font-size: 16px;
+    font-style: normal;
     font-weight: 400;
     line-height: 24px;
   }
@@ -359,7 +401,7 @@
   .loginList {
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 16px;
 
     .loginListItem {
       display: flex;
@@ -368,16 +410,18 @@
 
       .number {
         color: var(--accent-links);
-        font-size: 24px;
-        font-weight: 700;
-        line-height: 24px;
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 800;
+        line-height: 26px;
       }
 
       .itemLabel {
         color: var(--text-primary);
-        font-size: 24px;
+        font-size: 18px;
+        font-style: normal;
         font-weight: 400;
-        line-height: 24px;
+        line-height: 26px;
 
         button {
           display: inline;
@@ -385,6 +429,75 @@
           color: var(--accent-links);
         }
       }
+    }
+  }
+
+  .qrCode {
+    min-width: 200px;
+    height: fit-content;
+    overflow: hidden;
+    border-radius: 12px;
+    flex-grow: 1;
+
+    .actualQr {
+      width: 200px;
+      height: 200px;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+  }
+
+
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 18px;
+
+    .newToPrimal {
+      display: flex;
+      width: fit-content;
+      padding: 10px;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 10px;
+
+      border-radius: 10px;
+      background: var(--subtile-devider);
+
+      >div {
+        color: var(--text-secondary);
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 20px;
+        width: fit-content;
+      }
+
+      button {
+        color: var(--accent-links);
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 20px;
+        background: none;
+        border: none;
+        outline: none;
+        margin: 0;
+        padding: 0;
+        width: fit-content;
+      }
+    }
+
+    button {
+      color: var(--accent-links);
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 20px;
+      background: none;
+      border: none;
+      outline: none;
+      margin: 0;
+      padding: 0;
+      width: fit-content;
     }
   }
 }
