@@ -371,31 +371,6 @@ const LoginModal: Component<{
                         </div>
                       </Show>
                     </div>
-                    {/* <div class={styles.simpleDesc}>
-                      <div class={styles.loginExplain}>
-                        The simplest way to login:
-                      </div>
-                      <div class={styles.loginList}>
-                        <div class={styles.loginListItem}>
-                          <div class={styles.number}>1</div>
-                          <div class={styles.itemLabel}>
-                            Open your Primal mobile app
-                          </div>
-                        </div>
-
-                        <div class={styles.loginListItem}>
-                          <div class={styles.number}>2</div>
-                          <div class={styles.itemLabel}>
-                            Select “Scan Code” from the side menu
-                          </div>
-                        </div>
-                      </div>
-
-                      <button class={styles.copyButton}>
-                        <div class={styles.copyIcon}></div>
-                        <div>Copy Login URL</div>
-                      </button>
-                    </div> */}
                   </div>
                 </Tabs.Content>
                 <Tabs.Content value="extension" >

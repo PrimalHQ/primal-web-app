@@ -127,7 +127,7 @@ const GetStartedModal: Component<{
               <div class={styles.loginListItem}>
                 <div class={styles.number}>2</div>
                 <div class={styles.itemLabel}>
-                  Select “Scan Code” from the side menu
+                  Select “Remote Login” from the side menu
                 </div>
               </div>
 
