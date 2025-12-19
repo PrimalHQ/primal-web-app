@@ -25,6 +25,7 @@ import { logError } from '../../lib/logger';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import Lnbc from '../Lnbc/Lnbc';
 import NoteVideo from '../ParsedNote/NoteVideo';
+import NoteYouTube from '../ParsedNote/NoteYouTube';
 
 
 const groupGridLimit = 7;
@@ -506,16 +507,12 @@ const DirectMessageParsedContent: Component<{
       {(token) => {
         const youtubeId = isYouTube(token) && RegExp.$1;
 
-        return <iframe
+        if (!youtubeId) return null;
+
+        return <NoteYouTube
           class={`w-max embeddedContent ${lastClass}`}
-          src={`https://www.youtube.com/embed/${youtubeId}`}
-          title="YouTube video player"
-          // @ts-ignore no property
-          key={youtubeId}
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        ></iframe>;
+          youtubeId={youtubeId}
+        />;
       }}
     </For>
   };

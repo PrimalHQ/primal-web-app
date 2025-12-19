@@ -46,10 +46,25 @@ const NoteVideo: Component<{
   });
 
   const observer = new IntersectionObserver(entries => {
-    entries.forEach((entry) => {
-      const video = entry.target as HTMLVideoElement;
+    const getHTMLVideoElement = (element: Element) => {
+      if (element instanceof HTMLVideoElement) return element as HTMLVideoElement;
 
-      if (entry.isIntersecting && video.paused) {
+      const children = Array.from(element.children);
+      return children.find(
+        (child): child is HTMLVideoElement => child instanceof HTMLVideoElement,
+      );
+    };
+
+    entries.forEach((entry) => {
+      const video = getHTMLVideoElement(entry.target);
+      if (video == null) return;
+
+      if (!entry.isIntersecting) {
+        video.pause();
+        return;
+      }
+
+      if (video.paused) {
         video.muted = true;
 
         if (userPlayed() === 'pause') {
@@ -65,9 +80,6 @@ const NoteVideo: Component<{
       }
       else {
         video.muted = true;
-        if (video.pause) {
-          video.pause();
-        }
       }
     });
   });
