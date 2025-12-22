@@ -1406,6 +1406,11 @@ export const profile = {
     defaultMessage: 'Follows you',
     description: 'Label indicating that a profile is following your profile',
   },
+  mutedYou: {
+    id: 'profile.mutedYou',
+    defaultMessage: 'Muted you',
+    description: 'Label indicating that a profile has muted your profile',
+  },
   jointDate: {
     id: 'profile.joinDate',
     defaultMessage: 'Joined Nostr on {date}',
