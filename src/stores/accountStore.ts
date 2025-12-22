@@ -2018,6 +2018,7 @@ export const initAccountStore: AccountStore = {
       startEventQueueMonitor();
     }
 
+    updateAccountStore('isKeyLookupDone', false);
     updateAccountStore('isKeyLookupDone', true);
 
 // ===========================================

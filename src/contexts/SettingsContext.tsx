@@ -748,6 +748,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const loadSettings = async (pubkey: string | undefined, then?: () => void) => {
+
     if (!pubkey) {
       return;
     }
