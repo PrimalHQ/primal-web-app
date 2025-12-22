@@ -33,6 +33,21 @@ export const parseRepost = (message: NostrNoteContent, defaultKind = 1) => {
   }
 };
 
+const parseUserMetaSafe = (content?: string) => {
+  if (!content) return {};
+  try {
+    return JSON.parse(content);
+  } catch (e) {
+    try {
+      const sanitized = content.replace(/[\u0000-\u001F]+/g, '');
+      return JSON.parse(sanitized);
+    } catch (err) {
+      logError('Error parsing user meta JSON in extractRepostInfo', err);
+      return {};
+    }
+  }
+};
+
 export const encodeCoordinate = (event: NostrNoteContent, forceKind?: Kind) => {
 
   const identifier = (event.tags.find(t => t[0] === 'd') || [])[1];
@@ -48,7 +63,7 @@ export const encodeCoordinate = (event: NostrNoteContent, forceKind?: Kind) => {
 
 export const extractRepostInfo: MegaRepostInfo = (page, message) => {
   const user = page?.users[message.pubkey];
-  const userMeta = JSON.parse(user?.content || '{}');
+  const userMeta = parseUserMetaSafe(user?.content);
   const stat = page?.noteStats[message.id];
 
   const eventPointer: nip19.EventPointer ={
