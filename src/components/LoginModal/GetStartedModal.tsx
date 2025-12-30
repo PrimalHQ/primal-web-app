@@ -139,7 +139,12 @@ const GetStartedModal: Component<{
               </div>
             </div>
 
-            <div class={styles.qrCode}>
+            <div class={styles.qrCode}
+              onClick={() => {
+                navigator.clipboard.writeText(clientUrl());
+                toaster?.sendSuccess('Copied nostr connect uri')
+              }}
+            >
               <Show when={clientUrl().length > 0}>
                 <div class={styles.actualQr}>
                   <QrCode

@@ -371,6 +371,10 @@
   width: fit-content;
   margin-top: -12px;
 
+  .qrCode {
+    cursor: pointer;
+  }
+
   .img {
     width: 248px;
     height: 482px;
