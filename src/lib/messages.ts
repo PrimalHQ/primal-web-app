@@ -1,4 +1,4 @@
-import { Kind, settingsDescription } from "../constants";
+import { Kind, settingsApp, settingsDescription } from "../constants";
 import { sendMessage } from "../sockets";
 import { UserRelation } from "../types/primal";
 import { signEvent } from "./nostrAPI";
@@ -25,7 +25,7 @@ export const resetMessageCount = async (sender: string, subid: string) => {
   const event = {
     content: `{ "description": "reset messages from '${sender}'"}`,
     kind: Kind.Settings,
-    tags: [["d", settingsDescription.resetDirectMessages]],
+    tags: [["d", settingsApp, settingsDescription.resetDirectMessages]],
     created_at: Math.ceil((new Date()).getTime() / 1000),
   };
 
@@ -113,7 +113,7 @@ export const markAllAsRead = async (subid: string) => {
   const event = {
     content: `{ "description": "mark all messages as read"}`,
     kind: Kind.Settings,
-    tags: [["d", settingsDescription.markAllAsRead]],
+    tags: [["d", settingsApp, settingsDescription.markAllAsRead]],
     created_at: Math.ceil((new Date()).getTime() / 1000),
   };
 

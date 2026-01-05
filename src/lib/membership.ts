@@ -1,4 +1,4 @@
-import { Kind, settingsDescription } from "../constants";
+import { Kind, settingsApp, settingsDescription } from "../constants";
 import { logError } from "./logger";
 import { signEvent } from "./nostrAPI";
 
@@ -7,7 +7,7 @@ export const getMembershipStatus = async (pubkey: string | undefined, subId: str
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey], ['d', settingsDescription.getMembershipStatus]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.getMembershipStatus]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({ desription: 'Get Primal memebeship status'}),
   };

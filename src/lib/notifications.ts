@@ -1,4 +1,4 @@
-import { Kind, settingsDescription } from "../constants";
+import { Kind, settingsApp, settingsDescription } from "../constants";
 import { sendMessage } from "../sockets";
 import { NotificationGroup } from "../types/primal";
 import { signEvent } from "./nostrAPI";
@@ -85,7 +85,7 @@ export const setLastSeen = async (
   const event = {
     content: '{ "description": "update notifications last seen timestamp"}',
     kind: Kind.Settings,
-    tags: [["d", settingsDescription.nofiticationsLastSeen]],
+    tags: [["d", settingsApp, settingsDescription.nofiticationsLastSeen]],
     created_at: timestamp,
   };
 

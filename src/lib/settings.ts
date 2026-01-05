@@ -1,5 +1,5 @@
 import { unwrap } from "solid-js/store";
-import { Kind, settingsDescription } from "../constants";
+import { Kind, settingsApp, settingsDescription } from "../constants";
 import { sendMessage } from "../sockets";
 import { accountStore } from "../stores/accountStore";
 import { PrimalArticleFeed, PrimalFeed } from "../types/primal";
@@ -18,7 +18,7 @@ export const sendSettings = async (settings: PrimalSettings, subid: string) => {
   const event = {
     content: JSON.stringify(content),
     kind: Kind.Settings,
-    tags: [["d", settingsDescription.sendSettings]],
+    tags: [["d", settingsApp, settingsDescription.sendSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -43,7 +43,7 @@ export const getSettings = async (pubkey: string | undefined, subid: string) => 
   const event = {
     content,
     kind: Kind.Settings,
-    tags: [["d", settingsDescription.getSettings]],
+    tags: [["d", settingsApp, settingsDescription.getSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -70,7 +70,7 @@ export const getHomeSettings = async (subid: string) => {
   const event = {
     content,
     kind: Kind.Settings,
-    tags: [["d", settingsDescription.getHomeSettings]],
+    tags: [["d", settingsApp, settingsDescription.getHomeSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -100,7 +100,7 @@ export const setHomeSettings = async (subid: string, feeds: PrimalArticleFeed[])
   const event = {
     content,
     kind: Kind.Settings,
-    tags: [["d", settingsDescription.setHomeSettings]],
+    tags: [["d", settingsApp, settingsDescription.setHomeSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -127,7 +127,7 @@ export const getReadsSettings = async (subid: string) => {
   const event = {
     content,
     kind: Kind.Settings,
-    tags: [["d", settingsDescription.getReadsSettings]],
+    tags: [["d", settingsApp, settingsDescription.getReadsSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -157,7 +157,7 @@ export const setReadsSettings = async (subid: string, feeds: PrimalArticleFeed[]
   const event = {
     content,
     kind: Kind.Settings,
-    tags: [["d", settingsDescription.setReadsSettings]],
+    tags: [["d", settingsApp, settingsDescription.setReadsSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -194,7 +194,7 @@ export const getNWCSettings = async (subid: string) => {
   const event = {
     content,
     kind: Kind.Settings,
-    tags: [["d", settingsDescription.getNWCSettings]],
+    tags: [["d", settingsApp, settingsDescription.getNWCSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
@@ -224,7 +224,7 @@ export const setNWCSettings = async (subid: string, nwcSettings: { nwcList: stri
   const event = {
     content,
     kind: Kind.Settings,
-    tags: [["d", settingsDescription.setNWCSettings]],
+    tags: [["d", settingsApp, settingsDescription.setNWCSettings]],
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 

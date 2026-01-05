@@ -138,7 +138,7 @@ const GenericEvent: Component<{
   }
 
   const resolveSettingsEvent = (ev: NostrRelaySignedEvent) => {
-    const d = (ev.tags.find(t => t[0] === 'd') || ['d', ''])[1];
+    const d = (ev.tags.find(t => t[0] === 'd') || ['d', '', ''])[2];
 
     switch (d) {
       case settingsDescription.getMembershipStatus:

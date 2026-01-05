@@ -1,5 +1,5 @@
 import { nip05, nip19 } from "../lib/nTools";
-import { Kind, minKnownProfiles, settingsDescription } from "../constants";
+import { Kind, minKnownProfiles, settingsApp, settingsDescription } from "../constants";
 import { sendMessage } from "../sockets";
 import { userName } from "../stores/profile";
 import { Filterlist, NostrRelays, PrimalUser, VanityProfiles } from "../types/primal";
@@ -239,7 +239,7 @@ export const reportUser = async (pubkey: string | undefined, subid: string, user
   const event = {
     content: `{ "description": "report user '${userName(user)}'"}`,
     kind: Kind.Settings,
-    tags: [["d", settingsDescription.reportUser]],
+    tags: [["d", settingsApp, settingsDescription.reportUser]],
     created_at: Math.ceil((new Date()).getTime() / 1000),
   };
 
