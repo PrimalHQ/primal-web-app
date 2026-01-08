@@ -81,6 +81,7 @@ import { StreamingData, getStreamingEvent } from "../../../lib/streaming";
 import { fetchUserProfile } from "../../../handleFeeds";
 import { accountStore, hasPublicKey, quoteNote, saveEmoji, setShowPin } from "../../../stores/accountStore";
 import { DecodedNaddr } from "nostr-tools/lib/types/nip19";
+import ParsedNote from "../../ParsedNote/ParsedNote";
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -217,69 +218,23 @@ const EditBox: Component<{
 
 
   const renderMessage = () => {
-    const text = DOMPurify.sanitize(parsedMessage(), {ADD_TAGS: ['iframe']});
+    const previewNote = notePreview();
+    
+    if (!previewNote) {
+      return <div class={styles.editor} ref={textPreview}></div>;
+    }
 
-    if (!noteHasInvoice(text)) {
-      return (
-        <div
-          class={styles.editor}
-          ref={textPreview}
-          innerHTML={text}
-        ></div>
-      );
-    };
-
-    let sections: string[] = [];
-
-    let content = text.replace(linebreakRegex, ' __LB__ ').replaceAll('<br>', ' __LB__ ').replace(/\s+/g, ' __SP__ ');
-
-    let tokens: string[] = content.split(/[\s]+/);
-
-    let sectionIndex = 0;
-
-    tokens.forEach((tok) => {
-      const t = DOMPurify.sanitize(tok);
-      if (t.startsWith('lnbc')) {
-        if (sections[sectionIndex]) sectionIndex++;
-
-        sections[sectionIndex] = t;
-
-        sectionIndex++;
-      }
-      else {
-        let c = t;
-        const prev = sections[sectionIndex] || '';
-
-        if (t === '__SP__') {
-          c = prev.length === 0 ? '' : ' ';
-        }
-
-        if (t === '__LB__') {
-          c = prev.length === 0 ? '' : ' <br/>';
-        }
-
-        sections[sectionIndex] = prev + c;
-      }
-    });
-
+    // Use ParsedNote component which supports code blocks
     return (
       <div
         class={styles.editor}
         ref={textPreview}
       >
-        <For each={sections}>
-          {section => (
-            <Switch fallback={
-              <div
-                innerHTML={section}
-              ></div>
-            }>
-              <Match when={section.startsWith('lnbc')}>
-                <Lnbc lnbc={section} inactive={true} />
-              </Match>
-            </Switch>
-          )}
-        </For>
+        <ParsedNote
+          note={previewNote}
+          width={Math.min(598, window.innerWidth)}
+          margins={1}
+        />
       </div>
     );
   };

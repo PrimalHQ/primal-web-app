@@ -1,0 +1,45 @@
+.codeBlock {
+  margin: 12px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--background-input);
+  border: 1px solid var(--subtile-devider);
+}
+
+.codeBlockHeader {
+  padding: 8px 12px;
+  background-color: var(--background-header-input);
+  border-bottom: 1px solid var(--subtile-devider);
+  display: flex;
+  align-items: center;
+}
+
+.codeBlockLanguage {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-family: monospace;
+  text-transform: uppercase;
+}
+
+.codeBlockPre {
+  margin: 0;
+  padding: 12px;
+  overflow-x: auto;
+  background-color: var(--background-input);
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.codeBlockCode {
+  display: block;
+  color: var(--text-primary);
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  border: none;
+  white-space: pre;
+  word-wrap: normal;
+  overflow-wrap: normal;
+}
+

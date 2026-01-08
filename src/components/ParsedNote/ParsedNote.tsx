@@ -91,6 +91,8 @@ import LiveEventPreview from '../LiveVideo/LiveEventPreview';
 import ExternalLiveEventPreview from '../LiveVideo/ExternalLiveEventPreview';
 import NoteVideo from './NoteVideo';
 import { accountStore } from '../../stores/accountStore';
+import { useCodeBlockHighlight } from '../../lib/useCodeBlockHighlight';
+import CodeBlock from '../CodeBlock/CodeBlock';
 
 const groupGridLimit = 5;
 
@@ -229,8 +231,11 @@ const ParsedNote: Component<{
   });
 
   const [tokens, setTokens] = createStore<string[]>([]);
+  const [codeBlocks, setCodeBlocks] = createStore<Record<string, { code: string, language?: string }>>({});
 
   const [wordsDisplayed, setWordsDisplayed] = createSignal(0);
+  
+  const { extractCodeBlocks: extractCodeBlocksHook, isCodeBlockPlaceholder } = useCodeBlockHighlight();
 
   const isNoteTooLong = () => {
     return props.shorten && wordsDisplayed() > shortNoteWords;
@@ -251,13 +256,11 @@ const ParsedNote: Component<{
   };
 
   const parseContent = () => {
-    const content = props.ignoreLinebreaks ?
-      noteContent().replace(/\s+/g, ' __SP__ ') :
-      noteContent().replace(linebreakRegex, ' __LB__ ').replace(/\s+/g, ' __SP__ ');
-
-    const tokens = content.split(/[\s]+/);
-
-    setTokens(() => [...tokens]);
+    const content = noteContent();
+    const parsed = extractCodeBlocksHook(content, props.ignoreLinebreaks, linebreakRegex);
+    
+    setCodeBlocks(() => parsed.codeBlocks);
+    setTokens(() => parsed.tokens);
   }
 
   const removeLinebreaks = (type: string) => {
@@ -300,6 +303,18 @@ const ParsedNote: Component<{
   let totalLinks = 0;
 
   const parseToken = (token: string) => {
+    // Check if this is a code block placeholder
+    if (isCodeBlockPlaceholder(token)) {
+      const block = codeBlocks[token];
+      if (block) {
+        removeLinebreaks('codeblock');
+        isAfterEmbed = true;
+        lastSignificantContent = 'codeblock';
+        updateContent(content, 'codeblock', token, { code: block.code, language: block.language });
+        return;
+      }
+    }
+
     if (token === '__LB__') {
       if (isAfterEmbed) {
         return;
@@ -1976,6 +1991,17 @@ const ParsedNote: Component<{
     </For>
   }
 
+  const renderCodeBlock = (item: NoteContent) => {
+    if (isNoteTooLong()) return;
+
+    const code = item.meta?.code || '';
+    const language = item.meta?.language || '';
+    
+    setWordsDisplayed(w => w + 50); // Code blocks count as many words
+
+    return <CodeBlock code={code} language={language} />;
+  }
+
   const renderContent = (item: NoteContent, index: number) => {
 
 
@@ -2004,6 +2030,7 @@ const ParsedNote: Component<{
       hashtag: renderHashtag,
       emoji: renderEmoji,
       lnbc: renderLnbc,
+      codeblock: renderCodeBlock,
     }
 
     return renderers[item.type] ?

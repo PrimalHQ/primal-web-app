@@ -25,6 +25,8 @@ import { logError } from '../../lib/logger';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import Lnbc from '../Lnbc/Lnbc';
 import NoteVideo from '../ParsedNote/NoteVideo';
+import { useCodeBlockHighlight } from '../../lib/useCodeBlockHighlight';
+import CodeBlock from '../CodeBlock/CodeBlock';
 
 
 const groupGridLimit = 7;
@@ -43,10 +45,13 @@ const DirectMessageParsedContent: Component<{
 
   // const [tokens, setTokens] = createStore<string[]>([]);
   const [content, setContent] = createStore<NoteContent[]>([]);
+  const [codeBlocks, setCodeBlocks] = createStore<Record<string, { code: string, language?: string }>>({});
 
   let lastSignificantContent = 'text';
   let isAfterEmbed = false;
   let totalLinks = 0;
+
+  const { extractCodeBlocks: extractCodeBlocksHook, isCodeBlockPlaceholder } = useCodeBlockHighlight();
 
   onMount(() => {
     generateContent();
@@ -93,14 +98,24 @@ const DirectMessageParsedContent: Component<{
   };
 
   const parseContent = () => {
-    const content = props.content.replace(linebreakRegex, ' __LB__ ').replace(/\s+/g, ' __SP__ ');
-
-    const tks = content.split(/[\s]+/);
-
-    return tks;
+    const parsed = extractCodeBlocksHook(props.content, false, linebreakRegex);
+    
+    setCodeBlocks(() => parsed.codeBlocks);
+    return parsed.tokens;
   }
 
   const parseToken = (token: string) => {
+    // Check if this is a code block placeholder
+    if (isCodeBlockPlaceholder(token)) {
+      const block = codeBlocks[token];
+      if (block) {
+        isAfterEmbed = true;
+        lastSignificantContent = 'codeblock';
+        updateContent(content, 'codeblock', token, { code: block.code, language: block.language });
+        return;
+      }
+    }
+
     if (token === '__LB__') {
       if (isAfterEmbed) {
         return;
@@ -1120,6 +1135,13 @@ const DirectMessageParsedContent: Component<{
     </For>
   }
 
+  const renderCodeBlock = (item: NoteContent) => {
+    const code = item.meta?.code || '';
+    const language = item.meta?.language || '';
+    
+    return <CodeBlock code={code} language={language} />;
+  }
+
   const renderContent = (item: NoteContent, index: number) => {
     const renderers: Record<string, (item: NoteContent, index?: number) => JSXElement> = {
       linebreak: renderLinebreak,
@@ -1141,6 +1163,7 @@ const DirectMessageParsedContent: Component<{
       hashtag: renderHashtag,
       emoji: renderEmoji,
       lnbc: renderLnbc,
+      codeblock: renderCodeBlock,
     }
 
     return renderers[item.type] ?
