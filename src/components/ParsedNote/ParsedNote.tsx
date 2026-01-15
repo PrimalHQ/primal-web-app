@@ -865,13 +865,9 @@ const ParsedNote: Component<{
 
         setWordsDisplayed(w => w + shortMentionInWords);
 
-        const youtubeId = isYouTube(token) && RegExp.$1;
-
-        if (!youtubeId) return null;
-
         return <NoteYouTube
           class={`w-max embeddedContent ${lastClass}`}
-          youtubeId={youtubeId}
+          youtubeId={token}
         />;
       }}
     </For>

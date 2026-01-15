@@ -9,13 +9,16 @@ declare global {
 
 const NoteYouTube: Component<{
   class?: string,
-  youtubeId: string,
+  youtubeId?: string,
 }> = (props) => {
+  if (props.youtubeId == null)  return null;
+
   let iframeEl: HTMLIFrameElement | undefined;
   let containerEl: HTMLDivElement | undefined;
   let player: any = null;
   const [isPlayerReady, setIsPlayerReady] = createSignal(false);
   let playerId = `youtube-player-${Math.random().toString(36).substr(2, 9)}`;
+  const embedUrl = `https://www.youtube.com/embed/${props.youtubeId}?enablejsapi=1&mute=1&rel=0&playsinline=1`;
 
   const loadYouTubeAPI = () => {
     if (window.YT && window.YT.Player) {
@@ -116,12 +119,6 @@ const NoteYouTube: Component<{
       }
     }
   });
-
-  if (!props.youtubeId) {
-    return null;
-  }
-
-  const embedUrl = `https://www.youtube.com/embed/${props.youtubeId}?enablejsapi=1&mute=1&rel=0&playsinline=1`;
 
   return (
     <div

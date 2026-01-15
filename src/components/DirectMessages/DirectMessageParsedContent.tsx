@@ -505,13 +505,9 @@ const DirectMessageParsedContent: Component<{
 
     return <For each={item.tokens}>
       {(token) => {
-        const youtubeId = isYouTube(token) && RegExp.$1;
-
-        if (!youtubeId) return null;
-
         return <NoteYouTube
           class={`w-max embeddedContent ${lastClass}`}
-          youtubeId={youtubeId}
+          youtubeId={token}
         />;
       }}
     </For>
