@@ -131,7 +131,7 @@ const NoteYouTube: Component<{
         id={playerId}
         src={embedUrl}
         title="YouTube video player"
-        // @ts-ignore
+        // @ts-ignore - frameBorder is deprecated but kept for browser compatibility
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
         allowFullScreen
