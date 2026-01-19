@@ -33,7 +33,7 @@ import { useMediaContext } from '../contexts/MediaContext';
 import { profile as t, actions as tActions, toast as tToast, toastZapProfile } from '../translations';
 import PrimalMenu from '../components/PrimalMenu/PrimalMenu';
 import ConfirmModal from '../components/ConfirmModal/ConfirmModal';
-import { fetchKnownProfiles, isAccountVerified, reportUser } from '../lib/profile';
+import { fetchKnownProfiles, getProfileMuteList, isAccountVerified, reportUser } from '../lib/profile';
 import { APP_ID } from '../App';
 import ProfileTabs from '../components/ProfileTabs/ProfileTabs';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
@@ -75,6 +75,7 @@ const ProfileDesktop: Component = () => {
   const [followsModal, setFollowsModal] = createSignal<'follows' | 'followers' | false>(false);
 
   const [hasTiers, setHasTiers] = createSignal(false);
+  const [hasMutedYou, setHasMutedYou] = createSignal(false);
 
   const lightbox = new PhotoSwipeLightbox({
     gallery: '#central_header',
@@ -264,6 +265,47 @@ const ProfileDesktop: Component = () => {
 
     if (accountStore.muted.includes(pk)) {
       profile?.actions.clearNotes();
+    }
+  });
+
+  const checkIfMutedYou = (pubkey: string | undefined) => {
+    if (!pubkey || !accountStore.publicKey) {
+      setHasMutedYou(false);
+      return;
+    }
+
+    const random = Math.floor(Math.random() * 10_000);
+    const subId = `muted_by_${random}_${APP_ID}`;
+
+    let isMuted = false;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (content && [Kind.CategorizedPeople, Kind.MuteList].includes(content?.kind || 0)) {
+          const pubkeys = (content.tags || []).reduce<string[]>(
+            (acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc,
+            [],
+          );
+
+          if (pubkeys.includes(accountStore.publicKey || '')) {
+            isMuted = true;
+          }
+        }
+      },
+      onEose: () => {
+        setHasMutedYou(isMuted);
+        unsub();
+      },
+    });
+
+    getProfileMuteList(pubkey, subId);
+  };
+
+  createEffect(() => {
+    if (profile?.profileKey && !isCurrentUser() && accountStore.publicKey) {
+      checkIfMutedYou(profile.profileKey);
+    } else {
+      setHasMutedYou(false);
     }
   });
 
@@ -894,6 +936,12 @@ const ProfileDesktop: Component = () => {
                             {intl.formatMessage(t.followsYou)}
                           </div>
                         </Show>
+
+                        <Show when={hasMutedYou()}>
+                          <div class={`${styles.followsBadge} ${styles.mutedBadge}`}>
+                            {intl.formatMessage(t.mutedYou)}
+                          </div>
+                        </Show>
                       </div>
 
                       <Show when={profile?.userProfile?.about}>
@@ -992,6 +1040,12 @@ const ProfileDesktop: Component = () => {
                           <Show when={isFollowingYou()}>
                             <div class={styles.followsBadge}>
                               {intl.formatMessage(t.followsYou)}
+                            </div>
+                          </Show>
+
+                          <Show when={hasMutedYou()}>
+                            <div class={`${styles.followsBadge} ${styles.mutedBadge}`}>
+                              {intl.formatMessage(t.mutedYou)}
                             </div>
                           </Show>
                         </div>
