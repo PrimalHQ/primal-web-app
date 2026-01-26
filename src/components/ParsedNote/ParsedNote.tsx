@@ -55,7 +55,7 @@ import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
-import { getImageFromTags, getMediaUrl as getMediaUrlDefault } from "../../lib/media";
+import { getMediaVariantFromTags, getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
 import {
@@ -673,7 +673,7 @@ const ParsedNote: Component<{
       const url = image?.media_url || getMediaUrlDefault(token) || token;
 
       if (!image) {
-        image = getImageFromTags(props.note.tags, url);
+        image = getMediaVariantFromTags(props.note.tags, url);
       }
 
       let imageThumb =
@@ -780,6 +780,10 @@ const ParsedNote: Component<{
         if (isNoteTooLong()) return;
 
         let mVideo = media?.actions.getMedia(token, 'o');
+
+        if (!mVideo) {
+          mVideo = getMediaVariantFromTags(props.note.tags, token);
+        }
 
         let h: number | undefined = undefined;
         let w: number | undefined = undefined;

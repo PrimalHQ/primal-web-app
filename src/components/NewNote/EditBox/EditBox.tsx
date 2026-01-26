@@ -1891,6 +1891,7 @@ const EditBox: Component<{
               `url ${url}`,
               `m ${type}`,
               `dim ${dim}`,
+              'service nip96',
             ]],
           );
         };
@@ -1905,6 +1906,8 @@ const EditBox: Component<{
       video.addEventListener('loadedmetadata', () => {
         const dim = `${video.videoWidth}x${video.videoHeight}`;
 
+        const bitrate = (8 * file.size) / video.duration;
+
         updateMediaTags(
           (mt) => [
             ...mt,
@@ -1913,6 +1916,9 @@ const EditBox: Component<{
               `url ${url}`,
               `m ${type}`,
               `dim ${dim}`,
+              `duration ${video.duration}`,
+              `bitrate ${bitrate}`,
+              'service nip96',
           ]],
         );
 
