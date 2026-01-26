@@ -121,6 +121,8 @@
     height: 36px;
     border-radius: 18px;
     margin: 0;
+    padding-left: 16px;
+    padding-right: 12px;
 
     @media only screen and (max-width: 720px) {
       width: calc(100dvw - 32px);
