@@ -38,6 +38,7 @@ import {
   Component, createSignal, For, JSXElement, Match, onMount, Show, Switch,
 } from 'solid-js';
 import {
+  MediaVariant,
   NostrEventContent,
   NostrImageContent,
   NostrUserContent,
@@ -54,7 +55,7 @@ import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
-import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
+import { getImageFromTags, getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
 import {
@@ -668,8 +669,12 @@ const ParsedNote: Component<{
       if (isNoteTooLong()) return;
 
       const token = item.tokens[0];
-      let image = media?.actions.getMedia(token, 'o');
+      let image: MediaVariant | undefined = media?.actions.getMedia(token, 'o');
       const url = image?.media_url || getMediaUrlDefault(token) || token;
+
+      if (!image) {
+        image = getImageFromTags(props.note.tags, url);
+      }
 
       let imageThumb =
         media?.actions.getMedia(token, 'm') ||

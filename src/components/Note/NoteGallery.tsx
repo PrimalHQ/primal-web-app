@@ -20,6 +20,7 @@ import ParsedNote from '../ParsedNote/ParsedNote';
 import { humanizeTime, isDev, isPhone } from '../../utils';
 import { nip19 } from 'nostr-tools';
 import NoteImageSmall from '../NoteImage/NoteImageSmall';
+import { getImageFromTags } from '../../lib/media';
 
 const NoteGallery: Component<{
   note: PrimalNote,
@@ -69,6 +70,11 @@ const NoteGallery: Component<{
       let origUrl = images[i];
 
       let image = media?.actions.getMedia(origUrl, 'o');
+
+      if (!image) {
+        image = getImageFromTags(props.note.tags, origUrl);
+      }
+
       let url = image?.media_url || origUrl;
       let type = image?.mt;
 

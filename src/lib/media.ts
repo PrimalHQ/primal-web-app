@@ -1,4 +1,5 @@
 import { Kind } from "../constants";
+import { MediaVariant, PrimalNote } from "../types/primal";
 import { signEvent } from "./nostrAPI";
 
 export const getMediaUrl = (url: string | undefined, size = 'o', animated = 1) => {
@@ -158,3 +159,26 @@ export const uploadMediaConfirm = async (
     return false;
   }
 };
+
+export const getImageFromTags = (tags: string[][], url: string) => {
+  const mediaTags = tags.filter(t => t[0] === 'imeta');
+  const relevantTag = mediaTags.find(t => t.find(p => p === `url ${url}`));
+
+  if (!relevantTag) return undefined;
+
+  const dim = relevantTag.find(p => p.startsWith('dim'))?.split(' ')[1].split('x');
+
+  if (!dim || dim.length !== 2) return undefined;
+
+  const dom = url.split('.');
+  const mt = `image/${dom[dom.length - 1]}`;
+
+    return {
+      s: 'o',
+      a: 0,
+      w: parseInt(dim[0]),
+      h: parseInt(dim[1]),
+      mt,
+      media_url: url,
+    } as MediaVariant
+}
