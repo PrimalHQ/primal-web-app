@@ -37,6 +37,7 @@ export type LocalStore = {
   emojiHistory: EmojiOption[],
   noteDraft: Record<string, string>,
   noteDraftUserRefs: Record<string, Record<string, PrimalUser>>,
+  noteDraftMediaTags: string[][],
   uploadTime: Record<string, number>,
   selectedFeed: PrimalFeed | undefined,
   selectedHomeFeed: PrimalArticleFeed | undefined,
@@ -98,6 +99,7 @@ export const emptyStorage: LocalStore = {
   emojiHistory: [],
   noteDraft: {},
   noteDraftUserRefs: {},
+  noteDraftMediaTags: [],
   uploadTime: defaultUploadTime,
   selectedFeed: undefined,
   bookmarks: [],
@@ -500,6 +502,28 @@ export const readNoteDraftUserRefs = (pubkey: string | undefined, replyTo?: stri
   const key = replyTo || 'root';
 
   return store.noteDraftUserRefs[key] || {};
+}
+
+export const saveNoteDraftMediaTags = (pubkey: string | undefined, mediaTags: string[][]) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.noteDraftMediaTags = [...mediaTags];
+
+  setStorage(pubkey, store);
+}
+
+export const readNoteDraftMediaTags = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return [];
+  }
+
+  const store = getStorage(pubkey);
+
+  return store.noteDraftMediaTags;
 }
 
 export const saveUploadTime = (pubkey: string | undefined, uploadTime: Record<string, number>) => {

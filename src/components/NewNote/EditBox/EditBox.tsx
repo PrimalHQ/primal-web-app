@@ -35,7 +35,7 @@ import { getUserProfiles, getUsersRelayInfo } from "../../../lib/profile";
 import { subsTo } from "../../../sockets";
 import { convertToArticles, convertToLiveEvents, convertToNotes, referencesToTags } from "../../../stores/note";
 import { convertToUser, nip05Verification, truncateNpub, userName } from "../../../stores/profile";
-import { debounce, getScreenCordinates, isVisibleInContainer, replaceAsync, uuidv4 } from "../../../utils";
+import { debounce, getScreenCordinates, isVisibleInContainer, replaceAsync, sha256, uuidv4 } from "../../../utils";
 import Avatar from "../../Avatar/Avatar";
 import EmbeddedNote from "../../EmbeddedNote/EmbeddedNote";
 import MentionedUserLink from "../../Note/MentionedUserLink/MentionedUserLink";
@@ -55,9 +55,11 @@ import {
 } from "../../../translations";
 import {
   readNoteDraft,
+  readNoteDraftMediaTags,
   readNoteDraftUserRefs,
   readSecFromStorage,
   saveNoteDraft,
+  saveNoteDraftMediaTags,
   saveNoteDraftUserRefs,
 } from "../../../lib/localStore";
 import { useMediaContext } from "../../../contexts/MediaContext";
@@ -630,6 +632,7 @@ const EditBox: Component<{
     if (props.open) {
       const draft = readNoteDraft(accountStore.publicKey, props.replyToNote?.noteId);
       const draftUserRefs = readNoteDraftUserRefs(accountStore.publicKey, props.replyToNote?.noteId);
+      const mTags = readNoteDraftMediaTags(accountStore.publicKey);
 
       setUserRefs(reconcile(draftUserRefs));
 
@@ -646,6 +649,8 @@ const EditBox: Component<{
         return newMsg;
       });
 
+      updateMediaTags([...mTags]);
+
       if (accountStore.quotedNote) {
         addQuote(accountStore.quotedNote);
       }
@@ -661,6 +666,7 @@ const EditBox: Component<{
     // save draft just in case there is an unintended interuption
     saveNoteDraft(accountStore.publicKey, message(), props.replyToNote?.noteId);
     saveNoteDraftUserRefs(accountStore.publicKey, userRefs, props.replyToNote?.noteId);
+    saveNoteDraftMediaTags(accountStore.publicKey, unwrap(mediaTags));
   });
 
   const onEscape = (e: KeyboardEvent) => {
@@ -696,6 +702,7 @@ const EditBox: Component<{
     setEmojiInput(false);
     setEmojiQuery('')
     setEmojiResults(() => []);
+    updateMediaTags(() => []);
 
     resetUpload();
 
@@ -710,6 +717,7 @@ const EditBox: Component<{
 
     saveNoteDraft(accountStore.publicKey, '', props.replyToNote?.noteId);
     saveNoteDraftUserRefs(accountStore.publicKey, {}, props.replyToNote?.noteId);
+    saveNoteDraftMediaTags(accountStore.publicKey, []);
     clearEditor();
   };
 
@@ -723,6 +731,7 @@ const EditBox: Component<{
   const persistNote = (note: string) => {
     saveNoteDraft(accountStore.publicKey, note, props.replyToNote?.noteId);
     saveNoteDraftUserRefs(accountStore.publicKey, userRefs, props.replyToNote?.noteId);
+    saveNoteDraftMediaTags(accountStore.publicKey, unwrap(mediaTags));
     clearEditor();
   };
 
@@ -908,7 +917,21 @@ const EditBox: Component<{
 
         return t;
       });
-      tags = [...tags, ...relayTags];
+
+
+      let mediaTagsToAdd = unwrap(mediaTags);
+
+      mediaTagsToAdd = mediaTagsToAdd.filter(t => {
+        const data = t.find(p => p.startsWith('url'));
+        if (data) {
+          const [_, url] = data.split(' ');
+
+          return message().includes(url);
+        }
+        return false;
+      });
+
+      tags = [...tags, ...relayTags, ...mediaTagsToAdd];
 
       setIsPostingInProgress(true);
 
@@ -1530,6 +1553,7 @@ const EditBox: Component<{
         rec[url] = (<div>
           <LiveEventPreview stream={stream} user={user} />
         </div>)?.
+        // @ts-ignore outerHTML on Node
         outerHTML || url;
       }
     }
@@ -1820,7 +1844,9 @@ const EditBox: Component<{
 
     const n: PrimalNote = {
       user: accountStore.activeUser,
+      // @ts-ignore
       post,
+      // @ts-ignore
       msg,
       mentionedNotes: noteRefs,
       mentionedUsers: userRefs,
@@ -1837,6 +1863,64 @@ const EditBox: Component<{
     }
 
     return n;
+  }
+
+  const [mediaTags, updateMediaTags] = createStore<string[][]>([])
+
+  const attachFile = async (url: string, file: File) => {
+    const { type } = file;
+
+    if (type.startsWith('image')) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const result = e.target?.result as string
+        if (result === undefined || result === null) return;
+
+        const img = document.createElement('img');
+        img.src = result;
+
+        // Get dimensions after the image is loaded
+        img.onload = function() {
+          const dim = `${img.width}x${img.height}`;
+
+          updateMediaTags(
+            (mt) => [
+              ...mt,
+              [
+              'imeta',
+              `url ${url}`,
+              `m ${type}`,
+              `dim ${dim}`,
+            ]],
+          );
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+
+    if (type.startsWith('video')) {
+      const video = document.createElement('video');
+      video.preload = 'metadata'; // Hint to the browser to only load metadata
+
+      video.addEventListener('loadedmetadata', () => {
+        const dim = `${video.videoWidth}x${video.videoHeight}`;
+
+        updateMediaTags(
+          (mt) => [
+            ...mt,
+            [
+              'imeta',
+              `url ${url}`,
+              `m ${type}`,
+              `dim ${dim}`,
+          ]],
+        );
+
+        URL.revokeObjectURL(video.src);
+      });
+
+      video.src = URL.createObjectURL(file);
+    }
   }
 
   return (
@@ -1907,6 +1991,11 @@ const EditBox: Component<{
                 resetUpload();
               }}
               onSuccsess={(url:string) => {
+                const file = fileToUpload();
+                if (file) {
+                  attachFile(url, unwrap(file));
+                }
+
                 insertAtCursor(` ${url} `);
 
                 onExpandableTextareaInput(new InputEvent('input'));
