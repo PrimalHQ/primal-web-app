@@ -91,6 +91,7 @@ import { StreamingData } from '../../lib/streaming';
 import LiveEventPreview from '../LiveVideo/LiveEventPreview';
 import ExternalLiveEventPreview from '../LiveVideo/ExternalLiveEventPreview';
 import NoteVideo from './NoteVideo';
+import NoteYouTube from './NoteYouTube';
 import { accountStore } from '../../stores/accountStore';
 
 const groupGridLimit = 5;
@@ -873,18 +874,10 @@ const ParsedNote: Component<{
 
         setWordsDisplayed(w => w + shortMentionInWords);
 
-        const youtubeId = isYouTube(token) && RegExp.$1;
-
-        return <iframe
+        return <NoteYouTube
           class={`w-max embeddedContent ${lastClass}`}
-          src={`https://www.youtube.com/embed/${youtubeId}`}
-          title="YouTube video player"
-          // @ts-ignore no property
-          key={youtubeId}
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-        ></iframe>;
+          youtubeId={token}
+        />;
       }}
     </For>
   };
