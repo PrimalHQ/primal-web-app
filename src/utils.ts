@@ -317,6 +317,11 @@ export const calculateReadsOffset = (reads: PrimalArticle[], paging: PaginationI
     ) break;
 
     if (
+      paging.sortBy === 'published_at' &&
+      read.published !== paging.since
+    ) break;
+
+    if (
       paging.sortBy === 'satszapped' &&
       read.satszapped !== paging.since
     ) break;
