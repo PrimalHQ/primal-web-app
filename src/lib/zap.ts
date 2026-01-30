@@ -12,6 +12,11 @@ import { Event } from "nostr-tools";
 
 export let lastZapError: string = "";
 
+const buildCallbackUrl = (callback: string, amount: number, nostrEvent: string): string => {
+  const separator = callback.includes('?') ? '&' : '?';
+  return `${callback}${separator}amount=${amount}&nostr=${nostrEvent}`;
+};
+
 export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string) => {
 
   try {
@@ -88,7 +93,7 @@ export const zapNote = async (
 
     const event = encodeURIComponent(JSON.stringify(signedEvent));
 
-    const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
+    const r2 = await (await fetch(buildCallbackUrl(callback, sats, event))).json();
     const pr = r2.pr;
 
     if (nwc && nwc[1] && nwc[1].length > 0) {
@@ -150,7 +155,7 @@ export const zapArticle = async (
 
     const event = encodeURIComponent(JSON.stringify(signedEvent));
 
-    const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
+    const r2 = await (await fetch(buildCallbackUrl(callback, sats, event))).json();
     const pr = r2.pr;
 
     if (nwc && nwc[1] && nwc[1].length > 0) {
@@ -204,7 +209,7 @@ export const zapProfile = async (
 
     const event = encodeURIComponent(JSON.stringify(signedEvent));
 
-    const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
+    const r2 = await (await fetch(buildCallbackUrl(callback, sats, event))).json();
     const pr = r2.pr;
 
     if (nwc && nwc[1] && nwc[1].length > 0) {
@@ -276,7 +281,7 @@ export const zapSubscription = async (
 
     const event = encodeURIComponent(JSON.stringify(signedEvent));
 
-    const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
+    const r2 = await (await fetch(buildCallbackUrl(callback, sats, event))).json();
     const pr = r2.pr;
 
     if (nwc && nwc[1] && nwc[1].length > 0) {
@@ -339,7 +344,7 @@ export const zapDVM = async (
 
     const event = encodeURIComponent(JSON.stringify(signedEvent));
 
-    const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
+    const r2 = await (await fetch(buildCallbackUrl(callback, sats, event))).json();
     const pr = r2.pr;
 
     if (nwc && nwc[1] && nwc[1].length > 0) {
@@ -402,7 +407,7 @@ export const zapStream = async (
 
     const event = encodeURIComponent(JSON.stringify(signedEvent));
 
-    const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
+    const r2 = await (await fetch(buildCallbackUrl(callback, sats, event))).json();
     const pr = r2.pr;
 
     if (nwc && nwc[1] && nwc[1].length > 0) {
