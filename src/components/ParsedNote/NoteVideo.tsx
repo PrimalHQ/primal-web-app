@@ -18,7 +18,7 @@ const NoteVideo: Component<{
   const app =useAppContext();
   const media = useMediaContext();
 
-  let videoEl: HTMLVideoElement | undefined;
+  let videoEl: HTMLMediaElement | undefined;
 
   let mediaController: HTMLElement | undefined;
   let hlsVideo: HTMLMediaElement | undefined;
@@ -47,7 +47,8 @@ const NoteVideo: Component<{
 
   const observer = new IntersectionObserver(entries => {
     entries.forEach((entry) => {
-      const video = entry.target as HTMLVideoElement;
+      const video = videoEl;
+      if (!video) return;
 
       if (entry.isIntersecting && video.paused) {
         video.muted = true;
@@ -65,9 +66,7 @@ const NoteVideo: Component<{
       }
       else {
         video.muted = true;
-        if (video.pause) {
-          video.pause();
-        }
+        video.pause();
       }
     });
   });
@@ -129,6 +128,7 @@ const NoteVideo: Component<{
   })
 
   onCleanup(() => {
+    videoEl?.pause();
     videoEl?.removeEventListener('click', onVideoClick);
 
     playButton?.removeEventListener('click', onPlayClick);

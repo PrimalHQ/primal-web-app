@@ -82,6 +82,8 @@
     <img src="public/public/primal-web-banner.jpg" alt="iPhone Screenshot">
 </div>
 
+Interface update: Offscreen feed videos now pause instead of continuing playback. Current version: 2.6.11.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Built With
