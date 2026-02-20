@@ -16,14 +16,12 @@ import { createStore } from 'solid-js/store';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import NoteContextTrigger from './NoteContextTrigger';
 import { date, veryLongDate } from '../../lib/dates';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { isPhone, uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
-import { addrRegexG, imageRegexG, Kind, linebreakRegex, noteRegex, urlRegexG } from '../../constants';
-import { nip19 } from 'nostr-tools';
-import AppRouter from '../../Router';
+import { addrRegexG, imageRegexG, linebreakRegex, noteRegex, urlRegexG } from '../../constants';
 import { TranslatorProvider } from '../../contexts/TranslatorContext';
+import { accountStore } from '../../stores/accountStore';
 
 export type NoteReactionsState = {
   bookmarks?: number,
@@ -58,6 +56,9 @@ export type NoteProps = {
   quoteCount?: number,
   size?: 'xwide' | 'wide' | 'normal' | 'short',
   defaultParentAuthor?: PrimalUser,
+  onRemove?: (id: string, isRepost?: boolean) => void,
+  hideContext?: boolean,
+  hideFooter?: boolean,
 }
 
 export const renderNote = (props: NoteProps) => (
@@ -72,7 +73,6 @@ const Note: Component<NoteProps> = (props) => {
 
   const threadContext = useThreadContext();
   const app = useAppContext();
-  const account = useAccountContext();
 
   createEffect(() => {
     if (props.quoteCount) {
@@ -134,7 +134,7 @@ const Note: Component<NoteProps> = (props) => {
   })
 
   const addTopZapFeed = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -160,7 +160,7 @@ const Note: Component<NoteProps> = (props) => {
   };
 
   const addTopZap = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -193,7 +193,7 @@ const Note: Component<NoteProps> = (props) => {
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
 
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -264,6 +264,9 @@ const Note: Component<NoteProps> = (props) => {
         app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
+      (id: string, isRepost?: boolean) => {
+        props.onRemove && props.onRemove(id, isRepost);
+      },
     );
   }
 
@@ -327,7 +330,9 @@ const Note: Component<NoteProps> = (props) => {
           id={props.id}
           class={styles.noteNotificationLink}
           href={!props.onClick ? noteLinkId() : ''}
-          onClick={() => navToThread(props.note)}
+          onClick={() => {
+            navToThread(props.note)
+          }}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
         >
@@ -340,15 +345,18 @@ const Note: Component<NoteProps> = (props) => {
                 />
               </div>
 
-              <div class={styles.footer}>
-                <NoteFooter
-                  note={props.note}
-                  state={reactionsState}
-                  updateState={updateReactionsState}
-                  customZapInfo={customZapInfo()}
-                  size="short"
-                />
-              </div>
+              <Show when={!props.hideFooter}>
+                <div class={styles.footer}>
+                  <NoteFooter
+                    note={props.note}
+                    state={reactionsState}
+                    updateState={updateReactionsState}
+                    customZapInfo={customZapInfo()}
+                    size="notif"
+                    onDelete={props.onRemove}
+                  />
+                </div>
+              </Show>
             </div>
           </div>
         </a>
@@ -367,12 +375,14 @@ const Note: Component<NoteProps> = (props) => {
             <NoteHeader note={props.note} primary={true} />
           </div>
 
-          <div class={styles.upRightFloater}>
-            <NoteContextTrigger
-              ref={noteContextMenu}
-              onClick={onContextMenuTrigger}
-            />
-          </div>
+          <Show when={!props.hideContext}>
+            <div class={styles.upRightFloater}>
+              <NoteContextTrigger
+                ref={noteContextMenu}
+                onClick={onContextMenuTrigger}
+              />
+            </div>
+          </Show>
 
           <div class={styles.content}>
 
@@ -380,7 +390,7 @@ const Note: Component<NoteProps> = (props) => {
               <ParsedNote
                 note={props.note}
                 width={Math.min(598, window.innerWidth)}
-                margins={42}
+                margins={isPhone() ? 42 : 1}
               />
             </div>
 
@@ -460,28 +470,29 @@ const Note: Component<NoteProps> = (props) => {
               </Show>
             </div>
 
-            <div class={styles.footer}>
-              <NoteFooter
-                note={props.note}
-                state={reactionsState}
-                updateState={updateReactionsState}
-                customZapInfo={customZapInfo()}
-                size="wide"
-                large={true}
-                onZapAnim={addTopZap}
-                noteType="primary"
-              />
-            </div>
+            <Show when={!props.hideFooter}>
+              <div class={styles.footer}>
+                <NoteFooter
+                  note={props.note}
+                  state={reactionsState}
+                  updateState={updateReactionsState}
+                  customZapInfo={customZapInfo()}
+                  size="wide"
+                  large={true}
+                  onZapAnim={addTopZap}
+                  noteType="primary"
+                  onDelete={props.onRemove}
+                />
+              </div>
+            </Show>
           </div>
         </div>
       </Match>
 
       <Match when={isPhone() && noteType() === 'feed'}>
-        <a
+        <div
           id={props.id}
           class={`${styles.note} ${props.parent ? styles.parent : ''}`}
-          href={!props.onClick ? noteLinkId() : ''}
-          onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
           draggable={false}
@@ -491,7 +502,10 @@ const Note: Component<NoteProps> = (props) => {
               <NoteRepostHeader note={props.note} />
             </Show>
           </div>
-          <div class={styles.userHeader}>
+          <a
+            class={styles.userHeader}
+            href={app?.actions.profileLink(props.note.user.npub) || ''}
+          >
             {/* <A href={app?.actions.profileLink(props.note.user.npub) || ''}> */}
               <Avatar user={props.note.user} size="xs" />
             {/* </A> */}
@@ -501,24 +515,30 @@ const Note: Component<NoteProps> = (props) => {
               time={props.note.post.created_at}
             />
 
-            <div class={styles.upRightFloater}>
-              <NoteContextTrigger
-                ref={noteContextMenu}
-                onClick={onContextMenuTrigger}
-              />
-            </div>
-          </div>
+            <Show when={!props.hideContext}>
+              <div class={styles.upRightFloater}>
+                <NoteContextTrigger
+                  ref={noteContextMenu}
+                  onClick={onContextMenuTrigger}
+                />
+              </div>
+            </Show>
+          </a>
 
           <NoteReplyToHeader note={props.note} defaultParentAuthor={props.defaultParentAuthor} />
 
-          <div class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}>
+          <a
+            class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}
+            href={!props.onClick ? noteLinkId() : ''}
+            onClick={() => navToThread(props.note)}
+          >
             <ParsedNote
               note={props.note}
               shorten={props.shorten}
               width={window.innerWidth}
               margins={45}
             />
-          </div>
+          </a>
 
           <NoteTopZapsCompact
             note={props.note}
@@ -527,23 +547,24 @@ const Note: Component<NoteProps> = (props) => {
             topZapLimit={4}
           />
 
-          <NoteFooter
-            note={props.note}
-            state={reactionsState}
-            updateState={updateReactionsState}
-            customZapInfo={customZapInfo()}
-            onZapAnim={addTopZapFeed}
-            size={size()}
-          />
-        </a>
+          <Show when={!props.hideFooter}>
+            <NoteFooter
+              note={props.note}
+              state={reactionsState}
+              updateState={updateReactionsState}
+              customZapInfo={customZapInfo()}
+              onZapAnim={addTopZapFeed}
+              size={size()}
+              onDelete={props.onRemove}
+            />
+          </Show>
+        </div>
       </Match>
 
       <Match when={noteType() === 'thread' || noteType() === 'feed'}>
-        <a
+        <div
           id={props.id}
           class={`${styles.noteThread} ${props.parent ? styles.parent : ''}`}
-          href={!props.onClick ? noteLinkId() : ''}
-          onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
           draggable={false}
@@ -555,9 +576,9 @@ const Note: Component<NoteProps> = (props) => {
           </div>
           <div class={styles.content}>
             <div class={styles.leftSide}>
-              {/* <A href={app?.actions.profileLink(props.note.user.npub) || ''}> */}
+              <a href={app?.actions.profileLink(props.note.user.npub) || ''}>
                 <Avatar user={props.note.user} size="vs" />
-              {/* </A> */}
+              </a>
               <Show
                 when={props.parent}
               >
@@ -566,29 +587,45 @@ const Note: Component<NoteProps> = (props) => {
             </div>
 
             <div class={styles.rightSide}>
-              <NoteAuthorInfo
-                author={props.note.user}
-                time={props.note.post.created_at}
-              />
-
-              <div class={styles.upRightFloater}>
-                <NoteContextTrigger
-                  ref={noteContextMenu}
-                  onClick={onContextMenuTrigger}
+              <a
+                href={app?.actions.profileLink(props.note.user.npub) || ''}
+              >
+                <NoteAuthorInfo
+                  author={props.note.user}
+                  time={props.note.post.created_at}
                 />
-              </div>
+              </a>
+
+              <Show when={!props.hideContext}>
+                <div class={styles.upRightFloater}>
+                  <NoteContextTrigger
+                    ref={noteContextMenu}
+                    onClick={onContextMenuTrigger}
+                  />
+                </div>
+              </Show>
 
               <NoteReplyToHeader note={props.note} defaultParentAuthor={props.defaultParentAuthor} />
 
-              <div class={styles.message}>
+              <a
+                class={styles.message}
+                href={!props.onClick ? noteLinkId() : ''}
+                onClick={(e) => {
+                  if (app?.showNoteVideoContextMenu) {
+                    e.preventDefault();
+                    return false;
+                  }
+                  navToThread(props.note)
+                }}
+              >
                 <ParsedNote
                   note={props.note}
                   shorten={props.shorten}
-                  width={Math.min(508, window.innerWidth - 72)}
-                  margins={58}
+                  width={Math.min(510, window.innerWidth - 72)}
+                  margins={1}
                   footerSize="short"
                 />
-              </div>
+              </a>
 
               <NoteTopZapsCompact
                 note={props.note}
@@ -597,19 +634,22 @@ const Note: Component<NoteProps> = (props) => {
                 topZapLimit={4}
               />
 
-              <div class={styles.footer}>
-                <NoteFooter
-                  note={props.note}
-                  state={reactionsState}
-                  updateState={updateReactionsState}
-                  customZapInfo={customZapInfo()}
-                  onZapAnim={addTopZapFeed}
-                  size="short"
-                />
-              </div>
+              <Show when={!props.hideFooter}>
+                <div class={styles.footer}>
+                  <NoteFooter
+                    note={props.note}
+                    state={reactionsState}
+                    updateState={updateReactionsState}
+                    customZapInfo={customZapInfo()}
+                    onZapAnim={addTopZapFeed}
+                    size="short"
+                    onDelete={props.onRemove}
+                  />
+                </div>
+              </Show>
             </div>
           </div>
-        </a>
+        </div>
       </Match>
 
       <Match when={noteType() === 'reaction'}>

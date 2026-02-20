@@ -19,12 +19,20 @@
   grid-template-columns: var(--left-col-w) var(--center-col-w) var(--right-col-w);
 }
 
+.liveContainer {
+  width: var(--full-site-w);
+  margin: 0px auto;
+
+  display: grid;
+  grid-template-columns: 54px 756px var(--right-col-w);
+}
+
 .leftColumn {
   >div {
     position: fixed;
     width: var(--left-col-w);
     display: grid;
-    grid-template-rows: var(--header-height) 1fr 82px;
+    grid-template-rows: var(--header-height) 1fr 106px;
     height: 100%;
     border-right: 1px solid var(--devider);
   }
@@ -57,12 +65,35 @@
   }
 
   .leftFooter {
-    height: 82px;
-    display: flex;
+    height: 106px;
+    display: grid;
+    grid-template-rows: 30px 48px;
+    row-gap: 6px;
+    flex-direction: column;
+    align-items: flex-end;
     justify-content: flex-start;
+    padding-right: 24px;
   }
 }
 
+.liveStreamLeft {
+  width: 54px;
+  height: 100vh;
+  >div {
+    border-right: none;
+  }
+}
+
+.liveStreamCenter {
+  position: relative;
+  width: calc(var(--full-site-w) - 54px);
+  min-height: 100vh;
+
+  .headerFloater {
+    left: 50%; /* Position the left edge of the element at the horizontal center of the viewport */
+    transform: translateX(-50%);
+  }
+}
 
 .centerColumn {
   position: relative;
@@ -113,6 +144,21 @@
       height: 85px;
       border-left: none;
     }
+  }
+}
+
+.rightColumnLive {
+  display: flex;
+  flex-direction: column;
+  width: var(--right-col-w);
+
+  >div {
+    position: fixed;
+    width: var(--right-col-w);
+    display: grid;
+    grid-template-rows: var(--header-height) 1fr 82px;
+    height: 100%;
+    border-left: 1px solid var(--devider);
   }
 }
 
@@ -322,7 +368,6 @@
       /* height: calc(100dvh - 54px - 48px); */
     }
   }
-
 
   .phoneFooter {
     height: 48px;

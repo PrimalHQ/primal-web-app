@@ -1,34 +1,27 @@
-import { createContext, createEffect, on, onCleanup, useContext } from "solid-js";
+import { createContext, createEffect, on, useContext } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { APP_ID } from "../App";
-import { Kind, minKnownProfiles } from "../constants";
-import { getEvents } from "../lib/feed";
-import { setLinkPreviews } from "../lib/notes";
-import { getRecomendedArticleIds } from "../lib/search";
-import { emptyPaging, fetchMegaFeed, fetchRecomendedReads, filterAndSortReads, PaginationInfo } from "../megaFeeds";
-import { isConnected, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
-import { parseEmptyReposts, isRepostInCollection, convertToArticles } from "../stores/note";
+import { minKnownProfiles } from "../constants";
+import {
+  emptyPaging,
+  fetchMegaFeed,
+  fetchRecomendedReads,
+  filterAndSortReads,
+  PaginationInfo,
+} from "../megaFeeds";
 import {
   ContextChildren,
   FeedPage,
-  NostrEOSE,
-  NostrEvent,
-  NostrEventContent,
-  NostrMentionContent,
-  NostrNoteActionsContent,
   NostrNoteContent,
-  NostrStatsContent,
-  NostrUserContent,
-  NoteActions,
   PrimalArticle,
   PrimalArticleFeed,
   PrimalUser,
   SelectionOption,
-  TopZap,
 } from "../types/primal";
-import { calculateReadsOffset, parseBolt11 } from "../utils";
-import { useAccountContext } from "./AccountContext";
+import { calculateReadsOffset } from "../utils";
 import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
+import { accountStore } from "../stores/accountStore";
+import { useSettingsContext } from "./SettingsContext";
 
 
 type ReadsContextStore = {
@@ -78,6 +71,7 @@ type ReadsContextStore = {
     setTopics: (topicks: string[]) => void,
     setFeaturedAuthor: (author: PrimalUser) => void,
     refetchSelectedFeed: () => void,
+    removeEvent: (id: string) => void,
   }
 }
 
@@ -147,9 +141,13 @@ export const ReadsContext = createContext<ReadsContextStore>();
 
 export const ReadsProvider = (props: { children: ContextChildren }) => {
 
-  const account = useAccountContext();
+  const settings = useSettingsContext();
 
 // ACTIONS --------------------------------------
+
+const removeEvent = (id: string) => {
+  updateStore('notes', (drs) => drs.filter(d => d.id !== id));
+}
 
   const setTopics = (topics: string[]) => {
     updateStore('topics', () => [ ...topics ]);
@@ -203,7 +201,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
     );
 
     const { reads, paging } = await fetchMegaFeed(
-      account?.publicKey,
+      accountStore.publicKey,
       spec,
       `home_future_${APP_ID}`,
       {
@@ -237,7 +235,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
 
     updateStore('isFetching' , () => includeIsFetching);
 
-    const pubkey = account?.publicKey || minKnownProfiles.names['primal'];
+    const pubkey = accountStore.publicKey || minKnownProfiles.names['primal'];
 
     const offset = calculateReadsOffset(store.notes, store.paging.notes);
 
@@ -296,7 +294,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   const selectFeed = (feed: PrimalArticleFeed | undefined) => {
     if (feed?.spec !== undefined && (feed.spec !== currentFeed?.spec)) {
       currentFeed = { ...feed };
-      saveStoredFeed(account?.publicKey, 'reads', currentFeed);
+      saveStoredFeed(accountStore.publicKey, 'reads', currentFeed);
       updateStore('selectedFeed', reconcile({...feed}));
       clearNotes();
       fetchNotes(feed.spec, 0);
@@ -328,6 +326,14 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
   }
 
 
+  createEffect(on(() => settings?.readsFeedsReloaded, (reloaded) => {
+    if (!reloaded) return;
+
+    const feed = fetchStoredFeed(accountStore.publicKey, 'reads') || settings?.readsFeeds[0];
+
+    selectFeed(feed);
+  }));
+
 // STORES ---------------------------------------
 
   const [store, updateStore] = createStore<ReadsContextStore>({
@@ -348,6 +354,7 @@ export const ReadsProvider = (props: { children: ContextChildren }) => {
       setTopics,
       setFeaturedAuthor,
       refetchSelectedFeed,
+      removeEvent,
     },
   });
 

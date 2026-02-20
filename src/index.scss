@@ -61,7 +61,7 @@
   --missing-avatar-text: #FFFFFF;
 
   --z-index-lifted: 10;
-  --z-index-header: 20;
+  --z-index-header: 25;
   --z-index-floater: 30;
   --z-index-floater-2: 32;
   --z-index-overlay: 40;
@@ -124,6 +124,8 @@
   --legend-glow-blue: #01E0FF;
   --legend-glow-sunfire: #FFA722;
 
+  --mask-url: '';
+
   background-color: var(--background-site);
 
   .mentioned_user {
@@ -145,6 +147,10 @@
     width: 100%;
     height: 300px;
     border-radius: 4px;
+  }
+
+  .mtop-12 {
+    margin-top: 12px;
   }
 
   * {
@@ -174,6 +180,10 @@ body {
 a {
   color: var(--accent-links);
   text-decoration: none;
+
+  &:focus {
+    background: none;
+  }
 }
 
 .linkish {
@@ -248,6 +258,11 @@ body::after{
     url(./assets/icons/latest.svg)
     url(./assets/icons/heart.svg)
     url(./assets/icons/weather.svg)
+    url(./assets/icons/edit.svg)
+    url(./assets/icons/share.svg)
+    url(./assets/icons/unpublish.svg)
+    url(./assets/icons/quote.svg)
+    url(./assets/icons/clock.svg)
     url(./assets/icons/lf_editor_toolbar/bold.svg)
     url(./assets/icons/lf_editor_toolbar/bullet.svg)
     url(./assets/icons/lf_editor_toolbar/image.svg)
@@ -261,6 +276,27 @@ body::after{
     url(./assets/icons/lf_editor_toolbar/strike.svg)
     url(./assets/icons/lf_editor_toolbar/table.svg)
     url(./assets/icons/lf_editor_toolbar/uline.svg)
+
+    url(./assets/images/extension_dark.svg)
+    url(./assets/images/extension_light.svg)
+    url(./assets/images/nsec_dark.svg)
+    url(./assets/images/nsec_light.svg)
+    url(./assets/images/npub_dark.svg)
+    url(./assets/images/npub_light.svg)
+    url(./assets/images/signer_screenshot_dark_hq.png)
+    url(./assets/images/signer_screenshot_light_hq.png)
+
+
+    url(./assets/icons/table/del_table.svg)
+    url(./assets/icons/table/col_after.svg)
+    url(./assets/icons/table/col_before.svg)
+    url(./assets/icons/table/row_below.svg)
+    url(./assets/icons/table/row_above.svg)
+    url(./assets/icons/table/merge.svg)
+    url(./assets/icons/table/split.svg)
+    url(./assets/icons/table/del_row_dark.svg)
+    url(./assets/icons/table/del_col_dark.svg)
+    url(./assets/images/editor-phone-message.png)
     ;
 }
 
@@ -354,20 +390,27 @@ body::after{
   margin-block: 12px !important;
   display: grid;
 
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  grid-auto-rows: 125px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 250px 250px;
+  grid-template-areas:
+    "cell1 cell2"
+    "cell3 cell4";
+  height: 500px;
   border-radius: var(--border-radius-large) !important;
   overflow: hidden !important;
-  grid-gap: 2px;
+  gap: 1px;
 
   img {
     width: 100%;
     height: 100%;
+    object-fit: cover;
   }
 
+
   &.grid-2 {
+    max-height: 250px;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 500px;
+    grid-template-rows: 250px;
     grid-template-areas:
       "cell1 cell2";
   }
@@ -376,8 +419,8 @@ body::after{
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 250px 250px;
     grid-template-areas:
-      "cell1 cell2"
-      "cell1 cell3";
+      "cell1 cell1"
+      "cell2 cell3";
   }
   &.grid-4 {
     grid-template-columns: 1fr 1fr;
@@ -405,15 +448,27 @@ body::after{
   }
   .cell_1 {
     grid-area: cell1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .cell_2 {
     grid-area: cell2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .cell_3 {
     grid-area: cell3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .cell_4 {
     grid-area: cell4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .cell_5 {
     grid-area: cell5;
@@ -549,6 +604,15 @@ body::after{
     background-repeat: no-repeat;
   }
 
+}
+
+button {
+  background: none;
+  margin: 0;
+  padding: 0;
+  outline: 0;
+  border: none;
+  box-shadow: none;
 }
 
 button:focus {
@@ -1002,4 +1066,46 @@ button:focus {
   top: 0;
   /* left: 0; */
   background-color: var(--background-site);
+}
+
+th.selectedCell, td.selectedCell {
+  content: "";
+  left: 0; right: 0; top: 0; bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+
+  background-color: var(--subtile-devider) !important;
+}
+
+/* Force show progress bar for live streams */
+.video-js.vjs-live .vjs-progress-control {
+  display: flex !important;
+}
+
+/* Hide the "LIVE" indicator if you want */
+.video-js.vjs-live .vjs-live-display {
+  display: none;
+}
+
+/* Style the live seekbar differently */
+.video-js.vjs-live .vjs-progress-holder {
+  background: rgba(255, 0, 0, 0.2) !important; /* Red tint for live */
+}
+
+.video-js.vjs-live .vjs-play-progress {
+  background: #ff4444 !important; /* Red progress for live */
+}
+
+/* Show live edge indicator */
+.video-js.vjs-live .vjs-progress-control::after {
+  content: "LIVE";
+  position: absolute;
+  right: 0;
+  top: -25px;
+  background: #ff4444;
+  color: white;
+  padding: 2px 6px;
+  font-size: 10px;
+  border-radius: 2px;
 }

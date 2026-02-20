@@ -1,20 +1,15 @@
 import { A } from '@solidjs/router';
-import { Component, Show } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { useHomeContext } from '../../contexts/HomeContext';
+import { Component } from 'solid-js';
 import { useReadsContext } from '../../contexts/ReadsContext';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
 import { fetchStoredFeed } from '../../lib/localStore';
-import { FeedOption, PrimalFeed, SelectionOption } from '../../types/primal';
-import { sha256 } from '../../utils';
-import SelectBox from '../SelectBox/SelectBox';
-import SelectionBox from '../SelectionBox/SelectionBox';
+import { FeedOption, SelectionOption } from '../../types/primal';
 import SelectionBox2 from '../SelectionBox/SelectionBox2';
+import { accountStore } from '../../stores/accountStore';
 
 const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = (props) => {
 
-  const account = useAccountContext();
   const reeds = useReadsContext();
   const settings = useSettingsContext();
 
@@ -115,7 +110,7 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
     const selected = reeds?.selectedFeed;
 
     if (!selected) {
-      let feed = fetchStoredFeed(account?.publicKey, 'reads');
+      let feed = fetchStoredFeed(accountStore.publicKey, 'reads');
 
       if (feed) {
         return {
@@ -126,9 +121,9 @@ const ReedSelect: Component<{ isPhone?: boolean, id?: string, big?: boolean}> = 
         }
       }
 
-      
+
       const opt = options()[0];
-      
+
       selectFeed(opt);
       return opt;
     }

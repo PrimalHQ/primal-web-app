@@ -51,7 +51,9 @@ const NotificationsSidebar: Component<{
   };
 
   const activity = () => {
-    const replyNotifs = props.notifications[NotificationType.YOUR_POST_WAS_REPLIED_TO] || [];
+    let replyNotifs = props.notifications[NotificationType.YOUR_POST_WAS_REPLIED_TO] || [];
+    replyNotifs = [...replyNotifs, ...(props.notifications[NotificationType.REPLY_TO_REPLY] || [])];
+
     const repostNotifs = props.notifications[NotificationType.YOUR_POST_WAS_REPOSTED] || [];
     const likeNotifs = props.notifications[NotificationType.YOUR_POST_WAS_LIKED] || [];
 

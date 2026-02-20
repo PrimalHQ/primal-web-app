@@ -10,10 +10,11 @@ import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import styles from './Avatar.module.scss';
 import { useAppContext } from '../../contexts/AppContext';
 import { LegendCustomizationConfig } from '../../lib/premium';
+import { useSearchParams } from '@solidjs/router';
 
 const Avatar: Component<{
   src?: string | undefined,
-  size?: "nano" | "micro" | "xxs" | "xss" | "xs" | "vvs" | "vs2" | "vs" | "sm" | "md" | "ml" | "mll" | "lg" | "xl" | "xxl" | "xxxl",
+  size?: "nano" | "micro" | "xxs" | "xss" | "xs" | "vvs" | "vs2" | "vs" | "sm" | "md" | "ml" | "mll" | "lg" | "xl" | "xxl" | "xxxl" | "s38" | "s30" | "s50",
   user?: PrimalUser,
   highlightBorder?: boolean,
   id?: string,
@@ -21,10 +22,14 @@ const Avatar: Component<{
   zoomable?: boolean,
   showBorderRing?: boolean,
   legendConfig?: LegendCustomizationConfig,
+  legendWhite?: boolean,
 }> = (props) => {
 
   const media = useMediaContext();
   const app = useAppContext();
+
+  let queryString = window.location.search;
+  let searchParams = new URLSearchParams(queryString);
 
   const [isCached, setIsCached] = createSignal(false);
 
@@ -47,6 +52,9 @@ const Avatar: Component<{
     xl: styles.extraLargeAvatar,
     xxl: styles.xxlAvatar,
     xxxl: styles.xxxlAvatar,
+    s30: styles.s30Avatar,
+    s38: styles.s38Avatar,
+    s50: styles.s50Avatar,
   };
 
   const missingClass = {
@@ -66,6 +74,9 @@ const Avatar: Component<{
     xl: styles.extraLargeMissing,
     xxl: styles.xxlMissing,
     xxxl: styles.xxxlMissing,
+    s30: styles.s38Missing,
+    s38: styles.s38Missing,
+    s50: styles.s38Missing,
   };
 
   const imgError = (event: any) => {
@@ -96,6 +107,9 @@ const Avatar: Component<{
   }
 
   const highlightClass = () => {
+    if (props.legendWhite) {
+      return `${styles.legend} ${styles[`legend_WHITE`]}`;
+    }
     if (props.user){
       const legendConfig = props.legendConfig || app?.legendCustomization[props.user?.pubkey];
 
@@ -146,6 +160,7 @@ const Avatar: Component<{
       case 'ml':
       case 'mll':
       case 'lg':
+      case 's30':
         size = 's';
         break;
       default:
@@ -164,7 +179,15 @@ const Avatar: Component<{
 
     setIsCached(!!url);
 
-    return url ?? src;
+    const ret = url ?? src;
+
+    navigator?.serviceWorker?.controller?.postMessage({
+      type: 'CACHE_AVATAR',
+      url: ret,
+    });
+
+    return ret;
+
   });
 
   const notCachedFlag = () => {
@@ -189,6 +212,14 @@ const Avatar: Component<{
 
     return media?.actions.getMedia(src, 'm') || media?.actions.getMedia(src, 'o') || src;
   };
+
+  const liveHref = () => {
+    const stream = media?.actions.getStream(props.user?.pubkey || 'n/a');
+
+    if (!stream) return '';
+
+    return `${app?.actions.profileLink(props.user?.pubkey || stream.pubkey)}/live/${stream.id}`;
+  }
 
   return (
     <div
@@ -224,6 +255,19 @@ const Avatar: Component<{
       <Show when={props.user && props.showCheck}>
         <div class={styles.iconBackground}>
           <VerificationCheck user={props.user} />
+        </div>
+      </Show>
+
+      <Show when={media?.actions.isStreaming(props.user?.pubkey || 'n/a') && !props.legendWhite}>
+        <div class={styles.centerBottom}>
+          <a
+            id={props.id}
+            href={liveHref()}
+            class={styles.liveBadge}
+          >
+            <div class={styles.liveDot}></div>
+            <div class={styles.caption}>LIVE</div>
+          </a>
         </div>
       </Show>
     </div>

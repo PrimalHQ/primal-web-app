@@ -1,5 +1,5 @@
 import { Select } from '@kobalte/core/select';
-import { Component, Show, createSignal } from 'solid-js';
+import { Component, Show, createEffect, createSignal } from 'solid-js';
 
 import styles from './ReadsEditor.module.scss';
 
@@ -24,7 +24,7 @@ export const blockSelectorOptions: SelectorOption[] = [
 const ReadsEditorBlockSelector: Component<{
   value: SelectorOption
   options: SelectorOption[],
-  onChange: (selection: SelectorOption) => void,
+  onChange: (selection: SelectorOption | null) => void,
   short?: boolean,
 }> = (props) => {
 

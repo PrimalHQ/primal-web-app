@@ -1,8 +1,7 @@
 import { A, useNavigate } from '@solidjs/router';
-import { batch, Component, createEffect, createSignal, For, JSXElement, Show } from 'solid-js';
+import { batch, Component, createEffect, createSignal, JSXElement, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { wordsPerMinute } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
@@ -10,7 +9,7 @@ import { shortDate } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
 import { userName } from '../../stores/profile';
 import { PrimalArticle, TopZap, ZapOption } from '../../types/primal';
-import { uuidv4 } from '../../utils';
+import { urlEncode, uuidv4 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
 import { NoteReactionsState } from '../Note/Note';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
@@ -20,9 +19,9 @@ import defaultAvatarLight from '../../assets/images/reads_image_light.png';
 
 import styles from './ArticlePreview.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
-import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
 import NoteTopZapsTiny from '../Note/NoteTopZapsTiny';
 import { nip19 } from 'nostr-tools';
+import { accountStore } from '../../stores/accountStore';
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
@@ -35,11 +34,11 @@ const ArticleCompactPreview: Component<{
   hideContext?: boolean,
   bordered?: boolean,
   noLinks?: string,
-  onClick?: () => {},
+  onClick?: () => void,
+  onRemove?: (id: string) => void,
 }> = (props) => {
 
   const app = useAppContext();
-  const account = useAccountContext();
   const thread = useThreadContext();
   const media = useMediaContext();
   const settings = useSettingsContext();
@@ -88,7 +87,7 @@ const ArticleCompactPreview: Component<{
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
 
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -134,7 +133,7 @@ const ArticleCompactPreview: Component<{
   };
 
   const addTopZap = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -165,7 +164,7 @@ const ArticleCompactPreview: Component<{
 
 
   const addTopZapFeed = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -216,6 +215,9 @@ const ArticleCompactPreview: Component<{
         app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
+      () => {
+        props.onRemove && props.onRemove(props.article.noteId);
+      },
     );
   }
 
@@ -335,7 +337,7 @@ const ArticleCompactPreview: Component<{
 
     const data = decoded.data as nip19.AddressPointer;
 
-    return `/${vanityName}/${data.identifier}`;
+    return `/${vanityName}/${urlEncode(data.identifier)}`;
   }
 
   const wrapper = (children: JSXElement) => {

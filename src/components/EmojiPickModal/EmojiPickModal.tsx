@@ -1,13 +1,12 @@
 import { Component, createEffect, createSignal } from 'solid-js';
 
 import styles from './EmojiPickModal.module.scss';
-import Modal from '../Modal/Modal';
 
 import { EmojiOption } from '../../types/primal';
 import EmojiPicker from '../EmojiPicker/EmojiPicker';
 import EmojiPickHeader from './EmojiPickHeader';
-import { useAccountContext } from '../../contexts/AccountContext';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
+import { accountStore } from '../../stores/accountStore';
 
 const defaultTerm = 'face';
 
@@ -17,9 +16,6 @@ const EmojiPickModal: Component<{
   onClose: (e?: MouseEvent | KeyboardEvent) => void,
   onSelect: (emoji: EmojiOption) => void,
 }> = (props) => {
-
-  const account = useAccountContext();
-
   const [emojiSearchTerm, setEmojiSearchTerm] = createSignal(defaultTerm);
   const [focusInput, setFocusInput] = createSignal(false);
   const [showPreset, setShowPreset] = createSignal(true);
@@ -71,7 +67,7 @@ const EmojiPickModal: Component<{
 
         <EmojiPicker
           showPreset={showPreset()}
-          preset={account?.emojiHistory || []}
+          preset={accountStore.emojiHistory || []}
           filter={emojiSearchTerm()}
           onSelect={(emoji: EmojiOption) => {
             props.onSelect(emoji);

@@ -1,18 +1,15 @@
 import { createStore } from "solid-js/store";
 import { useToastContext } from "../components/Toaster/Toaster";
-import { andRD, andVersion, contentScope, defaultContentModeration, defaultFeeds, defaultNotificationAdditionalSettings, defaultNotificationSettings, defaultZap, defaultZapOptions, iosRD, iosVersion, nostrHighlights, themes, trendingFeed, trendingScope } from "../constants";
+import { NotificationType, andRD, andVersion, contentScope, defaultContentModeration, defaultFeeds, defaultNotificationAdditionalSettings, defaultNotificationSettings, defaultZap, defaultZapOptions, iosRD, iosVersion, nostrHighlights, themes, trendingScope } from "../constants";
 import {
   createContext,
   createEffect,
-  onCleanup,
+  on,
   onMount,
   useContext
 } from "solid-js";
 import {
   isConnected,
-  refreshSocketListeners,
-  removeSocketListeners,
-  socket,
   subsTo
 } from "../sockets";
 import {
@@ -33,8 +30,7 @@ import {
   updateAvailableFeeds,
   updateAvailableFeedsTop
 } from "../lib/availableFeeds";
-import { useAccountContext } from "./AccountContext";
-import { saveAnimated, saveHomeFeeds, saveNWC, saveNWCActive, saveReadsFeeds, saveTheme } from "../lib/localStore";
+import { readSystemDarkMode, saveAnimated, saveHomeFeeds, saveNWC, saveNWCActive, savePrimalProxySettings, saveReadsFeeds, saveSystemDarkMode, saveTheme } from "../lib/localStore";
 import { getDefaultSettings, getHomeSettings, getNWCSettings, getReadsSettings, getSettings, sendSettings, setHomeSettings, setReadsSettings } from "../lib/settings";
 import { APP_ID } from "../App";
 import { useIntl } from "@cookbook/solid-intl";
@@ -42,6 +38,9 @@ import { feedProfile, feedProfileDesription, settings as t } from "../translatio
 import { getMobileReleases } from "../lib/releases";
 import { logError } from "../lib/logger";
 import { fetchDefaultArticleFeeds, fetchDefaultHomeFeeds } from "../lib/feed";
+import { getDefaultBlossomServers } from "../lib/relays";
+import { runColorMode } from "../utils";
+import { accountStore, hasPublicKey, setProxyThroughPrimal, setDiscloseClient as setStoreDiscloseClient } from "../stores/accountStore";
 
 export type MobileReleases = {
   ios: { date: string, version: string },
@@ -52,10 +51,13 @@ export type SettingsContextStore = {
   locale: string,
   theme: string,
   themes: PrimalTheme[],
+  useSystemTheme: boolean,
   isAnimated: boolean,
   availableFeeds: PrimalFeed[],
   readsFeeds: PrimalArticleFeed[],
+  readsFeedsReloaded: boolean,
   homeFeeds: PrimalArticleFeed[],
+  homeFeedsReloaded: boolean,
   defaultFeed: PrimalFeed,
   defaultZap: ZapOption,
   availableZapOptions: ZapOption[],
@@ -66,8 +68,11 @@ export type SettingsContextStore = {
   applyContentModeration: boolean,
   contentModeration: ContentModeration[],
   mobileReleases: MobileReleases,
+  recomendedBlossomServers: string[],
   actions: {
     setTheme: (theme: PrimalTheme | null) => void,
+    setThemeByName: (theme: string | null, temp?: boolean) => void,
+    isLightTheme: () => boolean,
     addAvailableFeed: (feed: PrimalFeed, addToTop?: boolean) => void,
     removeAvailableFeed: (feed: PrimalFeed) => void,
     setAvailableFeeds: (feedList: PrimalFeed[]) => void,
@@ -79,6 +84,7 @@ export type SettingsContextStore = {
     setZapOptions: (option: ZapOption, index: number, temp?: boolean) => void,
     resetZapOptionsToDefault: (temp?: boolean) => void,
     updateNotificationSettings: (key: string, value: boolean, temp?: boolean) => void,
+    updateNotificationSettingsBulk: (entries: Record<string, boolean>, temp?: boolean) => void,
     updateNotificationAdditionalSettings: (key: string, value: boolean, temp?: boolean) => void,
     restoreDefaultFeeds: () => void,
     setApplyContentModeration: (flag: boolean) => void,
@@ -102,6 +108,8 @@ export type SettingsContextStore = {
     removeFeed: (feed: PrimalArticleFeed, feedType: FeedType) => void,
     isFeedAdded: (feed: PrimalArticleFeed, destination: 'home' | 'reads') => boolean,
     setAnimation: (isAnimated: boolean, temp?: boolean) => void,
+    getRecomendedBlossomServers: () => void,
+    setUseSystemTheme: (v: boolean) => void,
   }
 }
 
@@ -109,10 +117,13 @@ export const initialData = {
   locale: 'en-us',
   theme: 'sunrise',
   themes,
+  useSystemTheme: false,
   isAnimated: true,
   availableFeeds: [],
   readsFeeds: [],
+  readsFeedsReloaded: false,
   homeFeeds: [],
+  homeFeedsReloaded: false,
   defaultFeed: defaultFeeds[0],
   defaultZap: defaultZap,
   availableZapOptions: defaultZapOptions,
@@ -126,6 +137,7 @@ export const initialData = {
     ios: { date: `${iosRD}`, version: iosVersion },
     android: { date: `${andRD}`, version: andVersion },
   },
+  recomendedBlossomServers: [],
 };
 
 export type FeedType = 'home' | 'reads';
@@ -136,19 +148,52 @@ export const SettingsContext = createContext<SettingsContextStore>();
 export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const toaster = useToastContext();
-  const account = useAccountContext();
   const intl = useIntl();
 
 // ACTIONS --------------------------------------
 
-  const setProxyThroughPrimal = (shouldProxy: boolean, temp?: boolean) => {
-    account?.actions.setProxyThroughPrimal(shouldProxy);
+  const isLightTheme = (): boolean => {
+    return ['sunrise', 'ice'].includes(store.theme);
+  }
 
-    !temp && saveSettings();
+  const setUseSystemTheme = (flag: boolean) => {
+    updateStore('useSystemTheme', () => flag);
+    saveSystemDarkMode(accountStore.publicKey, flag);
+
+    if (['sunrise', 'sunset'].includes(store.theme)) {
+      setThemeByName(flag ? 'sunset' : 'sunrise', true);
+    } else {
+      setThemeByName(flag ? 'midnight' : 'ice', true);
+    }
+  }
+
+  const getRecomendedBlossomServers = () => {
+    const subId = `recommended_blossom_${APP_ID}`;
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        const list = JSON.parse(content.content || '[]') as string[];
+        updateStore('recomendedBlossomServers', () => [ ...list ]);
+      },
+      onEose: () => {
+        unsub();
+      },
+    })
+
+    getDefaultBlossomServers(subId);
+  };
+
+  const setTheProxyThroughPrimal = (shouldProxy: boolean, temp?: boolean) => {
+    setProxyThroughPrimal(shouldProxy);
+
+    if (!temp) {
+      saveSettings();
+      savePrimalProxySettings(accountStore.publicKey, shouldProxy)
+    }
   }
 
   const setDiscloseClient = (shouldDisclose: boolean, temp?: boolean) => {
-    account?.actions.setDiscloseClient(shouldDisclose);
+    setStoreDiscloseClient(shouldDisclose);
 
     !temp && saveSettings();
   }
@@ -215,10 +260,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    saveTheme(account?.publicKey, theme.name);
     updateStore('theme', () => theme.name);
+    if (!temp) {
+      saveTheme(accountStore.publicKey, theme.name);
 
-    !temp && saveSettings();
+      saveSettings();
+    }
   }
 
   const setThemeByName = (name: string | null, temp?: boolean) => {
@@ -226,13 +273,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    const availableTheme = store.themes.find(t => t.name === name);
+    const availableTheme = store.themes.find((t: PrimalTheme) => t.name === name);
     availableTheme && setTheme(availableTheme, temp);
   }
 
   const setAnimation = (isAnimated: boolean, temp?: boolean) => {
 
-    saveAnimated(account?.publicKey, isAnimated);
+    saveAnimated(accountStore.publicKey, isAnimated);
     updateStore('isAnimated', () => isAnimated);
 
     !temp && saveSettings();
@@ -249,10 +296,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     if (!feed) {
       return;
     }
-    if (account?.hasPublicKey()) {
+    if (hasPublicKey()) {
       const add = addToTop ? updateAvailableFeedsTop : updateAvailableFeeds;
 
-      updateStore('availableFeeds', (feeds) => add(account?.publicKey, feed, feeds));
+      updateStore('availableFeeds', (feeds) => add(accountStore.publicKey, feed, feeds));
 
 
       !temp && saveSettings();
@@ -264,9 +311,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
-    if (account?.hasPublicKey()) {
+    if (hasPublicKey()) {
       updateStore('availableFeeds',
-        (feeds) => removeFromAvailableFeeds(account?.publicKey, feed, feeds),
+        (feeds) => removeFromAvailableFeeds(accountStore.publicKey, feed, feeds),
       );
 
 
@@ -275,9 +322,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const setAvailableFeeds = (feedList: PrimalFeed[], temp?: boolean) => {
-    if (account?.hasPublicKey()) {
+    if (hasPublicKey()) {
       updateStore('availableFeeds',
-        () => replaceAvailableFeeds(account?.publicKey, feedList),
+        () => replaceAvailableFeeds(accountStore.publicKey, feedList),
       );
 
       !temp && saveSettings();
@@ -295,7 +342,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const renameAvailableFeed = (feed: PrimalFeed, newName: string) => {
-    const list = store.availableFeeds.map(af => {
+    const list = store.availableFeeds.map((af: PrimalFeed) => {
       return af.hex === feed.hex && af.includeReplies === feed.includeReplies ? { ...af, name: newName } : { ...af };
     });
     setAvailableFeeds(list);
@@ -324,7 +371,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     if (!pubkey) return;
 
     const spec = specifyUserFeed(pubkey);
-    const list = store.homeFeeds.filter(f => f.spec !== spec);
+    const list = store.homeFeeds.filter((f: PrimalArticleFeed) => f.spec !== spec);
 
     updateHomeFeeds(list);
   }
@@ -332,12 +379,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   const removeFeed = (feed: PrimalArticleFeed, feedType: FeedType) => {
 
     if (feedType === 'home') {
-      const updated = store.homeFeeds.filter(f => f.spec !== feed.spec);
+      const updated = store.homeFeeds.filter((f: PrimalArticleFeed) => f.spec !== feed.spec);
       updateHomeFeeds(updated);
     }
 
     if (feedType === 'reads') {
-      const updated = store.readsFeeds.filter(f => f.spec !== feed.spec);
+      const updated = store.readsFeeds.filter((f: PrimalArticleFeed) => f.spec !== feed.spec);
       updateReadsFeeds(updated);
     }
   }
@@ -388,7 +435,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     const spec = specifyUserFeed(pubkey);
 
-    return store.homeFeeds.find(f => f.spec === spec) !== undefined;
+    return store.homeFeeds.find((f: PrimalArticleFeed) => f.spec === spec) !== undefined;
   }
 
   const restoreHomeFeeds = () => {
@@ -433,7 +480,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const updateHomeFeeds = (feeds: PrimalArticleFeed[]) => {
     updateStore('homeFeeds', () => [...feeds]);
-    saveHomeFeeds(account?.publicKey, feeds);
+    saveHomeFeeds(accountStore.publicKey, feeds);
 
     const subId = `set_home_feeds_${APP_ID}`;
 
@@ -446,7 +493,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const updateReadsFeeds = (feeds: PrimalArticleFeed[]) => {
     updateStore('readsFeeds', () => [...feeds]);
-    saveHomeFeeds(account?.publicKey, feeds);
+    saveHomeFeeds(accountStore.publicKey, feeds);
 
     const subId = `set_home_feeds_${APP_ID}`;
 
@@ -476,21 +523,21 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const renameHomeFeed = (feed: PrimalArticleFeed, newName: string) => {
-    const list = store.homeFeeds.map(f => {
+    const list = store.homeFeeds.map((f: PrimalArticleFeed) => {
       return f.spec === feed.spec ? { ...f, name: newName } : { ...f };
     });
     updateHomeFeeds(list);
   };
 
   const renameReadsFeed = (feed: PrimalArticleFeed, newName: string) => {
-    const list = store.readsFeeds.map(f => {
+    const list = store.readsFeeds.map((f: PrimalArticleFeed) => {
       return f.spec === feed.spec ? { ...f, name: newName } : { ...f };
     });
     updateReadsFeeds(list);
   };
 
   const enableHomeFeed = (feed: PrimalArticleFeed, enabled: boolean) => {
-    const list = store.homeFeeds.map(f => {
+    const list = store.homeFeeds.map((f: PrimalArticleFeed) => {
       return f.spec === feed.spec ? { ...f, enabled } : { ...f };
     });
 
@@ -498,7 +545,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const enableReadsFeed = (feed: PrimalArticleFeed, enabled: boolean) => {
-    const list = store.readsFeeds.map(f => {
+    const list = store.readsFeeds.map((f: PrimalArticleFeed) => {
       return f.spec === feed.spec ? { ...f, enabled } : { ...f };
     });
 
@@ -507,9 +554,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const isFeedAdded: (f: PrimalArticleFeed, d: 'home' | 'reads') => boolean = (feed: PrimalArticleFeed, destination: 'home' | 'reads') => {
     if (destination === 'reads') {
-      return store.readsFeeds.find(f => f.spec === feed.spec) !== undefined;
+      return store.readsFeeds.find((f: PrimalArticleFeed) => f.spec === feed.spec) !== undefined;
     }
-    return store.homeFeeds.find(f => f.spec === feed.spec) !== undefined;
+    return store.homeFeeds.find((f: PrimalArticleFeed) => f.spec === feed.spec) !== undefined;
   }
 
   const addHomeFeed = (feed: PrimalArticleFeed) => {
@@ -522,6 +569,16 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     const list = [ ...store.readsFeeds, {...feed}];
 
     updateReadsFeeds(list);
+  };
+
+  const updateNotificationSettingsBulk = (entries: Record<string, boolean>, temp?: boolean) => {
+    const update = Object.entries(entries).reduce<Record<string, boolean>>((acc, [key, value]) => {
+      return { ...acc, [key]: value };
+    }, {})
+    updateStore('notificationSettings', () => ({ ...update }));
+
+
+    !temp && saveSettings();
   };
 
   const updateNotificationSettings = (key: string, value: boolean, temp?: boolean) => {
@@ -549,22 +606,22 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     //       let feeds = settings.feeds as PrimalFeed[];
 
-    //       if (account?.hasPublicKey()) {
+    //       if (hasPublicKey()) {
     //         feeds.unshift({
     //           name: feedLatestWithRepliesLabel,
-    //           hex: account?.publicKey,
-    //           npub: hexToNpub(account?.publicKey),
+    //           hex: accountStore.publicKey,
+    //           npub: hexToNpub(accountStore.publicKey),
     //           includeReplies: true,
     //         });
     //         feeds.unshift({
     //           name: feedLatestLabel,
-    //           hex: account?.publicKey,
-    //           npub: hexToNpub(account?.publicKey),
+    //           hex: accountStore.publicKey,
+    //           npub: hexToNpub(accountStore.publicKey),
     //         });
     //       }
 
     //       updateStore('availableFeeds',
-    //         () => replaceAvailableFeeds(account?.publicKey, feeds),
+    //         () => replaceAvailableFeeds(accountStore.publicKey, feeds),
     //       );
 
     //       updateStore('defaultFeed', () => store.availableFeeds[0]);
@@ -603,6 +660,14 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   };
 
   const saveSettings = (then?: () => void) => {
+    let notificationsAdditional = { ...store.notificationAdditionalSettings };
+
+    for (let notifType in NotificationType) {
+      if (notificationsAdditional[notifType] !== undefined) {
+        delete notificationsAdditional[notifType];
+      }
+    }
+
     const settings = {
       theme: store.theme,
       feeds: store.availableFeeds,
@@ -611,11 +676,11 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       defaultZapAmount: store.defaultZapAmountOld,
       zapOptions: store.zapOptionsOld,
       notifications: store.notificationSettings,
-      notificationsAdditional: store.notificationAdditionalSettings,
+      notificationsAdditional,
       applyContentModeration: store.applyContentModeration,
       contentModeration: store.contentModeration,
-      proxyThroughPrimal: account?.proxyThroughPrimal ?? false,
-      discloseClient: account?.discloseClient ?? true,
+      proxyThroughPrimal: accountStore.proxyThroughPrimal || false,
+      discloseClient: accountStore.discloseClient ?? true,
       animated: store.isAnimated,
     };
 
@@ -653,13 +718,13 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           const notificationAdditionalSettings = settings.notificationsAdditional as Record<string, boolean>;
 
           updateStore('availableFeeds',
-            () => replaceAvailableFeeds(account?.publicKey, feeds),
+            () => replaceAvailableFeeds(accountStore.publicKey, feeds),
           );
 
-          updateStore('defaultFeed', () => store.availableFeeds.find(x => x.hex === nostrHighlights) || store.availableFeeds[0]);
+          updateStore('defaultFeed', () => store.availableFeeds.find((x: PrimalFeed) => x.hex === nostrHighlights) || store.availableFeeds[0]);
 
-          updateStore('notificationSettings', () => ({ ...notificationSettings } || { ...defaultNotificationSettings }));
-          updateStore('notificationAdditionalSettings', () => ({ ...notificationAdditionalSettings } || { ...defaultNotificationAdditionalSettings }));
+          updateStore('notificationSettings', () => (Object.keys(notificationSettings).length > 0 ? { ...notificationSettings } : { ...defaultNotificationSettings }));
+          updateStore('notificationAdditionalSettings', () => (Object.keys(notificationAdditionalSettings) ? { ...notificationAdditionalSettings } : { ...defaultNotificationAdditionalSettings }));
           updateStore('applyContentModeration', () => true);
 
           let zapOptions = settings.zapConfig;
@@ -687,16 +752,24 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     getDefaultSettings(subid);
     getDefaultHomeFeeds();
     getDefaultReadsFeeds();
+    getRecomendedBlossomServers();
   };
 
-  const loadSettings = (pubkey: string | undefined, then?: () => void) => {
+  const loadSettings = async (pubkey: string | undefined, then?: () => void) => {
 
     if (!pubkey) {
       return;
     }
 
+    updateStore('homeFeedsReloaded', () => false);
+    updateStore('readsFeedsReloaded', () => false);
+
     updateStore('homeFeeds', () => [ ...loadHomeFeeds(pubkey) ])
     updateStore('readsFeeds', () => [ ...loadReadsFeeds(pubkey) ])
+
+    updateStore('homeFeedsReloaded', () => true);
+    updateStore('readsFeedsReloaded', () => true);
+
 
     const settingsSubId = `load_settings_${APP_ID}`;
     const settingsHomeSubId = `load_home_settings_${APP_ID}`;
@@ -723,7 +796,21 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             discloseClient,
           } = JSON.parse(content.content || '{}');
 
-          theme && setThemeByName(theme, true);
+          if (store.useSystemTheme) {
+
+            runColorMode((isDark) => {
+              if (['sunrise', 'sunset'].includes(theme)) {
+                setThemeByName(isDark ? 'sunset' : 'sunrise', true);
+              } else {
+                setThemeByName(isDark ? 'midnight' : 'ice', true);
+              }
+            }, () => {
+              theme && setThemeByName(theme, true);
+            })
+          }
+          else if (theme) {
+            setThemeByName(theme, true);
+          }
 
           setAnimation(animated, true);
 
@@ -761,8 +848,6 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             updateStore('notificationAdditionalSettings', () => ({ ...defaultNotificationAdditionalSettings }));
           }
 
-          console.log('SETTINGS: ', store.notificationAdditionalSettings)
-
           updateStore('applyContentModeration', () => applyContentModeration === false ? false : true);
 
           if (Array.isArray(contentModeration) && contentModeration.length === 0) {
@@ -771,7 +856,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           else if (Array.isArray(contentModeration)) {
             for (let i=0; i < contentModeration.length; i++) {
               const m = contentModeration[i];
-              const index = store.contentModeration.findIndex(x => x.name === m.name);
+              const index = store.contentModeration.findIndex((x: ContentModeration) => x.name === m.name);
 
               updateStore(
                 'contentModeration',
@@ -781,8 +866,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             }
           }
 
-          account?.actions.setProxyThroughPrimal(proxyThroughPrimal);
-          account?.actions.setDiscloseClient(discloseClient);
+          setProxyThroughPrimal(proxyThroughPrimal);
+          setStoreDiscloseClient(discloseClient ?? true);
         }
         catch (e) {
           logError('Error parsing settings response: ', e);
@@ -814,11 +899,21 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           getDefaultHomeFeeds();
         }
         saveHomeFeeds(pubkey, store.homeFeeds);
+        updateStore('homeFeedsReloaded', () => true);
         unsubHomeSettings();
       }
     });
 
-    pubkey && getHomeSettings(settingsHomeSubId);
+    if (pubkey) {
+      updateStore('readsFeedsReloaded', () => false);
+
+      const ok = await getHomeSettings(settingsHomeSubId);
+
+      if (!ok) {
+        unsubHomeSettings();
+        getDefaultHomeFeeds();
+      }
+    }
 
     const unsubReadsSettings = subsTo(settingsReadsSubId, {
       onEvent: (_, content) => {
@@ -831,11 +926,20 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           getDefaultReadsFeeds();
         }
         saveReadsFeeds(pubkey, store.readsFeeds);
+        updateStore('readsFeedsReloaded', () => true);
         unsubReadsSettings();
       }
     });
 
-    pubkey && getReadsSettings(settingsReadsSubId);
+    if (pubkey) {
+      updateStore('readsFeedsReloaded', () => false);
+      const ok = await getReadsSettings(settingsReadsSubId);
+
+      if (!ok) {
+        unsubReadsSettings();
+        getDefaultReadsFeeds();
+      }
+    }
 
     let nwcList: string[][] = [];
     let activeNWC: string[] = [];
@@ -858,6 +962,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     });
 
     pubkey && getNWCSettings(settingsNWCSubId);
+
+    getRecomendedBlossomServers();
   }
 
   const refreshMobileReleases = () => {
@@ -887,7 +993,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       },
       onEose: () => {
         unsub();
-        initReadsFeeds(account?.publicKey, store.readsFeeds);
+        initReadsFeeds(accountStore.publicKey, store.readsFeeds);
+        updateStore('readsFeedsReloaded', () => true);
       },
     });
 
@@ -905,13 +1012,36 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       },
       onEose: () => {
         unsub();
-        initHomeFeeds(account?.publicKey, store.homeFeeds)
+        initHomeFeeds(accountStore.publicKey, store.homeFeeds);
+        updateStore('homeFeedsReloaded', () => true);
       },
     });
 
+    updateStore('homeFeedsReloaded', () => false);
     fetchDefaultHomeFeeds(subId);
   }
 
+  const resolveTheme = () => {
+    const storedTheme = localStorage.getItem('theme') || 'sunrise';
+    const pubkey = localStorage.getItem('pubkey') || undefined;
+    const useSystemDarkMode = readSystemDarkMode(pubkey);
+
+    updateStore('useSystemTheme', () => useSystemDarkMode || false);
+
+    if (useSystemDarkMode) {
+      runColorMode((isDark) => {
+        if (['sunrise', 'sunset'].includes(storedTheme)) {
+          setThemeByName(isDark ? 'sunset' : 'sunrise', true);
+        } else {
+          setThemeByName(isDark ? 'midnight' : 'ice', true);
+        }
+      }, () => {
+        setThemeByName(storedTheme, true);
+      })
+    } else {
+      setThemeByName(storedTheme, true);
+    }
+  }
 
 // EFFECTS --------------------------------------
 
@@ -925,8 +1055,10 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
     // Set global theme, this is done to avoid changing the theme
     // when waiting for pubkey (like when reloading a page).
-    const storedTheme = localStorage.getItem('theme');
-    setThemeByName(storedTheme, true);
+    resolveTheme();
+    // const storedTheme = localStorage.getItem('theme');
+    // setThemeByName(storedTheme, true);
+
     const storedAnimated = localStorage.getItem('animated') || 'true';
     const anim = storedAnimated === 'true' ? true : false;
     setAnimation(anim, true);
@@ -935,17 +1067,23 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   });
 
   // Initial setup for a user with a public key
-  createEffect(() => {
-    if (!account?.hasPublicKey() && account?.isKeyLookupDone) {
+  createEffect(on(() => accountStore.isKeyLookupDone, (isDone) => {
+    if (!isDone) return;
+    const pubkey = accountStore.publicKey;
+
+    if (!pubkey) {
+      updateStore('homeFeeds', () => [])
+      updateStore('readsFeeds', () => [])
+
       loadDefaults();
       return;
     }
 
-    const publicKey = account?.publicKey;
+    // if (!isConnected()) return;
 
-    loadSettings(publicKey, () => {
+    loadSettings(pubkey, () => {
     });
-  });
+  }));
 
   createEffect(() => {
     const html: HTMLElement | null = document.querySelector('html');
@@ -966,6 +1104,8 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
     ...initialData,
     actions: {
       setTheme,
+      setThemeByName,
+      isLightTheme,
       addAvailableFeed,
       removeAvailableFeed,
       setAvailableFeeds,
@@ -983,11 +1123,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       setZapOptions,
       resetZapOptionsToDefault,
       updateNotificationSettings,
+      updateNotificationSettingsBulk,
       updateNotificationAdditionalSettings,
       setApplyContentModeration,
       modifyContentModeration,
       refreshMobileReleases,
-      setProxyThroughPrimal,
+      setProxyThroughPrimal: setTheProxyThroughPrimal,
       setDiscloseClient,
       getDefaultReadsFeeds,
       getDefaultHomeFeeds,
@@ -1002,6 +1143,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       isFeedAdded,
 
       setAnimation,
+
+      getRecomendedBlossomServers,
+      setUseSystemTheme,
     },
   });
 

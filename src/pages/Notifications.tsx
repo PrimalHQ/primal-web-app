@@ -1,7 +1,7 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { useSearchParams } from '@solidjs/router';
 import { nip19 } from '../lib/nTools';
-import { Component, createEffect, createMemo, createSignal, For, onCleanup, Show } from 'solid-js';
+import { Component, createEffect, createMemo, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 import { APP_ID } from '../App';
 import Loader from '../components/Loader/Loader';
@@ -13,13 +13,12 @@ import Search from '../components/Search/Search';
 import StickySidebar from '../components/StickySidebar/StickySidebar';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { Kind, minKnownProfiles, NotificationType, notificationTypeUserProps } from '../constants';
-import { useAccountContext } from '../contexts/AccountContext';
 import { notifSince, setNotifSince, useNotificationsContext } from '../contexts/NotificationsContext';
 import { getNotifications, getOldNotifications, setLastSeen, truncateNumber } from '../lib/notifications';
 import { subsTo } from '../sockets';
-import { convertToNotes } from '../stores/note';
+import { convertToArticles, convertToNotes } from '../stores/note';
 import { convertToUser, emptyUser } from '../stores/profile';
-import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, NoteActions, NotificationGroup, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
+import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NostrUserStatsContent, NoteActions, NotificationGroup, PrimalArticle, PrimalNote, PrimalNotification, PrimalNotifUser, PrimalUser, SortedNotifications } from '../types/primal';
 import { notifications as t } from '../translations';
 import { Tabs } from "@kobalte/core/tabs";
 
@@ -28,12 +27,12 @@ import PageCaption from '../components/PageCaption/PageCaption';
 import PageTitle from '../components/PageTitle/PageTitle';
 import { isPhone, timeNow } from '../utils';
 import { logError } from '../lib/logger';
+import { StreamingData } from '../lib/streaming';
+import { accountStore, hasPublicKey } from '../stores/accountStore';
 
 
 
 const Notifications: Component = () => {
-
-  const account = useAccountContext();
   const notifications = useNotificationsContext();
   const intl = useIntl();
 
@@ -66,22 +65,30 @@ const Notifications: Component = () => {
 
   type NotificationStore = {
     notes: PrimalNote[],
+    reads: PrimalArticle[],
+    highlights: any[],
     users: PrimalUser[],
-    page: FeedPage,
+    page: FeedPage & { highlights: any[], streams: StreamingData[]},
     reposts: Record<string, string> | undefined,
+    streams: StreamingData[],
   }
 
   type OldNotificationStore = {
     notes: PrimalNote[],
+    reads: PrimalArticle[],
+    highlights: any[],
     users: Record<string, PrimalUser>,
     userStats: Record<string, { followers_count: number }>,
-    page: FeedPage & { notifications: PrimalNotification[]},
+    page: FeedPage & { notifications: PrimalNotification[], highlights: any[], streams: StreamingData[]},
     reposts: Record<string, string> | undefined,
     notifications: PrimalNotification[],
+    streams: StreamingData[],
   }
 
   const [relatedNotes, setRelatedNotes] = createStore<NotificationStore>({
     notes: [],
+    reads: [],
+    highlights: [],
     users: [],
     page: {
       messages: [],
@@ -90,12 +97,17 @@ const Notifications: Component = () => {
       mentions: {},
       noteActions: {},
       topZaps: {},
+      highlights: [],
+      streams: [],
     },
     reposts: {},
+    streams: [],
   })
 
   const [oldNotifications, setOldNotifications] = createStore<OldNotificationStore>({
     notes: [],
+    reads: [],
+    highlights: [],
     users: {},
     userStats: {},
     page: {
@@ -106,9 +118,12 @@ const Notifications: Component = () => {
       mentions: {},
       noteActions: {},
       topZaps: {},
+      highlights: [],
+      streams: [],
     },
     reposts: {},
     notifications: [],
+    streams: []
   })
 
   const hasNewNotifications = createMemo(() => {
@@ -116,7 +131,11 @@ const Notifications: Component = () => {
   });
 
   const publicKey = () => {
-    const user = queryParams.user;
+    let user = queryParams.user;
+    if (Array.isArray(user)) {
+      user = user[0];
+    }
+
     if (user) {
       if (minKnownProfiles.names[user]) {
         return minKnownProfiles.names[user];
@@ -129,11 +148,11 @@ const Notifications: Component = () => {
       return user;
     }
 
-    return account?.publicKey;
+    return accountStore.publicKey;
   }
 
   createEffect(() => {
-    if (account?.hasPublicKey() && publicKey() === account.publicKey) {
+    if (hasPublicKey() && publicKey() === accountStore.publicKey) {
       const subid = `notif_sls_${APP_ID}`;
 
       const unsub = subsTo(subid, {
@@ -161,11 +180,38 @@ const Notifications: Component = () => {
 
     const unsub = subsTo(subid, {
       onEvent: (_, content) => {
+        if (content.kind === Kind.LiveEvent) {
+          const stream: StreamingData = {
+            id: (content.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
+            url: (content.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
+            image: (content.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
+            status: (content.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
+            starts: parseInt((content.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
+            summary: (content.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
+            title: (content.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
+            client: (content.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
+            currentParticipants: parseInt((content.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+            pubkey: content.pubkey,
+            hosts: (content.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
+            participants: (content.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
+            event: {...content },
+          }
+
+          setRelatedNotes('page',  'streams',
+            (streams) => [...streams, { ...stream }]
+          );
+          return;
+        }
         if (!content) return;
 
         if (content.kind === Kind.Notification) {
 
           const notif = JSON.parse(content.content) as PrimalNotification;
+
+          // Skip unknown notification types
+          if (!Object.values(NotificationType).includes(notif.type)) {
+            return;
+          }
 
           if (newNotifs[notif.type]) {
             newNotifs[notif.type].push(notif);
@@ -206,6 +252,26 @@ const Notifications: Component = () => {
           return;
         }
 
+        if ([Kind.LongForm].includes(content.kind)) {
+          const message = content as NostrNoteContent;
+
+          setRelatedNotes('page', 'messages',
+            (msgs) => [ ...msgs, { ...message }]
+          );
+
+          return;
+        }
+
+        if ([Kind.Highlight].includes(content.kind)) {
+          const message = content as NostrNoteContent;
+
+          setRelatedNotes('page', 'highlights',
+            (msgs) => [ ...msgs, { ...message }]
+          );
+
+          return;
+        }
+
         if (content.kind === Kind.NoteStats) {
           const statistic = content as NostrStatsContent;
           const stat = JSON.parse(statistic.content);
@@ -238,7 +304,17 @@ const Notifications: Component = () => {
       },
       onEose: () => {
         setSortedNotifications(() => newNotifs);
+
         setRelatedNotes('notes', () => [...convertToNotes(relatedNotes.page)])
+
+        // Convert related highlights
+        setRelatedNotes('highlights', (h) => [...h, ...relatedNotes.page.highlights])
+
+        // Convert related articles
+        setRelatedNotes('reads', () => [...convertToArticles(relatedNotes.page)])
+
+        setRelatedNotes('streams', (streams) => [...streams, ...relatedNotes.page.streams])
+
         setAllSet(true);
         setNotifSince(timeNow());
         unsub();
@@ -249,7 +325,7 @@ const Notifications: Component = () => {
 
     newNotifs = {};
     setSortedNotifications(reconcile({}));
-    getNotifications(account?.publicKey, pk as string, subid, group, since);
+    getNotifications(accountStore.publicKey, pk as string, subid, group, since);
 
   };
 
@@ -274,6 +350,10 @@ const Notifications: Component = () => {
 
   };
 
+  onMount(() => {
+    notifications?.actions.resetNotificationCounter();
+  });
+
   onCleanup(() => {
     setLastNotification(undefined);
     setOldNotifications('notifications', []);
@@ -292,12 +372,39 @@ const Notifications: Component = () => {
 
     const unsub = subsTo(subid, {
       onEvent: (_, content) => {
+        if (content.kind === Kind.LiveEvent) {
+          const stream: StreamingData = {
+            id: (content.tags?.find((t: string[]) => t[0] === 'd') || [])[1],
+            url: (content.tags?.find((t: string[]) => t[0] === 'streaming') || [])[1],
+            image: (content.tags?.find((t: string[]) => t[0] === 'image') || [])[1],
+            status: (content.tags?.find((t: string[]) => t[0] === 'status') || [])[1],
+            starts: parseInt((content.tags?.find((t: string[]) => t[0] === 'starts') || ['', '0'])[1]),
+            summary: (content.tags?.find((t: string[]) => t[0] === 'summary') || [])[1],
+            title: (content.tags?.find((t: string[]) => t[0] === 'title') || [])[1],
+            client: (content.tags?.find((t: string[]) => t[0] === 'client') || [])[1],
+            currentParticipants: parseInt((content.tags?.find((t: string[]) => t[0] === 'current_participants') || ['', '0'])[1] || '0'),
+            pubkey: content.pubkey,
+            hosts: (content.tags || []).filter(t => t[0] === 'p' && t[3].toLowerCase() === 'host').map(t => t[1]),
+            participants: (content.tags || []).filter(t => t[0] === 'p').map(t => t[1]),
+            event: {...content },
+          }
+
+          setOldNotifications('page',  'streams',
+            (streams) => [...streams, { ...stream }]
+          );
+          return;
+        }
+
         if (!content?.content) {
           return;
         }
 
         if (content.kind === Kind.Notification) {
           const notif = JSON.parse(content.content) as PrimalNotification;
+
+          // Ignore unsupported notification types
+          const isSupportedNotification = Object.values(NotificationType).includes(notif.type);
+          if (!isSupportedNotification) return;
 
           const isLastNotif =
             lastNotification()?.created_at === notif.created_at &&
@@ -331,6 +438,26 @@ const Notifications: Component = () => {
           const message = content as NostrNoteContent;
 
           setOldNotifications('page', 'messages',
+            (msgs) => [ ...msgs, { ...message }]
+          );
+
+          return;
+        }
+
+        if ([Kind.LongForm].includes(content.kind)) {
+          const message = content as NostrNoteContent;
+
+          setOldNotifications('page', 'messages',
+            (msgs) => [ ...msgs, { ...message }]
+          );
+
+          return;
+        }
+
+        if ([Kind.Highlight].includes(content.kind)) {
+          const message = content as NostrNoteContent;
+
+          setOldNotifications('page', 'highlights',
             (msgs) => [ ...msgs, { ...message }]
           );
 
@@ -379,6 +506,14 @@ const Notifications: Component = () => {
         // Convert related notes
         setOldNotifications('notes', (notes) => [...notes, ...convertToNotes(oldNotifications.page)])
 
+        // Convert related highlights
+        setOldNotifications('highlights', (high) => [...high, ...oldNotifications.page.highlights])
+
+        // Convert related articles
+        setOldNotifications('reads', (reads) => [...reads, ...convertToArticles(oldNotifications.page)])
+
+        setOldNotifications('streams', (streams) => [...streams, ...oldNotifications.page.streams])
+
         const pageUsers = oldNotifications.page.users;
 
         const newUsers = Object.keys(pageUsers).reduce((acc, key) => {
@@ -392,20 +527,21 @@ const Notifications: Component = () => {
       },
     });
 
+
     setOldNotifications('page', () => ({ messages: [], users: {}, postStats: {}, notifications: [] }));
 
     const pk = publicKey();
 
     if (pk) {
       setfetchingOldNotifs(true);
-      getOldNotifications(account?.publicKey, pk as string, subid, group, until);
+      getOldNotifications(accountStore.publicKey, pk as string, subid, group, until);
     }
 
   }
 
   // Fetch old notifications
   createEffect(() => {
-    if (account?.hasPublicKey() && !queryParams.ignoreLastSeen) {
+    if (hasPublicKey() && !queryParams.ignoreLastSeen) {
       const notifGroup = notificationGroup();
       setTimeout(() => {
         fetchOldNotifications(notifSince || 0, notifGroup);
@@ -454,6 +590,31 @@ const Notifications: Component = () => {
     );
   };
 
+  const liveEventStarted = () => {
+    const type = NotificationType.LIVE_EVENT_HAPPENING;
+    const notifs = sortedNotifications[type];
+
+    if (!notifs) {
+      return;
+    }
+    const grouped = groupBy(notifs, 'live_event_id');
+
+    const keys = Object.keys(grouped);
+
+    return <For each={keys}>
+      {key => {
+        return (
+          <NotificationItem
+            type={type}
+            users={getUsers(grouped[key], type)}
+            streams={relatedNotes.streams}
+            notification={notifs[0]}
+          />
+        )}
+      }
+    </For>
+  };
+
   const newUserFollowedYou = () => {
     const type = NotificationType.NEW_USER_FOLLOWED_YOU;
     const notifs = sortedNotifications[type];
@@ -490,13 +651,15 @@ const Notifications: Component = () => {
 
     const keys = Object.keys(grouped);
 
-    return <For each={keys}>
-      {key => {
+    return <For each={notifs}>
+      {notif => {
         return (
         <NotificationItem
           type={type}
-          users={getUsers(grouped[key], type)}
-          note={relatedNotes.notes.find(n => n.post.id === key)}
+          notification={notif}
+          users={getUsers(grouped[notif.your_post || ''], type)}
+          note={relatedNotes.notes.find(n => n.post.id === notif.your_post)}
+          read={relatedNotes.reads.find(n => n.id === notif.your_post)}
         />
       )}}
     </For>
@@ -518,6 +681,8 @@ const Notifications: Component = () => {
             type={type}
             users={getUsers(grouped[key], type)}
             note={relatedNotes.notes.find(n => n.post.id === key)}
+            read={relatedNotes.reads.find(n => n.id === key)}
+            notification={notifs[0]}
           />
         )}
       }
@@ -540,6 +705,33 @@ const Notifications: Component = () => {
             type={type}
             users={getUsers(grouped[key], type)}
             note={relatedNotes.notes.find(n => n.post.id === key)}
+            read={relatedNotes.reads.find(n => n.id === key)}
+            notification={notifs[0]}
+          />
+        )}
+      }
+    </For>
+  };
+
+
+  const yourThreadWasRepliedTo = () => {
+    const type = NotificationType.REPLY_TO_REPLY;
+    const notifs = sortedNotifications[type] || [];
+
+    const grouped = groupBy(notifs, 'reply');
+
+    const keys = Object.keys(grouped);
+
+
+    return <For each={keys}>
+      {key => {
+        return (
+          <NotificationItem
+            type={type}
+            users={getUsers(grouped[key], type)}
+            note={relatedNotes.notes.find(n => n.post.id === key)}
+            read={relatedNotes.reads.find(n => n.id === key)}
+            notification={notifs[0]}
           />
         )}
       }
@@ -565,8 +757,10 @@ const Notifications: Component = () => {
             type={type}
             users={getUsers(grouped[key], type)}
             note={relatedNotes.notes.find(n => n.post.id === key)}
+            read={relatedNotes.reads.find(n => n.id === key)}
             iconInfo={`${truncateNumber(sats)}`}
             iconTooltip={`${sats} sats`}
+            notification={notifs[0]}
           />
         )}
       }
@@ -610,6 +804,8 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
+            read={relatedNotes.reads.find(n => n.id === key)}
+            notification={notifs[0]}
           />
         )}
       }
@@ -654,6 +850,8 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
+            read={relatedNotes.reads.find(n => n.id === key)}
+            notification={notifs[0]}
           />
         )}
       }
@@ -698,6 +896,7 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
+            notification={notifs[0]}
           />
         )}
       }
@@ -747,6 +946,7 @@ const Notifications: Component = () => {
             note={notes.find(n => n.post.id === key)}
             iconInfo={`${truncateNumber(sats)}`}
             iconTooltip={`${sats} sats`}
+            notification={notifs[0]}
           />
         )}
       }
@@ -790,6 +990,7 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
+            notification={notifs[0]}
           />
         )}
       }
@@ -833,6 +1034,7 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
+            notification={notifs[0]}
           />
         )}
       }
@@ -877,6 +1079,7 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
+            notification={notifs[0]}
           />
         )}
       }
@@ -892,8 +1095,9 @@ const Notifications: Component = () => {
     const keys = Object.keys(grouped);
 
     const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
+    const reads = relatedNotes.notes.filter(n => keys.includes(n.id));
 
-    if (notes.length === 0) {
+    if (notes.length === 0 && reads.length === 0) {
       return;
     }
 
@@ -923,8 +1127,11 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
+            read={reads.find(n => n.id === key)}
             iconInfo={`${truncateNumber(sats)}`}
             iconTooltip={`${sats} sats`}
+            notification={notifs[0]}
+            sats={sats}
           />
         )}
       }
@@ -968,6 +1175,7 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
+            notification={notifs[0]}
           />
         )}
       }
@@ -1011,11 +1219,104 @@ const Notifications: Component = () => {
             type={type}
             users={rUsers[key]}
             note={notes.find(n => n.post.id === key)}
+            notification={notifs[0]}
           />
         )}
       }
     </For>
   };
+
+
+  const articleWasHighlighted = () => {
+    const type = NotificationType.YOUR_POST_WAS_HIGHLIGHTED;
+    const notifs = sortedNotifications[type] || [];
+
+    const reads = relatedNotes.reads;
+    const highlights = relatedNotes.highlights;
+
+    if (reads.length === 0 || highlights.length === 0) {
+      return;
+    }
+
+    const knownUsers = Object.keys(users);
+
+    const rUsers = notifs.reduce<Record<string, PrimalNotifUser[]>>((acc, notif) => {
+      const pk = notif.who_highlighted_it;
+
+      if (!pk) return acc;
+
+      const rUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk], pk) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [notif.id]: usrs};
+
+    }, {});
+
+    return <For each={notifs}>
+      {notif => {
+        return (
+          <NotificationItem
+            type={type}
+            users={rUsers[notif.id || '']}
+            read={reads.find(n => n.id === notif.your_post)}
+            highlight={highlights.find(n => n.id === notif.highlight)}
+            notification={notif}
+          />
+        )}
+      }
+    </For>
+  };
+
+
+  const postWasBookmarked = () => {
+    const type = NotificationType.YOUR_POST_WAS_BOOKMARKED;
+    const notifs = sortedNotifications[type] || [];
+
+    const grouped = groupBy(notifs, 'your_post');
+
+    const keys = Object.keys(grouped);
+
+    const notes = relatedNotes.notes.filter(n => keys.includes(n.post.id));
+
+    if (notes.length === 0) {
+      return;
+    }
+
+    const knownUsers = Object.keys(users);
+
+    const rUsers: Record<string, PrimalNotifUser[]> = notifs.reduce((acc, notif) => {
+      const pk = notif.who_bookmarked_it;
+
+      if (!pk) return acc;
+
+      const rUser: PrimalUser = knownUsers.includes(pk) ?
+        convertToUser(users[pk], pk) :
+        emptyUser(pk);
+
+      const usrs = [{...rUser, ...userStats[pk]}];
+
+      return { ...acc, [notif.your_post || 'none']: usrs};
+
+    }, {});
+
+
+    return <For each={keys}>
+      {key => {
+        return (
+          <NotificationItem
+            type={type}
+            users={rUsers[key]}
+            note={notes.find(n => n.post.id === key)}
+            notification={notifs[0]}
+          />
+        )}
+      }
+    </For>
+  };
+
 
   const [lastNotification, setLastNotification] = createSignal<PrimalNotification>();
 
@@ -1048,6 +1349,8 @@ const Notifications: Component = () => {
 
     setOldNotifications('notifications', (old) => [ ...sorted, ...old ]);
     setOldNotifications('notes', (old) => [ ...relatedNotes.notes, ...old ]);
+    setOldNotifications('reads', (old) => [ ...relatedNotes.reads, ...old ]);
+    setOldNotifications('highlights', (old) => [ ...relatedNotes.highlights, ...old ]);
     setOldNotifications('reposts', () => ({ ...relatedNotes.reposts }));
 
     const users = relatedNotes.users.reduce((acc, u) => ({ ...acc, [u.pubkey]: u }), {});
@@ -1092,7 +1395,7 @@ const Notifications: Component = () => {
 
       <PageCaption title={intl.formatMessage(t.title)} />
 
-      <Show when={newNotifCount() > 0 && !account?.showNewNoteForm}>
+      <Show when={newNotifCount() > 0 && !accountStore.showNewNoteForm}>
         <div class={styles.newContentNotification}>
           <button
             onClick={loadNewContent}
@@ -1148,6 +1451,7 @@ const Notifications: Component = () => {
               </div>
             }
           >
+            {liveEventStarted()}
 
             {newUserFollowedYou()}
             {userUnfollowedYou()}
@@ -1155,11 +1459,16 @@ const Notifications: Component = () => {
             {yourPostWasZapped()}
 
             {yourPostWasRepliedTo()}
+            {yourThreadWasRepliedTo()}
             {yourPostWasReposted()}
             {yourPostWasLiked()}
 
             {youWereMentioned()}
             {yourPostWasMentioned()}
+
+            {articleWasHighlighted()}
+            {postWasBookmarked()}
+
 
             {postYouWereMentionedInWasZapped()}
             {postYouWereMentionedInWasRepliedTo()}
@@ -1186,6 +1495,9 @@ const Notifications: Component = () => {
                       users={oldNotifications.users}
                       userStats={oldNotifications.userStats}
                       notes={oldNotifications.notes}
+                      reads={oldNotifications.reads}
+                      highlights={oldNotifications.highlights}
+                      streams={oldNotifications.streams}
                     />
                   )}
                 </For>
@@ -1215,6 +1527,8 @@ const Notifications: Component = () => {
                         users={oldNotifications.users}
                         userStats={oldNotifications.userStats}
                         notes={oldNotifications.notes}
+                        reads={oldNotifications.reads}
+                        highlights={oldNotifications.highlights}
                       />
                     )}
                   </For>

@@ -1,4 +1,4 @@
-import { generatePrivateKey, getPublicKey, nip04, nip19, finalizeEvent, verifyEvent, generateNsec } from '../lib/nTools';
+import { generatePrivateKey, getPublicKey, nip04, nip44, nip19, finalizeEvent, verifyEvent, generateNsec } from '../lib/nTools';
 import { NostrExtension, NostrRelayEvent, NostrRelays, NostrRelaySignedEvent } from '../types/primal';
 import { readSecFromStorage, storeSec } from './localStore';
 import { base64 } from '@scure/base';
@@ -12,12 +12,16 @@ export const [currentPin, setCurrentPin] = createSignal('');
 export const [tempNsec, setTempNsec] = createSignal<string | undefined>();
 
 export const generateKeys = (forceNewKey?: boolean) => {
-  const sec = forceNewKey ?
-    generatePrivateKey() :
-    readSecFromStorage() || generatePrivateKey();
+  let sec = generatePrivateKey();
+  let nsec = readSecFromStorage();
+
+  if (forceNewKey) {
+    nsec = nip19.nsecEncode(sec);
+  }
+
   const pubkey = getPublicKey(sec);
 
-  return { sec, pubkey };
+  return { sec, nsec, pubkey };
 };
 
 export const encryptWithPin = async (pin: string, text: string) => {
@@ -93,9 +97,9 @@ export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
       throw('invalid-nsec');
     }
 
-    sec = decoded.data;
+    const sk = decoded.data;
 
-    return sec.length > 0 ? sec : undefined;
+    return sk.length > 0 ? sk : undefined;
   }
 
   const gPk: () => Promise<string> = async () => {
@@ -121,6 +125,26 @@ export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
       if (!sec) throw('decrypt-no-nsec');
 
       return await nip04.decrypt(sec, pubkey, message);
+    };
+
+  const encrypt44: (pubkey: string, message: string) => Promise<string> =
+    async (pubkey, message) => {
+      const sec = await getSec();
+      if (!sec) throw('encrypt-no-nsec');
+
+      const key = nip44.getConversationKey(sec, pubkey);
+
+      return nip44.v2.encrypt(message, key);
+    };
+
+  const decrypt44: (pubkey: string, message: string) => Promise<string> =
+    async (pubkey, message) => {
+      const sec = await getSec();
+      if (!sec) throw('decrypt-no-nsec');
+
+      const key = nip44.getConversationKey(sec, pubkey);
+
+      return nip44.v2.decrypt(message, key);
     };
 
   const signEvent = async (event: NostrRelayEvent) => {
@@ -155,6 +179,10 @@ export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
     nip04: {
       encrypt,
       decrypt,
+    },
+    nip44: {
+      encrypt: encrypt44,
+      decrypt: decrypt44,
     },
     signEvent,
   };

@@ -75,6 +75,35 @@
   padding-bottom: 0px;
 }
 
+.headingLive {
+  @include heading();
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 20px;
+  text-transform: none;
+}
+
+.liveList {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 280px;
+  gap: 12px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  margin-bottom: 36px;
+}
+
+.participantIcon {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-tertiary);
+  -webkit-mask: url(../../assets/icons/profile.svg) no-repeat center;
+  mask: url(../../assets/icons/profile.svg) no-repeat center;
+}
+
 .readsSidebar {
   margin-left: -8px;
 

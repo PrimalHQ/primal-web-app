@@ -16,6 +16,7 @@ const VerificationCheck: Component<{
   id?: string,
   legendConfig?: LegendCustomizationConfig,
   mock?: boolean,
+  inline?: boolean,
 }> = (props) => {
   const app = useAppContext();
 
@@ -80,7 +81,7 @@ const VerificationCheck: Component<{
         <div
           id={props.id}
           data-user={props.user?.pubkey}
-          class={`${props.large ? styles.verificationIconL : styles.verificationIcon}`}
+          class={`${props.large ? styles.verificationIconL : styles.verificationIcon} ${props.inline ? styles.inline : ''}`}
         >
           <Show
             when={isVerifiedByPrimal() || isLegend()}

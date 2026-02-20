@@ -1,9 +1,8 @@
 import { batch, Component, createEffect, Show } from 'solid-js';
 import { MenuItem, PrimalNote, ZapOption } from '../../../types/primal';
-import { sendRepost, triggerImportEvents } from '../../../lib/notes';
+import { getMyRepostOfEvent, sendDeleteEvent, sendRepost } from '../../../lib/notes';
 
 import styles from './NoteFooter.module.scss';
-import { useAccountContext } from '../../../contexts/AccountContext';
 import { useToastContext } from '../../Toaster/Toaster';
 import { useIntl } from '@cookbook/solid-intl';
 
@@ -15,7 +14,7 @@ import zapMD from '../../../assets/lottie/zap_md_2.json';
 import { toast as t } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { hookForDev } from '../../../lib/devTools';
-import { getScreenCordinates, isPhone } from '../../../utils';
+import { determineOrient, isPhone } from '../../../utils';
 import ZapAnimation from '../../ZapAnimation/ZapAnimation';
 import { CustomZapInfo, useAppContext } from '../../../contexts/AppContext';
 import NoteFooterActionButton from './NoteFooterActionButton';
@@ -23,26 +22,39 @@ import { NoteReactionsState } from '../Note';
 import { SetStoreFunction } from 'solid-js/store';
 import BookmarkNote from '../../BookmarkNote/BookmarkNote';
 import { readSecFromStorage } from '../../../lib/localStore';
+import { useNavigate } from '@solidjs/router';
+import { Kind } from '../../../constants';
+import { APP_ID } from '../../../App';
+import {
+  accountStore,
+  addLike,
+  hasPublicKey,
+  quoteNote,
+  setShowPin,
+  showGetStarted,
+  showNewNoteForm,
+} from '../../../stores/accountStore';
 
 export const lottieDuration = () => zapMD.op * 1_000 / zapMD.fr;
 
 const NoteFooter: Component<{
   note: PrimalNote,
-  size?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'very_short',
+  size?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'very_short' | 'notif',
   id?: string,
   state: NoteReactionsState,
   updateState?: SetStoreFunction<NoteReactionsState>,
   customZapInfo?: CustomZapInfo,
   large?: boolean,
   onZapAnim?: (zapOption: ZapOption) => void,
+  onDelete?: (noteId: string, isRepost?: boolean) => void,
   noteType?: 'primary',
 }> = (props) => {
 
-  const account = useAccountContext();
   const toast = useToastContext();
   const intl = useIntl();
   const settings = useSettingsContext();
   const app = useAppContext();
+  const navigate = useNavigate();
 
   let medZapAnimation: HTMLElement | undefined;
 
@@ -52,19 +64,77 @@ const NoteFooter: Component<{
 
   const size = () => props.size ?? 'normal';
 
-  const repostMenuItems: MenuItem[] = [
+  const repostItem = (): MenuItem => {
+    return props.state.reposted ? {
+      action: () => {
+        app?.actions.openConfirmModal({
+          title: "Delete Repost?",
+          description: "You are about to delete this repost. Are you sure?",
+          confirmLabel: "Yes",
+          abortLabel: "Cancel",
+          onConfirm: () => {
+            doRepostDelete();
+            app.actions.closeConfirmModal();
+          },
+          onAbort: () => {app.actions.closeConfirmModal()},
+        })
+      },
+      warning: true,
+      label: 'Delete Repost',
+      icon: 'feed_repost',
+    } :
     {
       action: () => doRepost(),
-      label: 'Repost Note',
+      label: 'Repost',
       icon: 'feed_repost',
-    },
+    };
+  }
+
+  const repostMenuItems = (): MenuItem[] => [
+    repostItem(),
     {
       action: () => doQuote(),
-      label: 'Quote Note',
+      label: 'Quote',
       icon: 'quote',
     },
   ];
 
+  const doRepostDelete = async () => {
+    const pubkey = accountStore.publicKey;
+
+    let noteToDelete = props.note.repost;
+
+    if (!pubkey) return;
+
+    let id: string | undefined = noteToDelete?.note.id;
+
+
+    if (!id) {
+      id = await getMyRepostOfEvent(props.note.id, pubkey);
+    }
+
+    if (!id) {
+      return;
+    }
+
+    const { success, note: deleteEvent } = await sendDeleteEvent(
+      pubkey,
+      id,
+      Kind.Repost,
+    );
+
+    if (!success || !deleteEvent) return;
+
+    // id of the note to remove from UI
+    let removeId = props.note.pubkey === accountStore.publicKey ?
+      id :
+      props.note.noteId;
+
+    props.updateState && props.updateState('reposts', (r) => r - 1);
+    props.updateState && props.updateState('reposted', () => false);
+
+    props.onDelete && props.onDelete(removeId, true);
+  };
 
   const onClickOutside = (e: MouseEvent) => {
     if (
@@ -90,43 +160,32 @@ const NoteFooter: Component<{
   };
 
   const doQuote = () => {
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
     props.updateState && props.updateState('isRepostMenuVisible', () => false);
-    account?.actions?.quoteNote(`nostr:${props.note.post.noteId}`);
-    account?.actions?.showNewNoteForm();
+    quoteNote(`nostr:${props.note.post.noteId}`);
+    showNewNoteForm();
   };
 
   const doRepost = async () => {
-    if (!account) {
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.hasPublicKey()) {
-      account.actions.showGetStarted();
-      return;
-    }
-
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
 
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelaysConnected),
-      );
-      return;
-    }
-
     props.updateState && props.updateState('isRepostMenuVisible', () => false);
 
-    const { success } = await sendRepost(props.note, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
+    const { success } = await sendRepost(props.note);
 
     if (success) {
       batch(() => {
@@ -145,37 +204,31 @@ const NoteFooter: Component<{
     }
   };
 
-  const doReply = () => {};
+  const doReply = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/e/${props.note.noteId}`);
+
+  };
 
   const doLike = async (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (!account) {
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.hasPublicKey()) {
-      account.actions.showGetStarted();
-      return;
-    }
-
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
 
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelaysConnected),
-      );
-      return;
-    }
-
-    const success = await account.actions.addLike(props.note);
+    const success = await addLike(props.note);
 
     if (success) {
       batch(() => {
@@ -189,25 +242,18 @@ const NoteFooter: Component<{
     e.preventDefault();
     e.stopPropagation();
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       props.updateState && props.updateState('isZapping', () => false);
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
-    }
-
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toast?.sendWarning(
-        intl.formatMessage(t.noRelaysConnected),
-      );
-      return;
     }
 
     if (!canUserReceiveZaps(props.note.user)) {
@@ -230,20 +276,20 @@ const NoteFooter: Component<{
 
     clearTimeout(quickZapDelay);
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
 
-    if ((!account.proxyThroughPrimal && account.relays.length === 0) || !canUserReceiveZaps(props.note.user)) {
+    if (!canUserReceiveZaps(props.note.user)) {
       return;
     }
 
@@ -310,8 +356,8 @@ const NoteFooter: Component<{
   };
 
   const doQuickZap = async () => {
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
@@ -330,11 +376,11 @@ const NoteFooter: Component<{
     setTimeout(async () => {
       const success = await zapNote(
         props.note,
-        account.publicKey,
+        accountStore.publicKey,
         amount,
         message,
-        account.activeRelays,
-        account.activeNWC,
+        accountStore.activeRelays,
+        accountStore.activeNWC,
       );
 
       props.updateState && props.updateState('isZapping', () => false);
@@ -378,12 +424,6 @@ const NoteFooter: Component<{
       animateZap();
     }
   });
-
-  const determineOrient = () => {
-    const coor = getScreenCordinates(repostMenu);
-    const height = 100;
-    return (coor.y || 0) + height < window.innerHeight + window.scrollY ? 'down' : 'up';
-  }
 
   return (
     <div
@@ -443,7 +483,6 @@ const NoteFooter: Component<{
         id={`btn_repost_${props.note.post.id}`}
         class={`${styles.stat} ${props.state.reposted ? styles.highlighted : ''}`}
         onClick={showRepostMenu}
-        title={props.state.reposts.toLocaleString()}
       >
         <div
           class={`${buttonTypeClasses.repost}`}
@@ -460,9 +499,9 @@ const NoteFooter: Component<{
           </Show>
           <PrimalMenu
             id={`repost_menu_${props.note.post.id}`}
-            items={repostMenuItems}
+            items={repostMenuItems()}
             position="note_footer"
-            orientation={determineOrient()}
+            orientation={determineOrient(repostMenu as HTMLElement)}
             hidden={!props.state.isRepostMenuVisible}
           />
         </div>

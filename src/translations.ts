@@ -51,8 +51,25 @@ export const account = {
   },
   createNewDescription: {
     id: 'account.createNewDescription',
-    defaultMessage: 'New to Nostr? Create your account now and join this magical place. It’s quick and easy!',
+    defaultMessage: 'It will only take a minute:',
     description: 'Label inviting users to join Nostr',
+  },
+  getStartedSteps: {
+    step_one: {
+      id: 'settings.account.getStartedSteps.step_one',
+      defaultMessage: 'Install the Primal mobile app',
+      description: 'First step in getting started',
+    },
+    step_two: {
+      id: 'settings.account.getStartedSteps.step_two',
+      defaultMessage: 'Create your account within the app ',
+      description: 'Second step in getting started',
+    },
+    step_three: {
+      id: 'settings.account.getStartedSteps.step_three',
+      defaultMessage: 'Go to the login page and scan the QR code',
+      description: 'First step in getting started',
+    },
   },
   create: {
     title: {
@@ -83,8 +100,30 @@ export const account = {
 export const login = {
   title: {
     id: 'login.title',
-    defaultMessage: 'Login',
+    defaultMessage: 'Login to Primal.net',
     description: 'Login ',
+  },
+  tabs: {
+    simple: {
+      id: 'login.tabs.simple',
+      defaultMessage: 'Remote Signer',
+      description: 'Simple login',
+    },
+    extension: {
+      id: 'login.tabs.extension',
+      defaultMessage: 'Browser Extension',
+      description: 'Browser Extension',
+    },
+    nsec: {
+      id: 'login.tabs.nsec',
+      defaultMessage: 'Nsec Login',
+      description: 'Nsec login',
+    },
+    npub: {
+      id: 'login.tabs.npub',
+      defaultMessage: 'Npub Login',
+      description: 'Npub login',
+    },
   },
   description: {
     id: 'login.description',
@@ -192,6 +231,11 @@ export const actions = {
     defaultMessage: 'Get Started',
     description: 'Get Started action, button label',
   },
+  getStartedTitle: {
+    id: 'actions.getStartedTitle',
+    defaultMessage: 'Create Account – Download the Primal Mobile App',
+    description: 'Get Started action title',
+  },
   forgotPin: {
     id: 'actions.forgotPin',
     defaultMessage: 'I forgot my PIN',
@@ -287,15 +331,40 @@ export const actions = {
     defaultMessage: 'edit profile',
     description: 'Edit profile action label',
   },
+  reportContentConfirmTitle: {
+    id: 'actions.reportContentConfirmTitle',
+    defaultMessage: 'Report abuse?',
+    description: 'Title for report content confirmation',
+  },
+  reportContentConfirmDesc: {
+    id: 'actions.reportContentConfirmDesc',
+    defaultMessage: 'All reports will be publicly visible.',
+    description: 'Description for report content confirmation',
+  },
   reportUserConfirm: {
     id: 'actions.reportUserConfirm',
     defaultMessage: 'Report user {name}?',
     description: 'Label for report user confirmation',
   },
+  requestNoteDelete: {
+    id: 'actions.requestNoteDelete',
+    defaultMessage: 'Send ?',
+    description: 'Label for report user confirmation',
+  },
+  muteUserConfirmTitle: {
+    id: 'actions.muteUserConfirmTitle',
+    defaultMessage: 'Mute {name}',
+    description: 'Title for mute user confirmation dialog',
+  },
   muteUserConfirm: {
     id: 'actions.muteUserConfirm',
     defaultMessage: 'Add {name} to your mute list?',
     description: 'Label for mute user confirmation',
+  },
+  muteThreadConfirm: {
+    id: 'actions.muteUserConfirm',
+    defaultMessage: 'Mute this thread?',
+    description: 'Label for mute thread confirmation',
   },
   unmute: {
     id: 'actions.unmute',
@@ -326,6 +395,11 @@ export const actions = {
     id: 'actions.restoreCachingService',
     defaultMessage: 'Restore default caching service',
     description: 'Label for restore default caching service',
+  },
+  restoreBlossomServer: {
+    id: 'actions.restoreBlossomServer',
+    defaultMessage: 'restore default media server',
+    description: 'Label for restore default blossom server',
   },
   profileContext: {
     copyPubkey: {
@@ -374,6 +448,55 @@ export const actions = {
       description: 'Label for reporting user from profile context menu',
     },
   },
+  noteVideoContext: {
+    downloadVideo: {
+      id: 'actions.noteVideoContext.downloadVideo',
+      defaultMessage: 'Download Video',
+      description: 'Label for downloading video from context menu',
+    }
+  },
+  streamContext: {
+    copyLink: {
+      id: 'actions.streamContext.copyLink',
+      defaultMessage: 'Copy Stream Link',
+      description: 'Label for copy stream link from context menu',
+    },
+    copyId: {
+      id: 'actions.streamContext.copyId',
+      defaultMessage: 'Copy Stream ID',
+      description: 'Label for copy stream ID from context menu',
+    },
+    copyRaw: {
+      id: 'actions.streamContext.copyRaw',
+      defaultMessage: 'Copy Raw Data',
+      description: 'Label for copy stream raw data from context menu',
+    },
+    muteAuthor: {
+      id: 'actions.streamContext.muteAuthor',
+      defaultMessage: 'Mute User',
+      description: 'Label for muting user from context menu',
+    },
+    unmuteAuthor: {
+      id: 'actions.streamContext.unmuteAuthor',
+      defaultMessage: 'Unmute User',
+      description: 'Label for unmuting user from context menu',
+    },
+    reportContent: {
+      id: 'actions.streamContext.reportContent',
+      defaultMessage: 'Report Content',
+      description: 'Label for reporting user from context menu',
+    },
+    requestDelete: {
+      id: 'actions.streamContext.requestDelete',
+      defaultMessage: 'Request Delete',
+      description: 'Label for edit article from context menu',
+    },
+    quoteStream: {
+      id: 'actions.streamContext.quoteStream',
+      defaultMessage: 'Quote Stream',
+      description: 'Label for quoting stream from context menu',
+    },
+  },
   noteContext: {
     reactions: {
       id: 'actions.noteContext.reactions',
@@ -387,58 +510,130 @@ export const actions = {
     },
     copyLink: {
       id: 'actions.noteContext.copyLink',
-      defaultMessage: 'Copy note link',
+      defaultMessage: 'Copy Note Link',
       description: 'Label for copy note link from context menu',
     },
     copyText: {
       id: 'actions.noteContext.copytext',
-      defaultMessage: 'Copy note text',
+      defaultMessage: 'Copy Note Text',
       description: 'Label for copy note text from context menu',
     },
     copyId: {
       id: 'actions.noteContext.copyId',
-      defaultMessage: 'Copy note ID',
+      defaultMessage: 'Copy Note ID',
       description: 'Label for copy note ID from context menu',
     },
     copyRaw: {
       id: 'actions.noteContext.copyRaw',
-      defaultMessage: 'Copy raw data',
+      defaultMessage: 'Copy Raw Data',
       description: 'Label for copy note raw data from context menu',
     },
     copyPubkey: {
       id: 'actions.noteContext.copyPubkey',
-      defaultMessage: 'Copy user public key',
+      defaultMessage: 'Copy User Public Key',
       description: 'Label for copy note author\'s pubkey from context menu',
     },
     breadcast: {
       id: 'actions.noteContext.breadcast',
-      defaultMessage: 'Broadcast note',
+      defaultMessage: 'Broadcast Note',
       description: 'Label for note broadcast from context menu',
     },
     muteAuthor: {
       id: 'actions.noteContext.muteAuthor',
-      defaultMessage: 'Mute user',
+      defaultMessage: 'Mute User',
       description: 'Label for muting user from context menu',
     },
     unmuteAuthor: {
       id: 'actions.noteContext.unmuteAuthor',
-      defaultMessage: 'Unmute user',
+      defaultMessage: 'Unmute User',
       description: 'Label for unmuting user from context menu',
+    },
+    muteThread: {
+      id: 'actions.noteContext.muteThread',
+      defaultMessage: 'Mute Thread',
+      description: 'Label for muting thread from context menu',
+    },
+    unmuteThread: {
+      id: 'actions.noteContext.unmuteThread',
+      defaultMessage: 'Unmute Thread',
+      description: 'Label for unmuting thread from context menu',
+    },
+    editArticle: {
+      id: 'actions.noteContext.editArticle',
+      defaultMessage: 'Edit Article',
+      description: 'Label for edit article from context menu',
     },
     reportAuthor: {
       id: 'actions.noteContext.reportAuthor',
-      defaultMessage: 'Report user',
+      defaultMessage: 'Report User',
+      description: 'Label for reporting user from context menu',
+    },
+    reportContent: {
+      id: 'actions.noteContext.reportContent',
+      defaultMessage: 'Report Content',
       description: 'Label for reporting user from context menu',
     },
     repostNote: {
       id: 'actions.noteContext.repostNote',
-      defaultMessage: 'Repost note',
+      defaultMessage: 'Repost',
       description: 'Label for reposting note from context menu',
+    },
+    requestDelete: {
+      id: 'actions.noteContext.requestDelete',
+      defaultMessage: 'Request Delete',
+      description: 'Label for edit article from context menu',
+    },
+    requestDeleteRepost: {
+      id: 'actions.noteContext.requestDeleteRepost',
+      defaultMessage: 'Request Delete Repost',
+      description: 'Label for edit article from context menu',
     },
     quoteNote: {
       id: 'actions.noteContext.quoteNote',
-      defaultMessage: 'Quote note',
+      defaultMessage: 'Quote',
       description: 'Label for quoting note from context menu',
+    },
+  },
+  articleOverviewContext: {
+    edit: {
+      id: 'actions.articleOverviewContext.edit',
+      defaultMessage: 'Edit Article',
+      description: 'Label for editing an article',
+    },
+    editDraft: {
+      id: 'actions.articleOverviewContext.editDraft',
+      defaultMessage: 'Edit Draft',
+      description: 'Label for editing a draft',
+    },
+    quoteArticle: {
+      id: 'actions.articleOverviewContext.quoteArticle',
+      defaultMessage: 'Quote Article',
+      description: 'Label for quoting article from context menu',
+    },
+    shareArticle: {
+      id: 'actions.articleOverviewContext.shareArticle',
+      defaultMessage: 'Copy Article link',
+      description: 'Label for sharing article from context menu',
+    },
+    copyId: {
+      id: 'actions.articleOverviewContext.copyId',
+      defaultMessage: 'Copy Event ID',
+      description: 'Label for copying article from context menu',
+    },
+    copyRawEvent: {
+      id: 'actions.articleOverviewContext.copyRawEvent',
+      defaultMessage: 'Copy Raw Event',
+      description: 'Label for copying raw event from context menu',
+    },
+    unpublish: {
+      id: 'actions.articleOverviewContext.unpublish',
+      defaultMessage: 'Unpublish',
+      description: 'Label for copying raw event from context menu',
+    },
+    delete: {
+      id: 'actions.articleOverviewContext.delete',
+      defaultMessage: 'Request Delete',
+      description: 'Label for copying raw event from context menu',
     },
   },
   zap: {
@@ -717,6 +912,11 @@ export const messages = {
     defaultMessage: 'Mark All Read',
     description: 'DM mark as read label',
   },
+  sendComment: {
+    id: 'messages.sendComment',
+    defaultMessage: 'Send a comment...',
+    description: 'Placeholder for comment input',
+  },
 };
 
 export const navBar = {
@@ -834,13 +1034,15 @@ export const notificationTypeTranslations: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: 'followed you',
   [NotificationType.USER_UNFOLLOWED_YOU]: 'unfollowed you',
 
-  [NotificationType.YOUR_POST_WAS_ZAPPED]: 'zapped your note',
-  [NotificationType.YOUR_POST_WAS_LIKED]: 'liked your note',
-  [NotificationType.YOUR_POST_WAS_REPOSTED]: 'reposted your note',
-  [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'replied to your note',
+  [NotificationType.YOUR_POST_WAS_ZAPPED]: 'zapped your',
+  [NotificationType.YOUR_POST_WAS_LIKED]: 'liked your',
+  [NotificationType.YOUR_POST_WAS_REPOSTED]: 'reposted your',
+  [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'replied to your',
 
-  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'mentioned you in a note',
-  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'mentioned your note',
+  [NotificationType.REPLY_TO_REPLY]: 'replied in your thread',
+
+  [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'mentioned you in a',
+  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'mentioned your',
 
   [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED]: 'zapped a note you were mentioned in',
   [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED]: 'liked a note you were mentioned in',
@@ -851,6 +1053,12 @@ export const notificationTypeTranslations: Record<string, string> = {
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED]: 'liked a note your note was mentioned in',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'reposted a note your note was mentioned in',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'replied to a note your note was mentioned in',
+
+  [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: 'highlighted your',
+  [NotificationType.YOUR_POST_WAS_BOOKMARKED]: 'bookmarked your',
+  [NotificationType.YOUR_POST_HAD_REACTION]: 'reacted to your',
+
+  [NotificationType.LIVE_EVENT_HAPPENING]: 'is live',
 }
 
 export const notificationsNew: Record<number, MessageDescriptor> = Object.values(NotificationType).reduce((acc, type) => ({
@@ -1025,6 +1233,11 @@ export const notifications = {
     defaultMessage: 'Reposts',
     description: 'Title of the Reposts notifications tab',
   },
+  reactions: {
+    id: 'pages.notifications.reactions',
+    defaultMessage: 'Reactions',
+    description: 'Title of the Reactions notifications tab',
+  },
 };
 
 export const placeholders = {
@@ -1159,6 +1372,11 @@ export const placeholders = {
     id: 'placeholders.cachingServiceUrl',
     defaultMessage: 'wss://cachingservice.url',
     description: 'Placholder relay url input',
+  },
+  blossomServerUrl: {
+    id: 'placeholders.blossomServerUrl',
+    defaultMessage: 'enter blossom server url...',
+    description: 'Placholder server url input',
   },
 };
 
@@ -1348,6 +1566,39 @@ export const search = {
   },
 };
 
+export const eventQueue = {
+  title: {
+    id: 'eventQueue.title',
+    defaultMessage: 'Publish Pending',
+    description: 'Title of the event queue page',
+  },
+  caption: {
+    id: 'eventQueue.caption',
+    defaultMessage: 'Publish Pending ({number})',
+    description: 'Caption of the event queue page',
+  },
+  label: {
+    id: 'eventQueue.label',
+    defaultMessage: 'These actions failed to publish:',
+    description: 'Label of the event queue page',
+  },
+  retry: {
+    id: 'eventQueue.retry',
+    defaultMessage: 'Retrying in {seconds} seconds...',
+    description: 'Retry label of the event queue page',
+  },
+  retrying: {
+    id: 'eventQueue.retrying',
+    defaultMessage: 'Retrying...',
+    description: 'Retry label of the event queue page',
+  },
+  empty: {
+    id: 'eventQueue.empty',
+    defaultMessage: 'No events pending',
+    description: 'Retry label of the event queue page',
+  },
+}
+
 export const settings = {
   index: {
     title: {
@@ -1523,12 +1774,27 @@ export const settings = {
   muted: {
     title: {
       id: 'settings.muted.title',
-      defaultMessage: 'Muted Accounts',
+      defaultMessage: 'Muted Content',
       description: 'Title of the muted accounts settings sub-page',
     },
-    empty: {
-      id: 'settings.muted.empty',
+    emptyUsers: {
+      id: 'settings.muted.emptyUsers',
       defaultMessage: 'No muted users',
+      description: 'Caption indicating that there are no muted users',
+    },
+    emptyWords: {
+      id: 'settings.muted.emptyWords',
+      defaultMessage: 'No muted words',
+      description: 'Caption indicating that there are no muted users',
+    },
+    emptyHashtags: {
+      id: 'settings.muted.emptyHashtags',
+      defaultMessage: 'No muted hashtags',
+      description: 'Caption indicating that there are no muted users',
+    },
+    emptyThreads: {
+      id: 'settings.muted.emptyThreads',
+      defaultMessage: 'No muted threads',
       description: 'Caption indicating that there are no muted users',
     },
     emptyOther: {
@@ -1542,6 +1808,38 @@ export const settings = {
       id: 'settings.nwcSettings.title',
       defaultMessage: 'Connected Wallets',
       description: 'Title of the nwc settings sub-page',
+    },
+  },
+  blossomPage: {
+    mediaServer: {
+      id: 'settings.blossom.mediaServer',
+      defaultMessage: 'Media Server',
+      description: 'Title of the media server',
+    },
+    mediaMirrors: {
+        id: 'settings.blossom.mediaMirrors',
+        defaultMessage: 'Media Mirrors',
+        description: 'Title of the media mirrors',
+      },
+    mediaMirrorsDescription: {
+      id: 'settings.blossom.mediaMirrorsDescription',
+      defaultMessage: 'You can enable one or more media mirror servers. When enabled, your uploads to the primary media server will be automatically copied to the mirror(s).',
+      description: 'Description for blossom media mirrors',
+    },
+    switchServer: {
+      id: 'settings.blossom.switchServer',
+      defaultMessage: 'Switch media server',
+      description: 'Title of the switching media server section of the Blossom settings sub-page',
+    },
+    addMirror: {
+      id: 'settings.blossom.addMirror',
+      defaultMessage: 'Add media mirror server',
+      description: 'Title of the adding media mirror server section of the Blossom settings sub-page',
+    },
+    suggestedMirrors: {
+      id: 'settings.blossom.suggestedMirrors',
+      defaultMessage: 'Suggested media mirror servers',
+      description: 'Title of the suggested media mirror server list section of the Blossom settings sub-page',
     },
   },
   network: {
@@ -1681,6 +1979,11 @@ export const settings = {
     defaultMessage: 'Zaps',
     description: 'Title of the zaps section on the settings page',
   },
+  blossom: {
+    id: 'settings.sections.blossom',
+    defaultMessage: 'Media Uploads',
+    description: 'Title of the blossom section on the settings page',
+  },
   devTools: {
     id: 'settings.sections.devTools',
     defaultMessage: 'Dev Tools',
@@ -1694,7 +1997,7 @@ export const settings = {
     },
     core: {
       id: 'settings.sections.notifications.core',
-      defaultMessage: 'Core notifications:',
+      defaultMessage: 'Show notifications for:',
       description: 'Title of the notification settings sub-section for core notifications',
     },
     yourMentions: {
@@ -1709,7 +2012,7 @@ export const settings = {
     },
     additionalNotifs: {
       id: 'settings.sections.notifications.additionalNotifs',
-      defaultMessage: 'Additional Settings:',
+      defaultMessage: 'Notification preferences:',
       description: 'Title of the notification settings sub-section for additional settings',
     },
   },
@@ -2024,6 +2327,26 @@ export const toast = {
     defaultMessage: 'Nostr extension is required to send events',
     description: 'Toast message indicating no extension was found',
   },
+  streamPrimalLinkCoppied: {
+    id: 'toast.streamPrimalLinkCoppied',
+    defaultMessage: 'Stream link copied',
+    description: 'Confirmation message that the stream\'s link has been copied',
+  },
+  streamIdCoppied: {
+    id: 'toast.streamIdCoppied',
+    defaultMessage: 'Stream id copied',
+    description: 'Confirmation message that the stream\'s id has been copied',
+  },
+  streamRawDataCoppied: {
+    id: 'toast.streamRawDataCoppied',
+    defaultMessage: 'Stream raw data copied',
+    description: 'Confirmation message that the stream\'s raw data has been copied',
+  },
+  streamAuthorNpubCoppied: {
+    id: 'toast.streamAuthorNpubCoppied',
+    defaultMessage: 'Stream author npub copied',
+    description: 'Confirmation message that the stream\'s author npub has been copied',
+  },
   noteNostrLinkCoppied: {
     id: 'toast.noteNostrLinkCoppied',
     defaultMessage: 'Note nostr link copied',
@@ -2091,12 +2414,12 @@ export const toast = {
   },
   zapUnavailable: {
     id: 'toast.zapUnavailable',
-    defaultMessage: 'Author of this note cannot be zapped',
+    defaultMessage: 'Author of this note cannot be zapped because they didn\'t setup their lightning address',
     description: 'Toast message indicating user cannot receieve a zap',
   },
   zapDVMUnavailable: {
     id: 'toast.zapDVMUnavailable',
-    defaultMessage: 'Author of this feed cannot be zapped',
+    defaultMessage: 'Author of this note cannot be zapped because they didn\'t setup their lightning address',
     description: 'Toast message indicating user cannot receieve a zap',
   },
   updateProfileSuccess: {
@@ -2129,6 +2452,11 @@ export const errors = {
     defaultMessage: 'Invalid url',
     description: 'Error text for invalid url',
   },
+  invalidServerUrl: {
+      id: 'placeholders.invalidServerUrl',
+      defaultMessage: 'Invalid url',
+      description: 'Error text for invalid url',
+    },
 };
 
 export const unknown = {
@@ -2471,12 +2799,12 @@ export const premium = {
     },
     supportFirstLine: {
       id: 'pages.premium.labes.supportFirstLine',
-      defaultMessage: 'Are you enjoying Primal?',
+      defaultMessage: 'Want to get more out of Primal?',
       description: 'Support label first line',
     },
     supportSecondLine: {
       id: 'pages.premium.labes.supportSecondLine',
-      defaultMessage: 'if so, see how you can ',
+      defaultMessage: 'Check out ',
       description: 'Support label second line',
     },
     supportCaption: {
@@ -2541,6 +2869,11 @@ export const premium = {
       defaultMessage: 'support us',
       description: 'Action that takes user to the support page',
     },
+    primalPro: {
+      id: 'pages.premium.actions.primalPro',
+      defaultMessage: 'Primal Pro',
+      description: 'Action that takes user to the Primal Pro dialog',
+    },
     start: {
       id: 'pages.premium.actions.start',
       defaultMessage: 'Find Primal Name',
@@ -2558,13 +2891,18 @@ export const premium = {
     },
     subscribe: {
       id: 'pages.premium.actions.subscribe',
-      defaultMessage: 'Subscribe',
+      defaultMessage: 'Continue to Payment',
       description: 'Subscribe action on the premium page',
     },
     done: {
       id: 'pages.premium.actions.done',
       defaultMessage: 'Done',
       description: 'Done action on the premium page',
+    },
+    tryAgain: {
+      id: 'pages.premium.actions.tryAgain',
+      defaultMessage: 'Try Again',
+      description: 'Try again action on the premium page',
     },
     rename: {
       id: 'pages.premium.actions.rename',
@@ -2595,7 +2933,7 @@ export const premium = {
   title: {
     general: {
       id: 'pages.premium.title',
-      defaultMessage: 'Primal Premium',
+      defaultMessage: 'Primal {productGroup}',
       description: 'Title of the premium page',
     },
     name: {
@@ -2686,6 +3024,16 @@ export const premium = {
         defaultMessage: '$6/month',
         description: '$6 per month',
       },
+      m70: {
+        id: 'pages.premium.subOption.m70',
+        defaultMessage: '$69.99/month',
+        description: '$69.99 per month',
+      },
+      y750: {
+        id: 'pages.premium.subOption.y750',
+        defaultMessage: '$750/year',
+        description: '$750 per year',
+      },
     },
     durations: {
       m3: {
@@ -2697,6 +3045,16 @@ export const premium = {
         id: 'pages.premium.duration.m12',
         defaultMessage: '12 months',
         description: '12 month duration',
+      },
+      m1: {
+        id: 'pages.premium.duration.m1',
+        defaultMessage: 'monthly',
+        description: 'monthly payments',
+      },
+      y1: {
+        id: 'pages.premium.duration.y1',
+        defaultMessage: 'annually',
+        description: 'annual payments',
       },
     },
     success: {
@@ -2715,6 +3073,16 @@ export const premium = {
         defaultMessage: 'You subscribed to Primal Premium for 12 months.',
         description: 'Payment success description for 12 month plan',
       },
+      m70: {
+        id: 'pages.premium.success.m70',
+        defaultMessage: 'You subscribed to Primal Pro for 1 month.',
+        description: 'Payment success description for 1 month pro plan',
+      },
+      y750: {
+        id: 'pages.premium.success.y750',
+        defaultMessage: 'You subscribed to Primal Pro for 12 months.',
+        description: 'Payment success description for 12 month pro plan',
+      },
       legend: {
         id: 'pages.premium.success.legend',
         defaultMessage: 'You are now a Primal Legend.',
@@ -2724,6 +3092,18 @@ export const premium = {
         id: 'pages.premium.success.donation',
         defaultMessage: 'Thank you, Legend!',
         description: 'Payment success description for additional donations by legends',
+      },
+    },
+    fail: {
+      caption: {
+        id: 'pages.premium.fail.caption',
+        defaultMessage: 'Payment failed!',
+        description: 'Payment failure caption',
+      },
+      description: {
+        id: 'pages.premium.success.description',
+        defaultMessage: 'There was a problem procesing your payment',
+        description: 'Payment failure description',
       },
     }
   },
@@ -2755,6 +3135,11 @@ export const readsMy = {
   noPublishedArticle: {
     id: 'pages.readsMy.noPublishedArticle',
     defaultMessage: 'No articles published',
+    description: 'No published articles label',
+  },
+  noDrafts: {
+    id: 'pages.readsMy.noDrafts',
+    defaultMessage: 'You don\'t have any drafts',
     description: 'No published articles label',
   },
 

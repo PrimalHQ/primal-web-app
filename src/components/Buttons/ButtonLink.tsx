@@ -10,12 +10,13 @@ const ButtonLink: Component<{
   children?: JSXElement,
   disabled?: boolean,
   title?: string,
+  pro?: boolean
 }> = (props) => {
 
   return (
     <Button
       id={props.id}
-      class={styles.link}
+      class={`${styles.link} ${props.pro ? styles.proVersion : ''}`}
       onClick={props.onClick}
       disabled={props.disabled}
       title={props.title}

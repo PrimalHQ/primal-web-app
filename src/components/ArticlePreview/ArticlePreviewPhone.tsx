@@ -1,9 +1,7 @@
 import { A } from '@solidjs/router';
-import { batch, Component, createEffect, createSignal, For, JSXElement, onMount, Show } from 'solid-js';
+import { batch, Component, createEffect, createSignal, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { Portal } from 'solid-js/web';
 import { wordsPerMinute } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
@@ -11,14 +9,11 @@ import { shortDate } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
 import { userName } from '../../stores/profile';
 import { PrimalArticle, ZapOption } from '../../types/primal';
-import { uuidv4 } from '../../utils';
+import { urlEncode, uuidv4 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
 import { NoteReactionsState } from '../Note/Note';
 import NoteContextTrigger from '../Note/NoteContextTrigger';
 import ArticleFooter from '../Note/NoteFooter/ArticleFooter';
-import NoteFooter from '../Note/NoteFooter/NoteFooter';
-import NoteTopZaps from '../Note/NoteTopZaps';
-import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import defaultAvatarDark from '../../assets/images/reads_image_dark.png';
@@ -28,6 +23,7 @@ import styles from './ArticlePreview.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { nip19 } from 'nostr-tools';
 import NoteTopZapsTiny from '../Note/NoteTopZapsTiny';
+import { accountStore } from '../../stores/accountStore';
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
@@ -40,10 +36,10 @@ const ArticlePreviewPhone: Component<{
   hideContext?: boolean,
   bordered?: boolean,
   noBorder?: boolean,
+  onRemove?: (id: string) => void,
 }> = (props) => {
 
   const app = useAppContext();
-  const account = useAccountContext();
   const thread = useThreadContext();
   const media = useMediaContext();
   const settings = useSettingsContext();
@@ -91,7 +87,7 @@ const ArticlePreviewPhone: Component<{
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
 
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -137,7 +133,7 @@ const ArticlePreviewPhone: Component<{
   };
 
   const addTopZap = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -168,7 +164,7 @@ const ArticlePreviewPhone: Component<{
 
 
   const addTopZapFeed = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -219,6 +215,9 @@ const ArticlePreviewPhone: Component<{
         app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
+      () => {
+        props.onRemove && props.onRemove(props.article.noteId);
+      },
     );
   }
 
@@ -338,7 +337,7 @@ const ArticlePreviewPhone: Component<{
 
     const data = decoded.data as nip19.AddressPointer;
 
-    return `/${vanityName}/${data.identifier}`;
+    return `/${vanityName}/${urlEncode(data.identifier)}`;
   }
 
   return (

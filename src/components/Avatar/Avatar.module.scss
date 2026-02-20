@@ -1,6 +1,6 @@
 @mixin highlight {
   border-radius: 99999px;
-  overflow: hidden
+  /* overflow: hidden */
 }
 
 .legend_GOLD {
@@ -38,6 +38,11 @@
 .legend_SUNFIRE {
   @include highlight;
   background: var(--legend-sunfire) !important;
+}
+
+.legend_WHITE {
+  @include highlight;
+  background: #FFFFFF !important;
 }
 
 .legend_glow_GOLD {
@@ -81,6 +86,48 @@
     object-fit: cover;
     vertical-align: top;
   }
+
+
+  .centerBottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .liveBadge {
+    width: fit-content;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-inline: 6px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    background-color: var(--background-site);
+    border-radius: 10px;
+
+    .liveDot {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: #E00;
+      -webkit-mask: url(../../assets/icons/dot.svg) no-repeat 0/100%;
+      mask: url(../../assets/icons/dot.svg) no-repeat 0/100%;
+    }
+
+    .caption {
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 11px;
+    }
+  }
 }
 
 .verifiedIcon {
@@ -109,6 +156,7 @@
   @include avatar;
   width: 18px;
   height: 18px;
+  padding: 1px;
 
   .missingBack {
     width: 16px;
@@ -121,12 +169,18 @@
     right: -6px;
   }
 
-  // &.legend {
-  //   .missingBack {
-  //     width: 16px;
-  //     height: 16px;
-  //   }
-  // }
+  .liveBadge {
+    display: none;
+  }
+
+  &.legend {
+    width: 18px;
+    height: 18px;
+    .missingBack {
+      width: 16px;
+      height: 16px;
+    }
+  }
 }
 
 .microAvatar {
@@ -146,13 +200,20 @@
     right: -6px;
   }
 
-  // &.legend {
-  //   padding: 1px;
-  //   .missingBack {
-  //     width: 20px;
-  //     height: 20px;
-  //   }
-  // }
+  .liveBadge {
+    display: none;
+  }
+
+  &.legend {
+    width: 22px;
+    height: 22px;
+
+    .missingBack {
+      width: 20px;
+      height: 20px;
+      border: 0.5px solid var(--background-site);
+    }
+  }
 }
 
 .xxsAvatar {
@@ -172,13 +233,24 @@
     right: -6px;
   }
 
-  // &.legend {
-  //   padding: 2px;
-  //   .missingBack {
-  //     width: 24px;
-  //     height: 24px;
-  //   }
-  // }
+  .liveBadge {
+    display: none;
+  }
+
+  &.legend {
+    width: 28px;
+    height: 28px;
+    // padding: 0;
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+
+    .missingBack {
+      border: 0.5px solid var(--background-site);
+      width: 26px;
+      height: 26px;
+    }
+  }
 }
 
 .xssAvatar {
@@ -199,24 +271,34 @@
     right: -6px;
   }
 
-  // &.legend {
-  //   padding: 2px;
-  //   .missingBack {
-  //     width: 22px;
-  //     height: 22px;
-  //   }
-  // }
+  .liveBadge {
+    display: none;
+  }
+
+  &.legend {
+    width: 26px;
+    height: 26px;
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+
+    .missingBack {
+      border: 0.5px solid var(--background-site);
+      width: 24px;
+      height: 24px;
+    }
+  }
 }
 
 .xsAvatar {
   @include avatar;
   width: 32px;
   height: 32px;
-  padding: 2px;
+  padding: 1px;
 
   .missingBack {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
   }
 
   .iconBackground {
@@ -226,10 +308,74 @@
   }
 
   &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 28px;
-      // height: 28px;
+      border: 0.5px solid var(--background-site);
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
+    }
+  }
+}
+
+.s30Avatar {
+  @include avatar;
+  width: 30px;
+  height: 30px;
+  padding: 1px;
+
+  .missingBack {
+    width: 26px;
+    height: 26px;
+  }
+
+  .iconBackground {
+    @include iconBackground;
+    bottom: -6px;
+    right: -6px;
+  }
+
+  &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .missingBack {
+      border: 0.5px solid var(--background-site);
+      width: 26px;
+      height: 26px;
+    }
+  }
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
     }
   }
 }
@@ -238,7 +384,7 @@
   @include avatar;
   width: 36px;
   height: 36px;
-  padding: 2px;
+  padding: 1px;
 
   .missingBack {
     width: 32px;
@@ -252,19 +398,38 @@
   }
 
   &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 32px;
-      // height: 32px;
+      border: 0.5px solid var(--background-site);
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
     }
   }
 }
 
-.vs2Avatar {
+.s38Avatar {
   @include avatar;
-  width: 40px;
-  height: 40px;
-  padding: 3px;
+  width: 38px;
+  height: 38px;
+  padding: 2px;
 
   .missingBack {
     width: 34px;
@@ -273,13 +438,79 @@
 
   .iconBackground {
     @include iconBackground;
+    bottom: -6px;
+    right: -6px;
   }
 
   &.legend {
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 36px;
-      // height: 36px;
+      border: 0.5px solid var(--background-site);
+      width: 34px;
+      height: 34px;
+    }
+  }
+
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
+    }
+  }
+}
+
+.vs2Avatar {
+  @include avatar;
+  width: 40px;
+  height: 40px;
+  padding: 1px;
+
+  .missingBack {
+    width: 36px;
+    height: 36px;
+  }
+
+  .iconBackground {
+    @include iconBackground;
+  }
+
+  &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .missingBack {
+      border: 0.5px solid var(--background-site);
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
     }
   }
 }
@@ -288,7 +519,7 @@
   @include avatar;
   width: 42px;
   height: 42px;
-  padding: 2px;
+  padding: 1px;
 
   .missingBack {
     width: 38px;
@@ -300,10 +531,29 @@
   }
 
   &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 38px;
-      // height: 38px;
+      border: 0.5px solid var(--background-site);
+      width: 38px;
+      height: 38px;
+    }
+  }
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
     }
   }
 }
@@ -312,7 +562,7 @@
   @include avatar;
   width: 44px;
   height: 44px;
-  padding: 2px;
+  padding: 1px;
 
   .missingBack {
     width: 40px;
@@ -324,19 +574,39 @@
   }
 
   &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 40px;
-      // height: 40px;
+      border: 0.5px solid var(--background-site);
+      width: 40px;
+      height: 40px;
+    }
+  }
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
     }
   }
 }
 
-.midAvatar {
+
+.s50Avatar {
   @include avatar;
-  width: 52px;
-  height: 52px;
-  padding: 3px;
+  width: 50px;
+  height: 50px;
+  padding: 2px;
 
   .missingBack {
     width: 46px;
@@ -348,10 +618,72 @@
   }
 
   &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 48px;
-      // height: 48px;
+      border: 0.5px solid var(--background-site);
+      width: 46px;
+      height: 46px;
+    }
+  }
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
+    }
+  }
+}
+
+.midAvatar {
+  @include avatar;
+  width: 52px;
+  height: 52px;
+  padding: 1px;
+
+  .missingBack {
+    width: 48px;
+    height: 48px;
+  }
+
+  .iconBackground {
+    @include iconBackground;
+  }
+
+  &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .missingBack {
+      border: 0.5px solid var(--background-site);
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  .liveBadge {
+    height: 12px;
+    gap: 2px;
+
+    .liveDot {
+      width: 4px;
+      height: 4px;
+    }
+
+    .caption {
+      font-size: 9px;
+      line-height: 9px;
     }
   }
 }
@@ -360,11 +692,11 @@
   @include avatar;
   width: 60px;
   height: 60px;
-  padding: 3px;
+  padding: 3.5px;
 
   .missingBack {
-    width: 54px;
-    height: 54px;
+    width: 52px;
+    height: 52px;
   }
 
   .iconBackground {
@@ -372,10 +704,28 @@
   }
 
   &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 54px;
-      // height: 54px;
+      border: 0.5px solid var(--background-site);
+      width: 52px;
+      height: 52px;
+    }
+  }
+
+  .liveBadge {
+    height: 18px;
+
+    .liveDot {
+      width: 6px;
+      height: 6px;
+    }
+
+    .caption {
+      font-size: 10px;
+      line-height: 10px;
     }
   }
 }
@@ -384,11 +734,11 @@
   @include avatar;
   width: 64px;
   height: 64px;
-  padding: 3px;
+  padding: 1px;
 
   .missingBack {
-    width: 58px;
-    height: 58px;
+    width: 60px;
+    height: 60px;
   }
 
   .iconBackground {
@@ -396,10 +746,28 @@
   }
 
   &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
-      border: 1px solid var(--background-site);
-      // width: 58px;
-      // height: 58px;
+      border: 0.5px solid var(--background-site);
+      width: 60px;
+      height: 60px;
+    }
+  }
+
+  .liveBadge {
+    height: 18px;
+
+    .liveDot {
+      width: 6px;
+      height: 6px;
+    }
+
+    .caption {
+      font-size: 10px;
+      line-height: 10px;
     }
   }
 }
@@ -408,7 +776,7 @@
   @include avatar;
   width: 72px;
   height: 72px;
-  padding: 3px;
+  padding: 3.5px;
 
   .missingBack {
     width: 66px;
@@ -422,10 +790,28 @@
   }
 
   &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 1px solid var(--background-site);
-      // width: 66px;
-      // height: 66px;
+      width: 66px;
+      height: 66px;
+    }
+  }
+
+  .liveBadge {
+    height: 18px;
+
+    .liveDot {
+      width: 6px;
+      height: 6px;
+    }
+
+    .caption {
+      font-size: 10px;
+      line-height: 10px;
     }
   }
 }
@@ -434,11 +820,11 @@
   @include avatar;
   width: 80px;
   height: 80px;
-  padding: 4px;
+  padding: 2.5px;
 
   .missingBack {
-    width: 72px;
-    height: 72px;
+    width: 74px;
+    height: 74px;
   }
 
   .iconBackground {
@@ -448,10 +834,14 @@
   }
 
   &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 1px solid var(--background-site);
-      // width: 74px;
-      // height: 74px;
+      width: 74px;
+      height: 74px;
     }
   }
 
@@ -466,11 +856,11 @@
   @include avatar;
   width: 120px;
   height: 120px;
-  padding: 5px;
+  padding: 3.5px;
 
   .missingBack {
-    width: 110px;
-    height: 110px;
+    width: 112px;
+    height: 112px;
   }
 
   .iconBackground {
@@ -480,10 +870,14 @@
   }
 
   &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
       border: 1px solid var(--background-site);
-      // width: 112px;
-      // height: 112px;
+      width: 112px;
+      height: 112px;
     }
   }
 
@@ -498,11 +892,11 @@
   @include avatar;
   width: 128px;
   height: 128px;
-  padding: 4px;
+  padding: 5.5px;
 
   .missingBack {
-    width: 120px;
-    height: 120px;
+    width: 118px;
+    height: 118px;
   }
 
   .iconBackground {
@@ -512,11 +906,14 @@
   }
 
   &.legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
     .missingBack {
-      background: none;
-      /* border: 1px solid var(--background-site); */
-      // width: 112px;
-      // height: 112px;
+      border: 1px solid var(--background-site);
+      width: 118px;
+      height: 118px;
     }
   }
 
@@ -582,6 +979,13 @@
 }
 
 .vvsMissing {
+  @include missing;
+  width: 100%;
+  height: 100%;
+  font-size: 10px;
+}
+
+.s38Missing {
   @include missing;
   width: 100%;
   height: 100%;

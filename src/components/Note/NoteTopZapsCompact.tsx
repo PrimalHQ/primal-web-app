@@ -1,11 +1,10 @@
-import { Component, createEffect, createMemo, createSignal, For, Match, onMount, Show, Switch } from "solid-js";
+import { Component, createSignal, For, onMount, Show } from "solid-js";
 import { hookForDev } from "../../lib/devTools";
-import { useThreadContext } from "../../contexts/ThreadContext";
 import Avatar from "../Avatar/Avatar";
 import { TransitionGroup } from 'solid-transition-group';
 import styles from  "./Note.module.scss";
-import { PrimalNote, PrimalUser, TopZap } from "../../types/primal";
-import { useAccountContext } from "../../contexts/AccountContext";
+import { PrimalNote, TopZap } from "../../types/primal";
+import { accountStore } from "../../stores/accountStore";
 
 const NoteTopZapsCompact: Component<{
   note: PrimalNote,
@@ -15,8 +14,6 @@ const NoteTopZapsCompact: Component<{
   id?: string,
   hideMessage?: boolean,
 }> = (props) => {
-  const account = useAccountContext();
-
   const [dontAnimate, setDontAnimate] = createSignal(true);
 
   const topZaps = () => {
@@ -28,7 +25,7 @@ const NoteTopZapsCompact: Component<{
   }
 
   const zapSender = (zap: TopZap) => {
-    if (zap.pubkey === account?.publicKey) return account.activeUser;
+    if (zap.pubkey === accountStore.publicKey) return accountStore.activeUser;
 
     return (props.note.mentionedUsers || {})[zap.pubkey];
   };

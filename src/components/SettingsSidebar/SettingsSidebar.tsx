@@ -1,26 +1,28 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, For, Show } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { settings as t } from '../../translations';
 
-import { Relay, relayInit, utils } from "../../lib/nTools";
+import { utils } from "../../lib/nTools";
 
 import styles from './SettingsSidebar.module.scss';
 import { cacheServer, isConnected, socket } from '../../sockets';
 import { hookForDev } from '../../lib/devTools';
+import { accountStore } from '../../stores/accountStore';
 
 const SettingsSidebar: Component<{ id?: string }> = (props) => {
 
   const intl = useIntl();
-  const account = useAccountContext();
 
-  const connectedRelays = () => account?.relays || [];
+  const connectedRelays = () => {
+    const allRelayUrls = Object.keys(accountStore.relaySettings || {}).map(utils.normalizeURL);
+
+    return allRelayUrls.filter(url => accountStore.activeRelays.includes(url));
+  }
 
   const disconnectedRelays = () => {
-    const allRelayUrls = Object.keys(account?.relaySettings || {}).map(utils.normalizeURL);
-    const connectedUrls = connectedRelays().map(r => utils.normalizeURL(r.url));
+    const allRelayUrls = Object.keys(accountStore.relaySettings || {}).map(utils.normalizeURL);
 
-    return allRelayUrls.filter(url => !connectedUrls.includes(url));
+    return allRelayUrls.filter(url => !accountStore.activeRelays.includes(url));
   };
 
   return (
@@ -35,13 +37,13 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
         {relay => (
           <div class={styles.relayEntry}>
             <Show
-              when={!account?.proxyThroughPrimal}
+              when={!accountStore.proxyThroughPrimal}
               fallback={<div class={styles.suspended}></div>}
             >
               <div class={styles.connected}></div>
             </Show>
-            <span class={styles.relayUrl} title={relay.url}>
-              {relay.url}
+            <span class={styles.relayUrl} title={relay}>
+              {relay}
             </span>
           </div>
         )}
@@ -50,7 +52,7 @@ const SettingsSidebar: Component<{ id?: string }> = (props) => {
         {relayUrl => (
           <div class={styles.relayEntry}>
             <Show
-              when={!account?.proxyThroughPrimal}
+              when={!accountStore.proxyThroughPrimal}
               fallback={<div class={styles.suspended}></div>}
             >
               <div class={styles.disconnected}></div>

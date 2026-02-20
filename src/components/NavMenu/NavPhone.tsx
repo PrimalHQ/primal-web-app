@@ -1,25 +1,20 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { A, useLocation, useNavigate } from '@solidjs/router';
-import { Component, For, Match, Show, Switch } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
+import { useNavigate } from '@solidjs/router';
+import { Component, For, Match, Switch } from 'solid-js';
 import { useNotificationsContext } from '../../contexts/NotificationsContext';
-import { navBar as t, actions as tActions, placeholders as tPlaceholders } from '../../translations';
+import { navBar as t } from '../../translations';
 import NavLink from '../NavLink/NavLink';
 
 import styles from './NavPhone.module.scss';
 import { hookForDev } from '../../lib/devTools';
-import ButtonPrimary from '../Buttons/ButtonPrimary';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { ConfirmInfo, useAppContext } from '../../contexts/AppContext';
-import { useDMContext } from '../../contexts/DMContext';
 import { DropdownMenu } from '@kobalte/core/dropdown-menu';
+import { accountStore } from '../../stores/accountStore';
 
 const NavPhone: Component< { id?: string } > = (props) => {
-  const account = useAccountContext();
   const notifications = useNotificationsContext();
-  const dms = useDMContext();
   const intl = useIntl();
-  const loc = useLocation();
   const media = useMediaContext();
   const app = useAppContext();
   const navigate = useNavigate();
@@ -56,7 +51,7 @@ const NavPhone: Component< { id?: string } > = (props) => {
       label: intl.formatMessage(t.premium),
       icon: 'premiumIcon',
       hiddenOnSmallScreens: true,
-      bubble: () => account?.premiumReminder ? 1 : 0,
+      bubble: () => accountStore.premiumReminder ? 1 : 0,
     },
     {
       type: 'menu',
@@ -88,7 +83,7 @@ const NavPhone: Component< { id?: string } > = (props) => {
           label: intl.formatMessage(t.settings),
           icon: 'settingsIcon',
           hiddenOnSmallScreens: true,
-          bubble: () => account?.sec ? 1 : 0,
+          bubble: () => accountStore.sec ? 1 : 0,
         },
       ]
     },

@@ -1,93 +1,52 @@
 import { bech32 } from "@scure/base";
-import { nip04, nip47, nip57, Relay, relayInit, utils } from "../lib/nTools";
-import { Tier } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
+import { nip04, nip47, nip57, utils } from "../lib/nTools";
 import { Kind } from "../constants";
-import { NostrRelaySignedEvent, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser } from "../types/primal";
+import { NostrRelaySignedEvent, NostrUserZaps, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, PrimalZap, } from "../types/primal";
 import { logError } from "./logger";
-import { decrypt, enableWebLn, encrypt, sendPayment, signEvent } from "./nostrAPI";
+import { decrypt, enableWebLn, sendPayment, signEvent } from "./nostrAPI";
 import { decodeNWCUri } from "./wallet";
-import { hexToBytes } from "../utils";
+import { hexToBytes, parseBolt11 } from "../utils";
+import { StreamingData } from "./streaming";
+import { relayWorker } from "../App";
+import { Event } from "nostr-tools";
 
 export let lastZapError: string = "";
 
 export const zapOverNWC = async (pubkey: string, nwcEnc: string, invoice: string) => {
-  const nwc = await decrypt(pubkey, nwcEnc);
-
-  const nwcConfig = decodeNWCUri(nwc);
-
-  const request = await nip47.makeNwcRequestEvent(nwcConfig.pubkey, hexToBytes(nwcConfig.secret), invoice)
-
-  if (nwcConfig.relays.length === 0) return false;
-
-  let promises: Promise<boolean>[] = [];
-  let relays: Relay[] = [];
-  let result: boolean = false;
 
   try {
-    for (let i = 0; i < nwcConfig.relays.length; i++) {
-      const relay = relayInit(nwcConfig.relays[i]);
+    const nwc = await decrypt(pubkey, nwcEnc);
 
-      promises.push(new Promise(async (resolve) => {
-        await relay.connect();
+    const nwcConfig = decodeNWCUri(nwc);
 
-        relays.push(relay);
+    const request = await nip47.makeNwcRequestEvent(nwcConfig.pubkey, hexToBytes(nwcConfig.secret), invoice)
 
-        const subInfo = relay.subscribe(
-          [{ kinds: [13194], authors: [nwcConfig.pubkey] }],
-          {
-            onevent(event) {
-              const nwcInfo = event.content.split(' ');
-              if (nwcInfo.includes('pay_invoice')) {
+    if (nwcConfig.relays.length === 0) return false;
 
-                const subReq = relay.subscribe(
-                  [{ kinds: [23195], ids: [request.id] }],
-                  {
-                    async onevent(eventResponse) {
-                      if (!eventResponse.tags.find(t => t[0] === 'e' && t[1] === request.id)) return;
+    relayWorker.onmessage = (e: MessageEvent<{ event: Event, secret: string, pubkey: string}>) => {
+      const {event, secret, pubkey } = e.data;
 
-                      const decoded = await nip04.decrypt(hexToBytes(nwcConfig.secret), nwcConfig.pubkey, eventResponse.content);
-                      const content = JSON.parse(decoded);
+      const decoded = nip04.decrypt(hexToBytes(secret), pubkey, event.content);
+      const content = JSON.parse(decoded);
 
-                      if (content.error) {
-                        logError('Failed NWC payment: ', content.error);
-                        console.error('Failed NWC payment: ', content.error);
-                        subReq.close();
-                        subInfo.close();
-                        resolve(false);
-                        return;
-                      }
-
-                      subReq.close();
-                      subInfo.close();
-                      resolve(true);
-
-                    },
-                  },
-                );
-
-                relay.publish(request);
-              }
-            },
-          },
-        );
-      }));
+      if (content.error) {
+        console.error('Failed NWC payment: ', content.error);
+      }
     }
-    result = await Promise.any(promises);
+
+    relayWorker.postMessage({ type: 'SEND_NWC', nwcData: {
+      event: request,
+      nwcConfig,
+    }})
+
+    return true;
   }
   catch (e: any) {
     logError('Failed NWC payment init: ', e);
     console.error('Failed NWC payment init: ', e)
     lastZapError = e;
-    result = false;
+    return false;
   }
-
-  for (let i = 0; i < relays.length; i++) {
-    const relay = relays[i];
-    relay.close();
-  }
-
-  return result;
-
 };
 
 export const zapNote = async (
@@ -95,7 +54,7 @@ export const zapNote = async (
   sender: string | undefined,
   amount: number,
   comment = '',
-  relays: Relay[],
+  relays: string[],
   nwc?: string[],
 ) => {
   if (!sender) {
@@ -111,10 +70,10 @@ export const zapNote = async (
   const sats = Math.round(amount * 1000);
 
   let payload = {
-    profile: note.pubkey,
-    event: note.id,
+    pubkey: note.pubkey,
+    event: note.msg,
     amount: sats,
-    relays: relays.map(r => r.url)
+    relays,
   };
 
   if (comment.length > 0) {
@@ -151,7 +110,7 @@ export const zapArticle = async (
   sender: string | undefined,
   amount: number,
   comment = '',
-  relays: Relay[],
+  relays: string[],
   nwc?: string[],
 ) => {
   if (!sender) {
@@ -169,10 +128,10 @@ export const zapArticle = async (
   const sats = Math.round(amount * 1000);
 
   let payload = {
-    profile: note.pubkey,
-    event: note.msg.id,
+    pubkey: note.pubkey,
+    event: note.msg,
     amount: sats,
-    relays: relays.map(r => r.url)
+    relays,
   };
 
   if (comment.length > 0) {
@@ -213,7 +172,7 @@ export const zapProfile = async (
   sender: string | undefined,
   amount: number,
   comment = '',
-  relays: Relay[],
+  relays: string[],
   nwc?: string[],
 ) => {
   if (!sender || !profile) {
@@ -229,9 +188,9 @@ export const zapProfile = async (
   const sats = Math.round(amount * 1000);
 
   let payload = {
-    profile: profile.pubkey,
+    pubkey: profile.pubkey,
     amount: sats,
-    relays: relays.map(r => r.url)
+    relays,
   };
 
   if (comment.length > 0) {
@@ -266,7 +225,7 @@ export const zapSubscription = async (
   subEvent: NostrRelaySignedEvent,
   recipient: PrimalUser,
   sender: string | undefined,
-  relays: Relay[],
+  relays: string[],
   exchangeRate?: Record<string, Record<string, number>>,
   nwc?: string[],
 ) => {
@@ -299,10 +258,10 @@ export const zapSubscription = async (
   }
 
   let payload = {
-    profile: recipient.pubkey,
-    event: subEvent.id,
+    pubkey: recipient.pubkey,
+    event: subEvent,
     amount: sats,
-    relays: relays.map(r => r.url)
+    relays,
   };
 
   if (subEvent.content.length > 0) {
@@ -340,7 +299,7 @@ export const zapDVM = async (
   sender: string | undefined,
   amount: number,
   comment = '',
-  relays: Relay[],
+  relays: string[],
   nwc?: string[],
 ) => {
   if (!sender) {
@@ -358,10 +317,10 @@ export const zapDVM = async (
   const sats = Math.round(amount * 1000);
 
   let payload = {
-    profile: dvm.pubkey,
-    event: dvm.id,
+    pubkey: dvm.pubkey,
+    event: dvm,
     amount: sats,
-    relays: relays.map(r => r.url)
+    relays,
   };
 
   if (comment.length > 0) {
@@ -394,6 +353,71 @@ export const zapDVM = async (
   } catch (reason) {
     console.error('Failed to zap: ', reason);
     return false;
+  }
+}
+
+export const zapStream = async (
+  stream: StreamingData,
+  host: PrimalUser | undefined,
+  sender: string | undefined,
+  amount: number,
+  comment = '',
+  relays: string[],
+  nwc?: string[],
+) => {
+  if (!sender || !host) {
+    return { success: false };
+  }
+
+  const callback = await getZapEndpoint(host);
+
+  if (!callback) {
+    return { success: false };
+  }
+
+  const a = `${Kind.LiveEvent}:${stream.pubkey}:${stream.id}`;
+
+  const sats = Math.round(amount * 1000);
+
+  let payload = {
+    pubkey: host.pubkey,
+    event: stream.event,
+    amount: sats,
+    relays,
+  };
+
+  if (comment.length > 0) {
+    // @ts-ignore
+    payload.comment = comment;
+  }
+
+  const zapReq = nip57.makeZapRequest(payload);
+
+  if (!zapReq.tags.find((t: string[]) => t[0] === 'a' && t[1] === a)) {
+    zapReq.tags.push(['a', a]);
+  }
+
+  try {
+    const signedEvent = await signEvent(zapReq);
+
+    const event = encodeURIComponent(JSON.stringify(signedEvent));
+
+    const r2 = await (await fetch(`${callback}?amount=${sats}&nostr=${event}`)).json();
+    const pr = r2.pr;
+
+    if (nwc && nwc[1] && nwc[1].length > 0) {
+      const success = await zapOverNWC(sender, nwc[1], pr);
+
+      return { success: true, event: signedEvent }
+    }
+
+    await enableWebLn();
+    await sendPayment(pr);
+
+    return { success: true, event: signEvent };
+  } catch (reason) {
+    console.error('Failed to zap: ', reason);
+    return { sucess: false };
   }
 }
 
@@ -439,4 +463,28 @@ export const getZapEndpoint = async (user: PrimalUser): Promise<string | null>  
 
 export const canUserReceiveZaps = (user: PrimalUser | undefined) => {
   return !!user && (!!user.lud16 || !!user.lud06);
+}
+
+export const convertToZap = (zapContent: NostrUserZaps) => {
+
+  const bolt11 = (zapContent.tags.find(t => t[0] === 'bolt11') || [])[1];
+  const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
+  const senderPubkey = zapEvent.pubkey as string;
+  const receiverPubkey = zapEvent.tags.find((t: string[]) => t[0] === 'p')[1] as string;
+
+  let zappedId = '';
+  let zappedKind: number = 0;
+
+  const zap: PrimalZap = {
+    id: zapContent.id,
+    message: zapEvent.content || '',
+    amount: parseBolt11(bolt11) || 0,
+    sender: senderPubkey,
+    reciver: receiverPubkey,
+    created_at: zapContent.created_at,
+    zappedId,
+    zappedKind,
+  };
+
+  return zap;
 }

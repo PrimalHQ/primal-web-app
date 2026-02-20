@@ -1,11 +1,8 @@
-import { Component, createEffect, For, onCleanup, onMount, Show } from 'solid-js';
+import { Component, For, onMount, Show } from 'solid-js';
 import styles from './Explore.module.scss';
-import { useToastContext } from '../../components/Toaster/Toaster';
-import { useSettingsContext } from '../../contexts/SettingsContext';
-import { useIntl } from '@cookbook/solid-intl';
 import { useExploreContext } from '../../contexts/ExploreContext';
-import { A, useLocation } from '@solidjs/router';
-import { fetchExplorePeople, PaginationInfo } from '../../megaFeeds';
+import { A } from '@solidjs/router';
+import { fetchExplorePeople } from '../../megaFeeds';
 import { APP_ID } from '../../App';
 import { nip05Verification, userName } from '../../stores/profile';
 import Avatar from '../../components/Avatar/Avatar';
@@ -13,21 +10,12 @@ import Paginator from '../../components/Paginator/Paginator';
 import FollowButton from '../../components/FollowButton/FollowButton';
 import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
 import { humanizeNumber } from '../../lib/stats';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { calculatePagingOffset } from '../../utils';
-import { PrimalUser } from '../../types/primal';
 import { useAppContext } from '../../contexts/AppContext';
+import { accountStore } from '../../stores/accountStore';
 
 const ExplorePeople: Component<{ open?: boolean }> = (props) => {
-
-  const settings = useSettingsContext();
-  const toaster = useToastContext();
-  const intl = useIntl();
   const explore = useExploreContext();
-  const location = useLocation();
-  const account = useAccountContext();
   const app = useAppContext();
-
 
   onMount(() => {
     if (explore?.exploreMedia.length === 0) {
@@ -36,7 +24,7 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
   });
 
   const getPeople = async () => {
-    const { users, paging, page } = await fetchExplorePeople(account?.publicKey, `explore_people_${APP_ID}`, { limit: 20 });
+    const { users, paging, page } = await fetchExplorePeople(accountStore.publicKey, `explore_people_${APP_ID}`, { limit: 20 });
 
     explore?.actions.setExplorePeople(users, paging, page);
   }
@@ -56,7 +44,7 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
       offset,
     }
 
-    const { users, paging, page } = await fetchExplorePeople(account?.publicKey, `explore_people_${APP_ID}` , pagination);
+    const { users, paging, page } = await fetchExplorePeople(accountStore.publicKey, `explore_people_${APP_ID}` , pagination);
 
 
     explore?.actions.setExplorePeople(users, paging, page);

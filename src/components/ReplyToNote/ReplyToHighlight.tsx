@@ -1,13 +1,13 @@
 import { useIntl } from "@cookbook/solid-intl";
 import { Component, createEffect, createSignal, Show } from "solid-js";
-import { useAccountContext } from "../../contexts/AccountContext";
 import { hookForDev } from "../../lib/devTools";
 import { userName } from "../../stores/profile";
 import { actions as t } from "../../translations";
-import { PrimalNote, PrimalUser, SendNoteResult } from "../../types/primal";
+import { PrimalUser, SendNoteResult } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
 import EditBox from "../NewNote/EditBox/EditBox";
 import styles from  "./ReplyToNote.module.scss";
+import { accountStore } from "../../stores/accountStore";
 
 
 const ReplyToHighlight: Component<{
@@ -22,9 +22,7 @@ const ReplyToHighlight: Component<{
 
   const [open, setOpen] = createSignal(false);
 
-  const account = useAccountContext();
-
-  const activeUser = () => account?.activeUser;
+  const activeUser = () => accountStore.activeUser;
 
   const openReplyBox = () => {
     setOpen(true);
@@ -55,7 +53,7 @@ const ReplyToHighlight: Component<{
       tags: hTags(props.highlight),
     },
     user: props.author,
-    pubkey: account?.publicKey,
+    pubkey: accountStore.publicKey,
   })
 
   createEffect(() => {

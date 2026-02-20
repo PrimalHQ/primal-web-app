@@ -1,11 +1,9 @@
 import { A } from '@solidjs/router';
 import { Component, For, Show } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
-import { authorName, nip05Verification, truncateNpub } from '../../stores/profile';
-import { PrimalNote, PrimalUser } from '../../types/primal';
+import { authorName } from '../../stores/profile';
+import { PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
-import FollowButton from '../FollowButton/FollowButton';
 import MentionedPerson from './MentionedPerson';
 
 import styles from './PeopleList.module.scss';

@@ -7,14 +7,14 @@ import { APP_ID } from '../../App';
 import { fetchDVMFeeds } from '../../lib/feed';
 import { Kind } from '../../constants';
 import { createStore } from 'solid-js/store';
-import { NostrDVM, PrimalArticleFeed, PrimalDVM, PrimalUser } from '../../types/primal';
+import { PrimalArticleFeed, PrimalDVM } from '../../types/primal';
 import { convertToUser } from '../../stores/profile';
 import FeedMarketItem from './FeedMarketPlaceItem';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
 import FeedMarketPlacePreview from './FeedMarketPlacePreview';
 import ButtonPrimary from '../Buttons/ButtonPrimary';
 import { emptyStore, MarketplaceStore } from './FeedMarketPlace';
-import { useAccountContext } from '../../contexts/AccountContext';
+import { accountStore } from '../../stores/accountStore';
 
 
 const FeedMarketPlaceDialog: Component<{
@@ -23,8 +23,6 @@ const FeedMarketPlaceDialog: Component<{
   setOpen?: (v: boolean) => void,
   onAddFeed?: (feed: PrimalArticleFeed) => void,
 }> = (props) => {
-  const account = useAccountContext();
-
   const [store, updateStore] = createStore<MarketplaceStore>({ ...emptyStore });
 
   createEffect(() => {
@@ -90,7 +88,7 @@ const FeedMarketPlaceDialog: Component<{
       }
     });
 
-    fetchDVMFeeds(account?.publicKey, subId, props.type);
+    fetchDVMFeeds(accountStore.publicKey, subId, props.type);
   }
 
   const clearDVMs = () => {

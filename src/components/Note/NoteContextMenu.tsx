@@ -1,21 +1,25 @@
 import { Component, createEffect, createSignal } from 'solid-js';
-import { MenuItem, NostrRelaySignedEvent } from '../../types/primal';
+import { MenuItem, NostrRelaySignedEvent, PrimalArticle, PrimalNote } from '../../types/primal';
 
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { authorName, userName } from '../../stores/profile';
-import { note as t, actions as tActions, toast as tToast, toast } from '../../translations';
+import { actions as tActions, toast as tToast } from '../../translations';
 import { hookForDev } from '../../lib/devTools';
 import PrimalMenu from '../PrimalMenu/PrimalMenu';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { APP_ID } from '../../App';
 import { reportUser } from '../../lib/profile';
 import { useToastContext } from '../Toaster/Toaster';
-import { broadcastEvent } from '../../lib/notes';
+import { broadcastEvent, sendDeleteEvent } from '../../lib/notes';
 import { NoteContextMenuInfo, useAppContext } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { nip19 } from 'nostr-tools';
 import { readSecFromStorage } from '../../lib/localStore';
+import { useNavigate } from '@solidjs/router';
+import { Kind } from '../../constants';
+import ReportContentModal from '../ReportContentModal/ReportContentModal';
+import { urlEncode } from '../../utils';
+import { accountStore, addToMuteList, hasPublicKey, removeFromMuteList, setShowPin, showGetStarted } from '../../stores/accountStore';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -23,14 +27,17 @@ const NoteContextMenu: Component<{
   onClose: () => void,
   id?: string,
 }> = (props) => {
-  const account = useAccountContext();
   const toaster = useToastContext();
   const intl = useIntl();
   const app = useAppContext();
+  const navigate = useNavigate();
 
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
+  const [confirmReportContent, setConfirmReportContent] = createSignal<PrimalNote | PrimalArticle>();
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
+  const [confirmMuteThread, setConfirmMuteThread] = createSignal(false);
+  const [confirmRequestDelete, setConfirmRequestDelete] = createSignal(false);
 
   const [orientation, setOrientation] = createSignal<'down' | 'up'>('down')
 
@@ -65,26 +72,36 @@ const NoteContextMenu: Component<{
 
 
   const doMuteUser = () => {
-    account?.actions.addToMuteList(note()?.pubkey);
+    addToMuteList(note()?.pubkey);
     props.onClose();
   };
 
   const doUnmuteUser = () => {
-    account?.actions.removeFromMuteList(note()?.pubkey);
+    removeFromMuteList(note()?.pubkey);
+    props.onClose();
+  };
+
+  const doMuteThread = () => {
+    addToMuteList(note()?.id, 'thread');
+    props.onClose();
+  };
+
+  const doUnmuteThread = () => {
+    removeFromMuteList(note()?.id, 'thread');
     props.onClose();
   };
 
   const doReportUser = () => {
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
+    if (!accountStore.sec || accountStore.sec.length === 0) {
       const sec = readSecFromStorage();
       if (sec) {
-        account.actions.setShowPin(sec);
+        setShowPin(sec);
         return;
       }
     }
@@ -94,10 +111,10 @@ const NoteContextMenu: Component<{
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(note()?.user)}));
   };
 
-
+  // get note url
   const noteLinkId = () => {
     try {
-      return `e/${note().noteId}`;
+      return `e/${note().noteIdShort}`;
     } catch(e) {
       return '404';
     }
@@ -116,7 +133,7 @@ const NoteContextMenu: Component<{
 
         const data = decoded.data as nip19.AddressPointer;
 
-        link = `${vanityName}/${data.identifier}`;
+        link = `${vanityName}/${urlEncode(data.identifier)}`;
       }
     }
 
@@ -134,7 +151,7 @@ const NoteContextMenu: Component<{
 
   const copyNoteId = () => {
     if (!props.data) return;
-    navigator.clipboard.writeText(`${note().noteId}`);
+    navigator.clipboard.writeText(`nostr:${note().noteId}`);
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.noteIdCoppied));
   };
@@ -153,32 +170,51 @@ const NoteContextMenu: Component<{
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorNpubCoppied));
   };
 
+  const doRequestDelete = async () => {
+    const user = accountStore.activeUser;
+    const noteToDelete = note();
+
+    if (!props.data || !user || !noteToDelete) return;
+
+    const kind = noteToDelete.msg.kind;
+
+    const id = kind === Kind.LongForm ?
+      (noteToDelete as PrimalArticle).coordinate :
+      noteToDelete.id;
+
+    const { success, note: deleteEvent } = await sendDeleteEvent(
+      user.pubkey,
+      id,
+      noteToDelete.msg.kind,
+    );
+
+    if (!success || !deleteEvent) return;
+
+    props.data.onDelete && props.data.onDelete(noteToDelete.noteId);
+    props.onClose();
+  };
+
   const broadcastNote = async () => {
-    if (!account || !props.data) {
+    if (!props.data) {
       return;
     }
 
-    if (!account?.hasPublicKey()) {
-      account?.actions.showGetStarted();
+    if (!hasPublicKey()) {
+      showGetStarted();
       return;
     }
 
-    if (!account.sec || account.sec.length === 0) {
-        const sec = readSecFromStorage();
-        if (sec) {
-          account.actions.setShowPin(sec);
-          return;
-        }
+    if (!accountStore.sec || accountStore.sec.length === 0) {
+      const sec = readSecFromStorage();
+      if (sec) {
+        setShowPin(sec);
+        return;
       }
-
-    if (!account.proxyThroughPrimal && account.relays.length === 0) {
-      toaster?.sendWarning(
-        intl.formatMessage(toast.noRelaysConnected),
-      );
-      return;
     }
 
-    const { success } = await broadcastEvent(note().msg as NostrRelaySignedEvent, account.proxyThroughPrimal, account.activeRelays, account.relaySettings);
+    const { success } = await broadcastEvent(
+      note().msg as NostrRelaySignedEvent,
+    );
     props.onClose()
 
     if (success) {
@@ -211,57 +247,61 @@ const NoteContextMenu: Component<{
       note().user.nip05.endsWith('primal.net');
   }
 
-  const noteContextForEveryone: MenuItem[] = [
-    {
-      label: intl.formatMessage(tActions.noteContext.reactions),
-      action: () => {
-        props.data?.openReactions && props.data?.openReactions();
-        props.onClose()
+  const noteContextForEveryone: () => MenuItem[] = () => {
+
+    return [
+      {
+        label: intl.formatMessage(tActions.noteContext.reactions),
+        action: () => {
+          props.data?.openReactions && props.data?.openReactions();
+          props.onClose()
+        },
+        icon: 'heart',
       },
-      icon: 'heart',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.zap),
-      action: () => {
-        props.data?.openCustomZap && props.data?.openCustomZap();
-        props.onClose()
+      {
+        label: intl.formatMessage(tActions.noteContext.zap),
+        action: () => {
+          props.data?.openCustomZap && props.data?.openCustomZap();
+          props.onClose()
+        },
+        icon: 'feed_zap_2',
       },
-      icon: 'feed_zap',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.copyLink),
-      action: copyNoteLink,
-      icon: 'copy_note_link',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.copyText),
-      action: copyNoteText,
-      icon: 'copy_note_text',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.copyId),
-      action: copyNoteId,
-      icon: 'copy_note_id',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.copyRaw),
-      action: copyRawData,
-      icon: 'copy_raw_data',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.breadcast),
-      action: broadcastNote,
-      icon: 'broadcast',
-    },
-    {
-      label: intl.formatMessage(tActions.noteContext.copyPubkey),
-      action: copyUserNpub,
-      icon: 'copy_pubkey',
-    },
-  ];
+      {
+        label: intl.formatMessage(tActions.noteContext.copyLink),
+        action: copyNoteLink,
+        icon: 'copy_note_link_2',
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.copyText),
+        action: copyNoteText,
+        icon: 'copy_note_text',
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.copyId),
+        action: copyNoteId,
+        icon: 'copy_note_id',
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.copyRaw),
+        action: copyRawData,
+        icon: 'copy_raw_data',
+      },
+      // {
+      //   label: intl.formatMessage(tActions.noteContext.breadcast),
+      //   action: broadcastNote,
+      //   icon: 'broadcast',
+      // },
+      {
+        label: intl.formatMessage(tActions.noteContext.copyPubkey),
+        action: copyUserNpub,
+        icon: 'copy_pubkey',
+      },
+    ];
+  };
 
   const noteContextForOtherPeople: () => MenuItem[] = () => {
-    const isMuted = account?.muted.includes(note()?.user.pubkey);
+    const isMuted = accountStore.muted.includes(note()?.user.pubkey);
+    const isMutedThread = accountStore.mutedTags.find((t) => t[0] === 'e' && t[1] === note()?.id);
 
     return [
       {
@@ -274,10 +314,29 @@ const NoteContextMenu: Component<{
         warning: true,
       },
       {
-        label: intl.formatMessage(tActions.noteContext.reportAuthor),
+        label: isMutedThread ? intl.formatMessage(tActions.noteContext.unmuteThread) : intl.formatMessage(tActions.noteContext.muteThread),
         action: () => {
-          setConfirmReportUser(true);
+          isMutedThread ? doUnmuteThread() : setConfirmMuteThread(true);
           props.onClose()
+        },
+        icon: 'mute_thread',
+        warning: true,
+      },
+      // {
+      //   label: intl.formatMessage(tActions.noteContext.reportAuthor),
+      //   action: () => {
+      //     setConfirmReportUser(true);
+      //     props.onClose()
+      //   },
+      //   icon: 'report',
+      //   warning: true,
+      // },
+      {
+        label: intl.formatMessage(tActions.noteContext.reportContent),
+        action: () => {
+          const n = note();
+          n && setConfirmReportContent(() => ({ ...n }));
+          props.onClose();
         },
         icon: 'report',
         warning: true,
@@ -285,9 +344,43 @@ const NoteContextMenu: Component<{
     ];
   };
 
-  const noteContext = () => account?.publicKey !== note()?.pubkey ?
-      [ ...noteContextForEveryone, ...noteContextForOtherPeople()] :
-      noteContextForEveryone;
+  const noteContextForMe: () => MenuItem[] = () => {
+    // if (!note() || (note().user.pubkey !== account?.publicKey)) return [];
+
+    if (!(note()?.noteId || '').startsWith('naddr1')) return [];
+
+    return [
+      {
+        label: intl.formatMessage(tActions.noteContext.editArticle),
+        action: () => {
+          props.onClose();
+          navigate(`/reads/edit/${note().noteId}`);
+        },
+        icon: 'edit',
+      },
+    ];
+  };
+
+
+  const requestDeleteContextMenu: () => MenuItem[] = () => {
+    // if (!note() || (note().user.pubkey !== account?.publicKey)) return [];
+
+    return [
+      {
+        label: intl.formatMessage(tActions.noteContext.requestDelete),
+        action: () => {
+          setConfirmRequestDelete(true);
+          props.onClose();
+        },
+        icon: 'delete',
+        warning: true,
+      },
+    ];
+  };
+
+  const noteContext = () => accountStore.publicKey !== note()?.pubkey ?
+      [ ...noteContextForEveryone(), ...noteContextForOtherPeople()] :
+      [ ...noteContextForMe(), ...noteContextForEveryone(), ...requestDeleteContextMenu()];
 
   let context: HTMLDivElement | undefined;
 
@@ -303,6 +396,11 @@ const NoteContextMenu: Component<{
         onAbort={() => setConfirmReportUser(false)}
       />
 
+      <ReportContentModal
+        note={confirmReportContent()}
+        onClose={() => setConfirmReportContent(undefined)}
+      />
+
       <ConfirmModal
         open={confirmMuteUser()}
         description={intl.formatMessage(tActions.muteUserConfirm, { name: authorName(note()?.user) })}
@@ -311,6 +409,27 @@ const NoteContextMenu: Component<{
           setConfirmMuteUser(false);
         }}
         onAbort={() => setConfirmMuteUser(false)}
+      />
+
+      <ConfirmModal
+        open={confirmMuteThread()}
+        description={intl.formatMessage(tActions.muteThreadConfirm)}
+        onConfirm={() => {
+          doMuteThread();
+          setConfirmMuteThread(false);
+        }}
+        onAbort={() => setConfirmMuteThread(false)}
+      />
+
+      <ConfirmModal
+        open={confirmRequestDelete()}
+        title="Delete note?"
+        description="This will issue a “request delete” command to the relays where the note was published. Do you want to continue? "
+        onConfirm={() => {
+          doRequestDelete();
+          setConfirmRequestDelete(false);
+        }}
+        onAbort={() => setConfirmRequestDelete(false)}
       />
 
       <PrimalMenu

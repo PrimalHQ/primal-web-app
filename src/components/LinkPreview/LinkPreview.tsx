@@ -71,7 +71,7 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
   const [isLongTitle, setIsLongTitle] = createSignal(false);
 
   createEffect(on(() => props.preview.title, (v, p) => {
-    if (!v || v === p) return;
+    if (!v || v === p || title === undefined) return;
 
     new ResizeObserver(() => {
       setIsLongTitle(() => (title?.clientHeight || 0) > 25)

@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal, For, Match, onMount, Show, Switch } from 'solid-js';
-import { Relay, relayInit } from "../../lib/nTools";
+import { Relay, relayInit, utils } from "../../lib/nTools";
 import styles from './Settings.module.scss';
 
 import { useIntl } from '@cookbook/solid-intl';
@@ -11,12 +11,10 @@ import {
 } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import { A } from '@solidjs/router';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { getDefaultRelays } from '../../lib/relays';
 import { APP_ID } from '../../App';
 import { isConnected as isSocketConnected, socket, subsTo } from '../../sockets';
 import { createStore } from 'solid-js/store';
-import Checkbox from '../../components/Checkbox/Checkbox';
 import ConfirmModal from '../../components/ConfirmModal/ConfirmModal';
 import { interpretBold } from '../../translationHelpers';
 import HelpTip from '../../components/HelpTip/HelpTip';
@@ -24,13 +22,13 @@ import PageTitle from '../../components/PageTitle/PageTitle';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 import { logError } from '../../lib/logger';
 import { useSettingsContext } from '../../contexts/SettingsContext';
-import CheckBox2 from '../../components/Checkbox/CheckBox2';
+import CheckBox from '../../components/Checkbox/CheckBox';
+import { accountStore, addRelay, changeCachingService, connectToRelays, removeRelay, resetRelays, setConnectToPrimaryRelays } from '../../stores/accountStore';
 
 
 const Network: Component = () => {
 
   const intl = useIntl();
-  const account = useAccountContext();
   const settings = useSettingsContext();
 
   const [recomendedRelays, setRecomendedRelays] = createStore<Relay[]>([]);
@@ -41,81 +39,34 @@ const Network: Component = () => {
   let customRelayInput: HTMLInputElement | undefined;
   let cachingServiceInput: HTMLInputElement | undefined;
 
-  const relays = () => {
-    let settingsRelays = [];
-
-    for (let url in (account?.relaySettings || {})) {
-
-      settingsRelays.push(relayInit(url))
-    }
-
-    return settingsRelays;
-  };
-
-  const otherRelays = () => {
-    const myRelays: string[] = relays().map(r => r.url);
-
-    let unusedRelays: string[] = [];
-
-    for (let i = 0; i < recomendedRelays.length; i++) {
-      const relay = recomendedRelays[i];
-
-      const exists = myRelays.find(r => {
-
-        const a = new URL(r);
-        const b = new URL(relay.url);
-
-        return a.href === b.href;
-      });
-
-      if (!exists) {
-        unusedRelays.push(relay.url);
-      }
-    }
-
-    return unusedRelays;
-  }
+  const relays = () => Object.keys(accountStore.relaySettings);
 
   const isConnected = (url: string) => {
-    const relay: Relay | undefined = account?.relays.find(r => r.url === url);
+    if (accountStore.proxyThroughPrimal) return false;
 
-    return relay && relay.ws && relay.ws.readyState === WebSocket.OPEN;
+    const relay: string | undefined = accountStore.activeRelays.find(r => utils.normalizeURL(r) === utils.normalizeURL(url));
+
+    return relay !== undefined;
   };
 
   const isPrimalRelayInUserSettings = () => {
     const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
 
-    return Object.keys(account?.relaySettings || {}).includes(rels[0]);
+    return Object.keys(accountStore.relaySettings || {}).includes(rels[0]);
   }
 
   const onCheckPrimalRelay = () => {
-    account?.actions.setConnectToPrimaryRelays(!account.connectToPrimaryRelays)
-  };
-
-  const onAddRelay = (url: string) => {
-    const rels: string[] = import.meta.env.PRIMAL_PRIORITY_RELAYS?.split(',') || [];
-
-    if (rels.includes(url)) {
-      account?.actions.setConnectToPrimaryRelays(true);
-    }
-
-    const myRelays = relays();
-
-    if (myRelays.length === 0) {
-      account?.actions.dissconnectDefaultRelays()
-    }
-
-    account?.actions.addRelay(url);
+    setConnectToPrimaryRelays(!accountStore.connectToPrimaryRelays)
   };
 
   const onRemoveRelay = (url: string) => {
-    account?.actions.removeRelay(url);
+    removeRelay(url);
 
     const myRelays = relays();
 
     if (myRelays.length === 0) {
       setTimeout(() => {
-        account?.actions.connectToRelays({});
+        connectToRelays({});
       }, 200);
     }
   };
@@ -133,7 +84,7 @@ const Network: Component = () => {
       }
 
       customRelayInput.value = '';
-      account?.actions.addRelay(value);
+      addRelay(value);
       setInvalidCustomRelay(false);
     } catch (e) {
       logError('invalid relay input ', e);
@@ -141,8 +92,8 @@ const Network: Component = () => {
     }
   }
 
-  const resetRelays = () => {
-    account?.actions.resetRelays(recomendedRelays);
+  const resetTheRelays = () => {
+    resetRelays(recomendedRelays);
   }
 
   const onCachingServiceInput = () => {
@@ -157,7 +108,7 @@ const Network: Component = () => {
       }
 
       cachingServiceInput.value = '';
-      account?.actions.changeCachingService(url.href);
+      changeCachingService(url.href);
       setInvalidCachingService(false);
     } catch (e) {
       logError('invalid caching service input', e);
@@ -245,7 +196,7 @@ const Network: Component = () => {
       <div style="height: 20px"></div>
 
       <ButtonLink
-        onClick={() => account?.actions.changeCachingService()}
+        onClick={() => changeCachingService()}
       >
         {intl.formatMessage(tActions.restoreCachingService)}
       </ButtonLink>
@@ -273,21 +224,21 @@ const Network: Component = () => {
       >
         <For each={relays()}>
           {relay => (
-            <button class={styles.relayItem} onClick={() => setConfirmRemoveRelay(relay.url)}>
+            <button class={styles.relayItem} onClick={() => setConfirmRemoveRelay(relay)}>
               <div class={styles.relayEntry}>
                 <Switch fallback={<div class={styles.disconnected}></div>}>
-                  <Match when={account?.proxyThroughPrimal}>
+                  <Match when={accountStore.proxyThroughPrimal}>
                     <div class={styles.suspended}></div>
                   </Match>
 
-                  <Match when={isConnected(relay.url)}>
+                  <Match when={isConnected(relay)}>
                     <div class={styles.connected}></div>
                   </Match>
                 </Switch>
 
                 <div class={styles.webIcon}></div>
-                <span class={styles.relayUrl} title={relay.url}>
-                  {relay.url}
+                <span class={styles.relayUrl} title={relay}>
+                  {relay}
                 </span>
               </div>
 
@@ -302,9 +253,9 @@ const Network: Component = () => {
 
       <div class={styles.settingsContentPaddingOnly}>
         <Show when={!isPrimalRelayInUserSettings()}>
-          <Checkbox
+          <CheckBox
             id="primal_relay_check"
-            checked={account?.connectToPrimaryRelays}
+            checked={accountStore.connectToPrimaryRelays}
             onChange={() => onCheckPrimalRelay()}
             label={`Post a copy of all content to the Primal relay (${import.meta.env.PRIMAL_PRIORITY_RELAYS})`}
           />
@@ -312,7 +263,7 @@ const Network: Component = () => {
       </div>
 
       <div class={styles.resetRelays}>
-        <ButtonLink onClick={resetRelays}>
+        <ButtonLink onClick={resetTheRelays}>
           {intl.formatMessage(tActions.resetRelays)}
         </ButtonLink>
         <HelpTip>
@@ -350,11 +301,13 @@ const Network: Component = () => {
 
       <div class={styles.settingsContent}>
         <div class={styles.settingsCaption}>
-          <CheckBox2
+          <CheckBox
             id='proxyEvents'
             label=""
-            onChange={() => {settings?.actions.setProxyThroughPrimal(!account?.proxyThroughPrimal)}}
-            checked={account?.proxyThroughPrimal}
+            onChange={() => {
+              settings?.actions.setProxyThroughPrimal(!accountStore.proxyThroughPrimal)
+            }}
+            checked={accountStore.proxyThroughPrimal}
           />
           <span>{intl.formatMessage(t.network.proxyEvents)}</span>
           <HelpTip zIndex={1_000}>
@@ -371,11 +324,11 @@ const Network: Component = () => {
 
       <div class={styles.settingsContent}>
         <div class={styles.settingsCaption}>
-          <CheckBox2
+          <CheckBox
             id='discloseClient'
             label=""
-            onChange={() => {settings?.actions.setDiscloseClient(!account?.discloseClient)}}
-            checked={account?.discloseClient}
+            onChange={() => {settings?.actions.setDiscloseClient(!accountStore.discloseClient)}}
+            checked={accountStore.discloseClient}
           />
           <span>{intl.formatMessage(t.network.discloseClient)}</span>
           <HelpTip zIndex={1_000}>
@@ -396,6 +349,7 @@ const Network: Component = () => {
         open={confirmRemoveRelay().length > 0}
         description={intl.formatMessage(tActions.confirmRemoveRelay, {
           url: confirmRemoveRelay(),
+          // @ts-ignore
           b: interpretBold,
         }) as string}
         onConfirm={() => {

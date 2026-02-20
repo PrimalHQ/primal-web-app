@@ -1,23 +1,19 @@
-import { Component, createSignal, For, JSXElement, Match, onMount, Show, Switch } from 'solid-js';
+import { Component, For, JSXElement, onMount } from 'solid-js';
 import { hookForDev } from '../../lib/devTools';
 
 import styles from './DirectMessages.module.scss';
 import { nip19 } from '../../lib/nTools';
-import Avatar from '../Avatar/Avatar';
-import { nip05Verification, truncateNpub, userName } from '../../stores/profile';
-import { DMContact } from '../../megaFeeds';
-import { date } from '../../lib/dates';
-import { DirectMessage, PrimalArticle } from '../../types/primal';
+import { truncateNpub, userName } from '../../stores/profile';
+import { PrimalArticle } from '../../types/primal';
 import { useDMContext } from '../../contexts/DMContext';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { A } from '@solidjs/router';
 import { useAppContext } from '../../contexts/AppContext';
 import { decodeIdentifier, hexToNpub } from '../../lib/keys';
-import { isDev, msgHasCashu, msgHasInvoice } from '../../utils';
+import { isDev } from '../../utils';
 import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { createStore } from 'solid-js/store';
 import { NoteContent } from '../ParsedNote/ParsedNote';
-import { isInterpunction, isUrl, isImage, isMp4Video, isOggVideo, isWebmVideo, isYouTube, isSpotify, isTwitch, isMixCloud, isSoundCloud, isAppleMusic, isWavelake, getLinkPreview, isNoteMention, isUserMention, isAddrMention, isTagMention, isHashtag, isCustomEmoji, isUnitifedLnAddress, isLnbc } from '../../lib/notes';
+import { isInterpunction, isUrl, isImage, isMp4Video, isOggVideo, isWebmVideo, isYouTube, isSpotify, isTwitch, isMixCloud, isSoundCloud, isAppleMusic, isWavelake, getLinkPreview, isNoteMention, isUserMention, isAddrMention, isTagMention, isHashtag, isCustomEmoji, isUnitifedLnAddress, isLnbc, is3gppVideo } from '../../lib/notes';
 import { generatePrivateKey } from '../../lib/nTools';
 import { useMediaContext } from '../../contexts/MediaContext';
 import NoteImage from '../NoteImage/NoteImage';
@@ -28,6 +24,7 @@ import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import { logError } from '../../lib/logger';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import Lnbc from '../Lnbc/Lnbc';
+import NoteVideo from '../ParsedNote/NoteVideo';
 
 
 const groupGridLimit = 7;
@@ -40,7 +37,6 @@ const DirectMessageParsedContent: Component<{
   noLinks?: string,
   noPreviews?: boolean,
 }> = (props) => {
-  const account = useAccountContext();
   const app = useAppContext();
   const media = useMediaContext();
   const dms = useDMContext();
@@ -182,6 +178,14 @@ const DirectMessageParsedContent: Component<{
           isAfterEmbed = true;
           lastSignificantContent = 'video';
           updateContent(content, 'video', token, { videoType: 'video/webm'});
+          return;
+        }
+
+        if (is3gppVideo(token)) {
+          removeLinebreaks('video');
+          isAfterEmbed = true;
+          lastSignificantContent = 'video';
+          updateContent(content, 'video', token, { videoType: 'video/3gpp'});
           return;
         }
 
@@ -478,17 +482,13 @@ const DirectMessageParsedContent: Component<{
         klass += ' embeddedContent';
         klass += ` ${lastClass}`;
 
-        const video = <video
+        const video = <NoteVideo
           class={klass}
           width={w}
           height={h}
-          controls
-          muted={true}
-          loop={true}
-          playsinline={true}
-        >
-          <source src={token} type={item.meta?.videoType} />
-        </video>;
+          src={token}
+          type={item.meta?.videoType}
+        />;
 
         media?.actions.addVideo(video as HTMLVideoElement);
 

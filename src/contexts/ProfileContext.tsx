@@ -1,4 +1,3 @@
-import { nip19 } from "../lib/nTools";
 import { createStore, reconcile } from "solid-js/store";
 import { getFutureUserFeed, } from "../lib/feed";
 import { convertToArticles, convertToNotes, sortByScore } from "../stores/note";
@@ -9,24 +8,15 @@ import {
   createEffect,
   JSXElement,
   on,
-  onCleanup,
   useContext
 } from "solid-js";
 import {
-  isConnected,
-  readData,
-  refreshSocketListeners,
-  removeSocketListeners,
-  socket,
   subsTo
 } from "../sockets";
 import {
   ContextChildren,
   FeedPage,
-  NostrEOSE,
-  NostrEvent,
   NostrEventContent,
-  NostrEvents,
   NostrMentionContent,
   NostrNoteActionsContent,
   NostrNoteContent,
@@ -35,6 +25,7 @@ import {
   NostrUserContent,
   NoteActions,
   PrimalArticle,
+  PrimalDraft,
   PrimalNote,
   PrimalUser,
   PrimalZap,
@@ -54,17 +45,21 @@ import {
   getUserProfiles,
   isUserFollowing,
 } from "../lib/profile";
-import { useAccountContext } from "./AccountContext";
 import { readRecomendedUsers, saveRecomendedUsers } from "../lib/localStore";
 import { fetchUserZaps } from "../handleFeeds";
 import { convertToUser } from "../stores/profile";
 import ProfileAbout from "../components/ProfileAbout/ProfileAbout";
-import { emptyPaging, fetchMegaFeed, filterAndSortNotes, filterAndSortReads, filterAndSortZaps, MegaFeedResults, PaginationInfo } from "../megaFeeds";
+import {
+  emptyPaging,
+  fetchMegaFeed,
+  filterAndSortNotes,
+  filterAndSortReads,
+  filterAndSortZaps,
+  PaginationInfo,
+} from "../megaFeeds";
 import { calculateReadsOffset, handleSubscription } from "../utils";
-
-let startTime = 0;
-let midTime = 0;
-let endTime = 0
+import { decrypt44 } from "../lib/nostrAPI";
+import { accountStore, hasPublicKey } from "../stores/accountStore";
 
 export type ProfileContextStore = {
   profileKey: string | undefined,
@@ -73,6 +68,7 @@ export type ProfileContextStore = {
   fetchedUserStats: boolean,
   knownProfiles: VanityProfiles,
   articles: PrimalArticle[],
+  drafts: PrimalDraft[],
   notes: PrimalNote[],
   replies: PrimalNote[],
   zaps: PrimalZap[],
@@ -118,6 +114,7 @@ export type ProfileContextStore = {
   isFetchingFollowers: boolean,
   isFetchingZaps: boolean,
   isFetchingRelays: boolean,
+  isFetchingDrafts: boolean,
   isAboutParsed: boolean,
   profileStats: Record<string, number>,
   relays: NostrRelays,
@@ -139,6 +136,7 @@ export type ProfileContextStore = {
     clearZaps: () => void,
     clearArticles: () => void,
     clearGallery: () => void,
+    clearDrafts: () => void,
     setProfileKey: (profileKey?: string) => void,
     refreshNotes: () => void,
     checkForNewNotes: (pubkey: string | undefined) => void,
@@ -159,6 +157,7 @@ export type ProfileContextStore = {
     updateScrollTop: (top: number, tab: 'notes' | 'reads' | 'media' | 'replies' | 'zaps') => void,
     resetScroll: () => void,
     updateProfile: (pubkey: string) => void,
+    removeEvent: (id: string, kind: 'articles' | 'drafts' | 'notes' | 'replies', isRepost?: boolean) => void,
   }
 }
 
@@ -178,9 +177,6 @@ export const emptyStats = {
 export const ProfileContext = createContext<ProfileContextStore>();
 
 export const ProfileProvider = (props: { children: ContextChildren }) => {
-
-  const account = useAccountContext();
-
   let commonFollowers: PrimalUser[] = [];
 
   const initialData = {
@@ -190,6 +186,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     fetchedUserStats: false,
     knownProfiles: { names: {} },
     articles: [],
+    drafts: [],
     notes: [],
     replies: [],
     gallery: [],
@@ -200,6 +197,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     isProfileFollowing: false,
     isFetchingZaps: false,
     isFetchingGallery: false,
+    isFetchingDrafts: false,
     page: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
     repliesPage: { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {}, topZaps: {} },
     reposts: {},
@@ -275,6 +273,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       reads: { ...emptyPaging() },
       gallery: { ...emptyPaging() },
       replies: { ...emptyPaging() },
+      drafts: { ...emptyPaging() },
     },
     scrollTop: {
       reads: 0,
@@ -287,7 +286,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
-  const getProfileMegaFeed = async (pubkey: string | undefined, tab: string, until = 0, limit = 20, offset = 0, minwords = 100) => {
+  const getProfileMegaFeed = async (pubkey: string | undefined, tab: string, until = 0, limit = 20, offset = 0, minwords = 0) => {
     if (!pubkey) return;
 
     if (tab === 'notes') {
@@ -301,7 +300,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('isFetching', () => true);
 
       const { notes, paging } = await fetchMegaFeed(
-        account?.publicKey,
+        accountStore.publicKey,
         JSON.stringify(specification),
         `profile_notes_${APP_ID}`,
         {
@@ -330,7 +329,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('isFetchingReplies', () => true);
 
       const { notes, paging } = await fetchMegaFeed(
-        account?.publicKey,
+        accountStore.publicKey,
         JSON.stringify(specification),
         `profile_replies_${APP_ID}`,
         {
@@ -362,7 +361,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       const off = offset || calculateReadsOffset(store.articles, store.paging['reads']);
 
       const { reads, paging } = await fetchMegaFeed(
-        account?.publicKey,
+        accountStore.publicKey,
         JSON.stringify(specification),
         `profile_reads_${APP_ID}`,
         {
@@ -380,6 +379,44 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       return;
     }
 
+    if (tab === 'drafts') {
+      const specification = {
+        id: 'feed',
+        kind: 'drafts',
+        notes: 'authored',
+        pubkey,
+      };
+
+      updateStore('isFetchingDrafts', () => true);
+
+      const off = offset || calculateReadsOffset(store.articles, store.paging['drafts']);
+
+      const { drafts, paging } = await fetchMegaFeed(
+        accountStore.publicKey,
+        JSON.stringify(specification),
+        `profile_drafts_${APP_ID}`,
+        {
+          limit,
+          until,
+          offset: off,
+        },
+      );
+
+      for (let i = 0; i < drafts.length; i++) {
+        let draft = drafts[i];
+        draft.plain = await decrypt44(pubkey, draft.content);
+        draft.noteId = `ndraft1${draft.id}`
+      }
+
+      const sortedDrafts = drafts.filter(d => !store.drafts.find(sd => sd.id === d.id));
+
+      updateStore('paging', 'drafts', () => ({ ...paging }));
+      updateStore('drafts', (ns) => [ ...ns, ...sortedDrafts]);
+      updateStore('isFetchingDrafts', () => false);
+      return;
+    }
+
+
     if (tab === 'media') {
       const specification = {
         id: 'feed',
@@ -391,7 +428,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('isFetchingGallery', () => true);
 
       const { notes, paging } = await fetchMegaFeed(
-        account?.publicKey,
+        accountStore.publicKey,
         JSON.stringify(specification),
         `profile_media_${APP_ID}`,
         {
@@ -408,8 +445,17 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateStore('isFetchingGallery', () => false);
       return;
     }
+  }
 
+  const removeEvent = (id: string, kind: 'articles' | 'drafts' | 'notes' | 'replies', isRepost?: boolean) => {
 
+    if (isRepost) {
+      updateStore(kind, (note) => note.repost?.note?.noteId === id, 'repost', () => undefined);
+
+      return;
+    }
+    // @ts-ignore
+    updateStore(kind, (drs) => drs.filter(d => d.noteId !== id));
   }
 
   const getProfileMegaFeedNextPage = async (pubkey: string | undefined, tab: string) => {
@@ -628,6 +674,10 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     //resetScroll();
   };
 
+  const clearDrafts = () => {
+    updateStore('drafts', () => []);
+  };
+
   const clearReplies = () => {
     updateStore('repliesPage', () => ({ messages: [], users: {}, postStats: {}, noteActions: {} }));
     updateStore('replies', () => []);
@@ -697,7 +747,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     clearFuture();
 
     getFutureUserFeed(
-      account?.publicKey,
+      accountStore.publicKey,
       pubkey,
       `profile_future_${APP_ID}`,
       since,
@@ -822,21 +872,21 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       handleSubscription(
         profileInfoId,
-        () => getUserProfileInfo(profileKey, account?.publicKey, profileInfoId),
+        () => getUserProfileInfo(profileKey, accountStore.publicKey, profileInfoId),
         handleProfileInfoEvent,
         handleProfileInfoEose,
       );
 
       handleSubscription(
         profileScoredId,
-        () => getProfileScoredNotes(profileKey, account?.publicKey, profileScoredId, 8),
+        () => getProfileScoredNotes(profileKey, accountStore.publicKey, profileScoredId, 8),
         handleProfileScoredEvent,
         handleProfileScoredEose,
       );
 
       handleSubscription(
         profileCommonFollowersId,
-        () => getCommonFollowers(profileKey, account?.publicKey, profileCommonFollowersId, 6),
+        () => getCommonFollowers(profileKey, accountStore.publicKey, profileCommonFollowersId, 6),
         handleProfileCommonFollowersEvent,
         handleProfileCommonFollowersEose,
       );
@@ -848,7 +898,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
         pubkey: profileKey,
       };
 
-      const { reads, paging } = await fetchMegaFeed(account?.publicKey, JSON.stringify(readsSidebarSpec), `profile_reads_latest_${APP_ID}`, { until: 0, limit: 2 });
+      const { reads, paging } = await fetchMegaFeed(accountStore.publicKey, JSON.stringify(readsSidebarSpec), `profile_reads_latest_${APP_ID}`, { until: 0, limit: 2 });
 
       const sortedReads = filterAndSortReads(reads, paging);
 
@@ -859,7 +909,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 
       handleSubscription(
         isProfileFollowingId,
-        () => isUserFollowing(profileKey, account?.publicKey, isProfileFollowingId),
+        () => isUserFollowing(profileKey, accountStore.publicKey, isProfileFollowingId),
         handleProfileFollowingEvent,
       );
     }
@@ -913,7 +963,11 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       list.splice(index, 1);
 
       updateStore('profileHistory', 'profiles', () => [user, ...list]);
+      saveRecomendedUsers(accountStore.publicKey, { ...store.profileHistory });
 
+      if (user.userStats) {
+        addStatsToHistory(user.userStats);
+      }
       return;
     }
 
@@ -927,15 +981,22 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       delete stats[last];
 
       updateStore('profileHistory', 'stats', reconcile(stats));
+      saveRecomendedUsers(accountStore.publicKey, { ...store.profileHistory });
 
       list.pop()
     }
 
     updateStore('profileHistory', 'profiles', () => [...list]);
+    saveRecomendedUsers(accountStore.publicKey, { ...store.profileHistory });
+
+    if (user.userStats) {
+      addStatsToHistory(user.userStats);
+    }
   };
 
   const addStatsToHistory = (stats: UserStats) => {
     updateStore('profileHistory', 'stats', () => ({ [stats.pubkey]: stats }));
+    saveRecomendedUsers(accountStore.publicKey, { ...store.profileHistory });
   };
 
 // SOCKET HANDLERS ------------------------------
@@ -1002,19 +1063,19 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
 // EFFECTS --------------------------------------
 
   createEffect(() => {
-    if (account && account.hasPublicKey()) {
-      const history = readRecomendedUsers(account.publicKey);
+    if (hasPublicKey()) {
+      const history = readRecomendedUsers(accountStore.publicKey);
 
       history && updateStore('profileHistory', reconcile(history));
     }
   });
 
-  createEffect(() => {
-    const profiles = [...store.profileHistory.profiles];
-    const stats = { ...store.profileHistory.stats };
+  // createEffect(() => {
+  //   const profiles = [...store.profileHistory.profiles];
+  //   const stats = { ...store.profileHistory.stats };
 
-    saveRecomendedUsers(account?.publicKey, { profiles, stats });
-  });
+  //   saveRecomendedUsers(account?.publicKey, { profiles, stats });
+  // });
 
   // createEffect(() => {
   //   if (store.isProfileFetched) {
@@ -1038,6 +1099,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
     clearGallery();
     clearReplies();
     clearZaps();
+    clearDrafts();
     resetProfile();
   }
 
@@ -1066,6 +1128,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       clearArticles,
       clearGallery,
       clearReplies,
+      clearDrafts,
       setProfileKey,
       refreshNotes,
       checkForNewNotes,
@@ -1085,6 +1148,7 @@ export const ProfileProvider = (props: { children: ContextChildren }) => {
       updateScrollTop,
       resetScroll,
       updateProfile,
+      removeEvent,
 
       getProfileMegaFeed,
       getProfileMegaFeedNextPage,

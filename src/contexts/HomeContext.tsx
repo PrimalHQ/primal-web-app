@@ -1,5 +1,5 @@
-import { createContext, createEffect, useContext } from "solid-js";
-import { createStore, reconcile, unwrap } from "solid-js/store";
+import { createContext, createEffect, on, useContext } from "solid-js";
+import { createStore, reconcile } from "solid-js/store";
 import { APP_ID } from "../App";
 import { minKnownProfiles } from "../constants";
 import {
@@ -10,10 +10,11 @@ import {
   PrimalNote,
   SelectionOption,
 } from "../types/primal";
-import { useAccountContext } from "./AccountContext";
 import { emptyPaging, fetchMegaFeed, fetchScoredContent, filterAndSortNotes, PaginationInfo } from "../megaFeeds";
-import { saveStoredFeed } from "../lib/localStore";
+import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
 import { calculateNotesOffset } from "../utils";
+import { accountStore } from "../stores/accountStore";
+import { useSettingsContext } from "./SettingsContext";
 
 type HomeContextStore = {
   notes: PrimalNote[],
@@ -56,6 +57,7 @@ type HomeContextStore = {
     getFirstPage: () => void,
     resetSelectedFeed: () => void,
     refetchSelectedFeed: () => void,
+    removeEvent: (id: string, kind: 'notes') => void,
   }
 }
 
@@ -117,10 +119,13 @@ const initialHomeData = {
 export const HomeContext = createContext<HomeContextStore>();
 
 export const HomeProvider = (props: { children: ContextChildren }) => {
-
-  const account = useAccountContext();
+  const settings = useSettingsContext();
 
 // ACTIONS --------------------------------------
+
+  const removeEvent = (id: string, kind: 'notes') => {
+    updateStore(kind, (drs) => drs.filter(d => d.noteId !== id));
+  }
 
   const updateSidebarQuery = (selection: SelectionOption) => {
     updateStore('sidebarQuery', () => ({ ...selection }))
@@ -129,7 +134,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   const doSidebarSearch = async (query: string) => {
     updateStore('isFetchingSidebar', () => true);
     const { notes, paging } = await fetchScoredContent(
-      account?.publicKey,
+      accountStore.publicKey,
       query,
       `home_sidebar_${APP_ID}`,
     );
@@ -168,7 +173,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     );
 
     const { notes, paging } = await fetchMegaFeed(
-      account?.publicKey,
+      accountStore.publicKey,
       spec,
       `home_future_${APP_ID}`,
       {
@@ -200,7 +205,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     updateStore('isFetching' , () => includeIsFetching);
 
-    const pubkey = account?.publicKey || minKnownProfiles.names['primal'];
+    const pubkey = accountStore.publicKey || minKnownProfiles.names['primal'];
 
     const offset = calculateNotesOffset(store.notes, store.paging.notes);
 
@@ -261,7 +266,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
     if (feed?.spec !== undefined && (feed.spec !== currentFeed?.spec)) {
       currentFeed = { ...feed };
       updateStore('selectedFeed', reconcile({...feed}));
-      saveStoredFeed(account?.publicKey, 'home', feed);
+      saveStoredFeed(accountStore.publicKey, 'home', feed);
       clearNotes();
       fetchNotes(feed.spec, 0);
     }
@@ -288,6 +293,12 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   };
 
 
+  createEffect(on(() => settings?.homeFeedsReloaded, (reloaded) => {
+    if (!reloaded) return;
+
+    const feed = fetchStoredFeed(accountStore.publicKey, 'home') || settings?.homeFeeds[0];
+    selectFeed(feed);
+  }));
 // STORES ---------------------------------------
 
   const [store, updateStore] = createStore<HomeContextStore>({
@@ -305,6 +316,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       getFirstPage,
       resetSelectedFeed,
       refetchSelectedFeed,
+      removeEvent,
     },
   });
 

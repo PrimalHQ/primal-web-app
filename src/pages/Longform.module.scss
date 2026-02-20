@@ -22,6 +22,7 @@
 
       .userName {
         display: flex;
+        align-items: center;
         color: var(--text-primary);
         font-size: 14px;
         font-weight: 700;
@@ -98,7 +99,7 @@
     color: var(--text-primary);
     font-size: 44px;
     font-weight: 700;
-    line-height: 52px;
+    line-height: 120%;
   }
 
   .summary {

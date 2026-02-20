@@ -12,7 +12,6 @@ import { useIntl } from '@cookbook/solid-intl';
 import Avatar from '../components/Avatar/Avatar';
 import { useProfileContext } from '../contexts/ProfileContext';
 import { useMediaContext } from '../contexts/MediaContext';
-import { useAccountContext } from '../contexts/AccountContext';
 import { sendProfile } from '../lib/profile';
 import { useToastContext } from '../components/Toaster/Toaster';
 import { usernameRegex } from '../constants';
@@ -21,11 +20,9 @@ import { useNavigate } from '@solidjs/router';
 import PageTitle from '../components/PageTitle/PageTitle';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
-import Uploader from '../components/Uploader/Uploader';
-import { triggerImportEvents } from '../lib/notes';
-import { APP_ID } from '../App';
-import { useSettingsContext } from '../contexts/SettingsContext';
 import { useAppContext } from '../contexts/AppContext';
+import UploaderBlossom from '../components/Uploader/UploaderBlossom';
+import { accountStore, updateAccountProfile } from '../stores/accountStore';
 
 type AutoSizedTextArea = HTMLTextAreaElement & { _baseScrollHeight: number };
 
@@ -35,9 +32,7 @@ const EditProfile: Component = () => {
   const intl = useIntl();
   const profile = useProfileContext();
   const media = useMediaContext();
-  const account = useAccountContext();
   const toast = useToastContext();
-  const settings = useSettingsContext();
   const app = useAppContext();
   const navigate = useNavigate();
 
@@ -133,8 +128,8 @@ const EditProfile: Component = () => {
   })
 
   createEffect(() => {
-    if (account?.isKeyLookupDone) {
-      account.publicKey && setProfile(account.publicKey);
+    if (accountStore.isKeyLookupDone) {
+      accountStore.publicKey && setProfile(accountStore.publicKey);
     }
   });
 
@@ -192,7 +187,7 @@ const EditProfile: Component = () => {
   const onSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
 
-    if (!e.target || !account) {
+    if (!e.target) {
       return false;
     }
 
@@ -225,17 +220,43 @@ const EditProfile: Component = () => {
       }
     });
 
-    const oldProfile = profile?.userProfile || {};
+    const userProfile: Record<string, any> = JSON.parse(profile?.userProfile?.msg?.content || '{}');
 
-    const { success, note } = await sendProfile({ ...oldProfile, ...metadata}, account?.proxyThroughPrimal || false, account.activeRelays, account.relaySettings);
+    let oldProfile: Record<string, any> = userProfile ? {
+      'name': userProfile.name,
+      'about': userProfile.about,
+      'lud16': userProfile.lud16,
+      'nip05': userProfile.nip05,
+      'picture': userProfile.picture,
+    } : {};
 
-    if (success) {
-      note && triggerImportEvents([note], `import_profile_${APP_ID}`, () => {
-        note && profile?.actions.updateProfile(note.pubkey);
-        note && account.actions.updateAccountProfile(note.pubkey);
-        note && navigate(app?.actions.profileLink(note.pubkey) || '/home')
-        toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess))
-      });
+    if (userProfile.display_name) {
+      oldProfile.display_name = userProfile.display_name
+    }
+
+    if (userProfile.website) {
+      oldProfile.website = userProfile.website
+    }
+
+    if (userProfile.banner) {
+      oldProfile.banner = userProfile.banner
+    }
+
+    if (userProfile.bot) {
+      oldProfile.bot = userProfile.bot
+    }
+
+    if (userProfile.bithday) {
+      oldProfile.bithday = userProfile.bithday
+    }
+
+    const { success, note } = await sendProfile({ ...oldProfile, ...metadata});
+
+    if (success && note) {
+      profile?.actions.updateProfile(note.pubkey);
+      updateAccountProfile(note.pubkey);
+      navigate(app?.actions.profileLink(note.pubkey) || '/home');
+      toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
       return false;
     }
 
@@ -301,11 +322,10 @@ const EditProfile: Component = () => {
 
         <div class={styles.uploadActions}>
           <div class={styles.uploader}>
-            <Uploader
+            <UploaderBlossom
               hideLabel={true}
-              publicKey={account?.publicKey}
-              nip05={account?.activeUser?.nip05}
-              openSockets={openSockets()}
+              publicKey={accountStore.publicKey}
+              nip05={accountStore.activeUser?.nip05}
               file={fileToUpload()}
               onFail={() => {
                 toast?.sendWarning(intl.formatMessage(tUpload.fail, {
@@ -499,7 +519,7 @@ const EditProfile: Component = () => {
           </ButtonPrimary>
           <ButtonSecondary
             type='button'
-            onClick={() => navigate(app?.actions.profileLink(account?.publicKey) || '')}
+            onClick={() => navigate(app?.actions.profileLink(accountStore.publicKey) || '')}
           >
             {intl.formatMessage(tActions.cancel)}
           </ButtonSecondary>

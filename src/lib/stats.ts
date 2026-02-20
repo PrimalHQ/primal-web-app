@@ -31,9 +31,19 @@ export const getArticlesStats = (pubkey: string | undefined, subId: string) => {
   ]));
 }
 
-export const humanizeNumber = (number: number, veryShort = false) => {
+export const getTopArticle = (pubkey: string | undefined, by: 'satszapped' | 'interactions', subId: string) => {
+  pubkey && sendMessage(JSON.stringify([
+    "REQ",
+    subId,
+    {"cache":["top_article",{ pubkey, by }]},
+  ]));
+}
 
-  const bottomLimit = veryShort ? 1000 : 10000;
+export const humanizeNumber = (number: number, abbrLimit = true) => {
+
+  if (!abbrLimit) return number.toLocaleString();
+
+  const bottomLimit = 10000;
 
   if (number < bottomLimit) {
     return number.toLocaleString();

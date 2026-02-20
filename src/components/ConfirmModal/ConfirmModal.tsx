@@ -13,6 +13,7 @@ import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 const ConfirmModal: Component<{
   id?: string,
   open?: boolean,
+  setOpen?: (v: boolean) => void,
   title?: string,
   description?: string,
   confirmLabel?: string,
@@ -23,10 +24,22 @@ const ConfirmModal: Component<{
 
   const intl = useIntl();
 
+  const setOpen = (isOpen: boolean) => {
+    if (props.onAbort && !isOpen) {
+      props.onAbort();
+      return;
+    }
+
+    if (props.setOpen) {
+      props.setOpen(isOpen);
+      return;
+    }
+  }
+
   return (
     <AdvancedSearchDialog
       open={props.open}
-      setOpen={(isOpen: boolean) => !isOpen && props.onAbort && props.onAbort()}
+      setOpen={setOpen}
       title={
         <div class={styles.feedConfirmationTitle}>
           {props.title || intl.formatMessage(t.title)}

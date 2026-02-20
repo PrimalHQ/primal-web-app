@@ -3,8 +3,10 @@ import { decodeIdentifier, hexToNpub } from '../../lib/keys';
 import {
   getLinkPreview,
   getParametrizedEvent,
+  is3gppVideo,
   isAddrMention,
   isAppleMusic,
+  isAudio,
   isCustomEmoji,
   isHashtag,
   isImage,
@@ -27,6 +29,7 @@ import {
   isWavelake,
   isWebmVideo,
   isYouTube,
+  isZapStream,
   linkPreviews,
 } from '../../lib/notes';
 import { convertToUser, truncateNpub, userName } from '../../stores/profile';
@@ -35,6 +38,7 @@ import {
   Component, createSignal, For, JSXElement, Match, onMount, Show, Switch,
 } from 'solid-js';
 import {
+  MediaVariant,
   NostrEventContent,
   NostrImageContent,
   NostrUserContent,
@@ -51,10 +55,23 @@ import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { hookForDev } from '../../lib/devTools';
-import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
+import { getMediaVariantFromTags, getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
 import { createStore } from 'solid-js/store';
-import { addrRegex, hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, profileRegex, shortMentionInWords, shortNoteChars, shortNoteWords, specialCharsRegex, urlExtractRegex } from '../../constants';
+import {
+  addrRegex,
+  hashtagCharsRegex,
+  Kind,
+  linebreakRegex,
+  lnUnifiedRegex,
+  noteRegex,
+  profileRegex,
+  shortMentionInWords,
+  shortNoteChars,
+  shortNoteWords,
+  specialCharsRegex,
+  urlExtractRegex,
+} from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
 
@@ -63,17 +80,20 @@ import Lnbc from '../Lnbc/Lnbc';
 import { logError } from '../../lib/logger';
 import { useAppContext } from '../../contexts/AppContext';
 import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
-import { fetchArticles } from '../../handleNotes';
 import { APP_ID } from '../../App';
 import { getEvents } from '../../lib/feed';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { subsTo } from '../../sockets';
 import ProfileNoteZap from '../ProfileNoteZap/ProfileNoteZap';
 import { parseBolt11 } from '../../utils';
 import SimpleArticlePreview from '../ArticlePreview/SimpleArticlePreview';
 import NostrImage from '../NostrImage/NostrImage';
+import { StreamingData } from '../../lib/streaming';
+import LiveEventPreview from '../LiveVideo/LiveEventPreview';
+import ExternalLiveEventPreview from '../LiveVideo/ExternalLiveEventPreview';
+import NoteVideo from './NoteVideo';
+import { accountStore } from '../../stores/accountStore';
 
-const groupGridLimit = 7;
+const groupGridLimit = 5;
 
 export type NoteContent = {
   type: string,
@@ -172,13 +192,13 @@ const ParsedNote: Component<{
   altEmbeds?: boolean,
   embedLevel?: number,
   rootNote?: PrimalNote,
+  noPlaceholders?: boolean,
   footerSize?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'mini',
 }> = (props) => {
 
   const intl = useIntl();
   const media = useMediaContext();
   const app = useAppContext();
-  const account = useAccountContext();
 
   const dev = localStorage.getItem('devMode') === 'true';
 
@@ -292,7 +312,7 @@ const ParsedNote: Component<{
     }
 
     if (token === '__SP__') {
-      if (!['image', 'video', 'LB'].includes(lastSignificantContent)) {
+      if (!['image', 'video', 'audio', 'LB'].includes(lastSignificantContent)) {
         updateContent(content, 'text', ' ');
       }
       return;
@@ -305,6 +325,202 @@ const ParsedNote: Component<{
       updateContent(content, 'text', token);
       return;
     }
+
+    if (isUrl(token)) {
+      const index = token.indexOf('http');
+
+      if (index > 0) {
+        const prefix = token.slice(0, index);
+
+        const matched = (token.match(urlExtractRegex) || [])[0];
+
+        if (matched) {
+          const suffix = token.substring(matched.length + index, token.length);
+
+          parseToken(prefix);
+          parseToken(matched);
+          parseToken(suffix);
+          return;
+        } else {
+          parseToken(prefix);
+          parseToken(token.slice(index));
+          return;
+        }
+      }
+
+      // if (primalUserRegex.test(token)) {
+      //   lastSignificantContent = 'usermention';
+      //   updateContent(content, 'usermention', token);
+      //   return;
+      // }
+
+      if (!props.ignoreMedia) {
+        if (isImage(token)) {
+          removeLinebreaks('image');
+          isAfterEmbed = true;
+          lastSignificantContent = 'image';
+          updateContent(content, 'image', token);
+          return;
+        }
+
+        if (isMp4Video(token)) {
+          removeLinebreaks('video');
+          isAfterEmbed = true;
+          lastSignificantContent = 'video';
+          updateContent(content, 'video', token, { videoType: 'video/mp4'});
+          return;
+        }
+
+        if (isOggVideo(token)) {
+          removeLinebreaks('video');
+          isAfterEmbed = true;
+          lastSignificantContent = 'video';
+          updateContent(content, 'video', token, { videoType: 'video/ogg'});
+          return;
+        }
+
+        if (isWebmVideo(token)) {
+          removeLinebreaks('video');
+          isAfterEmbed = true;
+          lastSignificantContent = 'video';
+          updateContent(content, 'video', token, { videoType: 'video/webm'});
+          return;
+        }
+
+        if (is3gppVideo(token)) {
+          removeLinebreaks('video');
+          isAfterEmbed = true;
+          lastSignificantContent = 'video';
+          updateContent(content, 'video', token, { videoType: 'video/3gpp'});
+          return;
+        }
+
+        if (isAudio(token)) {
+          removeLinebreaks('audio');
+          isAfterEmbed = true;
+          lastSignificantContent = 'audio';
+          updateContent(content, 'audio', token);
+          return;
+        }
+
+        if (isYouTube(token)) {
+          removeLinebreaks('youtube');
+          isAfterEmbed = true;
+          lastSignificantContent = 'youtube';
+          updateContent(content, 'youtube', token);
+          return;
+        }
+
+        if (isSpotify(token)) {
+          removeLinebreaks('spotify');
+          isAfterEmbed = true;
+          lastSignificantContent = 'spotify';
+          updateContent(content, 'spotify', token);
+          return;
+        }
+
+        if (isTwitchPlayer(token)) {
+          removeLinebreaks('twitchPlayer');
+          isAfterEmbed = true;
+          lastSignificantContent = 'twitchPlayer';
+          updateContent(content, 'twitchPlayer', token);
+          return;
+        }
+
+        if (isTwitch(token)) {
+          removeLinebreaks('twitch');
+          isAfterEmbed = true;
+          lastSignificantContent = 'twitch';
+          updateContent(content, 'twitch', token);
+          return;
+        }
+
+        if (isMixCloud(token)) {
+          removeLinebreaks('mixcloud');
+          isAfterEmbed = true;
+          lastSignificantContent = 'mixcloud';
+          updateContent(content, 'mixcloud', token);
+          return;
+        }
+
+        if (isSoundCloud(token)) {
+          removeLinebreaks('soundcloud');
+          isAfterEmbed = true;
+          lastSignificantContent = 'soundcloud';
+          updateContent(content, 'soundcloud', token);
+          return;
+        }
+
+        if (isAppleMusic(token)) {
+          removeLinebreaks('applemusic');
+          isAfterEmbed = true;
+          lastSignificantContent = 'applemusic';
+          updateContent(content, 'applemusic', token);
+          return;
+        }
+
+        if (isWavelake(token)) {
+          removeLinebreaks('wavelake');
+          isAfterEmbed = true;
+          lastSignificantContent = 'wavelake';
+          updateContent(content, 'wavelake', token);
+          return;
+        }
+
+        if (isRumble(token)) {
+          removeLinebreaks('rumble');
+          isAfterEmbed = true;
+          lastSignificantContent = 'rumble';
+          updateContent(content, 'rumble', token);
+          return;
+        }
+
+        if (isZapStream(token)) {
+          removeLinebreaks('zapstream');
+          isAfterEmbed = true;
+          lastSignificantContent = 'zapstream';
+          updateContent(content, 'zapstream', token);
+          return;
+        }
+
+        // if (isTidal(token)) {
+        //   removeLinebreaks('tidal');
+        //   isAfterEmbed = true;
+        //   lastSignificantContent = 'tidal';
+        //   updateContent(content, 'tidal', token);
+        //   return;
+        // }
+      }
+
+      if (props.noLinks === 'text') {
+        lastSignificantContent = 'text';
+        updateContent(content, 'text', token);
+        return;
+      }
+
+      const preview = getLinkPreview(token);
+
+      const hasMinimalPreviewData = !props.noPreviews &&
+        preview &&
+        preview.url &&
+        ((!!preview.description && preview.description.length > 0) ||
+          !preview.images?.some((x:any) => x === '') ||
+          !!preview.title
+        );
+
+      if (hasMinimalPreviewData) {
+        removeLinebreaks('link');
+        updateContent(content, 'link', token, { preview });
+      } else {
+        updateContent(content, 'link', token);
+      }
+
+      lastSignificantContent = 'link';
+      isAfterEmbed = false;
+      totalLinks++;
+      return;
+    }
+
 
     if (isNoteMention(token)) {
       removeLinebreaks('notemention');
@@ -369,177 +585,6 @@ const ParsedNote: Component<{
       updateContent(content, 'lnbc', token);
       return;
     }
-
-    if (isUrl(token)) {
-          const index = token.indexOf('http');
-
-          if (index > 0) {
-            const prefix = token.slice(0, index);
-
-            const matched = (token.match(urlExtractRegex) || [])[0];
-
-            if (matched) {
-              const suffix = token.substring(matched.length + index, token.length);
-
-              parseToken(prefix);
-              parseToken(matched);
-              parseToken(suffix);
-              return;
-            } else {
-              parseToken(prefix);
-              parseToken(token.slice(index));
-              return;
-            }
-          }
-
-          // if (primalUserRegex.test(token)) {
-          //   lastSignificantContent = 'usermention';
-          //   updateContent(content, 'usermention', token);
-          //   return;
-          // }
-
-          if (!props.ignoreMedia) {
-            if (isImage(token)) {
-              removeLinebreaks('image');
-              isAfterEmbed = true;
-              lastSignificantContent = 'image';
-              updateContent(content, 'image', token);
-              return;
-            }
-
-            if (isMp4Video(token)) {
-              removeLinebreaks('video');
-              isAfterEmbed = true;
-              lastSignificantContent = 'video';
-              updateContent(content, 'video', token, { videoType: 'video/mp4'});
-              return;
-            }
-
-            if (isOggVideo(token)) {
-              removeLinebreaks('video');
-              isAfterEmbed = true;
-              lastSignificantContent = 'video';
-              updateContent(content, 'video', token, { videoType: 'video/ogg'});
-              return;
-            }
-
-            if (isWebmVideo(token)) {
-              removeLinebreaks('video');
-              isAfterEmbed = true;
-              lastSignificantContent = 'video';
-              updateContent(content, 'video', token, { videoType: 'video/webm'});
-              return;
-            }
-
-            if (isYouTube(token)) {
-              removeLinebreaks('youtube');
-              isAfterEmbed = true;
-              lastSignificantContent = 'youtube';
-              updateContent(content, 'youtube', token);
-              return;
-            }
-
-            if (isSpotify(token)) {
-              removeLinebreaks('spotify');
-              isAfterEmbed = true;
-              lastSignificantContent = 'spotify';
-              updateContent(content, 'spotify', token);
-              return;
-            }
-
-            if (isTwitchPlayer(token)) {
-              removeLinebreaks('twitchPlayer');
-              isAfterEmbed = true;
-              lastSignificantContent = 'twitchPlayer';
-              updateContent(content, 'twitchPlayer', token);
-              return;
-            }
-
-            if (isTwitch(token)) {
-              removeLinebreaks('twitch');
-              isAfterEmbed = true;
-              lastSignificantContent = 'twitch';
-              updateContent(content, 'twitch', token);
-              return;
-            }
-
-            if (isMixCloud(token)) {
-              removeLinebreaks('mixcloud');
-              isAfterEmbed = true;
-              lastSignificantContent = 'mixcloud';
-              updateContent(content, 'mixcloud', token);
-              return;
-            }
-
-            if (isSoundCloud(token)) {
-              removeLinebreaks('soundcloud');
-              isAfterEmbed = true;
-              lastSignificantContent = 'soundcloud';
-              updateContent(content, 'soundcloud', token);
-              return;
-            }
-
-            if (isAppleMusic(token)) {
-              removeLinebreaks('applemusic');
-              isAfterEmbed = true;
-              lastSignificantContent = 'applemusic';
-              updateContent(content, 'applemusic', token);
-              return;
-            }
-
-            if (isWavelake(token)) {
-              removeLinebreaks('wavelake');
-              isAfterEmbed = true;
-              lastSignificantContent = 'wavelake';
-              updateContent(content, 'wavelake', token);
-              return;
-            }
-
-            if (isRumble(token)) {
-              removeLinebreaks('rumble');
-              isAfterEmbed = true;
-              lastSignificantContent = 'rumble';
-              updateContent(content, 'rumble', token);
-              return;
-            }
-
-            // if (isTidal(token)) {
-            //   removeLinebreaks('tidal');
-            //   isAfterEmbed = true;
-            //   lastSignificantContent = 'tidal';
-            //   updateContent(content, 'tidal', token);
-            //   return;
-            // }
-          }
-
-          if (props.noLinks === 'text') {
-            lastSignificantContent = 'text';
-            updateContent(content, 'text', token);
-            return;
-          }
-
-          const preview = getLinkPreview(token);
-
-          const hasMinimalPreviewData = !props.noPreviews &&
-            preview &&
-            preview.url &&
-            ((!!preview.description && preview.description.length > 0) ||
-              !preview.images?.some((x:any) => x === '') ||
-              !!preview.title
-            );
-
-          if (hasMinimalPreviewData) {
-            removeLinebreaks('link');
-            updateContent(content, 'link', token, { preview });
-          } else {
-            updateContent(content, 'link', token);
-          }
-
-          lastSignificantContent = 'link';
-          isAfterEmbed = false;
-          totalLinks++;
-          return;
-        }
 
     lastSignificantContent = 'text';
     updateContent(content, 'text', token);
@@ -624,8 +669,12 @@ const ParsedNote: Component<{
       if (isNoteTooLong()) return;
 
       const token = item.tokens[0];
-      let image = media?.actions.getMedia(token, 'o');
+      let image: MediaVariant | undefined = media?.actions.getMedia(token, 'o');
       const url = image?.media_url || getMediaUrlDefault(token) || token;
+
+      if (!image) {
+        image = getMediaVariantFromTags(props.note.tags, url);
+      }
 
       let imageThumb =
         media?.actions.getMedia(token, 'm') ||
@@ -638,6 +687,7 @@ const ParsedNote: Component<{
       return <NoteImage
         class={`noteimage image_${props.note.noteId} ${lastClass}`}
         src={url}
+        altSrc={token}
         isDev={dev}
         media={image}
         mediaThumb={imageThumb}
@@ -646,6 +696,7 @@ const ParsedNote: Component<{
         shortHeight={props.shorten}
         onError={imageError}
         authorPk={props.note.pubkey}
+        noPlaceholders={props.noPlaceholders}
       />
     }
 
@@ -657,7 +708,7 @@ const ParsedNote: Component<{
 
     return <div
       class={`imageGrid ${gridClass}`}
-      style={`max-width: ${noteWidth() - (props.margins || 20)}px`}
+      style={`max-width: ${noteWidth()}px`}
     >
       <For each={item.tokens}>
         {(token, index) => {
@@ -677,6 +728,7 @@ const ParsedNote: Component<{
           return <NoteImage
             class={`noteimage_gallery image_${props.note.noteId} cell_${index()+1}`}
             src={url}
+            altSrc={url}
             isDev={dev}
             media={image}
             width={514}
@@ -684,13 +736,38 @@ const ParsedNote: Component<{
             imageGroup={`${imageGroup}`}
             shortHeight={props.shorten}
             plainBorder={true}
-            forceHeight={500}
             onError={imageError}
             authorPk={props.note.pubkey}
+            noPlaceholders={props.noPlaceholders}
+            seeMore={index() === 3 ? item.tokens.length - 4 : 0}
+            isGallery={true}
           />
         }}
       </For>
     </div>
+  }
+
+
+  const renderAudio = (item: NoteContent, index?: number) => {
+    // Remove bottom margin if media is the last thing in the note
+    const lastClass = index === content.length-1 ?
+      'noBottomMargin' : '';
+
+    return <For each={item.tokens}>{
+      (token) => {
+        if (isNoteTooLong()) return;
+
+        const audio = <div>
+            <audio
+              class={styles.audio}
+              controls={true}
+              src={token}
+            />
+          </div>
+
+        return audio;
+      }
+    }</For>;
   }
 
   const renderVideo = (item: NoteContent, index?: number) => {
@@ -703,6 +780,10 @@ const ParsedNote: Component<{
         if (isNoteTooLong()) return;
 
         let mVideo = media?.actions.getMedia(token, 'o');
+
+        if (!mVideo) {
+          mVideo = getMediaVariantFromTags(props.note.tags, token);
+        }
 
         let h: number | undefined = undefined;
         let w: number | undefined = undefined;
@@ -734,20 +815,47 @@ const ParsedNote: Component<{
 
         setWordsDisplayed(w => w + shortMentionInWords);
 
-        const video = <video
+        const video = <NoteVideo
           class={klass}
           width={w}
           height={h}
-          controls
-          muted={true}
-          loop={true}
-          playsinline={true}
-          data-ratio={`${ratio}`}
-        >
-          <source src={token} type={item.meta?.videoType} />
-        </video>;
+          ratio={ratio}
+          src={token}
+          type={item.meta?.videoType}
+        />
 
-        media?.actions.addVideo(video as HTMLVideoElement);
+        // const video = <video
+        //   class={klass}
+        //   width={w}
+        //   height={h}
+        //   controls
+        //   muted
+        //   loop={true}
+        //   playsinline={true}
+        //   data-ratio={`${ratio}`}
+        // >
+        //   <source src={token} type={item.meta?.videoType} />
+        // </video>;
+
+        // video.addEventListener('click', (e: MouseEvent) => {
+        //   e.stopPropagation();
+        //   e.preventDefault();
+        //   (video as HTMLVideoElement).setAttribute('data-user-played', 'true');
+        // });
+
+        // video.addEventListener('playing', () => {
+        //   console.log('PLAY', video.getAttribute('data-user-played'))
+        //   if (video.getAttribute('data-user-played') === 'true') {
+        //     video.muted = false;
+        //   }
+        // });
+
+        // video.addEventListener('pause', () => {
+        //   console.log('PAUSE')
+        //   video.muted = true;
+        // });
+
+        // media?.actions.addVideo(video as HTMLVideoElement);
 
         return video;
       }
@@ -961,6 +1069,20 @@ const ParsedNote: Component<{
     </For>
   };
 
+  const renderZapStream = (item: NoteContent, index?: number) => {
+    return <For each={item.tokens}>
+      {(token) => {
+        if (isNoteTooLong()) return;
+
+        setWordsDisplayed(w => w + shortMentionInWords);
+
+        return <ExternalLiveEventPreview
+          url={token}
+        />;
+      }}
+    </For>
+  };
+
   const renderRumble = (item: NoteContent, index?: number) => {
     // Remove bottom margin if media is the last thing in the note
     const lastClass = index === content.length-1 ?
@@ -1067,7 +1189,7 @@ const ParsedNote: Component<{
         }
       })
 
-      getEvents(account?.publicKey, [data.id], subId, true);
+      getEvents(accountStore.publicKey, [data.id], subId, true);
 
       return (
         <Switch fallback={
@@ -1189,16 +1311,29 @@ const ParsedNote: Component<{
           kind: data.kind,
           pubkey: data.pubkey,
           identifier: data.identifier || '',
+          relays: data.relays || [],
         });
 
         if (data.kind === Kind.LongForm) {
           const mentionedArticles = rn.mentionedArticles;
 
+          const decodedKeys = Object.entries(mentionedArticles || {}).map(entry => ({ decoded: decodeIdentifier(entry[0]), mention: entry[1] }));
+
           if (!mentionedArticles || (props.embedLevel || 0) > 1) {
             return unknownMention(reEncoded, token);
           }
 
-          const mention = mentionedArticles[reEncoded];
+          // const mention = mentionedArticles[id];
+          const mention = decodedKeys.reduce<PrimalArticle | undefined>((acc, d) => {
+            const dta = d.decoded.data;
+
+            // @ts-ignore
+            if (data.identifier === dta.identifier && data.kind === dta.kind && data.pubkey === dta.pubkey) {
+              return d.mention;
+            }
+
+            return acc;
+          }, undefined);
 
           if (!mention) {
             return unknownMention(id, token);
@@ -1207,9 +1342,45 @@ const ParsedNote: Component<{
           return renderLongFormMention(mention, index);
         }
 
+        if (data.kind === Kind.LiveEvent) {
+
+          const mentionedLiveEvents = rn.mentionedLiveEvents;
+
+
+          const decodedKeys = Object.entries(mentionedLiveEvents || {}).map(entry => ({ decoded: decodeIdentifier(entry[0]), mention: entry[1] }));
+
+          if (!mentionedLiveEvents || (props.embedLevel || 0) > 1) {
+            return unknownMention(reEncoded, token);
+          }
+
+          // const mention = mentionedArticles[id];
+          const mention = decodedKeys.reduce<StreamingData | undefined>((acc, d) => {
+            const dta = d.decoded.data;
+
+            // @ts-ignore
+            if (data.identifier === dta.identifier && data.kind === dta.kind && data.pubkey === dta.pubkey) {
+              return d.mention;
+            }
+
+            return acc;
+          }, undefined);
+
+          if (!mention) {
+            return unknownMention(id, token);
+          }
+
+          return renderLiveEvent(mention, index);
+        }
+
         return unknownMention(id, token);
       }}
     </For>
+  }
+
+  const renderLiveEvent = (mention: StreamingData, index?: number) => {
+    return <LiveEventPreview
+      stream={mention}
+    />;
   }
 
   const renderLongFormMention = (mention: PrimalArticle | undefined, index?: number) => {
@@ -1300,6 +1471,11 @@ const ParsedNote: Component<{
             ...(props.note.mentionedZaps || {}),
           }
 
+          const mentionedLiveEvents = {
+            ...(rn.mentionedLiveEvents || {}),
+            ...(props.note.mentionedLiveEvents || {}),
+          }
+
           if (kind === undefined) {
             let f: any = mentionedNotes && mentionedNotes[hex];
             if (!f) {
@@ -1361,6 +1537,7 @@ const ParsedNote: Component<{
                 // @ts-ignore
                 identifier: eventId.identifier || '',
               });
+
               const ment = mentionedArticles && mentionedArticles[reEncoded];
 
               link = unknownMention(id, token);
@@ -1470,8 +1647,30 @@ const ParsedNote: Component<{
               }
 
             }
+          }
 
+          if (kind === Kind.LiveEvent) {
+            if (!props.noLinks) {
+              const reEncoded = nip19.naddrEncode({
+                // @ts-ignore
+                kind,
+                // @ts-ignore
+                pubkey: eventId.pubkey || '',
+                // @ts-ignore
+                identifier: eventId.identifier || '',
+              });
 
+              const ment = mentionedLiveEvents && mentionedLiveEvents[reEncoded];
+
+              link = unknownMention(id, token);
+
+              if (ment) {
+                setWordsDisplayed(w => w + shortMentionInWords);
+
+                // @ts-ignore
+                link = renderLiveEvent(ment, index);
+              }
+            }
           }
 
         } catch (e) {
@@ -1793,6 +1992,7 @@ const ParsedNote: Component<{
       linebreak: renderLinebreak,
       text: renderText,
       image: renderImage,
+      audio: renderAudio,
       video: renderVideo,
       youtube: renderYouTube,
       spotify: renderSpotify,
@@ -1804,6 +2004,7 @@ const ParsedNote: Component<{
       wavelake: renderWavelake,
       rumble: renderRumble,
       tidal: renderTidal,
+      zapstream: renderZapStream,
       link: renderLinks,
       notemention: renderNoteMention,
       usermention: renderUserMention,

@@ -1,4 +1,5 @@
-import { Kind } from "../constants";
+import { APP_ID } from "../App";
+import { Kind, settingsApp, settingsDescription } from "../constants";
 import { LeaderboardSort } from "../pages/Premium/PremiumLegendLeaderboard";
 import { sendMessage, subTo } from "../sockets";
 import { signEvent } from "./nostrAPI";
@@ -51,7 +52,7 @@ export const changePremiumName = async (name: string, subId: string, socket: Web
 
   const event = {
     kind: Kind.Settings,
-    tags: [],
+    tags: [["d", settingsApp, settingsDescription.changePremiumName]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       name,
@@ -88,7 +89,7 @@ export const getPremiumQRCode = async (pubkey: string | undefined, name: string,
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.getPremiumQRCode]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       name,
@@ -162,7 +163,7 @@ export const getLegendQRCode = async (pubkey: string | undefined, name: string, 
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.getLegendQRCode]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({
       name,
@@ -238,7 +239,7 @@ export const getPremiumStatus = async (pubkey: string | undefined, subId: string
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.getPremiumStatus]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify({}),
   };
@@ -276,7 +277,7 @@ export const getPremiumMediaStats = async (pubkey: string | undefined, subId: st
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.getPremiumMediaStats]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "get media stats'"}`,
   };
@@ -312,7 +313,7 @@ export const getPremiumMediaList = async (pubkey: string | undefined, until: num
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.getPremiumMediaList]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "get media list"}`,
   };
@@ -363,7 +364,7 @@ export const deletePremiumMedia = async (pubkey: string | undefined, url: string
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.deletePremiumMedia]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "url": "${url}"}`,
   };
@@ -403,7 +404,7 @@ export const getContactListHistory = async (pubkey: string | undefined, until: n
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.getContactListHistory]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "get contacts history list"}`,
   };
@@ -454,7 +455,7 @@ export const getContentListHistory = async (pubkey: string | undefined, subId: s
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.getContentListHistory]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "get content list"}`,
   };
@@ -494,7 +495,7 @@ export const getContentDownloadData = async (pubkey: string | undefined, kinds: 
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.getContentDownloadData]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "get content download data"}`,
   };
@@ -539,7 +540,7 @@ export const startContentBroadcast = async (pubkey: string | undefined, kinds: n
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.startContentBroadcast]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "broadcats content data"}`,
   };
@@ -584,7 +585,7 @@ export const cancelContentBroadcast = async (pubkey: string | undefined, subId: 
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.cancelContentBroadcast]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "broadcats content data"}`,
   };
@@ -624,7 +625,7 @@ export const startListeningForContentBroadcastStaus = async (pubkey: string | un
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.startListeningForContentBroadcastStaus]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: `{ "description": "broadcast content status"}`,
   };
@@ -702,7 +703,7 @@ export const getOrderListHistory = async (pubkey: string | undefined, until: num
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.getOrderListHistory]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify(content),
   };
@@ -743,7 +744,7 @@ export const setLegendCutumization = async (pubkey: string | undefined, config: 
 
   const event = {
     kind: Kind.Settings,
-    tags: [['p', pubkey]],
+    tags: [['p', pubkey], ['d', settingsApp, settingsDescription.setLegendCustumization]],
     created_at: Math.floor((new Date()).getTime() / 1000),
     content: JSON.stringify(config),
   };
@@ -870,4 +871,140 @@ export const fetchLeaderboard = (subId: string, type: 'legend' | 'premium',  ord
   ]);
 
   sendMessage(message);
+};
+
+export type StripeInitResponse = {
+  client_secret: string,
+  session_id: string,
+}
+
+export const initStripe = async (pubkey: string | undefined, name: string, productId: string, socket: WebSocket) => {
+  return new Promise<StripeInitResponse>(async (resolve, reject) => {
+    if (!pubkey) {
+      reject('missing_pubkey');
+      return;
+    }
+
+    const subId = `init_stripe_${APP_ID}`;
+
+    let response: StripeInitResponse;
+
+    const unsub = subTo(socket, subId, (type, _, content) => {
+      if (type === 'EOSE') {
+        unsub();
+        resolve(response)
+      }
+
+      if (type === 'EVENT') {
+        response = JSON.parse(content?.content || "{ client_secret: '', session_id: '',}");
+      }
+
+      if (type === 'NOTICE') {
+        unsub();
+        reject('');
+      }
+    });
+
+    const event = {
+      kind: Kind.Settings,
+      tags: [['p', pubkey], ['d', settingsApp, settingsDescription.initStripe]],
+      created_at: Math.floor((new Date()).getTime() / 1000),
+      content: JSON.stringify({
+        name,
+        product_id: productId,
+        receiver_pubkey: pubkey,
+        stripe_subscription: true,
+      }),
+    };
+
+
+    try {
+      const signedNote = await signEvent(event);
+
+      const message = JSON.stringify([
+        "REQ",
+        subId,
+        {cache: ["membership_purchase_product", { event_from_user: signedNote }]},
+      ]);
+
+      if (socket) {
+        const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+        socket.send(message);
+        socket.dispatchEvent(e);
+      } else {
+        throw('no_socket');
+      }
+
+
+      return true;
+    } catch (reason) {
+      console.error('Failed to upload: ', reason);
+      return false;
+    }
+  });
+};
+
+
+export const resolveStripe = async (pubkey: string | undefined, session_id: string | undefined, socket: WebSocket) => {
+  return new Promise<StripeInitResponse>(async (resolve, reject) => {
+    if (!pubkey || !session_id) {
+      reject('missing_pubkey_or_session_id');
+      return;
+    }
+
+    const subId = `resolve_stripe_${APP_ID}`;
+
+    let response: StripeInitResponse;
+
+    const unsub = subTo(socket, subId, (type, _, content) => {
+      if (type === 'EOSE') {
+        unsub();
+        resolve(response)
+      }
+
+      if (type === 'EVENT') {
+        response = JSON.parse(content?.content || "{ client_secret: '', session_id: '',}");
+      }
+
+      if (type === 'NOTICE') {
+        unsub();
+        reject('failed_to_resolve_stripe_session');
+      }
+    });
+
+
+    const event = {
+      kind: Kind.Settings,
+      tags: [['p', pubkey], ['d', settingsApp, settingsDescription.resolveStripe]],
+      created_at: Math.floor((new Date()).getTime() / 1000),
+      content: JSON.stringify({ session_id }),
+    };
+
+
+    try {
+      const signedNote = await signEvent(event);
+
+      const message = JSON.stringify([
+        "REQ",
+        subId,
+        {cache: ["membership_stripe_checkout_session_check_status", { event_from_user: signedNote }]},
+      ]);
+
+      if (socket) {
+        const e = new CustomEvent('send', { detail: { message, ws: socket }});
+
+        socket.send(message);
+        socket.dispatchEvent(e);
+      } else {
+        throw('no_socket');
+      }
+
+
+      return true;
+    } catch (reason) {
+      console.error('Failed to upload: ', reason);
+      return false;
+    }
+  });
 };

@@ -1,9 +1,5 @@
-import { A } from '@solidjs/router';
-import { batch, Component, createEffect, For, JSXElement, onMount, Show } from 'solid-js';
+import { batch, Component, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { Portal } from 'solid-js/web';
-import { wordsPerMinute } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
 import { shortDate } from '../../lib/dates';
@@ -14,23 +10,20 @@ import { uuidv4 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
 import { NoteReactionsState } from '../Note/Note';
 import NoteContextTrigger from '../Note/NoteContextTrigger';
-import ArticleFooter from '../Note/NoteFooter/ArticleFooter';
-import NoteFooter from '../Note/NoteFooter/NoteFooter';
-import NoteTopZaps from '../Note/NoteTopZaps';
-import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './ArticlePreview.module.scss';
+import { accountStore } from '../../stores/accountStore';
 
 const SimpleArticlePreview: Component<{
   id?: string,
   article: PrimalArticle,
   height?: number,
   onRender?: (article: PrimalArticle, el: HTMLAnchorElement | undefined) => void,
+  onRemove?: (id: string) => void,
 }> = (props) => {
 
   const app = useAppContext();
-  const account = useAccountContext();
   const thread = useThreadContext();
 
   const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>({
@@ -76,7 +69,7 @@ const SimpleArticlePreview: Component<{
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
 
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -122,7 +115,7 @@ const SimpleArticlePreview: Component<{
   };
 
   const addTopZap = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -153,7 +146,7 @@ const SimpleArticlePreview: Component<{
 
 
   const addTopZapFeed = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -204,6 +197,9 @@ const SimpleArticlePreview: Component<{
         app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
+      () => {
+        props.onRemove && props.onRemove(props.article.noteId);
+      },
     );
   }
 

@@ -14,6 +14,7 @@ export const emptyPage: FeedPage = {
   postStats: {},
   noteActions: {},
   topZaps: {},
+  streams: [],
 }
 
 export const nostrHighlights ='9a500dccc084a138330a1d1b2be0d5e86394624325d25084d3eca164e7ea698a';
@@ -103,6 +104,9 @@ export enum Kind  {
   ChannelHideMessage = 43,
   ChannelMuteUser = 44,
 
+  LiveChatMessage = 1_311,
+  ReportContent = 1_984,
+
   Subscribe = 7_001,
   Unsubscribe = 7_002,
   Highlight = 9_802,
@@ -113,6 +117,11 @@ export enum Kind  {
   Bookmarks = 10_003,
   Blossom = 10_063,
   TierList = 17_000,
+  StreamMuteList = 10_555,
+
+  WalletInfo = 13_194,
+  WalletRequest = 23_194,
+  WalletResponse = 23_195,
 
   CategorizedPeople = 30_000,
   LongForm = 30_023,
@@ -168,6 +177,7 @@ export enum Kind  {
   LegendLeaderboard=10_000_170,
   PremiumLeaderboard=10_000_171,
   ArticlesStats=10_000_174,
+  LiveEventStats=10_000_176,
 
   WALLET_OPERATION = 10_000_300,
   WALLET_NWC_ACTIVE = 10_000_802,
@@ -177,6 +187,10 @@ export enum Kind  {
   OrderHistory = 10_000_605,
 
   LongFormShell = 10_030_023,
+
+  LiveChatReload = 11_000_001,
+
+  HLSVideo = 10_000_178,
 }
 
 export const relayConnectingTimeout = 1000;
@@ -201,7 +215,26 @@ export enum NotificationType {
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED = 202,//
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED = 203,
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO = 204,
+
+  YOUR_POST_WAS_HIGHLIGHTED=301,
+  YOUR_POST_WAS_BOOKMARKED=302,
+  YOUR_POST_HAD_REACTION=303,
+
+  LIVE_EVENT_HAPPENING=501,
+  REPLY_TO_REPLY=601,
 };
+
+export const mentionedNotifTypes = [
+  NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED,
+  NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED,
+  NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPOSTED,
+  NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_REPLIED_TO,
+  NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_ZAPPED,
+  NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED,
+  NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED,
+  NotificationType.LIVE_EVENT_HAPPENING,
+];
+
 
 export const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: 'user_followed.svg',
@@ -211,6 +244,8 @@ export const typeIcons: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_LIKED]: 'post_liked.svg',
   [NotificationType.YOUR_POST_WAS_REPOSTED]: 'post_reposted.svg',
   [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'post_replied.svg',
+
+  [NotificationType.REPLY_TO_REPLY]: 'post_replied.svg',
 
   [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'mention.svg',
   [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'mentioned_post.svg',
@@ -225,6 +260,10 @@ export const typeIcons: Record<string, string> = {
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'mentioned_post_reposted.svg',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'mentioned_post_replied.svg',
 
+  [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: 'post_highlighted.svg',
+  [NotificationType.YOUR_POST_WAS_BOOKMARKED]: 'post_bookmarked.svg',
+  [NotificationType.YOUR_POST_HAD_REACTION]: 'post_reacted.svg',
+
 }
 
 export const notificationTypeUserProps: Record<string, string> = {
@@ -236,8 +275,10 @@ export const notificationTypeUserProps: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_REPOSTED]: 'who_reposted_it',
   [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'who_replied_to_it',
 
+  [NotificationType.REPLY_TO_REPLY]: 'who_replied_to_it',
+
   [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'you_were_mentioned_by',
-  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'your_post_were_mentioned_by',
+  [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'your_post_was_mentioned_by',
 
   [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_ZAPPED]: 'who_zapped_it',
   [NotificationType.POST_YOU_WERE_MENTIONED_IN_WAS_LIKED]: 'who_liked_it',
@@ -249,6 +290,11 @@ export const notificationTypeUserProps: Record<string, string> = {
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'who_reposted_it',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'who_replied_to_it',
 
+  [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: 'who_highlighted_it',
+  [NotificationType.YOUR_POST_WAS_BOOKMARKED]: 'who_bookmarked_it',
+  [NotificationType.YOUR_POST_HAD_REACTION]: 'who_reacted',
+
+  [NotificationType.LIVE_EVENT_HAPPENING]: 'host',
 }
 
 export const notificationTypeNoteProps: Record<string, string> = {
@@ -259,6 +305,8 @@ export const notificationTypeNoteProps: Record<string, string> = {
   [NotificationType.YOUR_POST_WAS_LIKED]: 'your_post',
   [NotificationType.YOUR_POST_WAS_REPOSTED]: 'your_post',
   [NotificationType.YOUR_POST_WAS_REPLIED_TO]: 'reply',
+
+  [NotificationType.REPLY_TO_REPLY]: 'reply',
 
   [NotificationType.YOU_WERE_MENTIONED_IN_POST]: 'you_were_mentioned_in',
   [NotificationType.YOUR_POST_WAS_MENTIONED_IN_POST]: 'your_post_were_mentioned_in',
@@ -273,6 +321,12 @@ export const notificationTypeNoteProps: Record<string, string> = {
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED]: 'your_post_were_mentioned_in',
   [NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO]: 'reply',
 
+  [NotificationType.YOUR_POST_WAS_HIGHLIGHTED]: 'your_post',
+  [NotificationType.YOUR_POST_WAS_BOOKMARKED]: 'your_post',
+  [NotificationType.YOUR_POST_HAD_REACTION]: 'your_post',
+
+  [NotificationType.LIVE_EVENT_HAPPENING]: 'live_event_id',
+
 }
 
 export const usernameRegex = /^[a-zA-Z0-9\-\_]+$/;
@@ -280,6 +334,7 @@ export const usernameRegex = /^[a-zA-Z0-9\-\_]+$/;
 // export const magnetRegex = /(magnet:[\S]+)/i;
 // export const tweetUrlRegex = /https?:\/\/twitter\.com\/(?:#!\/)?(\w+)\/status(?:es)?\/(\d+)/;
 // export const tidalRegex = /tidal\.com\/(?:browse\/)?(\w+)\/([a-z0-9-]+)/i;
+export const zapStreamEmbedRegex = /zap\.stream\/.+/i;
 export const tidalEmbedRegex = /embed\.tidal\.com\/.+/i;
 export const spotifyRegex = /open\.spotify\.com\/(track|album|playlist|episode)\/([a-zA-Z0-9]+)/;
 export const twitchRegex = /twitch\.tv\/([a-z0-9_]+$)/i;
@@ -302,28 +357,34 @@ export const lnUnifiedRegex = /bitcoin:[a-zA-Z0-9]*(\?.*)lightning=([a-zA-Z0-9]*
 export const hashtagRegex = /(?:\s|^)#[^\s!@#$%^&*(),.?":{}|<>]+/i;
 export const linebreakRegex = /(\r\n|\r|\n)/ig;
 export const tagMentionRegex = /\#\[([0-9]*)\]/;
-export const noteRegex = /((note|nevent)1\w+)\b/g;
-export const noteRegexLocal = /((note|nevent)1\w+)\b/;
-export const profileRegex = /((npub|nprofile)1\w+)\b/;
-export const profileRegexG = /((nostr:)?(npub|nprofile)1\w+)\b/g;
-export const addrRegex = /((naddr)1\w+)\b/;
-export const addrRegexG = /((naddr)1\w+)\b/g;
+export const noteRegex = /((note|nevent)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
+export const noteRegexLocal = /((note|nevent)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const profileRegex = /((npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const profileRegexG = /((nostr:)?(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
+export const profileRegexEdit = /((nostr:)?(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const profileRegexEditG = /(?:\s|^)((nostr:)?(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
+
+export const userMentionUrlRegex = /((nostr:)?(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)(?!png|jpg|jpeg|webp|gif|format=png|mp4|mov|ogg|webm)\b/
+export const primalUserRegex = /(http(s?):\/\/)([/|.|\w|\s|-])*\/(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+\b/
+
+export const addrRegex = /((naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const addrRegexG = /((naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
 export const editMentionRegex = /(?:\s|^)@\`(.*?)\`/ig;
 export const imageRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/;
 export const imageRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)/g;
 export const imageRegexEnd = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|format=png)$/;
-export const videoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mov|ogg|webm)/;
-export const videoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mov|ogg|webm)/g;
+export const videoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mov|ogg|webm|3gp)/;
+export const videoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:mp4|mov|ogg|webm|3gp)/g;
 
-export const imageOrVideoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|format=png)/g;
-export const imageOrVideoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|format=png)/;
+export const imageOrVideoRegexG = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|3gp|format=png)/g;
+export const imageOrVideoRegex = /(http(s?):)([/|.|\w|\s|-])*\.(?:png|jpg|jpeg|webp|gif|mp4|mov|ogg|webm|3gp|format=png)/;
 
-export const eventRegexLocal = /(?:\s|^)(nostr:)?((note|nevent|naddr)1\w+)\b/;
-export const eventRegexG = /(?:\s|^)(nostr:)?((note|nevent|naddr)1\w+)\b/g;
-export const eventRegexNostrless = /((note|nevent|naddr)1\w+)\b/;
-export const mentionRegexNostrless = /((note|nevent|naddr|nprofile|npub)1\w+)\b/;
+export const eventRegexLocal = /(?:\s|^)(nostr:)?((note|nevent|naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const eventRegexG = /(?:\s|^)(nostr:)?((note|nevent|naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
+export const eventRegexNostrless = /((note|nevent|naddr)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
+export const mentionRegexNostrless = /((note|nevent|naddr|nprofile|npub)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/;
 
-export const mdImageRegex = /(https?:\/\/.*\.(?:png|jpg))|\!\[(.*?)\]\((https?:\/\/.*\.(?:png|jpg))\)/i;
+export const mdImageRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|webp|gif|format=png))|\!\[(.*?)\]\((https?:\/\/.*)\)/i;
 
 export const specialCharsRegex = /[^A-Za-z0-9]/;
 export const hashtagCharsRegex = /[^A-Za-z0-9\-\_]/;
@@ -362,6 +423,8 @@ export const defaultNotificationSettings: Record<string, boolean> = {
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_LIKED: true,
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPOSTED: true,
   POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO: true,
+
+  LIVE_EVENT_HAPPENING: true,
 };
 
 export const defaultNotificationAdditionalSettings: Record<string, boolean> = {
@@ -456,7 +519,7 @@ export const threadLenghtInMs = 900;
 export const uploadLimit = {
   regular: 100,
   premium: 1024,
-  premiumLegend: 1024,
+  premiumLegend: 10 * 1024,
 }
 
 export const emptyInvoice: LnbcInvoice = {
@@ -475,3 +538,43 @@ export const floatingPoints: Record<string,number> = {
 };
 
 export const sevenDays = 7 * 24 * 60 * 60 * 1_000;
+
+export const primalBlossom = 'https://blossom.primal.net';
+
+export const settingsApp = 'Primal-Web App';
+
+export const settingsDescription = {
+  resetDirectMessages: 'reset_direct_message_count',
+  markAllAsRead: 'mark_all_dms_as_read',
+  nofiticationsLastSeen: 'notifications_laste_seen',
+  changePremiumName: 'change_premium_name',
+
+  getMembershipStatus: 'get_membership_status',
+  getPremiumQRCode: 'membership_purchase_premium',
+  getLegendQRCode: 'membership_purchase_legend',
+  getPremiumStatus: 'membership_status',
+  getPremiumMediaStats: 'membership_media_management_stats',
+  getPremiumMediaList: 'membership_media_management_uploads',
+  deletePremiumMedia: 'membership_media_management_delete',
+  getContactListHistory: 'membership_recovery_contact_lists',
+  getContentDownloadData: 'membership_content_backup',
+  getContentListHistory: 'membership_content_stats',
+  startContentBroadcast: 'membership_content_rebroadcast_start',
+  cancelContentBroadcast: 'membership_content_rebroadcast_cancel',
+  startListeningForContentBroadcastStaus: 'rebroadcasting_status',
+  getOrderListHistory: 'membership_purchase_history',
+  setLegendCustumization: 'membership_legend_customization',
+  initStripe: 'membership_purchase_product',
+  resolveStripe: 'membership_stripe_checkout_session_check_status',
+
+  reportUser: 'report_user',
+
+  sendSettings: 'set_app_settings',
+  getSettings: 'get_app_settings',
+  getHomeSettings: 'get_app_subsettings_home',
+  setHomeSettings: 'set_app_subsettings_home',
+  getReadsSettings: 'get_app_subsettings_reads',
+  setReadsSettings: 'set_app_subsettings_reads',
+  getNWCSettings: 'get_app_subsettings_nwc',
+  setNWCSettings: 'set_app_subsettings_nwc',
+}

@@ -17,7 +17,6 @@ import { authorName, nip05Verification, truncateNpub, userName } from '../stores
 import { useToastContext } from '../components/Toaster/Toaster';
 import { useSettingsContext } from '../contexts/SettingsContext';
 import { useProfileContext } from '../contexts/ProfileContext';
-import { useAccountContext } from '../contexts/AccountContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { useIntl } from '@cookbook/solid-intl';
 import { sanitize, sendEvent } from '../lib/notes';
@@ -42,7 +41,6 @@ import VerificationCheck from '../components/VerificationCheck/VerificationCheck
 
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import NoteImage from '../components/NoteImage/NoteImage';
-import ProfileQrCodeModal from '../components/ProfileQrCodeModal/ProfileQrCodeModal';
 import { CustomZapInfo, useAppContext } from '../contexts/AppContext';
 import ProfileAbout from '../components/ProfileAbout/ProfileAbout';
 import { Tier, TierCost } from '../components/SubscribeToAuthorModal/SubscribeToAuthorModal';
@@ -55,13 +53,13 @@ import ProfileFollowModal from '../components/ProfileFollowModal/ProfileFollowMo
 import ProfileCardSkeleton from '../components/Skeleton/ProfileCardSkeleton';
 import PremiumCohortInfo from './Premium/PremiumCohortInfo';
 import { ProfilePointer } from 'nostr-tools/lib/types/nip19';
+import { accountStore, addFilterList, addToAllowlist, addToMuteList, removeFilterList, removeFromMuteList } from '../stores/accountStore';
 
 const ProfileDesktop: Component = () => {
 
   const settings = useSettingsContext();
   const toaster = useToastContext();
   const profile = useProfileContext();
-  const account = useAccountContext();
   const media = useMediaContext();
   const app = useAppContext();
 
@@ -73,7 +71,6 @@ const ProfileDesktop: Component = () => {
   const [showContext, setContext] = createSignal(false);
   const [confirmReportUser, setConfirmReportUser] = createSignal(false);
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
-  const [openQr, setOpenQr] = createSignal(false);
 
   const [followsModal, setFollowsModal] = createSignal<'follows' | 'followers' | false>(false);
 
@@ -94,13 +91,16 @@ const ProfileDesktop: Component = () => {
     return (location.hash.length > 1) ? location.hash.substring(1) : 'notes';
   }
 
-  let profileAboutDiv: HTMLDivElement | undefined;
-
   const [getHex, setHex] = createSignal<string>();
 
   const resolveHex = async (vanityName: string | undefined) => {
     if (vanityName) {
-      const name = vanityName.toLowerCase();
+      let name = vanityName.toLowerCase();
+
+      if (name === 'gigi') {
+        name = 'dergigi';
+      }
+
       const vanityProfile = await fetchKnownProfiles(name);
 
       const hex = vanityProfile.names[name];
@@ -116,7 +116,7 @@ const ProfileDesktop: Component = () => {
       return;
     }
 
-    let hex = params.npub || account?.publicKey;
+    let hex = params.npub || accountStore.publicKey;
 
     if (params.npub?.startsWith('npub')) {
       hex = nip19.decode(params.npub).data as string;
@@ -249,10 +249,10 @@ const ProfileDesktop: Component = () => {
   }
 
   const isCurrentUser = () => {
-    if (!account || !profile || !account.isKeyLookupDone) {
+    if (!profile || !accountStore.isKeyLookupDone) {
       return false;
     }
-    return account?.publicKey === profile?.profileKey;
+    return accountStore.publicKey === profile?.profileKey;
   };
 
   createEffect(() => {
@@ -262,16 +262,16 @@ const ProfileDesktop: Component = () => {
       return;
     }
 
-    if (account?.muted.includes(pk)) {
+    if (accountStore.muted.includes(pk)) {
       profile?.actions.clearNotes();
     }
   });
 
   const isMuted = (pk: string | undefined, ignoreContentCheck = false) => {
-    const isContentMuted = account?.mutelists.find(x => x.pubkey === account.publicKey)?.content;
+    const isContentMuted = accountStore.mutelists.find(x => x.pubkey === accountStore.publicKey)?.content;
 
     return pk &&
-      account?.muted.includes(pk) &&
+      accountStore.muted.includes(pk) &&
       (ignoreContentCheck ? true : isContentMuted);
   };
 
@@ -280,25 +280,25 @@ const ProfileDesktop: Component = () => {
   };
 
   const unMuteProfile = () => {
-    if (!account || !profile?.profileKey) {
+    if (!profile?.profileKey) {
       return;
     }
 
-    account.actions.removeFromMuteList(profile.profileKey, () => setProfile(profile.profileKey));
+    removeFromMuteList(profile.profileKey, 'user', () => setProfile(profile.profileKey));
   };
 
   const isFollowingMute = (pk: string | undefined) => {
     if (!pk) return false;
 
-    return account?.mutelists.find(l => l.pubkey === pk);
+    return accountStore.mutelists.find(l => l.pubkey === pk);
   };
 
   const followMute = () => {
-    account?.actions.addFilterList(profile?.profileKey);
+    addFilterList(profile?.profileKey);
   };
 
   const unfollowMute = () => {
-    account?.actions.removeFilterList(profile?.profileKey);
+    removeFilterList(profile?.profileKey);
   };
 
   const openContextMenu = (e: MouseEvent) => {
@@ -417,13 +417,13 @@ const ProfileDesktop: Component = () => {
     ];
   };
 
-  const profileContext = () => account?.publicKey !== getHex() ?
+  const profileContext = () => accountStore.publicKey !== getHex() ?
       [ ...profileContextForEveryone(), ...profileContextForOtherPeople()] :
       profileContextForEveryone();
 
   const doMuteUser = () => {
     const pk = getHex();
-    pk && account?.actions.addToMuteList(pk);
+    pk && addToMuteList(pk);
   };
 
   const doReportUser = () => {
@@ -438,10 +438,10 @@ const ProfileDesktop: Component = () => {
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorReported, { name: userName(profile?.userProfile)}));
   };
 
-  const addToAllowlist = async () => {
+  const addToTheAllowlist = async () => {
     const pk = getHex();
     if (pk) {
-      account?.actions.addToAllowlist(pk, () => { setProfile(pk) });
+      addToAllowlist(pk, () => { setProfile(pk) });
     }
   };
 
@@ -581,7 +581,7 @@ const ProfileDesktop: Component = () => {
   const doSubscription = async (tier: Tier, cost: TierCost, exchangeRate?: Record<string, Record<string, number>>) => {
     const a = profile?.userProfile;
 
-    if (!a || !account || !cost) return;
+    if (!a || !cost) return;
 
     const subEvent = {
       kind: Kind.Subscribe,
@@ -597,16 +597,16 @@ const ProfileDesktop: Component = () => {
       ],
     }
 
-    const { success, note } = await sendEvent(subEvent, account.activeRelays, account.relaySettings, account?.proxyThroughPrimal || false);
+    const { success, note } = await sendEvent(subEvent);
 
     if (success && note) {
       const isZapped = await zapSubscription(
         note,
         a,
-        account.publicKey,
-        account.activeRelays,
+        accountStore.publicKey,
+        accountStore.activeRelays,
         exchangeRate,
-        account.activeNWC,
+        accountStore.activeNWC,
       );
 
       if (!isZapped) {
@@ -618,7 +618,7 @@ const ProfileDesktop: Component = () => {
   const unsubscribe = async (eventId: string) => {
     const a = profile?.userProfile;;
 
-    if (!a || !account) return;
+    if (!a) return;
 
     const unsubEvent = {
       kind: Kind.Unsubscribe,
@@ -631,19 +631,16 @@ const ProfileDesktop: Component = () => {
       ],
     };
 
-    await sendEvent(unsubEvent, account.activeRelays, account.relaySettings, account?.proxyThroughPrimal || false);
+    await sendEvent(unsubEvent);
 
   }
-
 
   const openSubscribe = () => {
     app?.actions.openAuthorSubscribeModal(profile?.userProfile, doSubscription);
   };
 
   const shortProfileAbout = (text: string | undefined) => {
-    if (!profileAboutDiv || !text) return true;
-
-    // const text = profileAboutDiv.innerText;
+    if (!text) return true;
 
     return text.length < 50;
   }
@@ -696,6 +693,11 @@ const ProfileDesktop: Component = () => {
     return re.slice(0, 5).reverse();
   }
 
+
+  const getStream = () => {
+    return media?.actions.getStream(profile?.profileKey || 'n/a', true);
+  }
+
   return (
     <>
       <PageTitle title={
@@ -740,6 +742,7 @@ const ProfileDesktop: Component = () => {
               notes={profile?.sidebarNotes.notes}
               articles={profile?.sidebarArticles.notes}
               profile={profile?.userProfile}
+              stream={getStream()}
             />
           </Show>
         </TransitionGroup>
@@ -801,7 +804,7 @@ const ProfileDesktop: Component = () => {
               </div>
 
               <ButtonSecondary
-                onClick={() => setOpenQr(true)}
+                onClick={() => profile?.userProfile && app?.actions.openProfileQr(profile?.userProfile)}
                 shrink={true}
               >
                 <div class={styles.qrIcon}></div>
@@ -816,7 +819,7 @@ const ProfileDesktop: Component = () => {
                 </ButtonSecondary>
               </Show>
 
-              <Show when={account?.publicKey}>
+              <Show when={accountStore.publicKey}>
                 <ButtonSecondary
                   onClick={() => navigate(`/dms/${profile?.userProfile?.npub}`)}
                   shrink={true}
@@ -825,7 +828,7 @@ const ProfileDesktop: Component = () => {
                 </ButtonSecondary>
               </Show>
 
-              <Show when={!isCurrentUser() || !account?.following.includes(profile?.profileKey || '')}>
+              <Show when={!isCurrentUser() || !accountStore.following.includes(profile?.profileKey || '')}>
                 <FollowButton person={profile?.userProfile} large={true} />
               </Show>
 
@@ -849,7 +852,7 @@ const ProfileDesktop: Component = () => {
               </Show>
             </div>
 
-            <div ref={profileAboutDiv} class="hidden">
+            <div class="hidden">
               <ProfileAbout about={profile?.userProfile?.about} />
             </div>
 
@@ -895,9 +898,7 @@ const ProfileDesktop: Component = () => {
 
                       <Show when={profile?.userProfile?.about}>
                         <div class={`${styles.profileAboutHolder} animated`}>
-                          <div ref={profileAboutDiv}>
-                            <ProfileAbout about={profile?.userProfile?.about} />
-                          </div>
+                          <ProfileAbout about={profile?.userProfile?.about} />
                         </div>
                       </Show>
 
@@ -1007,10 +1008,7 @@ const ProfileDesktop: Component = () => {
                         </Show>
                     </div>
                     <div class={`${styles.profileAboutHolder} animated`}>
-                      <div ref={profileAboutDiv}>
-                        <ProfileAbout about={profile?.userProfile?.about} />
-                      </div>
-
+                      <ProfileAbout about={profile?.userProfile?.about} />
                     </div>
                     <div class="animated">
                       <div class={styles.profileLinks}>
@@ -1079,12 +1077,6 @@ const ProfileDesktop: Component = () => {
           following: profile?.userStats?.follows_count || 0,
           followers: profile?.userStats?.followers_count || 0,
         }}
-      />
-
-      <ProfileQrCodeModal
-        open={openQr()}
-        onClose={() => setOpenQr(false)}
-        profile={profile?.userProfile}
       />
     </>
   )

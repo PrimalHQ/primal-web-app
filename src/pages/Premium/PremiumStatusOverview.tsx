@@ -69,7 +69,8 @@ const PremiumStatusOverview: Component<{
         updateUserMetadata={props.updateUserMetadata}
       />
 
-      <Show when={isLegend()}>
+      {/* <Show when={isLegend()}> */}
+      <Show when={false}>
         <div class={styles.legendContribution}>
           <div class={styles.current}>
             <div class={styles.label}>
@@ -107,7 +108,7 @@ const PremiumStatusOverview: Component<{
           <div>{intl.formatMessage(t.labels.supportFirstLine)}</div>
           <div>
             {intl.formatMessage(t.labels.supportSecondLine)}
-            <A href={'/premium/support'}>{intl.formatMessage(t.actions.support)}</A>
+            <button onClick={() => props.setData('openPremiumProInfo', true)} >{intl.formatMessage(t.actions.primalPro)}</button>.
           </div>
         </div>
       </Show>

@@ -202,7 +202,7 @@
     .rightSide {
       display: flex;
       flex-direction: column;
-      width: calc(100% - 42px);
+      width: calc(100% - 18px);
 
       .message {
         color: var(--text-primary);
@@ -1047,7 +1047,7 @@
   border-radius: 6px;
   display: block;
   transition: 0.2s padding;
-  margin-top: 6px;
+  /* margin-top: 6px; */
 
   .noteNotifications {
     background-color: var(--background-site);
@@ -1063,11 +1063,11 @@
       grid-area: content;
       display: flex;
       flex-direction: column;
-      padding-right: 20px;
+      padding-right: 12px;
 
       .message {
         grid-area: message;
-        color: var(--text-primary);
+        color: var(--text-secondary);
         word-break: break-word;
         font-size: 16px;
         line-height: 24px;

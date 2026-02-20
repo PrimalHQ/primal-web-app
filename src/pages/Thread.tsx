@@ -1,48 +1,24 @@
-import { batch, Component, createEffect, createSignal, JSXElement, Match, onMount, Resource, Switch } from 'solid-js';
-import Branding from '../components/Branding/Branding';
-import Wormhole from '../components/Wormhole/Wormhole';
-import Search from '../components/Search/Search';
-
-import appstoreImg from '../assets/images/appstore_download.svg';
-import playstoreImg from '../assets/images/playstore_download.svg';
-
-import gitHubLight from '../assets/icons/github_light.svg';
-import gitHubDark from '../assets/icons/github.svg';
-
-import primalDownloads from '../assets/images/primal_downloads.png';
-
-import styles from './Downloads.module.scss';
-import { downloads as t } from '../translations';
-import { useIntl } from '@cookbook/solid-intl';
-import StickySidebar from '../components/StickySidebar/StickySidebar';
-import { appStoreLink, playstoreLink, apkLink, Kind, contentScope } from '../constants';
-import ExternalLink from '../components/ExternalLink/ExternalLink';
-import PageCaption from '../components/PageCaption/PageCaption';
-import PageTitle from '../components/PageTitle/PageTitle';
-import { useSettingsContext } from '../contexts/SettingsContext';
-import { useLocation, useNavigate, useParams } from '@solidjs/router';
+import { batch, Component, createEffect, createSignal, Match, Switch } from 'solid-js';
+import { Kind } from '../constants';
+import { useNavigate, useParams } from '@solidjs/router';
 import NotFound from './NotFound';
 import NoteThread from './NoteThread';
 import { nip19 } from '../lib/nTools';
 import Longform from './Longform';
-import { VanityProfiles } from '../types/primal';
 import { logError, logWarning } from '../lib/logger';
 import { APP_ID } from '../App';
 import { subsTo } from '../sockets';
 import { getEvents } from '../lib/feed';
-import { useAccountContext } from '../contexts/AccountContext';
-import { hexToNpub } from '../lib/keys';
 import { fetchKnownProfiles } from '../lib/profile';
-import { fetchUserProfile } from '../handleNotes';
 import { useAppContext } from '../contexts/AppContext';
+import { getStreamingEvent } from '../lib/streaming';
+import { accountStore } from '../stores/accountStore';
 
 const EventPage: Component = () => {
 
-  const account = useAccountContext();
   const params = useParams();
   const app = useAppContext();
   const navigate = useNavigate();
-  const loc = useLocation();
 
   const [evId, setEvId] = createSignal<string>('');
 
@@ -98,10 +74,65 @@ const EventPage: Component = () => {
       }
     });
 
-    getEvents(account?.publicKey, [id], subId, false);
+    getEvents(accountStore.publicKey, [id], subId, false);
   }
 
-  const [component, setComponent] = createSignal<'note' | 'read' | 'none' | 'not_found'>('none');
+
+  const resolveFromNaddr = async (id: string) => {
+    try {
+      const decoded = nip19.decode(id);
+
+      const data = decoded.data as nip19.AddressPointer;
+
+      const pubkey = data.pubkey;
+      const identifier = data.identifier;
+      const kind = data.kind;
+
+      if (kind === Kind.LongForm) {
+        // await fetchUserProfile(account?.publicKey, pubkey, `thred_profile_info_${APP_ID}`);
+
+        const vanityName = app?.verifiedUsers[pubkey];
+
+        if (vanityName) {
+          navigate(`/${vanityName}/${identifier}`);
+          return;
+        }
+
+        batch(() => {
+          setComponent(() => 'read');
+          setEvId(() => id);
+        });
+        return;
+      }
+
+      if (kind === Kind.LiveEvent) {
+        const stream = await getStreamingEvent(identifier, pubkey);
+
+        const host = stream.hosts?.[0] || stream.pubkey;
+
+        if (!host) throw new Error('no-pubkey');
+
+        const vanityName = app?.verifiedUsers[host];
+
+        if (vanityName) {
+          navigate(`/${vanityName}/live/${identifier}`);
+          return;
+        }
+
+        batch(() => {
+          setComponent(() => 'live');
+          setEvId(() => id);
+        });
+        return;
+      }
+    }
+    catch (e) {
+      logError(`Failed to load stream: ${e}`);
+      navigate('/404');
+    }
+  }
+
+  const [component, setComponent] = createSignal<'note' | 'read' | 'live' | 'none' | 'not_found'>('none');
 
   createEffect(() => {
     render(params.id, params.identifier);
@@ -130,7 +161,7 @@ const EventPage: Component = () => {
       const kind = Kind.LongForm;
 
       try {
-        const naddr = nip19.naddrEncode({ pubkey, kind, identifier: decodeURI(identifier) });
+        const naddr = nip19.naddrEncode({ pubkey, kind, identifier: decodeURIComponent(identifier) });
 
         setEvId(() => naddr);
         setComponent(() => 'read');
@@ -146,27 +177,28 @@ const EventPage: Component = () => {
     if (id) {
       if (id.startsWith('naddr')) {
 
-        const decoded = nip19.decode(id);
+        resolveFromNaddr(id);
+        // const decoded = nip19.decode(id);
 
-        const data = decoded.data as nip19.AddressPointer;
+        // const data = decoded.data as nip19.AddressPointer;
 
-        const pubkey = data.pubkey;
-        const identifier = data.identifier;
+        // const pubkey = data.pubkey;
+        // const identifier = data.identifier;
 
-        await fetchUserProfile(account?.publicKey, pubkey, `thred_profile_info_${APP_ID}`);
+        // await fetchUserProfile(account?.publicKey, pubkey, `thred_profile_info_${APP_ID}`);
 
-        const vanityName = app?.verifiedUsers[pubkey];
+        // const vanityName = app?.verifiedUsers[pubkey];
 
-        if (vanityName) {
-          navigate(`/${vanityName}/${identifier}`);
-          return;
-        }
+        // if (vanityName) {
+        //   navigate(`/${vanityName}/${identifier}`);
+        //   return;
+        // }
 
-        batch(() => {
-          setComponent(() => 'read');
-          setEvId(() => id);
-        });
-        return;
+        // batch(() => {
+        //   setComponent(() => 'read');
+        //   setEvId(() => id);
+        // });
+        // return;
       }
 
       if (id.startsWith('note')) {

@@ -1,10 +1,8 @@
 import { useIntl } from '@cookbook/solid-intl';
 import { Component, createEffect, createSignal } from 'solid-js';
-import Modal from '../Modal/Modal';
 import { useToastContext } from '../Toaster/Toaster';
 
 import { nip19 } from '../../lib/nTools';
-
 
 import { pin as tPin, actions as tActions } from '../../translations';
 
@@ -15,7 +13,6 @@ import TextInput from '../TextInput/TextInput';
 import { decryptWithPin, setCurrentPin } from '../../lib/PrimalNostr';
 import { logError } from '../../lib/logger';
 import ButtonSecondary from '../Buttons/ButtonSecondary';
-import { useAccountContext } from '../../contexts/AccountContext';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 
 const EnterPinModal: Component<{
@@ -29,7 +26,6 @@ const EnterPinModal: Component<{
 
   const intl = useIntl();
   const toast = useToastContext();
-  const account = useAccountContext();
 
   let pinInput: HTMLInputElement | undefined;
 

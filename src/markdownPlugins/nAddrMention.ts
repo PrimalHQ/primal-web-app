@@ -1,5 +1,5 @@
 
-import { mergeAttributes, Node, nodePasteRule, NodeViewRenderer, Range } from '@tiptap/core';
+import { Editor, mergeAttributes, Node, nodePasteRule, NodeViewRenderer, Range } from '@tiptap/core';
 import type { Node as ProsemirrorNode } from '@tiptap/pm/model';
 import type { MarkdownSerializerState } from 'prosemirror-markdown';
 import { nip19 } from '../lib/nTools';
@@ -10,7 +10,8 @@ import { Kind } from '../constants';
 import { renderArticlePreview } from '../components/ArticlePreview/ArticlePreview';
 import { setReadMentions } from '../pages/ReadsEditor';
 
-export const findMissingEvent = async (naddr: string) => {
+export const findMissingEvent = async (naddr: string, editor: Editor) => {
+  if (!naddr) return;
   const decode = nip19.decode(naddr);
 
   let identifier = '';
@@ -48,6 +49,9 @@ export const findMissingEvent = async (naddr: string) => {
   const el = document.querySelector('.tiptap.ProseMirror');
   el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
 
+  setTimeout(() => {
+    editor.chain().focus().enter().run();
+  }, 100)
 }
 
 export type NAddrAttributes = {
@@ -81,7 +85,7 @@ export const makeNAddrNode = (bech32: string, options?: any) => ({
   attrs: makeNAddrAttrs(bech32, options),
 })
 
-export const NADDR_REGEX = /(?<![\w./:?=])(nostr:)?(naddr1[0-9a-z]+)/g
+export const NADDR_REGEX = /(?<![\w./:?=])(nostr:)?(naddr1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)/g
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -116,7 +120,7 @@ export const NAddrExtension = Node.create({
       // Append paragraph to the main div
       // dom.appendChild(contentP);
 
-      findMissingEvent(node.attrs.bech32);
+      findMissingEvent(node.attrs.bech32, editor);
 
       return {
         dom,
@@ -142,7 +146,7 @@ export const NAddrExtension = Node.create({
     return {
       markdown: {
         serialize(state: MarkdownSerializerState, node: ProsemirrorNode) {
-          state.write('nostr:' + node.attrs.bech32 + ' ')
+          state.write('nostr:' + node.attrs.bech32 + '\n')
         },
         parse: {},
       },

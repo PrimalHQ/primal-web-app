@@ -3,6 +3,7 @@ import styles from "./NoteImage.module.scss";
 import { generatePrivateKey } from "../../lib/nTools";
 import { MediaVariant } from "../../types/primal";
 import { useAppContext } from "../../contexts/AppContext";
+import { cacheImages, isImageCached } from "../../lib/cache";
 
 const NoteImage: Component<{
   class?: string,
@@ -21,6 +22,9 @@ const NoteImage: Component<{
   ignoreRatio?: boolean,
   forceHeight?: number;
   authorPk?: string,
+  noPlaceholders?: boolean,
+  seeMore?: number,
+  isGallery?: boolean,
 }> = (props) => {
   const app = useAppContext();
   const imgId = generatePrivateKey();
@@ -86,6 +90,8 @@ const NoteImage: Component<{
         return true;
       }
     } catch {
+      image.onerror = "";
+      image.src = props.altSrc;
       setSrc(() => props.altSrc || '');
       setIsImageLoaded(true);
       return true;
@@ -108,6 +114,8 @@ const NoteImage: Component<{
     if (props.forceHeight) {
       return `${props.forceHeight}px`;
     }
+
+    if (props.isGallery) return '250px';
 
     if (!props.media || props.ignoreRatio) return '100%';
 
@@ -191,11 +199,11 @@ const NoteImage: Component<{
 
   return (
     <Show
-      when={isImageLoaded()}
+      when={props.noPlaceholders || isImageLoaded()}
       fallback={<div class={styles.placeholderImage}></div>}
     >
       <a
-        class={`${props.class || ''} ${props.plainBorder ? '' : 'roundedImage'}`}
+        class={`${styles.noteImageHolder} ${props.class || ''} ${props.plainBorder ? '' : 'roundedImage'}`}
         href={src()}
         data-pswp-width={zoomW()}
         data-pswp-height={zoomH()}
@@ -205,6 +213,9 @@ const NoteImage: Component<{
         data-ratio={ratio()}
         target="_blank"
       >
+        <div class={props.seeMore ? styles.seeMore : styles.hidden}>
+          <div>+{props.seeMore || '0'}</div>
+        </div>
         <img
           id={`${imgId}`}
           ref={imgActual}

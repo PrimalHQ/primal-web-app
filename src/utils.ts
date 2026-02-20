@@ -3,8 +3,25 @@ import { subsTo } from './sockets';
 import { DirectMessage, NostrEventContent, PrimalArticle, PrimalNote, PrimalZap } from './types/primal';
 import { DMContact, LeaderboardInfo, PaginationInfo } from './megaFeeds';
 import { isAndroid } from '@kobalte/utils';
+import { BlossomClient, SignedEvent, BlobDescriptor, fetchWithTimeout } from "blossom-client-sdk";
+import { signEvent } from './lib/nostrAPI';
+import { logWarning } from './lib/logger';
 
 let debounceTimer: number = 0;
+
+export const areUrlsSame = (a: string, b: string) => {
+  if (a === b) return true;
+
+  let trimA = a;
+  let trimB = b;
+
+
+  if (a.endsWith('/')) trimA = a.slice(0, -1);
+  if (b.endsWith('/')) trimB = b.slice(0, -1);
+
+  return trimA === trimB;
+}
+
 
 export const debounce = (callback: TimerHandler, time: number) => {
   if (debounceTimer) {
@@ -300,6 +317,11 @@ export const calculateReadsOffset = (reads: PrimalArticle[], paging: PaginationI
     ) break;
 
     if (
+      paging.sortBy === 'published_at' &&
+      read.published !== paging.since
+    ) break;
+
+    if (
       paging.sortBy === 'satszapped' &&
       read.satszapped !== paging.since
     ) break;
@@ -474,4 +496,94 @@ export const previousWord = (input: HTMLInputElement) => {
   const words = input.value.slice(0, carret).split(' ');
 
   return words.length > 0 ? words[words.length - 1] : '';
+}
+
+export const encodeAuthorizationHeader = (uploadAuth: SignedEvent) => {
+  return "Nostr " + btoa(unescape(encodeURIComponent(JSON.stringify(uploadAuth))));
+}
+
+export const checkBlossomServer = async (url: string) => {
+  // const encodedAuthHeader = encodeAuthorizationHeader(auth);
+  // const uploadUrl = url.endsWith('/') ? `${url}upload` : `${url}`;
+
+  const blossomCheck = await fetchWithTimeout(url, {
+    method: "GET",
+    timeout: 3_000,
+  });
+
+  return blossomCheck.status === 200;
+}
+
+export const runColorMode = (
+  callback: (isDarkMode: boolean) => void,
+  fallback: () => void,
+) => {
+  if (!window.matchMedia) {
+    fallback();
+    return;
+  }
+
+  const query = window.matchMedia('(prefers-color-scheme: dark)');
+
+  callback(query.matches);
+
+  query.addEventListener('change', (event) => callback(event.matches));
+}
+
+export const getLang = () => {
+  if (navigator.languages !== undefined)
+    return navigator.languages[0];
+  return navigator.language;
+}
+
+export const urlEncode = (text: string) => {
+    return text.replace(/[^a-zA-Z0-9-]/g,
+        char => '%' + char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')
+    );
+};
+
+export const replaceAsync = async(str: string, regex: RegExp, asyncReplacer: (m: string) => Promise<string>) => {
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = regex.exec(str)) !== null) {
+    // Push the non-matching part
+    parts.push(str.slice(lastIndex, match.index));
+
+    // Push the promise returned by the async replacer
+    parts.push(asyncReplacer(match[0]));
+
+    lastIndex = regex.lastIndex;
+
+    // Handle zero-length matches for global regex
+    if (match[0].length === 0) {
+      regex.lastIndex++;
+    }
+  }
+
+  // Push the remaining part of the string
+  parts.push(str.slice(lastIndex));
+
+  // Wait for all promises to resolve and then join the parts
+  return (await Promise.all(parts)).join('');
+}
+
+export const findFirstDifference = (arr1: string[], arr2: string[]) => {
+  const maxLength = Math.max(arr1.length, arr2.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+
+export const determineOrient = (element: HTMLElement) => {
+  const coor = getScreenCordinates(element);
+  const height = 100;
+  return (coor.y || 0) + height < window.innerHeight + window.scrollY ? 'down' : 'up';
 }

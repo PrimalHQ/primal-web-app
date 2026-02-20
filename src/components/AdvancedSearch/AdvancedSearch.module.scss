@@ -49,7 +49,7 @@
   width: 16px;
   height: 16px;
 
-  background-color: var(--text-tertiary-2);
+  background-color: var(--text-tertiary);
   -webkit-mask: url(../../assets/icons/caret.svg) 0 / 100% no-repeat;
   mask: url(../../assets/icons/caret.svg) 0 / 100% no-repeat;
 }
@@ -58,7 +58,7 @@
   width: 16px;
   height: 16px;
 
-  background-color: var(--text-tertiary-2);
+  background-color: var(--text-tertiary);
   -webkit-mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
   mask: url(../../assets/icons/check.svg) 0 / 100% no-repeat;
 }
@@ -121,6 +121,8 @@
     height: 36px;
     border-radius: 18px;
     margin: 0;
+    padding-left: 16px;
+    padding-right: 12px;
 
     @media only screen and (max-width: 720px) {
       width: calc(100dvw - 32px);
@@ -388,6 +390,10 @@
       justify-content: space-between;
       margin-bottom: 24px;
 
+      &.topAligned {
+        align-items: flex-start;
+      }
+
       .dialogCloseButton {
         height: 16px;
         width: 16px;
@@ -432,6 +438,17 @@
       margin: 0;
     }
 
+    &.noPadding {
+      padding: 0;
+
+      .dialogHeader {
+        .dialogCloseButton {
+          margin-top: 20px;
+          margin-right: 24px;
+        }
+      }
+    }
+
   }
 
   @media only screen and (max-width: 720px) {
@@ -472,7 +489,6 @@
     &:hover {
       background-color: var(--subtile-devider);
     }
-
 
     width: 442px;
 

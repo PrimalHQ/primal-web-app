@@ -7,14 +7,15 @@ import { fetchKnownProfiles } from './lib/profile';
 import { useHomeContext } from './contexts/HomeContext';
 import { useExploreContext } from './contexts/ExploreContext';
 import { useThreadContext } from './contexts/ThreadContext';
-import { useAccountContext } from './contexts/AccountContext';
 import { useProfileContext } from './contexts/ProfileContext';
 import { useSettingsContext } from './contexts/SettingsContext';
 import { useMediaContext } from './contexts/MediaContext';
 import { useNotificationsContext } from './contexts/NotificationsContext';
 import { useSearchContext } from './contexts/SearchContext';
 import { useDMContext } from './contexts/DMContext';
-import { generateNsec, nip19 } from './lib/nTools';
+import { generateNsec, nip19, nip44 } from './lib/nTools';
+import Blossom from './pages/Settings/Blossom';
+import { accountStore } from './stores/accountStore';
 
 const Home = lazy(() => import('./pages/Home'));
 const Reads = lazy(() => import('./pages/Reads'));
@@ -51,8 +52,10 @@ const Network = lazy(() => import('./pages/Settings/Network'));
 const Moderation = lazy(() => import('./pages/Settings/Moderation'));
 const NostrWalletConnect = lazy(() => import('./pages/Settings/NostrWalletConnect'));
 const Menu = lazy(() => import('./pages/Settings/Menu'));
+const BlossomSettings = lazy(() => import('./pages/Settings/Blossom'));
 // const Landing = lazy(() => import('./pages/Landing'));
 const AppDownloadQr = lazy(() => import('./pages/appDownloadQr'));
+const EventQueuePage = lazy(() => import('./pages/EventQueue'));
 
 const Terms = lazy(() => import('./pages/Terms'));
 const Privacy = lazy(() => import('./pages/Privacy'));
@@ -65,6 +68,11 @@ const AdvancedSearch = lazy(() => import('./pages/AdvancedSearch'));
 const AdvancedSearchResults = lazy(() => import('./pages/AdvancedSearchResults'));
 const ReadsEditor = lazy(() => import('./pages/ReadsEditor'));
 const ReadsMy = lazy(() => import('./pages/ReadsMy'));
+
+
+const Streaming = lazy(() => import('./pages/StreamPage'));
+
+// const CitadelPage = lazy(() => import(`./pages/CitadelPage`));
 
 const primalWindow = window as PrimalWindow;
 
@@ -82,7 +90,6 @@ export const getKnownProfiles = cache(({ params }: any) => {
 
 const AppRouter: Component = () => {
 
-  const account = useAccountContext();
   const profile = useProfileContext();
   const settings = useSettingsContext();
   const home = useHomeContext();
@@ -97,7 +104,7 @@ const AppRouter: Component = () => {
 
   if (isDev) {
     primalWindow.primal = {
-      account,
+      account: { ...accountStore },
       explore,
       home,
       media,
@@ -109,6 +116,7 @@ const AppRouter: Component = () => {
       thread,
       genNsec,
       nip19,
+      nip44,
     };
 
     primalWindow.onPrimalComponentMount = () => {};
@@ -129,9 +137,9 @@ const AppRouter: Component = () => {
         <Route path="/" component={Layout} >
           <Route path="/" component={() => <Navigate href="/home" />} />
           <Route path="/home" component={Home} />
-          <Route path="/reads/my" component={ReadsMy} />
           <Route path="/reads/edit/:id?" component={ReadsEditor} />
           <Route path="/reads/:topic?" component={Reads} />
+          <Route path="/myarticles/:tab?" component={ReadsMy} />
           <Route path="/thread/:id" component={Thread} />
           <Route path="/e/:id" component={Thread} />
           <Route path="/a/:id" component={Thread} />
@@ -157,11 +165,15 @@ const AppRouter: Component = () => {
             <Route path="/filters" component={Moderation} />
             <Route path="/nwc" component={NostrWalletConnect} />
             <Route path="/devtools" component={DevTools} />
+            <Route path="/uploads" component={Blossom} />
           </Route>
           <Route path="/bookmarks" component={Bookmarks} />
           <Route path="/settings/profile" component={EditProfile} />
           <Route path="/profile/:npub?" component={Profile} />
-          <Route path="/p/:npub?" component={Profile} />
+          <Route path="/p/:npub?">
+            <Route path="/" component={Profile} />
+            <Route path="/live/streamId?" component={Streaming} />
+          </Route>
           <Route path="/help" component={Help} />
           {/* <Route path="/search/:query" component={Search} /> */}
           {/* <Route path="/rest" component={Explore} /> */}
@@ -180,8 +192,12 @@ const AppRouter: Component = () => {
           <Route path="/legends" component={Legends} />
           <Route path="/:vanityName">
             <Route path="/" component={Profile} preload={getKnownProfiles} />
+            <Route path="/live/:streamId?" component={Streaming} />
             <Route path="/:identifier" component={Thread} preload={getKnownProfiles} />
           </Route>
+          <Route path="/pending" component={EventQueuePage} />
+          <Route path="/rc/:code?" component={() => <Navigate href='/app-download-qr' />}/>
+          {/* <Route path="/citadel_stream" component={CitadelPage} /> */}
           <Route path="/404" component={NotFound} />
         </Route>
       </Router>

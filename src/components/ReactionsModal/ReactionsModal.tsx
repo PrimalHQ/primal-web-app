@@ -5,17 +5,31 @@ import { Component, createEffect, createSignal, For, Match, Show, Switch } from 
 import { createStore } from 'solid-js/store';
 import { APP_ID } from '../../App';
 import { Kind, urlRegexG } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { ReactionStats, useAppContext } from '../../contexts/AppContext';
 import { hookForDev } from '../../lib/devTools';
 import { hexToNpub } from '../../lib/keys';
-import { getEventQuotes, getEventQuoteStats, getEventReactions, getEventZaps, parseLinkPreviews, setLinkPreviews } from '../../lib/notes';
+import {
+  getEventQuotes,
+  getEventQuoteStats,
+  getEventReactions,
+  getEventZaps,
+  parseLinkPreviews,
+} from '../../lib/notes';
 import { truncateNumber2 } from '../../lib/notifications';
 import { subsTo } from '../../sockets';
 import { convertToNotes } from '../../stores/note';
 import { userName } from '../../stores/profile';
 import { actions as tActions, placeholders as tPlaceholders, reactionsModal } from '../../translations';
-import { FeedPage, NostrMentionContent, NostrNoteActionsContent, NostrNoteContent, NostrStatsContent, NostrUserContent, NoteActions, PrimalNote } from '../../types/primal';
+import {
+  FeedPage,
+  NostrMentionContent,
+  NostrNoteActionsContent,
+  NostrNoteContent,
+  NostrStatsContent,
+  NostrUserContent,
+  NoteActions,
+  PrimalNote,
+} from '../../types/primal';
 import { parseBolt11 } from '../../utils';
 import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import Avatar from '../Avatar/Avatar';
@@ -26,6 +40,7 @@ import VerificationCheck from '../VerificationCheck/VerificationCheck';
 
 import styles from './ReactionsModal.module.scss';
 import DOMPurify from 'dompurify';
+import { accountStore } from '../../stores/accountStore';
 
 
 const ReactionsModal: Component<{
@@ -36,7 +51,6 @@ const ReactionsModal: Component<{
 }> = (props) => {
 
   const intl = useIntl();
-  const account = useAccountContext();
   const app = useAppContext();
   const navigate = useNavigate();
 
@@ -233,7 +247,7 @@ const ReactionsModal: Component<{
     });
 
     setIsFetching(() => true);
-    getEventZaps(props.noteId, account?.publicKey, subId, 20, offset);
+    getEventZaps(props.noteId, accountStore.publicKey, subId, 20, offset);
     // getEventReactions(props.noteId, Kind.Zap, subId, offset);
   };
 
@@ -353,7 +367,7 @@ const ReactionsModal: Component<{
     });
 
     setIsFetching(() => true);
-    getEventQuotes(props.noteId, subId, offset, account?.publicKey);
+    getEventQuotes(props.noteId, subId, offset, accountStore.publicKey);
   };
 
   const getQuoteCount = () => {

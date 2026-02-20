@@ -26,7 +26,7 @@ const PremiumProfile: Component<{ data: PremiumStore, profile?: PrimalUser }> = 
 
       <div class={styles.userInfo}>
         <div>{displayName() || 'unknown'}</div>
-        <div class={styles.purpleCheck}></div>
+        <div class={props.data.productGroup === 'pro' ? styles.proCheck : styles.purpleCheck}></div>
       </div>
     </div>
   );

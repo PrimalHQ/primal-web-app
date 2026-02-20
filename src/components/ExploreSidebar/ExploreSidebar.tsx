@@ -1,29 +1,25 @@
-import { A, useResolvedPath } from '@solidjs/router';
-import { Component, createEffect, createMemo, For, onCleanup, onMount } from 'solid-js';
+import { A } from '@solidjs/router';
+import { Component, createEffect, For, onMount } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { Kind } from '../../constants';
 import { APP_ID } from '../../App';
-import { getExploreFeed } from '../../lib/feed';
-import { cacheServer, decompressBlob, isConnected, readData, refreshSocketListeners, removeSocketListeners, socket, subsTo } from '../../sockets';
-import { sortingPlan, convertToNotes } from '../../stores/note';
+import { isConnected, subsTo } from '../../sockets';
 import { convertToUser, emptyUser, truncateNpub } from '../../stores/profile';
-import { FeedPage, NostrEOSE, NostrEvent, NostrEventContent, NostrEvents, NostrUserContent, PrimalNote, PrimalUser } from '../../types/primal';
+import { NostrEventContent, NostrUserContent, PrimalUser } from '../../types/primal';
 import Avatar from '../Avatar/Avatar';
 
 import styles from './ExploreSidebar.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { getTrendingUsers } from '../../lib/profile';
-import { hexToNpub } from '../../lib/keys';
 import { exploreSidebarCaption } from '../../translations';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { hookForDev } from '../../lib/devTools';
 import { loadTrendingUsers, saveTrendingUsers } from '../../lib/localStore';
 import { useAppContext } from '../../contexts/AppContext';
+import { accountStore } from '../../stores/accountStore';
 
 const ExploreSidebar: Component<{ id?: string }> = (props) => {
 
   const intl = useIntl();
-  const account = useAccountContext();
   const app = useAppContext();
 
   const [store, setStore] = createStore<{ users: Record<string, NostrUserContent>, scores: Record<string, number> }>({
@@ -92,7 +88,7 @@ const ExploreSidebar: Component<{ id?: string }> = (props) => {
 	});
 
   createEffect(() => {
-    if (!isConnected() || !account?.isKeyLookupDone) return;
+    if (!isConnected() || !accountStore.isKeyLookupDone) return;
 
     const subId = `explore_sidebar_${APP_ID}`
     const unsub = subsTo(subId, {
@@ -127,7 +123,7 @@ const ExploreSidebar: Component<{ id?: string }> = (props) => {
       },
     });
 
-    getTrendingUsers(subId, account?.publicKey);
+    getTrendingUsers(subId, accountStore.publicKey);
   })
 
 // RENDER ---------------------------------------

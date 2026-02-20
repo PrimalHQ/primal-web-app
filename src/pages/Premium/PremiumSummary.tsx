@@ -2,12 +2,10 @@ import { useIntl } from '@cookbook/solid-intl';
 import { Component, Show } from 'solid-js';
 import { shortDate } from '../../lib/dates';
 
-import { premium as t } from '../../translations';
 import { formatStorage } from '../../utils';
 import { PremiumStore } from './Premium';
 
 import styles from './Premium.module.scss';
-import { useAccountContext } from '../../contexts/AccountContext';
 import ButtonLink from '../../components/Buttons/ButtonLink';
 
 
@@ -18,8 +16,6 @@ const PremiumSummary: Component<{
   hideApply?: boolean,
   updateUserMetadata: (option?: 'nip05' | 'lud16', force?: boolean) => void,
 }> = (props) => {
-  const account = useAccountContext();
-
   const name = () => props.rename ? props.data.rename : props.data.name;
 
   const status = () => props.data.membershipStatus;
@@ -37,6 +33,19 @@ const PremiumSummary: Component<{
 
   const applyLud16 = () => {
     props.updateUserMetadata('lud16', true)
+  }
+
+
+  const totalStorage = () => {
+    if (props.data.membershipStatus.tier === 'premium-legend') {
+      return '100GB';
+    }
+
+    if (props.data.membershipStatus.tier === 'premium') {
+      return '10GB';
+    }
+
+    return 0;
   }
 
   return (
@@ -115,7 +124,7 @@ const PremiumSummary: Component<{
           </div>
           <div>
             <span class={styles.summaryValue}>
-              {formatStorage(status().used_storage || 0)} of 100GB
+              {formatStorage(status().used_storage || 0)} of {totalStorage()}
             </span>
           </div>
         </div>

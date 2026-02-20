@@ -2,7 +2,6 @@
 import { batch, Component, createEffect, createSignal, For, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { wordsPerMinute } from '../../constants';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { CustomZapInfo, useAppContext } from '../../contexts/AppContext';
 import { useMediaContext } from '../../contexts/MediaContext';
 import { useThreadContext } from '../../contexts/ThreadContext';
@@ -10,7 +9,7 @@ import { shortDate } from '../../lib/dates';
 import { hookForDev } from '../../lib/devTools';
 import { userName } from '../../stores/profile';
 import { PrimalArticle, ZapOption } from '../../types/primal';
-import { uuidv4 } from '../../utils';
+import { urlEncode, uuidv4 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
 import { NoteReactionsState } from '../Note/Note';
 import NoteContextTrigger from '../Note/NoteContextTrigger';
@@ -24,6 +23,7 @@ import defaultAvatarLight from '../../assets/images/reads_image_light.png';
 import styles from './ArticlePreview.module.scss';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { nip19 } from 'nostr-tools';
+import { accountStore } from '../../stores/accountStore';
 
 const isDev = localStorage.getItem('devMode') === 'true';
 
@@ -37,6 +37,8 @@ export type ArticleProps = {
   bordered?: boolean,
   noLinks?: boolean,
   onClick?: (url: string) => void,
+  onRemove?: (id: string) => void,
+  notif?: boolean,
 };
 
 export const renderArticlePreview = (props: ArticleProps) => (
@@ -47,7 +49,6 @@ export const renderArticlePreview = (props: ArticleProps) => (
 
 const ArticlePreview: Component<ArticleProps> = (props) => {
   const app = useAppContext();
-  const account = useAccountContext();
   const thread = useThreadContext();
   const media = useMediaContext();
   const settings = useSettingsContext();
@@ -95,7 +96,7 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
     app?.actions.closeCustomZapModal();
     app?.actions.resetCustomZap();
 
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -141,7 +142,7 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
   };
 
   const addTopZap = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -172,7 +173,7 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
 
 
   const addTopZapFeed = (zapOption: ZapOption) => {
-    const pubkey = account?.publicKey;
+    const pubkey = accountStore.publicKey;
 
     if (!pubkey) return;
 
@@ -223,6 +224,9 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
         app?.actions.openCustomZapModal(customZapInfo());
       },
       openReactionModal,
+      () => {
+        props.onRemove && props.onRemove(props.article.noteId);
+      },
     );
   }
 
@@ -298,9 +302,11 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
     var divHeight = el.offsetHeight
 
     // @ts-ignore
-    var lineHeight = el.computedStyleMap().get('line-height').value;
+    var lineHeight = el.computedStyleMap ?
+      (el.computedStyleMap().get('line-height')?.toString() || '0') :
+      window.getComputedStyle(el).getPropertyValue('line-height').valueOf();
 
-    var lines = divHeight / lineHeight;
+    var lines = divHeight / parseInt(lineHeight);
 
     return lines;
   }
@@ -342,15 +348,15 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
 
     const data = decoded.data as nip19.AddressPointer;
 
-    return `/${vanityName}/${data.identifier}`;
+    return `/${vanityName}/${urlEncode(data.identifier)}`;
   }
 
 
   return (
     <div
       ref={articlePreview}
-      class={`${styles.article} ${props.bordered ? styles.bordered : ''}`}
-      onClick={() => props.onClick(articleUrl())}
+      class={`${styles.article} ${props.bordered ? styles.bordered : ''} ${props.notif ? styles.notif : ''}`}
+      onClick={() => props.onClick && props.onClick(articleUrl())}
       style={props.height ? `height: ${props.height}px` : ''}
     >
       <Show when={!props.hideContext}>
@@ -363,7 +369,14 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
       </Show>
 
       <div class={styles.header}>
-        <div class={styles.userInfo}>
+        <div
+          class={styles.userInfo}
+          onClick={(e: MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+            props.onClick && props.onClick(app?.actions.profileLink(props.article.user.npub) || '');
+          }}
+        >
           <Avatar user={props.article.user} size="micro"/>
           <div class={styles.userName}>{userName(props.article.user)}</div>
           <VerificationCheck user={props.article.user} />
@@ -436,7 +449,7 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
       </Show>
 
       <Show when={!props.hideFooter}>
-        <div class={styles.footer}>
+        <div class={`${props.notif ? styles.footerNotif : styles.footer}`}>
           <ArticleFooter
             note={props.article}
             state={reactionsState}

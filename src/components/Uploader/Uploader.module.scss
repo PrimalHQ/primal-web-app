@@ -54,7 +54,8 @@
     height: 2px;
     border-radius: 1px;
     width: var(--kb-progress-fill-width);
-    transition: width var(--progress-rate) linear;
+    /* transition: width var(--progress-rate) linear; */
+    transition: width 250ms linear;
 
     // &.huge {
     //   transition: width 400ms linear;

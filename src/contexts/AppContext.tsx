@@ -3,20 +3,48 @@ import {
   createContext,
   createEffect,
   JSXElement,
+  on,
   onCleanup,
   onMount,
   useContext
 } from "solid-js";
-import { MediaEvent, MediaVariant, NostrBlossom, NostrEOSE, NostrEvent, NostrEventContent, NostrEvents, PrimalArticle, PrimalDVM, PrimalNote, PrimalUser, ZapOption } from "../types/primal";
+import {
+  NostrBlossom,
+  NostrEOSE,
+  NostrEvent,
+  NostrEventContent,
+  NostrEvents,
+  NostrLiveChat,
+  PrimalArticle,
+  PrimalDVM,
+  PrimalNote,
+  PrimalUser,
+  ZapOption,
+} from "../types/primal";
+import {
+  connect,
+  disconnect,
+  isConnected,
+  readData,
+  refreshSocketListeners,
+  removeSocketListeners,
+  socket,
+} from "../sockets";
+import {
+  accountStore,
+  hasPublicKey,
+  logUserIn,
+  reconnectSuspendedRelays,
+  suspendRelays,
+} from "../stores/accountStore";
 import { CashuMint } from "@cashu/cashu-ts";
 import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
-import { connect, disconnect, isConnected, isNotConnected, readData, refreshSocketListeners, removeSocketListeners, socket } from "../sockets";
-import { nip19, Relay } from "../lib/nTools";
+import { nip19, nip46 } from "../lib/nTools";
 import { logInfo } from "../lib/logger";
 import { Kind } from "../constants";
 import { LegendCustomizationConfig } from "../lib/premium";
-import { config } from "@milkdown/core";
-
+import { StreamingData } from "../lib/streaming";
+import { loadLegendCustomization, saveLegendCustomization } from "../lib/localStore";
 
 export type ReactionStats = {
   likes: number,
@@ -30,6 +58,8 @@ export type CustomZapInfo = {
   profile?: PrimalUser,
   note?: PrimalNote | PrimalArticle,
   dvm?: PrimalDVM,
+  stream?: StreamingData,
+  streamAuthor?: PrimalUser,
   onConfirm: (zapOption: ZapOption) => void,
   onSuccess: (zapOption: ZapOption) => void,
   onFail: (zapOption: ZapOption) => void,
@@ -41,6 +71,7 @@ export type NoteContextMenuInfo = {
   position: DOMRect | undefined,
   openCustomZap?: () => void,
   openReactions?: () => void,
+  onDelete?: (id: string, isRepost?: Boolean) => void,
 };
 
 export type ConfirmInfo = {
@@ -68,6 +99,19 @@ export type CohortInfo = {
   premium_since?: number,
 };
 
+export type LiveStreamContextMenuInfo = {
+  stream: StreamingData,
+  streamAuthor: PrimalUser,
+  position: DOMRect | undefined,
+  onDelete?: (id: string) => void,
+};
+
+export type NoteVideoContextMenuInfo = {
+  src: string,
+  position: DOMRect | undefined,
+  onDownload?: () => void,
+};
+
 export type AppContextStore = {
   events: Record<number, NostrEventContent[]>,
   isInactive: boolean,
@@ -78,6 +122,14 @@ export type AppContextStore = {
   customZap: CustomZapInfo | undefined,
   showNoteContextMenu: boolean,
   noteContextMenuInfo: NoteContextMenuInfo | undefined,
+  showStreamContextMenu: boolean,
+  streamContextMenuInfo: LiveStreamContextMenuInfo | undefined,
+  noteVideoContextMenuInfo: NoteVideoContextMenuInfo | undefined,
+  showNoteVideoContextMenu: boolean,
+  showArticleOverviewContextMenu: boolean,
+  articleOverviewContextMenuInfo: NoteContextMenuInfo | undefined,
+  showArticleDraftContextMenu: boolean,
+  articleDraftContextMenuInfo: NoteContextMenuInfo | undefined,
   showLnInvoiceModal: boolean,
   lnbc: InvoiceInfo | undefined,
   showCashuInvoiceModal: boolean,
@@ -87,18 +139,55 @@ export type AppContextStore = {
   cashuMints: Map<string, CashuMint>,
   subscribeToAuthor: PrimalUser | undefined,
   subscribeToTier: (tier: Tier) => void,
-  connectedRelays: Relay[],
   verifiedUsers: Record<string, string>,
   legendCustomization: Record<string, LegendCustomizationConfig>,
   memberCohortInfo: Record<string, CohortInfo>,
+  showProfileQr: PrimalUser | undefined,
+  reportContent: PrimalNote | PrimalArticle | NostrLiveChat | undefined,
+  signer: nip46.BunkerSigner | undefined,
   actions: {
     openReactionModal: (noteId: string, stats: ReactionStats) => void,
     closeReactionModal: () => void,
     openCustomZapModal: (custonZapInfo: CustomZapInfo) => void,
     closeCustomZapModal: () => void,
     resetCustomZap: () => void,
-    openContextMenu: (note: PrimalNote | PrimalArticle, position: DOMRect | undefined, openCustomZapModal: () => void, openReactionModal: () => void) => void,
+    openContextMenu: (
+      note: PrimalNote | PrimalArticle,
+      position: DOMRect | undefined,
+      openCustomZap: () => void,
+      openReaction: () => void,
+      onDelete: (id: string) => void,
+    ) => void,
     closeContextMenu: () => void,
+    openStreamContextMenu: (
+      stream: StreamingData,
+      streamAuthor: PrimalUser,
+      position: DOMRect | undefined,
+      onDelete: (id: string) => void,
+    ) => void,
+    closeStreamContextMenu: () => void,
+    openNoteVideoContextMenu: (
+      src: string,
+      position: DOMRect | undefined,
+      onDownload: () => void,
+    ) => void,
+    closeNoteVideoContextMenu: () => void,
+    openArticleOverviewContextMenu: (
+      note: PrimalArticle,
+      position: DOMRect | undefined,
+      openCustomZap: () => void,
+      openReaction: () => void,
+      onDelete: (id: string) => void,
+    ) => void,
+    closeArticleOverviewContextMenu: () => void,
+    openArticleDraftContextMenu: (
+      note: PrimalArticle,
+      position: DOMRect | undefined,
+      openCustomZapModal: () => void,
+      openReactionModal: () => void,
+      onDelete: (id: string) => void,
+    ) => void,
+    closeArticleDraftContextMenu: () => void,
     openLnbcModal: (lnbc: string, onPay: () => void) => void,
     closeLnbcModal: () => void,
     openCashuModal: (cashu: string, onPay: () => void) => void,
@@ -108,11 +197,13 @@ export type AppContextStore = {
     getCashuMint: (url: string) => CashuMint | undefined,
     openAuthorSubscribeModal: (author: PrimalUser | undefined, subscribeTo: (tier: Tier, cost: TierCost) => void) => void,
     closeAuthorSubscribeModal: () => void,
-    addConnectedRelay: (relay: Relay) => void,
-    removeConnectedRelay: (relay: Relay) => void,
-    profileLink: (pubkey: string | undefined) => string,
+    profileLink: (pubkey: string | undefined, noP?: boolean) => string,
     setLegendCustomization: (pubkey: string, config: LegendCustomizationConfig) => void,
     getUserBlossomUrls: (pubkey: string) => string[],
+    openProfileQr: (user: PrimalUser) => void,
+    closeProfileQr: () => void,
+    openReportContent: (content: PrimalNote | PrimalArticle | NostrLiveChat) => void,
+    closeReportContent: () => void,
   },
 }
 
@@ -132,6 +223,14 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   customZap: undefined,
   showNoteContextMenu: false,
   noteContextMenuInfo: undefined,
+  showArticleOverviewContextMenu: false,
+  articleOverviewContextMenuInfo: undefined,
+  showArticleDraftContextMenu: false,
+  articleDraftContextMenuInfo: undefined,
+  showStreamContextMenu: false,
+  showNoteVideoContextMenu: false,
+  streamContextMenuInfo: undefined,
+  noteVideoContextMenuInfo: undefined,
   showLnInvoiceModal: false,
   lnbc: undefined,
   showCashuInvoiceModal: false,
@@ -140,11 +239,13 @@ const initialData: Omit<AppContextStore, 'actions'> = {
   confirmInfo: undefined,
   cashuMints: new Map(),
   subscribeToAuthor: undefined,
-  connectedRelays: [],
   verifiedUsers: {},
   legendCustomization: {},
   memberCohortInfo: {},
   subscribeToTier: () => {},
+  showProfileQr: undefined,
+  reportContent: undefined,
+  signer: undefined,
 };
 
 export const AppContext = createContext<AppContextStore>();
@@ -198,15 +299,80 @@ export const AppProvider = (props: { children: JSXElement }) => {
     position: DOMRect | undefined,
     openCustomZap: () => void,
     openReactions: () => void,
+    onDelete: (id: string) => void,
   ) => {
     updateStore('noteContextMenuInfo', reconcile({
       note,
       position,
       openCustomZap,
       openReactions,
+      onDelete,
     }))
     updateStore('showNoteContextMenu', () => true);
   };
+
+  const openStreamContextMenu = (
+    stream: StreamingData,
+    streamAuthor: PrimalUser,
+    position: DOMRect | undefined,
+    onDelete: (id: string) => void,
+  ) => {
+    updateStore('streamContextMenuInfo', reconcile({
+      stream,
+      streamAuthor,
+      position,
+      onDelete,
+    }))
+    updateStore('showStreamContextMenu', () => true);
+  };
+
+
+  const openNoteVideoContextMenu = (
+    src: string,
+    position: DOMRect | undefined,
+    onDownload: () => void,
+  ) => {
+    updateStore('noteVideoContextMenuInfo', reconcile({
+      src,
+      position,
+      onDownload,
+    }))
+    updateStore('showNoteVideoContextMenu', () => true);
+  };
+
+  const openArticleOverviewContextMenu = (
+    note: PrimalArticle,
+    position: DOMRect | undefined,
+    openCustomZap: () => void,
+    openReactions: () => void,
+    onDelete: (id: string) => void,
+  ) => {
+    updateStore('articleOverviewContextMenuInfo', reconcile({
+      note,
+      position,
+      openCustomZap,
+      openReactions,
+      onDelete,
+    }))
+    updateStore('showArticleOverviewContextMenu', () => true);
+  };
+
+  const openArticleDraftContextMenu = (
+      note: PrimalArticle,
+      position: DOMRect | undefined,
+      openCustomZap: () => void,
+      openReactions: () => void,
+      onDelete: (id: string) => void,
+    ) => {
+      updateStore('articleDraftContextMenuInfo', reconcile({
+        note,
+        position,
+        openCustomZap,
+        openReactions,
+        onDelete,
+      }))
+      updateStore('showArticleDraftContextMenu', () => true);
+    };
 
   const openLnbcModal = (lnbc: string, onPay: () => void) => {
     updateStore('showLnInvoiceModal', () => true);
@@ -251,6 +417,22 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('showNoteContextMenu', () => false);
   };
 
+  const closeStreamContextMenu = () => {
+    updateStore('showStreamContextMenu', () => false);
+  };
+
+  const closeNoteVideoContextMenu = () => {
+    updateStore('showNoteVideoContextMenu', () => false);
+  };
+
+  const closeArticleOverviewContextMenu = () => {
+    updateStore('showArticleOverviewContextMenu', () => false);
+  };
+
+  const closeArticleDraftContextMenu = () => {
+    updateStore('showArticleDraftContextMenu', () => false);
+  };
+
   const getCashuMint = (url: string) => {
     const formatted = new URL(url).toString();
     if (!store.cashuMints.has(formatted)) {
@@ -271,24 +453,13 @@ export const AppProvider = (props: { children: JSXElement }) => {
     updateStore('subscribeToAuthor', () => undefined);
   };
 
-  const addConnectedRelay = (relay: Relay) => {
-    if (store.connectedRelays.find(r => r.url === relay.url)) return;
-
-    updateStore('connectedRelays', store.connectedRelays.length, () => ({ ...relay }));
-  };
-
-  const removeConnectedRelay = (relay: Relay) => {
-    if (!store.connectedRelays.find(r => r.url === relay.url)) return;
-
-    updateStore('connectedRelays', (rs) => rs.filter(r => r.url !== relay.url));
-  };
-
-  const profileLink = (pubkey: string | undefined) => {
+  const profileLink = (pubkey: string | undefined, noP?: boolean) => {
     if (!pubkey) return '/home';
 
     let pk = `${pubkey}`;
 
     if (pk.startsWith('npub')) {
+      // @ts-ignore
       pk = nip19.decode(pk).data;
     }
 
@@ -298,15 +469,16 @@ export const AppProvider = (props: { children: JSXElement }) => {
 
     try {
       const npub = nip19.nprofileEncode({ pubkey: pk });
-      return `/p/${npub}`;
+      return `/${noP ? '' : 'p/'}${npub}`;
     } catch (e) {
-      return `/p/${pk}`;
+      return `/${noP ? '' : 'p/'}${pk}`;
     }
 
   }
 
   const setLegendCustomization = (pubkey: string, config: LegendCustomizationConfig) => {
     updateStore('legendCustomization', () => ({ [pubkey]: { ...config }}));
+    saveLegendCustomization(pubkey, config);
   }
 
   const getUserBlossomUrls = (pubkey: string) => {
@@ -317,6 +489,22 @@ export const AppProvider = (props: { children: JSXElement }) => {
     return blossom.tags.reduce<string[]>((acc, t) => {
       return t[0] === 'server' ? [ ...acc, t[1]] : acc;
     }, []);
+  }
+
+  const openProfileQr = (user: PrimalUser) => {
+    updateStore('showProfileQr', () => ({ ...user }));
+  }
+
+  const closeProfileQr = () => {
+    updateStore('showProfileQr', () => undefined);
+  }
+
+  const openReportContent = (user: PrimalNote | PrimalArticle | NostrLiveChat) => {
+    updateStore('reportContent', () => ({ ...user }));
+  }
+
+  const closeReportContent = () => {
+    updateStore('reportContent', () => undefined);
   }
 
 
@@ -402,10 +590,35 @@ const onSocketClose = (closeEvent: CloseEvent) => {
     document.addEventListener('keydown', monitorActivity);
   });
 
+  onMount(() => {
+    logUserIn();
+  })
+
   onCleanup(() => {
     document.removeEventListener('mousemove', monitorActivity);
     document.removeEventListener('scroll', monitorActivity);
     document.removeEventListener('keydown', monitorActivity);
+  });
+
+  createEffect(() => {
+    const config = store.legendCustomization;
+    const pubkey = accountStore.publicKey;
+
+    if (!pubkey || !config || !config[pubkey]) return;
+
+    saveLegendCustomization(pubkey, config[pubkey]);
+  })
+
+  createEffect(() => {
+    if (hasPublicKey()) {
+      const pubkey = accountStore.publicKey;
+
+      const legendConfig = loadLegendCustomization(pubkey);
+
+      if (!pubkey || !legendConfig) return;
+
+      updateStore('legendCustomization', () => ({ [pubkey]: { ...legendConfig } }));
+    }
   });
 
   let wakingTimeout = 0;
@@ -427,18 +640,23 @@ const onSocketClose = (closeEvent: CloseEvent) => {
     }
   });
 
-  createEffect(() => {
-    if (store.appState === 'sleep') {
+  createEffect(on(() => store.appState, (state, prev) => {
+    if (state === prev) return;
+
+    if (state === 'sleep') {
       logInfo('Disconnected from Primal socket due to inactivity at: ', (new Date()).toLocaleTimeString())
       disconnect(false);
+      suspendRelays();
       return;
     }
 
-    if (store.appState === 'waking' && socket()?.readyState === WebSocket.CLOSED) {
+    if (state === 'waking' && socket()?.readyState === WebSocket.CLOSED) {
       logInfo('Reconnected to Primal socket at: ', (new Date()).toLocaleTimeString());
       connect();
+      reconnectSuspendedRelays();
+      return;
     }
-  })
+  }));
 
   createEffect(() => {
     if (isConnected()) {
@@ -468,6 +686,14 @@ const onSocketClose = (closeEvent: CloseEvent) => {
       resetCustomZap,
       openContextMenu,
       closeContextMenu,
+      openStreamContextMenu,
+      closeStreamContextMenu,
+      openNoteVideoContextMenu,
+      closeNoteVideoContextMenu,
+      openArticleOverviewContextMenu,
+      closeArticleOverviewContextMenu,
+      openArticleDraftContextMenu,
+      closeArticleDraftContextMenu,
       openLnbcModal,
       closeLnbcModal,
       openConfirmModal,
@@ -477,11 +703,13 @@ const onSocketClose = (closeEvent: CloseEvent) => {
       getCashuMint,
       openAuthorSubscribeModal,
       closeAuthorSubscribeModal,
-      addConnectedRelay,
-      removeConnectedRelay,
       profileLink,
       setLegendCustomization,
       getUserBlossomUrls,
+      openProfileQr,
+      closeProfileQr,
+      openReportContent,
+      closeReportContent,
     }
   });
 

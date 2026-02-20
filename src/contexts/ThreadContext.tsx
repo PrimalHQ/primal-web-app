@@ -1,4 +1,3 @@
-import { nip19 } from "../lib/nTools";
 import { createStore } from "solid-js/store";
 import { getEvents, getThread } from "../lib/feed";
 import {
@@ -10,26 +9,12 @@ import { convertToUser } from "../stores/profile";
 import { Kind } from "../constants";
 import {
   createContext,
-  createEffect,
-  onCleanup,
   useContext
 } from "solid-js";
 import {
-  decompressBlob,
-  isConnected,
-  readData,
-  refreshSocketListeners,
-  removeSocketListeners,
-  socket
-} from "../sockets";
-import {
   ContextChildren,
   FeedPage,
-  NostrEOSE,
-  NostrEvent,
   NostrEventContent,
-  NostrEvents,
-  NostrMediaInfo,
   NostrMentionContent,
   NostrNoteActionsContent,
   NostrNoteContent,
@@ -41,10 +26,10 @@ import {
   TopZap,
 } from "../types/primal";
 import { APP_ID } from "../App";
-import { useAccountContext } from "./AccountContext";
-import { getEventQuoteStats, getEventZaps, parseLinkPreviews, setLinkPreviews } from "../lib/notes";
+import { getEventQuoteStats, getEventZaps, parseLinkPreviews } from "../lib/notes";
 import { handleSubscription, parseBolt11 } from "../utils";
 import { getUserProfiles } from "../lib/profile";
+import { accountStore } from "../stores/accountStore";
 
 export type ThreadContextStore = {
   primaryNote: PrimalNote | undefined,
@@ -71,6 +56,7 @@ export type ThreadContextStore = {
     fetchTopZaps: (noteId: string) => void,
     fetchUsers: (pubkeys: string[]) => void,
     insertNote: (note: PrimalNote) => void,
+    removeEvent: (id: string, kind: 'notes', isRepost?: boolean) => void,
   }
 }
 
@@ -103,9 +89,11 @@ export const ThreadContext = createContext<ThreadContextStore>();
 
 export const ThreadProvider = (props: { children: ContextChildren }) => {
 
-  const account = useAccountContext();
-
 // ACTIONS --------------------------------------
+
+  const removeEvent = (id: string, kind: 'notes') => {
+    updateStore(kind, (drs) => drs.filter(d => d.noteId !== id));
+  }
 
   const saveNotes = (newNotes: PrimalNote[]) => {
     const oldNotesIds = store.notes.map(n => n.post.id);
@@ -123,7 +111,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
     handleSubscription(
       threadId,
-      () => getThread(account?.publicKey, noteId, threadId),
+      () => getThread(accountStore.publicKey, noteId, threadId),
       handleThreadEvent,
       handleThreadEose,
     )
@@ -144,7 +132,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
     handleSubscription(
       threadDiffId,
-      () => getThread(account?.publicKey, noteId, threadDiffId, until, limit),
+      () => getThread(accountStore.publicKey, noteId, threadDiffId, until, limit),
       handleThreadEvent,
       handleThreadEose,
     );
@@ -362,7 +350,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
     handleSubscription(
       threadZapsId,
-      () => getEventZaps(noteId, account?.publicKey, threadZapsId, 10, 0),
+      () => getEventZaps(noteId, accountStore.publicKey, threadZapsId, 10, 0),
       handleThreadZapsEvent,
       handleThreadZapsEose,
     );
@@ -410,7 +398,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
 
     handleSubscription(
       threadRepostId,
-      () => getEvents(account?.publicKey, ids, threadRepostId),
+      () => getEvents(accountStore.publicKey, ids, threadRepostId),
       handleThreadRepostEvent,
       handleThreadRepostEose,
     );
@@ -494,6 +482,7 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
       fetchTopZaps,
       fetchUsers,
       insertNote,
+      removeEvent,
     },
   });
 

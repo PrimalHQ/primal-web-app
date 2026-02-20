@@ -6,10 +6,8 @@ import { PrimalArticle, PrimalNote, PrimalUser, SendNoteResult } from '../types/
 import PeopleList from '../components/PeopleList/PeopleList';
 import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 
-import { nip19 } from '../lib/nTools';
 import { useThreadContext } from '../contexts/ThreadContext';
 import Wormhole from '../components/Wormhole/Wormhole';
-import { useAccountContext } from '../contexts/AccountContext';
 import { sortByRecency } from '../stores/note';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
@@ -23,15 +21,16 @@ import ThreadNoteSkeleton from '../components/Skeleton/ThreadNoteSkeleton';
 import { Transition } from 'solid-transition-group';
 import { APP_ID } from '../App';
 import { fetchNotes } from '../handleNotes';
-import { isIOS, isPhone } from '../utils';
-import { logWarning } from '../lib/logger';
+import { isPhone } from '../utils';
 import { noteIdToHex } from '../lib/keys';
+import { useToastContext } from '../components/Toaster/Toaster';
+import { accountStore, hasPublicKey } from '../stores/accountStore';
 
 
 const NoteThread: Component<{ noteId: string }> = (props) => {
-  const account = useAccountContext();
   const intl = useIntl();
   const navigate = useNavigate();
+  const toast = useToastContext();
 
   let repliesHolder: HTMLDivElement | undefined;
 
@@ -77,7 +76,9 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
 
     return sortByRecency(
       threadContext?.notes.filter(n =>
-        n.post.id !== note.post.id && n.post.created_at <= note.post.created_at,
+        n.post.id !== note.post.id &&
+        // n.post.created_at <= note.post.created_at &&
+        !n.tags.find(t => t[0] === 'e' && (t[3] === 'reply' || t[3] === 'root' || t[3] === 'fork') && t[1] === note.id),
       ) || [],
       true,
     );
@@ -91,7 +92,9 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     }
 
     return threadContext?.notes.filter(n =>
-      n.post.id !== note.post.id && n.post.created_at >= note.post.created_at,
+      n.post.id !== note.post.id &&
+      // n.post.created_at >= note.post.created_at &&
+      n.tags.find(t => t[0] === 'e' && (t[3] === 'reply' || t[3] === 'root') && t[1] === note.id),
     ) || [];
   };
 
@@ -158,7 +161,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     relayHints: Record<string, string>,
   }) => {
     const pNote = primaryNote();
-    if (!meta || !result.note || !account?.activeUser || !pNote ) return;
+    if (!meta || !result.note || !accountStore.activeUser || !pNote ) return;
 
     const modifiedMeta = {
       ...meta,
@@ -167,15 +170,9 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
 
     const subId = `posted_note_${APP_ID}`;
 
-    const notes = await fetchNotes(account.publicKey, [result.note.id], subId);
-
-    // const note = generateNote(result.note, account?.activeUser, modifiedMeta);
+    const notes = await fetchNotes(accountStore.publicKey, [result.note.id], subId);
 
     threadContext?.actions.insertNote(notes[0]);
-
-    // setTimeout(() => {
-    //   threadContext?.actions.updateNotes(postId());
-    // }, 2_000)
   };
 
 
@@ -212,7 +209,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
 
       <NavHeader title="Thread" />
 
-      <Show when={account?.isKeyLookupDone}>
+      <Show when={accountStore.isKeyLookupDone}>
         <Transition name='slide-fade'>
           <Show
             when={!isFetching()}
@@ -235,6 +232,10 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                         parent={true}
                         shorten={true}
                         noteType="thread"
+                        onRemove={(id: string, isRepost?: boolean) => {
+                          if (isRepost) return;
+                          threadContext?.actions.removeEvent(id, 'notes');
+                        }}
                       />
                     </div>
                   }
@@ -258,8 +259,14 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                     note={primaryNote() as PrimalNote}
                     noteType="primary"
                     quoteCount={threadContext?.quoteCount}
+                    onRemove={(id: string, isRepost?: boolean) => {
+                      if (isRepost) return;
+
+                      toast?.sendSuccess('Delete request sent');
+                      navigate('/home');
+                    }}
                   />
-                  <Show when={account?.hasPublicKey()}>
+                  <Show when={hasPublicKey()}>
                     <ReplyToNote
                       note={primaryNote() as PrimalNote}
                       onNotePosted={onNotePosted}
@@ -276,6 +283,11 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
                         note={note}
                         shorten={true}
                         noteType="thread"
+                        onRemove={(id: string, isRepost?: boolean) => {
+                          if (isRepost) return;
+
+                          threadContext?.actions.removeEvent(id, 'notes');
+                        }}
                       />
                     </div>
                   }

@@ -24,8 +24,8 @@ import { convertToUser } from "../stores/profile";
 import { convertToNotes } from "../stores/note";
 import { subsTo } from "../sockets";
 import { nip19 } from "../lib/nTools";
-import { useAccountContext } from "./AccountContext";
 import { npubToHex } from "../lib/keys";
+import { accountStore } from "../stores/accountStore";
 
 export const recomendedUsers = [
   '82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2', // jack
@@ -86,14 +86,12 @@ export const SearchContext = createContext<SearchContextStore>();
 
 export function SearchProvider(props: { children: JSX.Element }) {
 
-  const account = useAccountContext();
-
 // ACTIONS --------------------------------------
 
   const findUserByNupub = (npub: string) => {
     const subId = `find_npub_${APP_ID}`;
 
-    let decoded: nip19.DecodeResult | undefined;
+    let decoded: nip19.DecodedResult | undefined;
 
     try {
       decoded = nip19.decode(npub);
@@ -362,7 +360,7 @@ export function SearchProvider(props: { children: JSX.Element }) {
     updateStore('isFetchingContent', () => true);
     updateStore('notes', () => []);
     updateStore('page', { messages: [], users: {}, postStats: {}, mentions: {}, noteActions: {} })
-    searchContent(account?.publicKey, subid, query);
+    searchContent(accountStore.publicKey, subid, query);
   }
 
   const setContentQuery = (query: string) => {
@@ -403,7 +401,7 @@ export function SearchProvider(props: { children: JSX.Element }) {
         },
       });
 
-      searchFilteredUsers(pubkey, account?.publicKey, subId);
+      searchFilteredUsers(pubkey, accountStore.publicKey, subId);
     }
   }
 

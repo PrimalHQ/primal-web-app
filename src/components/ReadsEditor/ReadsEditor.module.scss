@@ -7,8 +7,8 @@
 
   .trigger {
     padding-block: 8px;
-    padding-left: 16px;
-    padding-right: 12px;
+    padding-left: 10px;
+    padding-right: 10px;
     border: none;
     border-radius: 4px;
     outline: none;
@@ -16,14 +16,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    width: 136px;
+    width: 122px;
 
     background-color: var(--background-site);
 
     color: var(--text-secondary);
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 400;
-    line-height: 20px;
+    line-height: 16px;
 
     &:hover {
       background-color: var(--background-input);
@@ -158,8 +158,8 @@
 }
 
 .chevronIcon {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
 
   background-color: var(--text-tertiary-2);
   -webkit-mask: url(../../assets/icons/caret.svg) 0 / 100% no-repeat;
@@ -282,7 +282,7 @@
   border-top: 1px solid var(--devider);
   border-bottom: 1px solid var(--devider);
   width: 640px;
-  height: 64px;
+  height: 52px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -292,9 +292,9 @@
   >div {
     /* position:fixed; */
     display: flex;
-    gap: 5px;
+    gap: 6px;
     width: 640px;
-    height: 64px;
+    height: 52px;
     justify-content: flex-start;
     align-items: center;
 
@@ -540,11 +540,26 @@
     width: 100%;
     min-height: 200px;
     padding: 20px;
+    padding-top: 16px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
-    gap: 20px;
+    gap: 16px;
+
+    .uploadImageHolder {
+      width: 100%;
+      background-color: var(--background-sheet);
+      border: 1px solid var(--devider);
+      border-radius: 12px;
+      overflow: hidden;
+
+      transition: 0.3s;
+
+      &:hover {
+        background-color: var(--background-input);
+      }
+    }
 
     .uploadButton {
       position: relative;
@@ -586,14 +601,24 @@
           -o-animation: fadeInUploadHover 0.3s ease-out;
           animation: fadeInUploadHover 0.3s ease-out;
         }
+
+        .closeBtn {
+          position: absolute;
+          top: 12px;
+          right: 12px;
+          border-radius: 99px;
+          width: 20px;
+          height: 20px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
       }
     }
 
     .noTitleImagePlaceholder {
       width: 100%;
-      height: 300px;
-      border: 1px solid var(--devider);
-      border-radius: 12px;
+      height: 260px;
 
       label {
         display: flex;
@@ -619,11 +644,12 @@
 
     .titleInput {
       textarea {
+        display: block;
         background-color: var(--background-site);
         color: var(--text-primary);
-        font-size: 44px;
-        font-weight: 700;
-        line-height: 52px;
+        font-size: 40px;
+        font-weight: 800;
+        line-height: 48px;
         border: none;
         width: 100%;
         padding: 0;
@@ -686,6 +712,7 @@
       border-radius: 16px;
       width: 100%;
       padding: 2px;
+      padding-inline: 3px;
       justify-content: flex-start;
       align-items: center;
 
@@ -716,8 +743,10 @@
         border: none;
         border-radius: 99px;
         padding: 6px;
+        padding-block: 0px;
         min-width: 100%;
         height: fit-content;
+        min-height: 24px;
         margin: 0;
 
         &:focus {
@@ -737,7 +766,7 @@
     padding-block: 12px;
     padding-inline: 20px;
     width: 100%;
-    min-height: 50dvh;
+    min-height: calc(100dvh - 64px - 510px);
     max-height: unset;
     margin: 0;
 
@@ -749,6 +778,11 @@
     font-weight: 400;
     line-height: 22px;
     background-color: var(--background-header-input);
+
+    &.topMargin {
+      margin-top: 52px;
+      min-height: calc(100dvh - 64px);
+    }
   }
 
   .editor {
@@ -757,9 +791,13 @@
     padding-inline: 20px;
 
     width: 100%;
-    min-height: 50dvh;
+    min-height: 40dvh;
     background-color: var(--background-site);
     cursor: text;
+
+    &.topMargin {
+      margin-top: 52px;
+    }
 
     [role="textbox"] {
       width: 100%;
@@ -771,6 +809,17 @@
       }
     }
 
+    code {
+      color: var(--brand-text);
+      font-family: "Fira Mono", monospace;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 28px;
+      border-radius: 12px;
+      padding: 20px;
+    }
+
     p {
       color: var(--brand-text);
       font-size: 16px;
@@ -778,6 +827,17 @@
       line-height: 28px;
       margin-top: 0;
       margin-bottom: 20px;
+
+      code {
+        color: var(--brand-text);
+        font-family: "Fira Mono", monospace;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 28px;
+        border-radius: 4px;
+        padding: 0 6px;
+      }
     }
 
     span {
@@ -842,7 +902,7 @@
     }
 
     hr {
-      border-top:1px solid var(--subtile-devider);
+      border-top: 1px solid var(--subtile-devider);
       margin-top: 10px;
       margin-bottom: 20px;
     }
@@ -945,7 +1005,7 @@
       font-weight: 400;
       line-height: 28px;
       padding-left: 12px;
-      padding-bottom: 0;
+      padding-block: 0;
       margin-top: 0;
       margin-bottom: 20px;
       border-left: 4px solid var(--text-tertiary);
@@ -989,15 +1049,6 @@
       cursor: pointer;
     }
 
-    code {
-      color: var(--brand-text);
-      font-family: "Fira Mono", monospace;
-      font-size: 16px;
-      font-style: normal;
-      font-weight: 400;
-      line-height: 28px;
-    }
-
     ins {
       color: var(--warning-bright);
     }
@@ -1011,18 +1062,38 @@
       overflow-x: auto;
       white-space: nowrap;
 
+      border-collapse: separate;
+      border: 1px solid var(--text-tertiary-2);
+      border-radius: 8px;
+
       tbody {
         display: table;
         width: 100%;
       }
 
+      tr {
+        border: none;
+      }
+
       th {
+        position: relative;
         color: var(--text-primary);
         font-size: 16px;
         font-weight: 700;
         line-height: 28px;
-        border-bottom: 1px solid var(--text-secondary);
         padding: 12px 8px;
+        border-left: 1px solid var(--text-tertiary-2);
+        border-block: none;
+        background-color: var(--devider);
+
+        color: var(--text-tertiary);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 24px;
+
+        &:first-child {
+          border-left: none;
+        }
         * {
           margin-bottom: 0;
           font-size: inherit;
@@ -1032,12 +1103,19 @@
       }
 
       td {
+        position: relative;
         color: var(--brand-text);
         font-size: 16px;
         font-weight: 400;
-        line-height: 28px;
-        border-bottom: 1px solid var(--subtile-devider);
+        line-height: 24px;
+        border-left: 1px solid var(--text-tertiary-2);
+        border-top: 1px solid var(--text-tertiary-2);
+        border-bottom: none;
         padding: 12px 8px;
+
+        &:first-child {
+          border-left: none;
+        }
         * {
           margin-bottom: 0;
           font-size: inherit;
@@ -1051,4 +1129,104 @@
 
 .hiddenEditor {
   display:none;
+}
+
+.invisibleToolbar {
+  visibility: hidden;
+}
+
+.closeIcon {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
+  mask: url(../../assets/icons/close.svg) no-repeat center;
+}
+
+.uploadingOverlay {
+  width: 100%;
+  height: 260px;
+  position: relative;
+  cursor: pointer;
+
+  color: var(--text-tertiary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 14px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .closeBtn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background-color: black;
+    border-radius: 99px;
+  }
+}
+
+.uploadProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+
+  .progressLabelContainer {
+    display: flex;
+    justify-content: space-between;
+  }
+  .progressLabel,
+  .progressValue {
+    color: var(--text-tertiary-2);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+  }
+
+  .progressTrackContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .iconClose {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: var(--text-secondary);
+      -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
+      mask: url(../../assets/icons/close.svg) no-repeat center;
+    }
+
+    .iconCheck {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: var(--success-bright);
+      -webkit-mask: url(../../assets/icons/check.svg) no-repeat center;
+      mask: url(../../assets/icons/check.svg) no-repeat center;
+    }
+  }
+  .progressTrack {
+    width: 100%;
+    height: 2px;
+    background-color: var(--background-input);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .progressFill {
+    background-color: var(--accent);
+    height: 2px;
+    border-radius: 1px;
+    width: var(--kb-progress-fill-width);
+    transition: width 250ms linear;
+  }
+  /* .progressFill[data-progress="complete"] {
+    background-color: var(--success-bright);
+  } */
 }

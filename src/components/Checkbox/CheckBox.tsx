@@ -4,7 +4,7 @@ import { hookForDev } from '../../lib/devTools';
 
 import styles from './Checkbox.module.scss';
 
-const Checkbox2: Component<{
+const CheckBox: Component<{
   id?: string,
   onChange: (checked: boolean) => void,
   checked?: boolean,
@@ -27,6 +27,9 @@ const Checkbox2: Component<{
         </Checkbox.Indicator>
       </Checkbox.Control>
       <Checkbox.Label class={styles.label}>
+        <Show when={props.icon}>
+          <img class={styles.icon} src={props.icon} />
+        </Show>
         <Switch>
           <Match when={props.children}>
             {props.children}
@@ -41,4 +44,4 @@ const Checkbox2: Component<{
 
 }
 
-export default hookForDev(Checkbox2);
+export default hookForDev(CheckBox);

@@ -7,7 +7,7 @@ import styles from './NavLink.module.scss';
 const NavLink: Component<{
   id?: string,
   to: string,
-  label: string,
+  label?: string,
   icon: string,
   bubble?: () => number,
   hiddenOnSmallScreens?: boolean,
@@ -45,7 +45,9 @@ const NavLink: Component<{
           onClick={scrollIfInactive}
         >
           <div class={styles[props.icon]}></div>
-          <div class={styles.label}>{props.label}</div>
+          <Show when={props.label}>
+            <div class={styles.label}>{props.label}</div>
+          </Show>
         </A>
         <Show when={props.bubble && props.bubble() > 0}>
           <div class={`${styles.bubble} ${bubbleClass()}`}>

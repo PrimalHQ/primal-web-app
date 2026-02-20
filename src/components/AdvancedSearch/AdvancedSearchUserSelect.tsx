@@ -115,12 +115,12 @@ const AdvancedSearchUserSelect: Component<{
       <div class={styles.userList}>
         <For each={props.userList}>
           {user => (
-            <button class={styles.userPill} onClick={() => props.onRemoveUser(user)} >
+            <div class={styles.userPill} onClick={() => props.onRemoveUser(user)} >
               <Avatar size="xs" user={user} />
               <div class={styles.remove}>
                 <div class={styles.excludeIcon}></div>
               </div>
-            </button>
+            </div>
           )}
         </For>
       </div>

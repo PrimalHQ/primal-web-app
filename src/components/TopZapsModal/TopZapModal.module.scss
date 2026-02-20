@@ -1,0 +1,230 @@
+.hidden {
+  display: none;
+}
+
+.liveTopZaps {
+  width: 600px;
+  color: var(--text-secondary);
+  background-color: var(--background-input);
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .zapStats {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+
+    .totalZaps {
+      color: var(--text-secondary);
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 20px;
+
+      span {
+        color: var(--text-primary);
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 20px;
+      }
+    }
+
+    .totalSats {
+      display: flex;
+      gap: 2px;
+      color: var(--text-secondary);
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 20px;
+
+      .satsNumber {
+        color: var(--text-primary);
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 18px;
+      }
+
+      .zapIcon {
+        width: 11px;
+        height: 16px;
+        background-color: var(--text-primary);
+      }
+    }
+  }
+
+  .zapList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 535px;
+    overflow-y: scroll;
+  }
+
+  .topZapsTitle {
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 18px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .feedConfirmationDescription {
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+    margin-bottom: 20px;
+  }
+
+  .topZapFooter {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+}
+
+.zapIcon {
+  width: 10px;
+  height: 14px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 0/10px 14px;
+  mask: url(../../assets/icons/feed_zap_fill_2.svg) no-repeat 0 0/10px 14px;
+}
+
+
+.liveMessage {
+  display: flex;
+  gap: 8px;
+  padding-left: 9px;
+
+  .leftSide {
+    width: 24px;
+  }
+
+  .rightSide {
+    line-height: 20px;
+    overflow: hidden;
+    .authorName {
+      color: var(--text-primary);
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 16px;
+      width: fit-content;
+      margin-right: 4px;
+      /* display: flex; */
+      gap: 4px;
+
+      >span {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 160px;
+
+        &.zapped {
+          color: var(--brand-text);
+          font-size: 16px;
+          font-weight: 400;
+          line-height: 16px;
+        }
+
+        &.zapStats {
+          color: var(--text-primary);
+          font-size: 16px;
+          font-weight: 700;
+          line-height: 16px;
+        }
+      }
+
+    }
+  }
+
+  .messageContent {
+    color: var(--text-secondary);
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 20px;
+    overflow-wrap: anywhere;
+  }
+
+  &.zapMessage {
+    width: 100%;
+    padding-block: 8px;
+    padding-inline: 8px;
+    border-radius: 8px;
+    border: 1px solid #E47C00;
+    background: rgba(228, 124, 0, 0.20);
+
+    .rightSide {
+      width: 100%;
+      line-height: 20px;
+
+      .zapInfo {
+        display: flex;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+      }
+
+      .authorName {
+        color: var(--active-zap);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 20px;
+        width: fit-content;
+        display: flex;
+        gap: 4px;
+
+        >span {
+          display: -webkit-box;
+          -webkit-box-orient: vertical;
+          -webkit-line-clamp: 1;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          max-width: 160px;
+
+          &.zapped {
+            color: var(--active-zap);
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 20px;
+          }
+        }
+      }
+
+      .zapStats {
+        display: flex;
+        height: 24px;
+        padding-inline: 8px;
+        align-items: center;
+        gap: 2px;
+        width: fit-content;
+        border-radius: 24px;
+        background: var(--active-zap);
+
+        color: var(--background-site);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 16px;
+
+        .zapIcon {
+          background-color: var(--background-site);
+        }
+      }
+    }
+
+    .messageContent {
+      color: var(--text-primary);
+    }
+  }
+
+}

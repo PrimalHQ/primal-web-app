@@ -13,13 +13,14 @@ import styles from './Premium.module.scss';
 const PremiumSidebarInactve: Component<{
   altCaption?: string,
   onOpenFAQ?: () => void,
+  pro?: boolean,
 }> = (props) => {
 
   return (
 
     <div class={styles.premiumSidebar}>
     <div class={styles.premiumSidebarTitle}>
-      {props.altCaption || 'Why Get Primal Premium?'}
+      {props.altCaption || 'Why Get Primal Premium/Pro?'}
     </div>
 
     <div class={styles.premiumSidebarDescription}>
@@ -28,7 +29,7 @@ const PremiumSidebarInactve: Component<{
       </p>
 
       <p>
-        At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium, you are enabling us to continue building for Nostr.
+        At Primal, we don’t rely on advertising. We don’t monetize user data. Our users are our customers. Our sole focus is to make the best possible product for our users. We open source all our work to help the Nostr ecosystem flourish. By signing up for Primal Premium or Pro tier, you are enabling us to continue building for Nostr.
       </p>
 
       <p>
@@ -37,7 +38,7 @@ const PremiumSidebarInactve: Component<{
 
       <p>
         Have a question?&nbsp;
-        <ButtonLink onClick={props.onOpenFAQ}>Check out our FAQ.</ButtonLink>
+        <ButtonLink pro={props.pro} onClick={props.onOpenFAQ}>Check out our FAQ.</ButtonLink>
       </p>
     </div>
   </div>

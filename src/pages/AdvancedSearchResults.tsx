@@ -9,35 +9,33 @@ import { useAdvancedSearchContext } from '../contexts/AdvancedSearchContext';
 import { Kind } from '../constants';
 import ArticlePreview from '../components/ArticlePreview/ArticlePreview';
 import Paginator from '../components/Paginator/Paginator';
-import { TextField } from '@kobalte/core/text-field';
 import ButtonLink from '../components/Buttons/ButtonLink';
 import SaveFeedDialog from '../components/SaveFeedDialog/SaveFeedDialog';
 import { setAdvSearchState } from './AdvancedSearch';
 import AdvancedSearchCommadTextField from '../components/AdvancedSearch/AdvancedSearchCommadTextField';
-import { useAccountContext } from '../contexts/AccountContext';
 import { isPhone } from '../utils';
+import { accountStore } from '../stores/accountStore';
 
 
 const AdvancedSearchResults: Component = () => {
   const params = useParams()
   const search = useAdvancedSearchContext();
   const navigate = useNavigate();
-  const account = useAccountContext();
 
   const [openAddFeedDialog, setAddFeedDialog] = createSignal<boolean>(false);
   const [allowCommandChange, setAllowCommandChange] = createSignal(false);
   const [queryString, setQueryString] = createSignal('');
 
-  const isPremium = () => ['premium', 'premium-legend'].includes(account?.membershipStatus.tier || '');
+  const isPremium = () => ['premium', 'premium-legend'].includes(accountStore.membershipStatus.tier || '');
 
   createEffect(on(() => params.query, (v, p) => {
     if (!v || v === p) return;
 
     let q = decodeURIComponent(params.query);
 
-    if (!q.includes(' pas:1')) {
-      q += ' pas:1';
-    }
+    // if (!q.includes(' pas:1')) {
+    //   q += ' pas:1';
+    // }
 
     setQueryString(() => q);
     search?.actions.clearSearch();
@@ -110,12 +108,24 @@ const AdvancedSearchResults: Component = () => {
         <Switch>
           <Match when={[Kind.LongForm, Kind.LongFormShell].includes(kind())}>
             <For each={search?.reads} >
-              {article => <ArticlePreview article={article} onClick={navigate} />}
+              {article => <ArticlePreview
+                article={article}
+                onClick={navigate}
+                onRemove={(id: string) => {
+                  search?.actions.removeEvent(id, 'reads');
+                }}
+              />}
             </For>
           </Match>
           <Match when={[Kind.Text].includes(kind())}>
             <For each={search?.notes} >
-              {note => <Note note={note} shorten={true} />}
+              {note => <Note
+                note={note}
+                shorten={true}
+                onRemove={(id: string) => {
+                  search?.actions.removeEvent(id, 'notes');
+                }}
+              />}
             </For>
           </Match>
           <Match when={!search?.isFetchingContent && (search?.notes.length === 0 || search?.reads.length === 0)}>

@@ -61,9 +61,9 @@ const ReadsEditorTableSelector: Component<{
           </div>
           <Popover.Description class={styles.tableSelectContent}>
             <For each={matrix.cols}>
-              { col =>
+              { row =>
                 <For each={matrix.rows}>
-                  { row =>
+                  { col =>
                     <div
                       class={styles.tableMatrixItem}
                       data-row={`${row}`}

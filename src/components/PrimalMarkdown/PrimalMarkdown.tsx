@@ -11,12 +11,19 @@ import {
 } from '@milkdown/preset-gfm';
 
 import { callCommand } from '@milkdown/utils';
-import { history, undoCommand, redoCommand } from '@milkdown/plugin-history';
+import { redoCommand } from '@milkdown/plugin-history';
 import  styles from './PrimalMarkdown.module.scss';
 import ButtonGhost from '../Buttons/ButtonGhost';
 import { hexToNpub, noteIdToHex, npubToHex } from '../../lib/keys';
-import { useAccountContext } from '../../contexts/AccountContext';
-import { eventRegexG, eventRegexLocal, eventRegexNostrless, Kind, mdImageRegex, profileRegex, profileRegexG, specialCharsRegex } from '../../constants';
+import {
+  eventRegexLocal,
+  eventRegexNostrless,
+  Kind,
+  mdImageRegex,
+  profileRegex,
+  profileRegexG,
+  specialCharsRegex,
+} from '../../constants';
 import { NostrRelaySignedEvent, PrimalArticle } from '../../types/primal';
 import { userName } from '../../stores/profile';
 import { A, useNavigate } from '@solidjs/router';
@@ -34,6 +41,7 @@ import { useMediaContext } from '../../contexts/MediaContext';
 import { useAppContext } from '../../contexts/AppContext';
 import { isAndroid } from '@kobalte/utils';
 import { logError } from '../../lib/logger';
+import LiveEventPreview from '../LiveVideo/LiveEventPreview';
 
 export type Coord = {
   x: number;
@@ -87,7 +95,6 @@ const PrimalMarkdown: Component<{
   onHighlightReply?: (id: string) => void,
   onHighlightDeselected?: () => void,
 }> = (props) => {
-  const account = useAccountContext();
   const toast = useToastContext();
   const navigate = useNavigate();
   const media = useMediaContext();
@@ -230,7 +237,6 @@ const PrimalMarkdown: Component<{
 
   const [html, setHTML] = createSignal<string>();
 
-
   const regexIndexOf = (text: string, regex: RegExp, startpos: number) => {
     var indexOf = text.substring(startpos || 0).search(regex);
     return (indexOf >= 0) ? (indexOf + (startpos || 0)) : indexOf;
@@ -307,6 +313,11 @@ const PrimalMarkdown: Component<{
         continue;
       }
 
+      if (token.value.startsWith('[![')) {
+        tokens.push({ ...token });
+        continue;
+      }
+
       const parsedTokens = tokenizeByRegex(token.value, regex, type, token.index);
 
       tokens.push(...parsedTokens);
@@ -337,7 +348,13 @@ const PrimalMarkdown: Component<{
     if (token.type === 'md') {
       const orig = convertHtmlEntityToAngleBrackets(token.value);
 
-      const prepped = orig.replace(profileRegexG, (r: string) => {
+      const linkRegex = /\[([^\]]+)\]\(nostr:((npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\)/g;
+
+      let prepped = orig.replace(linkRegex, '[@$1]($2)')
+
+      const nonLinkRegex = /(?<!\]\()((nostr:)?(npub|nprofile)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)\b/g;
+
+      prepped = prepped.replace(nonLinkRegex, (r: string) => {
 
         let npub = r;
         let end = '';
@@ -445,10 +462,24 @@ const PrimalMarkdown: Component<{
 
       if (noteId.startsWith('naddr')) {
 
-        const mention = props.article?.mentionedArticles && props.article.mentionedArticles[noteId];
+        let mention = props.article?.mentionedArticles && props.article.mentionedArticles[noteId];
 
         if (!mention) {
-          return <>nostr:{noteId}</>;
+
+          let mention = props.article?.mentionedLiveEvents && props.article.mentionedLiveEvents[noteId];
+
+          if (!mention) {
+            return <>nostr:{noteId}</>;
+          }
+
+
+          return (
+            <div class={styles.articlePreview}>
+              <LiveEventPreview
+                stream={mention}
+              />
+            </div>
+          );
         };
 
         return (
@@ -457,6 +488,7 @@ const PrimalMarkdown: Component<{
               article={mention}
               bordered={true}
               hideFooter={true}
+              hideContext={true}
               onClick={navigate}
             />
           </div>
@@ -487,6 +519,7 @@ const PrimalMarkdown: Component<{
         <NoteImage
           class={`noteimage image_${props.noteId}`}
           src={src}
+          altSrc={token.value}
           media={mediaImage}
           mediaThumb={mediaThumb}
           width={isIOS() || isAndroid() ? window.innerWidth : 640}
@@ -514,6 +547,14 @@ const PrimalMarkdown: Component<{
 
   const onMouseClick= (e: MouseEvent) => {
     const el = e.target as HTMLElement;
+
+    const parent = el.parentElement;
+
+    if (el.tagName === 'IMG' && parent && parent.tagName === 'A' && !parent.classList.contains('noteimage')) {
+      e.preventDefault();
+      window.open(parent.getAttribute('href') || '', '_blank')
+      return false;
+    }
 
     if (el.tagName === 'A') {
       const href = el.getAttribute('href') || '';
@@ -594,7 +635,6 @@ const PrimalMarkdown: Component<{
 
         return false;
       }
-
 
       return true;
     }

@@ -1,12 +1,11 @@
 import { Component, createEffect, createSignal, For, Show } from 'solid-js';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { FeedType } from '../../contexts/SettingsContext';
 import { hookForDev } from '../../lib/devTools';
 import { PrimalArticleFeed } from '../../types/primal';
-import Checkbox from '../Checkbox/Checkbox';
-import CheckBox2 from '../Checkbox/CheckBox2';
+import CheckBox2 from '../Checkbox/CheckBox';
 
 import styles from './FeedSorter.module.scss';
+import { hasPublicKey } from '../../stores/accountStore';
 
 const lockedFeeds = ['primal'];
 
@@ -26,7 +25,6 @@ const FeedSorter: Component<{
 }> = (props) => {
 
   let sorter: any;
-  const account = useAccountContext();
 
   const [editMode, setEditMode] = createSignal('');
 
@@ -140,7 +138,7 @@ const FeedSorter: Component<{
                       <div class={styles.feedName}>{feed.name}</div>
                       <div class={styles.feedDescription}>{feed.description}</div>
                     </div>
-                    <Show when={account?.hasPublicKey()}>
+                    <Show when={hasPublicKey()}>
                       <div class={styles.controls}>
                         <div class={styles.manageControls}>
                           <Show when={isLockedFeed(feed)}>

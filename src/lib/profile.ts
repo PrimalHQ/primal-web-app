@@ -1,10 +1,8 @@
-import { Relay, nip05, nip19 } from "../lib/nTools";
-import { unwrap } from "solid-js/store";
-import { Kind, minKnownProfiles } from "../constants";
+import { nip05, nip19 } from "../lib/nTools";
+import { Kind, minKnownProfiles, settingsApp, settingsDescription } from "../constants";
 import { sendMessage } from "../sockets";
 import { userName } from "../stores/profile";
-import { Filterlist, NostrRelays, NostrWindow, PrimalUser, VanityProfiles } from "../types/primal";
-import { getStorage } from "./localStore";
+import { Filterlist, NostrRelays, PrimalUser, VanityProfiles } from "../types/primal";
 import { logError } from "./logger";
 import { signEvent } from "./nostrAPI";
 import { sendEvent } from "./notes";
@@ -172,60 +170,6 @@ export const trimVerification = (address: string | undefined) => {
   return address.split('@');
 }
 
-export const getLikes = (pubkey: string | undefined, relays: Relay[], callback: (likes: string[]) => void) => {
-  if (!pubkey) {
-    return;
-  }
-
-  const win = window as NostrWindow;
-  const nostr = win.nostr;
-  const storage = getStorage(pubkey);
-
-  let likes = new Set<string>(storage.likes);
-
-  if (!nostr) {
-    callback(storage.likes);
-    return;
-  }
-
-  // Request Reactions from all relays
-  try {
-    // const signedNote = await nostr.signEvent(event);
-
-    relays.forEach(relay => {
-
-      // if (!relay.subscribe) return;
-
-
-      const sub = relay.subscribe(
-        [
-          {
-            kinds: [Kind.Reaction],
-            authors: [pubkey],
-          },
-        ],
-        {
-          onevent(event: any) {
-            const e = event.tags.find((t: string[]) => t[0] === 'e');
-
-            e && e[1] && likes.add(e[1]);
-          },
-          oneose() {
-            const likeArray = Array.from(likes);
-
-            callback(likeArray);
-
-            sub.close();
-          },
-        },
-      );
-    });
-
-  } catch (e) {
-    logError('Failed sending note: ', e);
-  }
-};
-
 export const fetchKnownProfiles: (vanityName: string) => Promise<VanityProfiles> = async (vanityName: string) => {
   try {
     const name = vanityName.toLowerCase();
@@ -249,16 +193,16 @@ export const isVerifiedByPrimal = async (user: PrimalUser | undefined) => {
   return isVerified && nip05 && nip05.endsWith && nip05.endsWith('primal.net');
 }
 
-export const checkVerification: (user: PrimalUser | undefined) => Promise<boolean> = (user: PrimalUser | undefined) => {
+export const checkVerification: (user: PrimalUser | undefined) => Promise<boolean> = async (user: PrimalUser | undefined) => {
   const nip05 = user?.nip05;
 
   if (!user || !nip05) {
-    return new Promise((resolve) => false)
+    return false;
   }
 
-  return isAccountVerified(nip05).then(profile => {
-    return profile && profile.pubkey === user?.pubkey
-  });
+  const profile = await isAccountVerified(nip05);
+
+  return profile ? profile.pubkey === user?.pubkey : false;
 }
 
 export const isAccountVerified: (domain: string | undefined) => Promise<nip19.ProfilePointer | null> = async (domain: string | undefined) => {
@@ -276,7 +220,7 @@ export const isAccountVerified: (domain: string | undefined) => Promise<nip19.Pr
 };
 
 
-export const sendProfile = async (metaData: any, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendProfile = async (metaData: any) => {
   const event = {
     content: JSON.stringify(metaData),
     kind: Kind.Metadata,
@@ -284,10 +228,10 @@ export const sendProfile = async (metaData: any, shouldProxy: boolean, relays: R
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays, relaySettings, shouldProxy);
+  return await sendEvent(event);
 };
 
-export const reportUser = async (pubkey: string, subid: string, user?: PrimalUser) => {
+export const reportUser = async (pubkey: string | undefined, subid: string, user?: PrimalUser) => {
   if (!pubkey) {
     return false;
   }
@@ -295,7 +239,7 @@ export const reportUser = async (pubkey: string, subid: string, user?: PrimalUse
   const event = {
     content: `{ "description": "report user '${userName(user)}'"}`,
     kind: Kind.Settings,
-    tags: [["d", "Primal-Web App"]],
+    tags: [["d", settingsApp, settingsDescription.reportUser]],
     created_at: Math.ceil((new Date()).getTime() / 1000),
   };
 
@@ -327,7 +271,7 @@ export const getFilterlists = (pubkey: string | undefined, subid: string, extend
   ]));
 };
 
-export const sendFilterlists = async (filterLists: Filterlist[], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendFilterlists = async (filterLists: Filterlist[], date: number, content: string) => {
   const tags = filterLists.reduce((acc, fl) => {
     let s = [];
     if (fl.content) s.push('content');
@@ -348,7 +292,7 @@ export const sendFilterlists = async (filterLists: Filterlist[], date: number, c
     created_at: date,
   };
 
-  return await sendEvent(event, relays, relaySettings, shouldProxy);
+  return await sendEvent(event);
 };
 
 export const getAllowlist = (pubkey: string | undefined, subid: string, extended?: boolean) => {
@@ -363,7 +307,7 @@ export const getAllowlist = (pubkey: string | undefined, subid: string, extended
   ]));
 };
 
-export const sendAllowList = async (allowlist: string[], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendAllowList = async (allowlist: string[], date: number, content: string) => {
   const tags = allowlist.reduce((acc, pk) => {
     return [...acc, ['p', pk]];
   }, [['d', 'allowlist']]);
@@ -375,7 +319,7 @@ export const sendAllowList = async (allowlist: string[], date: number, content: 
     created_at: date,
   };
 
-  return await sendEvent(event, relays, relaySettings, shouldProxy);
+  return await sendEvent(event);
 };
 
 export const getSuggestions = async (subid: string) => {
@@ -399,7 +343,7 @@ export const getRelays = async (pubkey: string | undefined, subid: string) => {
 };
 
 
-export const sendRelays = async (relays: Relay[], relaySettings: NostrRelays, shouldProxy: boolean) => {
+export const sendRelays = async (relaySettings: NostrRelays) => {
   const tags = Object.entries(relaySettings).reduce<string[][]>((acc, [url, config]) => {
     if (config.read && config.write) {
       return [ ...acc, ['r', url]];
@@ -421,10 +365,12 @@ export const sendRelays = async (relays: Relay[], relaySettings: NostrRelays, sh
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event, relays, relaySettings, shouldProxy);
+  const result = await sendEvent(event);
+
+  return result;
 };
 
-export const sendBookmarks = async (tags: string[][], date: number, content: string, shouldProxy: boolean, relays: Relay[], relaySettings?: NostrRelays) => {
+export const sendBookmarks = async (tags: string[][], date: number, content: string) => {
   const event = {
     content,
     kind: Kind.Bookmarks,
@@ -432,7 +378,7 @@ export const sendBookmarks = async (tags: string[][], date: number, content: str
     created_at: date,
   };
 
-  return await sendEvent(event, relays, relaySettings, shouldProxy);
+  return await sendEvent(event);
 };
 
 export const getBookmarks = async (pubkey: string | undefined, subid: string) => {

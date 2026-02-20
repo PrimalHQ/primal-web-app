@@ -213,7 +213,7 @@ const Search: Component<{
         <For each={search?.users}>
           {(user) => (
             <SearchOption
-              href={props.noLinks ? undefined : app?.actions.profileLink(user.npub) || ''}
+              href={props.noLinks ? undefined : app?.actions.profileLink(user?.npub) || ''}
               title={userName(user)}
               description={nip05Verification(user)}
               icon={<Avatar user={user} size="vvs" />}

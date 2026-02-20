@@ -1,9 +1,8 @@
-import { Component, createEffect, createSignal, on, onCleanup, onMount, Show } from 'solid-js';
+import { Component, createEffect, createSignal, on, Show } from 'solid-js';
 
 import styles from './Layout.module.scss';
 
-import { useBeforeLeave, useLocation, useParams} from '@solidjs/router';
-import { useAccountContext } from '../../contexts/AccountContext';
+import { useLocation, useParams} from '@solidjs/router';
 import zapMD from '../../assets/lottie/zap_md.json';
 import { useHomeContext } from '../../contexts/HomeContext';
 import { SendNoteResult } from '../../types/primal';
@@ -27,12 +26,20 @@ import { useIntl } from '@cookbook/solid-intl';
 import LayoutPhone from './LayoutPhone';
 import LayoutDesktop from './LayoutDesktop';
 import { isPhone } from '../../utils';
+import ArticleOverviewContextMenu from '../Note/ArticleOverviewContextMenu';
+import ArticleDraftContextMenu from '../Note/ArticleDraftContextMenu';
+import LiveStreamContextMenu from '../Note/LiveStreamContextMenu';
+import ProfileQrCodeModal from '../ProfileQrCodeModal/ProfileQrCodeModal';
+import ReportContentModal from '../ReportContentModal/ReportContentModal';
+import NoteVideoContextMenu from '../Note/NoteVideoContextMenu';
+import { accountStore, checkNostrKey, doAfterLogin, loginUsingLocalNsec, logout, resolveContacts, setFlag, setFollowData, setSec, setString } from '../../stores/accountStore';
+import { storeSec } from '../../lib/localStore';
+import GetStartedModal from '../LoginModal/GetStartedModal';
 
 export const [isHome, setIsHome] = createSignal(false);
 
 const Layout: Component<any> = (props) => {
 
-  const account = useAccountContext();
   const home = useHomeContext();
   const profile = useProfileContext();
   const location = useLocation();
@@ -44,6 +51,8 @@ const Layout: Component<any> = (props) => {
   createEffect(on(() => location.pathname, (path, prev) => {
     if (path !== prev) {
       app?.actions.closeContextMenu();
+      app?.actions.closeArticleOverviewContextMenu();
+      app?.actions.closeArticleDraftContextMenu();
     }
   }));
 
@@ -51,7 +60,7 @@ const Layout: Component<any> = (props) => {
     const newNote = document.getElementById('new_note_input');
     const newNoteTextArea = document.getElementById('new_note_text_area') as HTMLTextAreaElement;
 
-    if (account?.showNewNoteForm) {
+    if (accountStore.showNewNoteForm) {
       if (!newNote || !newNoteTextArea) {
         return;
       }
@@ -79,7 +88,7 @@ const Layout: Component<any> = (props) => {
     if (['p', 'profile'].includes(path[1]) && profile) {
       const pubkey = params.npub;
       // check for new notes on the profile feed
-      profile.actions.checkForNewNotes(pubkey || account?.publicKey);
+      profile.actions.checkForNewNotes(pubkey || accountStore.publicKey);
       return;
     }
   }
@@ -90,11 +99,11 @@ const Layout: Component<any> = (props) => {
     }
   });
 
-  createEffect(() => {
-    if (!account?.publicKey) {
-      account?.actions.checkNostrKey();
-    }
-  });
+  // createEffect(() => {
+  //   if (!accountStore.publicKey) {
+  //     checkNostrKey();
+  //   }
+  // });
 
   return (
     <Show
@@ -142,6 +151,8 @@ const Layout: Component<any> = (props) => {
           note={app?.customZap?.note}
           profile={app?.customZap?.profile}
           dvm={app?.customZap?.dvm}
+          stream={app?.customZap?.stream}
+          streamAuthor={app?.customZap?.streamAuthor}
           onConfirm={app?.customZap?.onConfirm}
           onSuccess={app?.customZap?.onSuccess}
           onFail={app?.customZap?.onFail}
@@ -164,6 +175,7 @@ const Layout: Component<any> = (props) => {
 
         <ConfirmModal
           open={app?.showConfirmModal}
+          setOpen={app?.actions.closeConfirmModal}
           title={app?.confirmInfo?.title}
           description={app?.confirmInfo?.description}
           confirmLabel={app?.confirmInfo?.confirmLabel}
@@ -179,42 +191,59 @@ const Layout: Component<any> = (props) => {
         />
 
         <EnterPinModal
-          open={(account?.showPin || '').length > 0}
-          valueToDecrypt={account?.showPin}
+          open={(accountStore.showPin || '').length > 0}
+          valueToDecrypt={accountStore.showPin}
           onSuccess={(sec: string) => {
-            account?.actions.setSec(sec, true);
-            account?.actions.setString('showPin', '');
+            setSec(sec, true);
+            accountStore.publicKey && doAfterLogin(accountStore.publicKey);
+            setString('showPin', '');
           }}
-          onAbort={() => account?.actions.setString('showPin', '')}
+          onAbort={() => setString('showPin', '')}
           onForgot={() => {
-            account?.actions.setString('showPin', '');
-            account?.actions.setFlag('showForgot', true);
+            setString('showPin', '');
+            setFlag('showForgot', true);
           }}
         />
         <CreateAccountModal
-          open={account?.showGettingStarted}
-          onAbort={() => account?.actions.setFlag('showGettingStarted', false)}
-          onLogin={() => {
-            account?.actions.setFlag('showGettingStarted', false);
-            account?.actions.setFlag('showLogin', true);
+          open={accountStore.showCreateAccount}
+          onAbort={() => setFlag('showCreateAccount', false)}
+        />
+        <GetStartedModal
+          open={accountStore.showGettingStarted}
+          onAbort={() => {
+            setFlag('showGettingStarted', false);
+            if (accountStore.loginType !== 'nip46') {
+              localStorage.removeItem('bunkerUrl');
+              localStorage.removeItem('clientConnectionUrl');
+              localStorage.removeItem('appNsec');
+              localStorage.removeItem('appPubkey');
+            }
           }}
         />
         <LoginModal
-          open={account?.showLogin}
-          onAbort={() => account?.actions.setFlag('showLogin', false)}
+          open={accountStore.showLogin}
+          onAbort={() => {
+            setFlag('showLogin', false);
+            if (accountStore.loginType !== 'nip46') {
+              localStorage.removeItem('bunkerUrl');
+              localStorage.removeItem('clientConnectionUrl');
+              localStorage.removeItem('appNsec');
+              localStorage.removeItem('appPubkey');
+            }
+          }}
         />
         <ConfirmModal
-          open={account?.followData.openDialog}
+          open={accountStore.followData.openDialog}
           title={intl.formatMessage(followWarning.title)}
           description={intl.formatMessage(followWarning.description)}
           confirmLabel={intl.formatMessage(followWarning.confirm)}
           abortLabel={intl.formatMessage(followWarning.abort)}
           onConfirm={async () => {
-            if (account?.publicKey) {
-              const data = unwrap(account?.followData)
-              await account.actions.resolveContacts(account?.publicKey, data.following, data.date, data.tags, data.relayInfo);
+            if (accountStore.publicKey) {
+              const data = unwrap(accountStore.followData)
+              await resolveContacts(accountStore.publicKey, data.following, data.date, data.tags, data.relayInfo);
             }
-            account?.actions.setFollowData({
+            setFollowData({
               tags: [],
               date: 0,
               relayInfo: '',
@@ -223,7 +252,7 @@ const Layout: Component<any> = (props) => {
             });
           }}
           onAbort={() => {
-            account?.actions.setFollowData({
+            setFollowData({
               tags: [],
               date: 0,
               relayInfo: '',
@@ -233,23 +262,59 @@ const Layout: Component<any> = (props) => {
           }}
         />
         <ConfirmModal
-          open={account?.showForgot}
+          open={accountStore.showForgot}
           title={intl.formatMessage(forgotPin.title)}
           description={intl.formatMessage(forgotPin.description)}
           confirmLabel={intl.formatMessage(forgotPin.confirm)}
           abortLabel={intl.formatMessage(forgotPin.abort)}
           onConfirm={async () => {
-            account?.actions.logout();
-            account?.actions.setFlag('showForgot', false);
+            logout();
+            setFlag('showForgot', false);
           }}
           onAbort={() => {
-            account?.actions.setFlag('showForgot', false);
+            setFlag('showForgot', false);
           }}
         />
+
         <NoteContextMenu
           open={app?.showNoteContextMenu}
           onClose={app?.actions.closeContextMenu}
           data={app?.noteContextMenuInfo}
+        />
+
+        <LiveStreamContextMenu
+          open={app?.showStreamContextMenu}
+          onClose={app?.actions.closeStreamContextMenu}
+          data={app?.streamContextMenuInfo}
+        />
+
+        <NoteVideoContextMenu
+          open={app?.showNoteVideoContextMenu}
+          onClose={app?.actions.closeNoteVideoContextMenu}
+          data={app?.noteVideoContextMenuInfo}
+        />
+
+        <ArticleOverviewContextMenu
+          open={app?.showArticleOverviewContextMenu}
+          onClose={app?.actions.closeArticleOverviewContextMenu}
+          data={app?.articleOverviewContextMenuInfo}
+        />
+
+        <ArticleDraftContextMenu
+          open={app?.showArticleDraftContextMenu}
+          onClose={app?.actions.closeArticleDraftContextMenu}
+          data={app?.articleDraftContextMenuInfo}
+        />
+
+        <ProfileQrCodeModal
+          open={app?.showProfileQr !== undefined}
+          onClose={app?.actions.closeProfileQr}
+          profile={app?.showProfileQr}
+        />
+
+        <ReportContentModal
+          note={app?.reportContent}
+          onClose={() => app?.actions.closeReportContent()}
         />
       </>
     </Show>

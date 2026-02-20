@@ -1,5 +1,5 @@
 import { useIntl } from '@cookbook/solid-intl';
-import { Component, createEffect, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { Component, createEffect, createSignal, Match, on, onCleanup, onMount, Show, Switch } from 'solid-js';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import Wormhole from '../../components/Wormhole/Wormhole';
@@ -16,7 +16,6 @@ import { APP_ID } from '../../App';
 import { changePremiumName, getPremiumQRCode, getPremiumStatus, startListeningForPremiumPurchase, stopListeningForPremiumPurchase, isPremiumNameAvailable, fetchExchangeRate, stopListeningForLegendPurchase, startListeningForLegendPurchase, getLegendQRCode, getOrderListHistory, LegendCustomizationConfig, setLegendCutumization } from '../../lib/premium';
 import ButtonPremium from '../../components/Buttons/ButtonPremium';
 import PremiumSummary from './PremiumSummary';
-import { useAccountContext } from '../../contexts/AccountContext';
 import PremiumSubscriptionOptions, { PremiumOption } from './PremiumSubscriptionOptions';
 import PremiumProfile from './PremiumProfile';
 import PremiumSubscribeModal from './PremiumSubscribeModal';
@@ -41,8 +40,6 @@ import PremiumSidebarActive from './PremiumSidebarActive';
 import PremiumRenameDialog from './PremiumRenameDialog';
 import PremiumRenewModal from './PremiumRenewModal';
 import PremiumSupport from './PremiumSupport';
-import PremiumLegend from './PremiumLegend';
-import PremiumBecomeLegend from './PremiumBecomeLegend';
 import { Kind } from '../../constants';
 import PremiumLegendModal from './PremiumLegendModal';
 import PremiumRelay from './PremiumRelay';
@@ -53,11 +50,15 @@ import PremiumCustomLegend from './PremiumCustomLegend';
 import PremiumOrderHistoryModal from './PremiumOrderHistoryModal';
 import { emptyPaging, PaginationInfo } from '../../megaFeeds';
 import { useToastContext } from '../../components/Toaster/Toaster';
-import { triggerImportEvents } from '../../lib/notes';
 import { useAppContext } from '../../contexts/AppContext';
 import { isPhone } from '../../utils';
 import PremiumManageModal from './PremiumManageModal';
 import PremiumLegendLeaderBoard from './PremiumLegendLeaderboard';
+import PremiumStripeModal from './PremiumStripeModal';
+import PrimalProInfoDialog from './PrimalProInfoDialog';
+import {loadStripe, Stripe} from '@stripe/stripe-js';
+import PremiumFailModal from './PremiumFailModal';
+import { accountStore, clearPremiumRemider, hasPublicKey, showGetStarted, updateAccountProfile } from '../../stores/accountStore';
 
 export const satsInBTC = 100_000_000;
 
@@ -88,12 +89,14 @@ export type PremiumStore = {
   selectedSubOption: PremiumOption,
   openSubscribe: boolean,
   openSuccess: boolean,
+  openFail: boolean,
   successMessage: string,
   openAssignPubkey: boolean,
   openPromoCode: boolean,
   openRename: boolean,
   openRenew: boolean,
   openManage: boolean,
+  openStripe: boolean,
   openOrderHistory: boolean,
   openFeatures: 'features' | 'faq' | undefined,
   openLegend: boolean,
@@ -109,6 +112,9 @@ export type PremiumStore = {
   legendSupscription: PrimalPremiumSubscription,
   orderHistory: OrderHistoryItem[],
   pagingOrderHistory: PaginationInfo,
+  productGroup: string,
+  paymentMethod: string,
+  openPremiumProInfo: boolean,
 }
 
 export type PremiumStatus = {
@@ -130,13 +136,31 @@ export type PremiumStatus = {
 };
 
 const availablePremiumOptions: PremiumOption[] = [
-  { id: '3-months-premium', price: 'm7', duration: 'm3' },
-  { id: '12-months-premium', price: 'm6', duration: 'm12' },
+  { id: '1-month-premium', price: 'm7', duration: 'm1' },
+  { id: '12-months-premium', price: 'm6', duration: 'y1' },
 ];
+
+const availableProOptions: PremiumOption[] = [
+  { id: '1-month-legend', price: 'm70', duration: 'm1' },
+  { id: '12-months-legend', price: 'y750', duration: 'y1' },
+];
+
+const premiumOptions = (group?: string, paymentMethod?: string) => {
+  let options = [...availablePremiumOptions];
+
+  if (group === 'pro') {
+    options = [...availableProOptions];
+  }
+
+  if (paymentMethod === 'btc') {
+    options = options.filter(o => o.duration !== 'm1');
+  }
+
+  return options;
+}
 
 const Premium: Component = () => {
   const intl = useIntl();
-  const account = useAccountContext();
   const params = useParams();
   const navigate = useNavigate();
   const toast = useToastContext();
@@ -149,6 +173,19 @@ const Premium: Component = () => {
 
   let premiumSocket: WebSocket | undefined;
 
+  const [stripe, setStripe] = createSignal<Stripe>();
+
+  const initStripe = async () => {
+    const stripe = await loadStripe('pk_live_51RVHYpFwkeNa1BHGECLthTjCyKDMtxQKCvIELbfjm1eE5yMMSwkJB44zcbioVWDCLhpKpkbL3wVhfWGvp6NTyHjf00TSUW1RVL');
+    // @ts-ignore
+    setStripe(stripe);
+  }
+
+  onMount(() => {
+    initStripe();
+  });
+
+
   const [premiumData, setPremiumData] = createStore<PremiumStore>({
     name: '',
     rename: '',
@@ -158,6 +195,7 @@ const Premium: Component = () => {
     selectedSubOption: { ...availablePremiumOptions[0] },
     openSubscribe: false,
     openSuccess: false,
+    openFail: false,
     successMessage: '',
     openAssignPubkey: false,
     openPromoCode: false,
@@ -165,11 +203,13 @@ const Premium: Component = () => {
     openRenew: false,
     openManage: false,
     openLegend: false,
+    openStripe: false,
     openOrderHistory: false,
     openFeatures: undefined,
     openDonation: undefined,
     subscriptions: {},
     membershipStatus: {},
+    productGroup: 'premium',
     recipientPubkey: undefined,
     recipient: undefined,
     promoCode: '',
@@ -186,6 +226,8 @@ const Premium: Component = () => {
     },
     orderHistory: [],
     pagingOrderHistory: { ...emptyPaging() },
+    paymentMethod: 'btc',
+    openPremiumProInfo: false,
   });
 
   // const setPremiumStatus = async () => {
@@ -197,7 +239,7 @@ const Premium: Component = () => {
   const getRecipientUser = async (pubkey: string) => {
     const subId = `recipient_${APP_ID}`;
 
-    const user = await fetchUserProfile(account?.publicKey, premiumData.recipientPubkey, subId);
+    const user = await fetchUserProfile(accountStore.publicKey, premiumData.recipientPubkey, subId);
 
     if (user) {
       setPremiumData('recipient', () => ({ ...user }));
@@ -208,12 +250,24 @@ const Premium: Component = () => {
     return premiumData.selectedSubOption.id.split('-')[0] || '0';
   }
 
-  const onStartAction = () => {
-    if (!account?.publicKey) {
-      account?.actions.showGetStarted()
+  createEffect(() => {
+    const method = premiumData.paymentMethod;
+    const product = premiumData.productGroup;
+
+    setPremiumData('subOptions', premiumOptions(product, method));
+    setPremiumData('selectedSubOption', premiumOptions(product, method)[0]);
+  })
+
+  const onStartAction = (product: string) => {
+    setPremiumData('productGroup', () => product);
+    setPremiumData('subOptions', premiumOptions(product, premiumData.paymentMethod));
+    setPremiumData('selectedSubOption', premiumOptions(product, premiumData.paymentMethod)[0]);
+
+    if (!accountStore.publicKey) {
+      showGetStarted();
       return;
     }
-    if (!account?.activeUser) {
+    if (!accountStore.activeUser) {
       navigate('/settings/profile');
       return;
     }
@@ -223,11 +277,11 @@ const Premium: Component = () => {
 
 
   const onBecomeLegendAction = () => {
-    if (!account?.publicKey) {
-      account?.actions.showGetStarted()
+    if (!accountStore.publicKey) {
+      showGetStarted()
       return;
     }
-    if (!account?.activeUser) {
+    if (!accountStore.activeUser) {
       navigate('/settings/profile');
       return;
     }
@@ -248,7 +302,7 @@ const Premium: Component = () => {
   const updateUserMetadata = async (option?: 'nip05' | 'lud16', force?: boolean) => {
     const user = premiumData.recipient;
 
-    if (!user || !account) return;
+    if (!user) return;
 
     const shouldUpdateNip05 = force || user.nip05.endsWith('@primal.net');
     const shouldUpdateLud16 = force || user.lud16.endsWith('@primal.net');
@@ -273,15 +327,13 @@ const Premium: Component = () => {
 
     if (metaUpdate.lud16 === user.lud16 && metaUpdate.nip05 === user.nip05) return;
 
-    const { success, note } = await sendProfile({ ...user, ...metaUpdate }, account.proxyThroughPrimal,  account.activeRelays, account.relaySettings);
+    const { success, note } = await sendProfile({ ...user, ...metaUpdate });
 
-    if (success) {
-      note && triggerImportEvents([note], `import_profile_${APP_ID}`, () => {
-        const prof = JSON.parse(note.content)
-        premiumData.recipientPubkey && account.actions.updateAccountProfile(premiumData.recipientPubkey);
-        setPremiumData('recipient', () => ({...prof}));
-        toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
-      });
+    if (success && note) {
+      const prof = JSON.parse(note.content)
+      premiumData.recipientPubkey && updateAccountProfile(premiumData.recipientPubkey);
+      setPremiumData('recipient', () => ({...prof}));
+      toast?.sendSuccess(intl.formatMessage(tToast.updateProfileSuccess));
       return;
     }
   }
@@ -299,7 +351,7 @@ const Premium: Component = () => {
     let isAvailable = false;
 
     try {
-      isAvailable = await isPremiumNameAvailable(premiumData.name, account?.publicKey, premiumSocket, subId);
+      isAvailable = await isPremiumNameAvailable(premiumData.name, accountStore.publicKey, premiumSocket, subId);
     } catch (e: any) {
       isAvailable = false;
       logError('ERROR while checking premium name availability: ', e);
@@ -371,6 +423,7 @@ const Premium: Component = () => {
           updateUserMetadata();
           setPremiumData('openSubscribe', () => false);
           setPremiumData('openSuccess', () => true);
+          // @ts-ignore
           setPremiumData('successMessage', () => intl.formatMessage(t.subOptions.success[premiumData.selectedSubOption.duration]));
         }
       }
@@ -405,6 +458,7 @@ const Premium: Component = () => {
             style: 'GOLD',
             custom_badge: true,
             avatar_glow: true,
+            in_leaderboard: true,
           })
           setPremiumData('openLegend', () => false);
           setPremiumData('openSuccess', () => true);
@@ -452,7 +506,7 @@ const Premium: Component = () => {
 
   const getSubscriptionInfo = () => {
     return new Promise((resolve) => {
-      premiumData.subOptions.forEach(option => {
+      premiumOptions(premiumData.productGroup).forEach(option => {
         if (!premiumSocket) return;
 
         const subId = `qr__${option.id}_${APP_ID}`;
@@ -671,7 +725,7 @@ const Premium: Component = () => {
       }
     });
 
-    getOrderListHistory(account?.publicKey, until, offset, subId, premiumSocket)
+    getOrderListHistory(accountStore.publicKey, until, offset, subId, premiumSocket)
   }
 
   const getOrderHistoryNextPage = () => {
@@ -684,7 +738,7 @@ const Premium: Component = () => {
   };
 
   const updateLegendConfig = async (config: LegendCustomizationConfig) => {
-    if (!premiumSocket || !account?.publicKey) return;
+    if (!premiumSocket || !accountStore.publicKey) return;
 
     const subId = `premium_legend_config_${APP_ID}`;
 
@@ -714,15 +768,15 @@ const Premium: Component = () => {
       edited_shoutout: config.edited_shoutout || '',
     };
 
-    await setLegendCutumization(account.publicKey, configToSend, subId, premiumSocket);
+    await setLegendCutumization(accountStore.publicKey, configToSend, subId, premiumSocket);
 
-    app?.actions.setLegendCustomization(account.publicKey, config);
+    app?.actions.setLegendCustomization(accountStore.publicKey, config);
   }
 
   onMount(() => {
     keepSoceketOpen = true;
     openSocket();
-    account?.actions.clearPremiumRemider();
+    clearPremiumRemider();
   });
 
   onCleanup(() => {
@@ -731,7 +785,7 @@ const Premium: Component = () => {
   });
 
   createEffect(() => {
-    if (account?.isKeyLookupDone && account.hasPublicKey()) {
+    if (accountStore.isKeyLookupDone && hasPublicKey()) {
       checkPremiumStatus();
     }
   })
@@ -751,7 +805,7 @@ const Premium: Component = () => {
   createEffect(() => {
     if (premiumStep() === 'name') {
       nameInput?.focus();
-      setPremiumData('name', () => account?.activeUser?.name || '');
+      setPremiumData('name', () => accountStore.activeUser?.name || '');
     }
     else if (premiumStep() === 'rename') {
       renameInput?.focus();
@@ -783,8 +837,8 @@ const Premium: Component = () => {
   });
 
   createEffect(() => {
-    if (account?.isKeyLookupDone && account.activeUser !== undefined) {
-      const pubkey = account?.publicKey;
+    if (accountStore.isKeyLookupDone && accountStore.activeUser !== undefined) {
+      const pubkey = accountStore.publicKey;
       pubkey && setPremiumData('recipientPubkey', () => pubkey);
     }
   });
@@ -796,8 +850,8 @@ const Premium: Component = () => {
     if (pubkey) {
       // getSubscriptionInfo();
 
-      if (pubkey === account?.publicKey) {
-        const recipient = account.activeUser;
+      if (pubkey === accountStore.publicKey) {
+        const recipient = accountStore.activeUser;
         checkPremiumStatus();
         recipient && setPremiumData('recipient', () => ({ ...recipient }));
       }
@@ -861,7 +915,7 @@ const Premium: Component = () => {
   return (
     <div>
       <PageTitle title={
-        intl.formatMessage(t.title.general)}
+        intl.formatMessage(t.title.general, { productGroup: premiumData.productGroup })}
       />
 
       <Show when={!isPhone()}>
@@ -872,57 +926,50 @@ const Premium: Component = () => {
         </Wormhole>
       </Show>
 
-      <PageCaption>
-        <Switch
-          fallback={
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.general)}</div>
-          }
-        >
-          <Match when={premiumStep() === 'legends'}>
-            <div class={styles.pageTitle}>{intl.formatMessage(t.title.legends)}</div>
-          </Match>
+      <Show when={premiumStep()}>
+        <PageCaption>
+          <Switch
+            fallback={
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.general, { productGroup: premiumData.productGroup })}</div>
+            }
+          >
+            <Match when={premiumStep() === 'legends'}>
+              <div class={styles.pageTitle}>{intl.formatMessage(t.title.legends)}</div>
+            </Match>
 
-          <Match when={premiumStep() === 'premiums'}>
-            <div class={styles.pageTitle}>{intl.formatMessage(t.title.premiums)}</div>
-          </Match>
+            <Match when={premiumStep() === 'premiums'}>
+              <div class={styles.pageTitle}>{intl.formatMessage(t.title.premiums)}</div>
+            </Match>
 
-          <Match when={premiumStep() === 'support'}>
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.support)}</div>
-          </Match>
+            <Match when={premiumStep() === 'support'}>
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.support)}</div>
+            </Match>
 
-          <Match when={premiumStep() === 'legend'}>
-            <div class={styles.centerPageTitle}>
-              {!!isOG() ? intl.formatMessage(t.title.legendShort) : intl.formatMessage(t.title.legend)}
-            </div>
-          </Match>
+            <Match when={premiumStep() === 'relay'}>
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.relay)}</div>
+            </Match>
 
-          <Match when={premiumStep() === 'legendary'}>
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.legend)}</div>
-          </Match>
+            <Match when={premiumStep() === 'media'}>
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.media)}</div>
+            </Match>
 
-          <Match when={premiumStep() === 'relay'}>
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.relay)}</div>
-          </Match>
+            <Match when={premiumStep() === 'contacts'}>
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.contacts)}</div>
+            </Match>
 
-          <Match when={premiumStep() === 'media'}>
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.media)}</div>
-          </Match>
+            <Match when={premiumStep() === 'content'}>
+              <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.content)}</div>
+            </Match>
+            <Match when={!!isOG() && isOG() !== 'legend'}>
+              <div class={`${styles.centerPageTitle} ${styles.noTransform}`}>{intl.formatMessage(t.title.og)}</div>
+            </Match>
+            <Match when={!!isOG() && isOG() === 'legend'}>
+              <div class={`${styles.centerPageTitle}`}>{intl.formatMessage(t.title.og)}</div>
+            </Match>
+          </Switch>
+        </PageCaption>
+      </Show>
 
-          <Match when={premiumStep() === 'contacts'}>
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.contacts)}</div>
-          </Match>
-
-          <Match when={premiumStep() === 'content'}>
-            <div class={styles.centerPageTitle}>{intl.formatMessage(t.title.content)}</div>
-          </Match>
-          <Match when={!!isOG() && isOG() !== 'legend'}>
-            <div class={`${styles.centerPageTitle} ${styles.noTransform}`}>{intl.formatMessage(t.title.og)}</div>
-          </Match>
-          <Match when={!!isOG() && isOG() === 'legend'}>
-            <div class={`${styles.centerPageTitle}`}>{intl.formatMessage(t.title.og)}</div>
-          </Match>
-        </Switch>
-      </PageCaption>
 
       <Show when={!isPhone()}>
         <StickySidebar>
@@ -936,6 +983,7 @@ const Premium: Component = () => {
               <Match when={premiumData.membershipStatus.tier === 'free'}>
                 <PremiumSidebarInactve
                   onOpenFAQ={() => setPremiumData('openFeatures', () => 'faq')}
+                  pro={premiumData.productGroup === 'pro'}
                 />
               </Match>
               <Match when={['premium', 'premium-legend'].includes(premiumData.membershipStatus.tier || '')}>
@@ -950,24 +998,22 @@ const Premium: Component = () => {
       </Show>
 
 
-      <div class={`${styles.premiumContent} ${['legends', 'premiums'].includes(premiumStep()) ? styles.noPadding : ''}`}>
+      <div class={`${styles.premiumContent} ${['legends', 'premiums'].includes(premiumStep()) ? styles.noPadding : ''} ${premiumStep() === undefined ? styles.introPage : ''}`}>
         <div class={styles.premiumStepContent}>
           <Switch
             fallback={<Loader />}
           >
             <Match when={premiumStep() === 'legends'}>
               <PremiumLegendLeaderBoard
-                data={premiumData}
                 type="legend"
               />
             </Match>
 
             <Match when={premiumStep() === 'premiums'}>
-                <PremiumLegendLeaderBoard
-                  data={premiumData}
-                  type="premium"
-                />
-              </Match>
+              <PremiumLegendLeaderBoard
+                type="premium"
+              />
+            </Match>
 
             <Match when={premiumStep() === 'name'}>
               <div class={styles.nameStep}>
@@ -1003,6 +1049,7 @@ const Premium: Component = () => {
                   </ButtonSecondary>
                   <ButtonPremium
                     onClick={() => checkName()}
+                    pro={premiumData.productGroup === 'pro'}
                   >
                     {intl.formatMessage(t.actions.next)}
                   </ButtonPremium>
@@ -1016,7 +1063,7 @@ const Premium: Component = () => {
                 <div>{intl.formatMessage(t.title.subscriptionSubtitle)}</div>
               </div>
 
-              <PremiumProfile data={premiumData} profile={account?.activeUser} />
+              <PremiumProfile data={premiumData} profile={accountStore.activeUser} />
 
               <PremiumSummary
                 data={premiumData}
@@ -1038,6 +1085,7 @@ const Premium: Component = () => {
                       navigate('/premium/confirm')
                     }
                   }}
+                  pro={premiumData.productGroup === 'pro'}
                 >
                   {intl.formatMessage(t.actions.next)}
                 </ButtonPremium>
@@ -1048,7 +1096,14 @@ const Premium: Component = () => {
               <div class={styles.confirmStep}>
                 <div class={styles.title}>
                   <div>You are Buying:</div>
-                  <div>{subOptionCaption()} Months of Primal Premium</div>
+                  <Show
+                    when={premiumData.productGroup === 'pro'}
+                    fallback={
+                      <div>{subOptionCaption()} Months of Primal Premium</div>
+                    }
+                  >
+                    <div>{subOptionCaption()} Months of Primal Pro</div>
+                  </Show>
                 </div>
 
                 <div class={styles.premiumProfile}>
@@ -1060,7 +1115,7 @@ const Premium: Component = () => {
                   <div class={styles.userInfo}>
                     <div class={styles.explainer}>primal name:</div>
                     <div>{premiumData.name}</div>
-                    <div class={styles.purpleCheck}></div>
+                    <div class={premiumData.productGroup === 'pro' ? styles.proCheck : styles.purpleCheck}></div>
                   </div>
 
                   <div class={styles.npub}>
@@ -1070,6 +1125,7 @@ const Premium: Component = () => {
                   <div class={styles.changeAccount}>
                     <ButtonLink
                       onClick={() => setPremiumData('openAssignPubkey', () => true)}
+                      pro={premiumData.productGroup === 'pro'}
                     >
                       assign to a different nostr account
                     </ButtonLink>
@@ -1080,6 +1136,7 @@ const Premium: Component = () => {
                   options={premiumData.subOptions}
                   selectedOption={premiumData.selectedSubOption}
                   data={premiumData}
+                  setData={setPremiumData}
                   onSelect={(option) => {
                     setPremiumData('selectedSubOption', () => ({ ...option }));
                   }}
@@ -1088,13 +1145,22 @@ const Premium: Component = () => {
                 />
 
                 <ButtonPremium
-                  onClick={() => premiumData.selectedSubOption && setPremiumData('openSubscribe', () => true)}
+                  onClick={() => {
+                    if (!premiumData.selectedSubOption) return;
+                    if (premiumData.paymentMethod === 'card') {
+                      setPremiumData('openStripe', () => true)
+                      return;
+                    }
+
+                    setPremiumData('openSubscribe', () => true);
+                  }}
+                  pro={premiumData.productGroup === 'pro'}
                 >
                   {intl.formatMessage(t.actions.subscribe)}
                 </ButtonPremium>
 
-                <div class={styles.disclaimer}>
-                  By clicking “Subscribe” you acknowledge that<br/>
+                <div class={`${styles.disclaimer} ${premiumData.productGroup === 'pro' ? styles.proVersion : ''}`}>
+                  By clicking “Continue to Payment” you acknowledge that<br/>
                   you agree to our <a href="https://primal.net/terms" target="__blank">Terms of Service</a>
                 </div>
               </div>
@@ -1103,28 +1169,6 @@ const Premium: Component = () => {
             <Match when={premiumStep() === 'support'}>
               <PremiumSupport
                 onExtendPremium={() => handlePremiumAction('extendSubscription')}
-              />
-            </Match>
-
-            <Match when={premiumStep() === 'legend'}>
-              <PremiumLegend
-                pubkey={account?.publicKey}
-                user={account?.activeUser}
-                isOG={!!isOG()}
-                onBecomeLegendAction={onBecomeLegendAction}
-              />
-            </Match>
-
-            <Match when={premiumStep() === 'legendary'}>
-              <PremiumBecomeLegend
-                data={premiumData}
-                profile={account?.activeUser}
-                getExchangeRate={getExchangeRate}
-                onBuyLegend={(amount: number) => {
-                  setPremiumData('legendAmount', () => amount);
-                  setPremiumData('openLegend', () => true);
-                }}
-                isOG={!!isOG()}
               />
             </Match>
 
@@ -1163,7 +1207,7 @@ const Premium: Component = () => {
               <PremiumStatusOverview
                 data={premiumData}
                 setData={setPremiumData}
-                profile={account?.activeUser}
+                profile={accountStore.activeUser}
                 updateUserMetadata={updateUserMetadata}
                 onExtendPremium={() => handlePremiumAction('extendSubscription')}
                 onManagePremium={() => handlePremiumAction('managePremium')}
@@ -1173,13 +1217,13 @@ const Premium: Component = () => {
 
             <Match when={
               premiumData.membershipStatus?.tier === 'free' ||
-              (account?.isKeyLookupDone && (!account.publicKey || !account.activeUser))
+              (accountStore.isKeyLookupDone && (!accountStore.publicKey || !accountStore.activeUser))
             }>
               <PremiumHighlights
                 onStart={onStartAction}
-                onMore={() => setPremiumData('openFeatures', () => 'features')}
-                pubkey={account?.publicKey}
-                user={account?.activeUser}
+                onMore={() => setPremiumData('openPremiumProInfo', () => true)}
+                pubkey={accountStore.publicKey}
+                user={accountStore.activeUser}
                 isOG={!!isOG()}
               />
             </Match>
@@ -1197,6 +1241,31 @@ const Premium: Component = () => {
             }}
             onOpen={() => {
               listenForPayement();
+            }}
+            subscription={premiumData.subscriptions[premiumData.selectedSubOption.id]}
+          />
+
+          <PremiumStripeModal
+            open={premiumData.openStripe}
+            setOpen={(v: boolean) => setPremiumData('openStripe', () => v)}
+            stripe={stripe()}
+            getSocket={() => premiumSocket}
+            data={premiumData}
+            onSuccess={() => {
+              setPremiumData('openSuccess', true);
+            }}
+            onFail={() => {
+              setPremiumData('openFail', true);
+            }}
+            onClose={() => {
+              if (!premiumData.openStripe) return;
+              setPremiumData('openStripe', () => false);
+
+              // premiumSocket && stopListeningForPremiumPurchase(purchuseSubId, premiumSocket);
+              // purchuseMonitorUnsub();
+            }}
+            onOpen={() => {
+              // listenForPayement();
             }}
             subscription={premiumData.subscriptions[premiumData.selectedSubOption.id]}
           />
@@ -1266,6 +1335,16 @@ const Premium: Component = () => {
             data={premiumData}
           />
 
+          <PremiumFailModal
+            open={premiumData.openFail}
+            profile={premiumData.recipient}
+            setOpen={(v: boolean) => setPremiumData('openFail', () => v)}
+            onClose={() => {
+              setPremiumData('openFail', () => false);
+            }}
+            data={premiumData}
+          />
+
           <PremiumFeaturesDialog
             open={premiumData.openFeatures}
             setOpen={(v: boolean) => setPremiumData('openFeatures', () => v ? 'features' : undefined)}
@@ -1299,7 +1378,7 @@ const Premium: Component = () => {
               setPremiumData('openRename', () => false)
             }}
             name={premiumData.name}
-            checkNameAvailability={(name: string) => isPremiumNameAvailable(name, account?.publicKey, premiumSocket, `rename_check_${APP_ID}`)}
+            checkNameAvailability={(name: string) => isPremiumNameAvailable(name, accountStore.publicKey, premiumSocket, `rename_check_${APP_ID}`)}
           />
 
           <PremiumRenewModal
@@ -1325,6 +1404,12 @@ const Premium: Component = () => {
               premiumData.orderHistory.length === 0 && getOrderHistory();
             }}
             onNextPage={getOrderHistoryNextPage}
+          />
+
+          <PrimalProInfoDialog
+            open={premiumData.openPremiumProInfo}
+            setOpen={(v: boolean) => setPremiumData('openPremiumProInfo', () => v)}
+            onBuy={() => onStartAction('pro')}
           />
         </div>
       </div>

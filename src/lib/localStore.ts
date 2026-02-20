@@ -1,6 +1,8 @@
 import { TopicStat } from "../megaFeeds";
 import { convertToUser, userName } from "../stores/profile";
-import { EmojiOption, NostrRelays, NostrStats, PrimalArticleFeed, PrimalDVM, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
+import { EmojiOption, MembershipStatus, NostrRelays, NostrRelaySignedEvent, NostrStats, PrimalArticleFeed, PrimalDVM, PrimalFeed, PrimalUser, SelectionOption, SenderMessageCount, UserRelation, UserStats } from "../types/primal";
+import { LegendCustomizationConfig } from "./premium";
+import { StreamingData } from "./streaming";
 
 export type LocalStore = {
   following: string[],
@@ -8,6 +10,9 @@ export type LocalStore = {
   muted: string[],
   mutedPrivate: string,
   mutedSince: number,
+  streamMuted: string[],
+  streamMutedPrivate: string,
+  streamMutedSince: number,
   relaySettings: NostrRelays,
   likes: string[],
   feeds: PrimalFeed[];
@@ -32,6 +37,7 @@ export type LocalStore = {
   emojiHistory: EmojiOption[],
   noteDraft: Record<string, string>,
   noteDraftUserRefs: Record<string, Record<string, PrimalUser>>,
+  noteDraftMediaTags: string[][],
   uploadTime: Record<string, number>,
   selectedFeed: PrimalFeed | undefined,
   selectedHomeFeed: PrimalArticleFeed | undefined,
@@ -43,8 +49,15 @@ export type LocalStore = {
   premiumReminder: number,
   dvms: PrimalDVM[] | undefined,
   usePrimalRelay: boolean | undefined,
+  usePrimalProxy: boolean | undefined,
   nwc: string[][] | undefined,
   nwcActive: string[] | undefined,
+  useSystemDarkMode: boolean | undefined,
+  liveStreams: StreamingData[] | undefined,
+  liveAuthors: PrimalUser[] | undefined,
+  legendCustomization: LegendCustomizationConfig | undefined,
+  membershipStatus: MembershipStatus | undefined,
+  eventQueue: NostrRelaySignedEvent[] | undefined,
 };
 
 export type UploadTime = {
@@ -69,6 +82,9 @@ export const emptyStorage: LocalStore = {
   muted: [],
   mutedPrivate: '',
   mutedSince: 0,
+  streamMuted: [],
+  streamMutedPrivate: '',
+  streamMutedSince: 0,
   relaySettings: {},
   likes: [],
   feeds: [],
@@ -83,6 +99,7 @@ export const emptyStorage: LocalStore = {
   emojiHistory: [],
   noteDraft: {},
   noteDraftUserRefs: {},
+  noteDraftMediaTags: [],
   uploadTime: defaultUploadTime,
   selectedFeed: undefined,
   bookmarks: [],
@@ -95,8 +112,15 @@ export const emptyStorage: LocalStore = {
   premiumReminder: 0,
   dvms: undefined,
   usePrimalRelay: false,
+  usePrimalProxy: false,
   nwc: [],
   nwcActive: undefined,
+  useSystemDarkMode: false,
+  liveStreams: undefined,
+  liveAuthors: undefined,
+  legendCustomization: undefined,
+  membershipStatus: undefined,
+  eventQueue: undefined,
 }
 
 export const storageName = (pubkey?: string) => {
@@ -171,6 +195,33 @@ export const saveMuted = (pubkey: string | undefined, muted: string[], since: nu
   setStorage(pubkey, store);
 }
 
+export const saveStreamMuteList = (pubkey: string | undefined, muted: string[], mutedPrivate: string, since: number) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.streamMuted = [...muted];
+  store.streamMutedPrivate = mutedPrivate;
+  store.streamMutedSince = since;
+
+  setStorage(pubkey, store);
+}
+
+export const saveStreamMuted = (pubkey: string | undefined, muted: string[], since: number) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.streamMuted = [...muted];
+  store.streamMutedSince = since;
+
+  setStorage(pubkey, store);
+}
+
 export const saveRelaySettings = (pubkey: string | undefined, settings: NostrRelays) => {
   if (!pubkey) {
     return;
@@ -181,6 +232,16 @@ export const saveRelaySettings = (pubkey: string | undefined, settings: NostrRel
   store.relaySettings = { ...settings };
 
   setStorage(pubkey, store);
+}
+
+export const readRelaySettings = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  return store.relaySettings;
 }
 
 export const savePrimalRelaySettings = (pubkey: string | undefined, usePrimalRelay: boolean) => {
@@ -203,6 +264,29 @@ export const readPrimalRelaySettings = (pubkey: string | undefined) => {
   const store = getStorage(pubkey);
 
   return store.usePrimalRelay || false;
+}
+
+
+export const savePrimalProxySettings = (pubkey: string | undefined, usePrimalProxy: boolean) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.usePrimalProxy = usePrimalProxy;
+
+  setStorage(pubkey, store);
+}
+
+export const readPrimalProxySettings = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return false;
+  }
+
+  const store = getStorage(pubkey);
+
+  return store.usePrimalProxy || false;
 }
 
 export const saveLikes = (pubkey: string | undefined, likes: string[]) => {
@@ -260,6 +344,38 @@ export const saveTheme = (pubkey: string | undefined, theme: string) => {
 
   setStorage(pubkey, store);
 };
+
+export const readTheme = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return false;
+  }
+
+  const store = getStorage(pubkey);
+
+  return store.theme || 'sunrise';
+}
+
+
+export const saveSystemDarkMode = (pubkey: string | undefined, flag: boolean) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  store.useSystemDarkMode = flag;
+
+  setStorage(pubkey, store);
+};
+
+export const readSystemDarkMode = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return false;
+  }
+
+  const store = getStorage(pubkey);
+
+  return store.useSystemDarkMode || false;
+}
 
 export const saveAnimated = (pubkey: string | undefined, animated: boolean) => {
   if (!pubkey) {
@@ -386,6 +502,28 @@ export const readNoteDraftUserRefs = (pubkey: string | undefined, replyTo?: stri
   const key = replyTo || 'root';
 
   return store.noteDraftUserRefs[key] || {};
+}
+
+export const saveNoteDraftMediaTags = (pubkey: string | undefined, mediaTags: string[][]) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.noteDraftMediaTags = [...mediaTags];
+
+  setStorage(pubkey, store);
+}
+
+export const readNoteDraftMediaTags = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return [];
+  }
+
+  const store = getStorage(pubkey);
+
+  return store.noteDraftMediaTags;
 }
 
 export const saveUploadTime = (pubkey: string | undefined, uploadTime: Record<string, number>) => {
@@ -723,6 +861,112 @@ export const saveNWCActive = (pubkey: string, name?: string, uri?: string) => {
   } else {
     store.nwcActive = [name, uri];
   }
+
+  setStorage(pubkey, store);
+};
+
+
+export const saveLiveStreams = (pubkey: string | undefined, streams: StreamingData[]) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.liveStreams = [...streams];
+
+  setStorage(pubkey, store);
+}
+
+
+export const loadLiveStreams = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return [];
+  }
+  const store = getStorage(pubkey);
+
+  return store.liveStreams || [];
+};
+
+export const saveLiveAuthors = (pubkey: string | undefined, streams: StreamingData[]) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.liveAuthors = [...streams];
+
+  setStorage(pubkey, store);
+}
+
+
+export const loadLiveAuthors = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return [];
+  }
+  const store = getStorage(pubkey);
+
+  return store.liveAuthors || [];
+};
+
+
+export const saveLegendCustomization = (pubkey: string | undefined, config: LegendCustomizationConfig) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.legendCustomization = { ...config };
+
+  setStorage(pubkey, store);
+}
+
+
+export const loadLegendCustomization = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  return store.legendCustomization;
+};
+
+
+export const saveMembershipStatus = (pubkey: string | undefined, status: MembershipStatus) => {
+  if (!pubkey) {
+    return;
+  }
+
+  const store = getStorage(pubkey);
+
+  store.membershipStatus = { ...status };
+
+  setStorage(pubkey, store);
+}
+
+
+export const loadMembershipStatus = (pubkey: string | undefined) => {
+  if (!pubkey) {
+    return;
+  }
+  const store = getStorage(pubkey);
+
+  return store.membershipStatus;
+};
+
+
+export const loadEventQueue = (pubkey: string) => {
+  const store = getStorage(pubkey);
+
+  return store.eventQueue || [];
+};
+
+export const saveEventQueue = (pubkey: string, eventQueue: NostrRelaySignedEvent[]) => {
+  let store = getStorage(pubkey);
+
+  store.eventQueue = [ ...eventQueue ];
 
   setStorage(pubkey, store);
 };

@@ -196,7 +196,7 @@
   border-radius: 99999px;
   border: 1px solid var(--text-secondary);
   margin: 0px;
-  padding-inline: 18px;
+  padding-inline: 12px;
   padding-block: 10px;
   font-size: 16px;
   line-height: 20px;
@@ -284,6 +284,10 @@
   &:focus {
     box-shadow: none;
   }
+
+  &.proVersion {
+    color: var(--accent-pro);
+  }
 }
 
 .tertiary {
@@ -342,6 +346,10 @@
   color: var(--text-primary-button);
   width: 100%;
   min-height: 36px;
+
+  &.proVersion {
+    background-color: var(--accent-pro);
+  }
 }
 
 .green {
@@ -361,3 +369,24 @@
   width: fit-content;
   min-height: 36px;
 }
+
+
+.spinner {
+	width: 16px;
+	height: 16px;
+	border: 2px solid #FFF;
+	border-bottom-color: transparent;
+	border-radius: 50%;
+	display: inline-block;
+	box-sizing: border-box;
+	animation: spinner-rotation 1s linear infinite;
+	}
+
+	@keyframes spinner-rotation {
+	0% {
+			transform: rotate(0deg);
+	}
+	100% {
+			transform: rotate(360deg);
+	}
+	}

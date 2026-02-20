@@ -1,22 +1,26 @@
-import { Component, createEffect, For, Match, onMount, Switch } from 'solid-js';
+import { Component, For, Match, onMount, Switch } from 'solid-js';
 import styles from './FeedMarketPlace.module.scss';
 
-import AdvancedSearchDialog from '../AdvancedSearch/AdvancedSearchDialog';
 import { subsTo } from '../../sockets';
 import { APP_ID } from '../../App';
 import { fetchDVMFeeds } from '../../lib/feed';
 import { Kind } from '../../constants';
 import { createStore } from 'solid-js/store';
-import { DVMMetadata, DVMStats, NostrDVM, NostrNoteActionsContent, NoteActions, PrimalArticleFeed, PrimalDVM, PrimalUser } from '../../types/primal';
+import {
+  DVMMetadata,
+  DVMStats,
+  NostrNoteActionsContent,
+  NoteActions,
+  PrimalArticleFeed,
+  PrimalDVM,
+  PrimalUser,
+} from '../../types/primal';
 import { convertToUser } from '../../stores/profile';
 import FeedMarketItem from './FeedMarketPlaceItem';
-import ButtonSecondary from '../Buttons/ButtonSecondary';
-import ButtonPrimary from '../Buttons/ButtonPrimary';
 import { useNavigate } from '@solidjs/router';
-import { account, explore } from '../../translations';
 import { useExploreContext } from '../../contexts/ExploreContext';
-import { useAccountContext } from '../../contexts/AccountContext';
 import { readDVMs, saveDVMs } from '../../lib/localStore';
+import { accountStore } from '../../stores/accountStore';
 
 export type MarketplaceStore = {
   dvms: PrimalDVM[],
@@ -43,7 +47,6 @@ const FeedMarketPlace: Component<{
   type?: 'notes' | 'reads',
   onAddFeed?: (feed: PrimalArticleFeed) => void,
 }> = (props) => {
-  const account = useAccountContext();
   const navigate = useNavigate();
   const explore = useExploreContext();
 
@@ -61,7 +64,7 @@ const FeedMarketPlace: Component<{
   const fetchDVMs = () => {
     const subId = `explore_feeds_${APP_ID}`;
 
-    const storedDvms = readDVMs(account?.publicKey);
+    const storedDvms = readDVMs(accountStore.publicKey);
 
     if (storedDvms && storedDvms.length > 0) {
       updateStore('dvms', [...storedDvms])
@@ -141,12 +144,12 @@ const FeedMarketPlace: Component<{
       onEose: () => {
 
         updateStore('dvms', () => ({ ...fetchedDVMs }));
-        saveDVMs(account?.publicKey, [...fetchedDVMs]);
+        saveDVMs(accountStore.publicKey, [...fetchedDVMs]);
         unsub();
       }
     });
 
-    fetchDVMFeeds(account?.publicKey, subId, props.type);
+    fetchDVMFeeds(accountStore.publicKey, subId, props.type);
   }
 
   const clearDVMs = () => {

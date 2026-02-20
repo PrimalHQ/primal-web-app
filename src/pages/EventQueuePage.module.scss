@@ -1,0 +1,83 @@
+.queueContainer {
+  background-color: var(--background-card);
+  min-height: 100vh;
+  padding-bottom: 20px;
+}
+
+.eventQueueHeader {
+  padding: 18px 20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+
+  .label {
+    color: var(--text-secondary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+
+  .retry {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+  }
+}
+
+.eventList {
+  margin-bottom: 72px;
+}
+
+.unknownEvents {
+  color: var(--text-tertiary);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.queueItem {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  padding-left: 20px;
+  padding-right: 12px;
+  border-bottom: 1px solid var(--devider);
+
+  &:first-child {
+    border-top: 1px solid var(--devider);
+  }
+
+  .check {
+    display: flex;
+    width: 20px;
+    height: 58px;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding-top: 3px;
+  }
+
+  &:has([data-expanded]) {
+    background-color: var(--background-input);
+  }
+}
+
+.actionFooter {
+  position: fixed;
+  bottom: 0;
+  width: 640px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 20px;
+  gap: 12px;
+  background-color: var(--background-site);
+  z-index: 5;
+
+  button {
+    padding-inline: 18px !important;
+  }
+}
+

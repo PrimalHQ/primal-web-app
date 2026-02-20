@@ -1,7 +1,5 @@
-import { TextField } from '@kobalte/core/text-field';
-
 import { useNavigate } from '@solidjs/router';
-import { batch, Component, createEffect, For, onMount, Show } from 'solid-js';
+import { batch, Component, createEffect, onMount, Show } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import ButtonPrimary from '../components/Buttons/ButtonPrimary';
 import PageCaption from '../components/PageCaption/PageCaption';
@@ -23,9 +21,8 @@ import ButtonLink from '../components/Buttons/ButtonLink';
 import { wordsPerMinute } from '../constants';
 import { useSearchContext } from '../contexts/SearchContext';
 import AdvancedSearchCommadTextField from '../components/AdvancedSearch/AdvancedSearchCommadTextField';
-import { useAppContext } from '../contexts/AppContext';
-import { useAccountContext } from '../contexts/AccountContext';
 import { isPhone } from '../utils';
+import { accountStore } from '../stores/accountStore';
 
 export type SearchState = {
   includes: string,
@@ -190,8 +187,6 @@ export const [advSearchState, setAdvSearchState] = createStore<SearchState>({
 const AdvancedSearch: Component = () => {
   const navigate = useNavigate();
   const search = useSearchContext();
-  const account = useAccountContext();
-
 
   onMount(() => {
     dayjs.extend(objectSupport);
@@ -200,16 +195,6 @@ const AdvancedSearch: Component = () => {
   const onSubmit = (e: SubmitEvent) => {
     e.preventDefault();
   }
-
-  // createEffect(() => {
-  //   console.log('ADV: ', advSearch?.searchCommand)
-  //   if ((advSearch?.searchCommand.length || 0) > 0) {
-  //     setState('command', () => advSearch?.searchCommand || '');
-  //     return;
-  //   }
-
-  //   advSearch?.actions.setSearchCommand(state.command);
-  // })
 
   createEffect(() => {
     if (advSearchState.timeframe !== 'Custom') {
@@ -543,14 +528,14 @@ const AdvancedSearch: Component = () => {
     return label;
   }
 
-  const isPremium = () => ['premium', 'premium-legend'].includes(account?.membershipStatus.tier || '');
+  const isPremium = () => ['premium', 'premium-legend'].includes(accountStore.membershipStatus.tier || '');
 
   const submitSearch = () => {
     let cmd = advSearchState.command;
 
-    if(!cmd.includes(' pas:1')) {
-      cmd += ' pas:1';
-    }
+    // if(!cmd.includes(' pas:1')) {
+    //   cmd += ' pas:1';
+    // }
 
     search?.actions.setAdvancedSearchCommand(cmd);
 
@@ -778,7 +763,7 @@ const AdvancedSearch: Component = () => {
                   Time frame:
                 </div>
 
-                <div class={styles.leftFloat}>
+                <div class={styles.datePicker}>
                   <DatePicker
                     type="range"
                     onChange={(data) => {
@@ -798,7 +783,7 @@ const AdvancedSearch: Component = () => {
                     }}
                     maxDate={utils().getToday()}
                     renderInput={({ value, showDate }) => (
-                      <button class={styles.linkButton} onClick={showDate}>
+                      <button type="button" class={styles.linkButton} onClick={showDate}>
                         {value().label || 'Select a date range'}
                       </button>
                     )}

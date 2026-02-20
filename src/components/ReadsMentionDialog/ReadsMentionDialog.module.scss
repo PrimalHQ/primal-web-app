@@ -18,7 +18,7 @@
   align-items: flex-start;
 
   .actions {
-    display:flex;
+    display: flex;
     justify-content: flex-end;
     align-items: center;
     gap: 12px;
@@ -27,6 +27,95 @@
 
     >button {
       width: 100px;
+    }
+  }
+}
+
+.readsPublishDialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  width: 640px;
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 8px;
+
+    >button {
+      width: 100px;
+    }
+  }
+}
+
+.successIcon {
+  width: 100px;
+  height: 100px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../../assets/icons/big_success.svg) no-repeat center;
+  mask: url(../../assets/icons/big_success.svg) no-repeat center;
+}
+
+.readsPublishSuccessDialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+  width: 640px;
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 8px;
+
+    >button {
+      width: 100px;
+    }
+  }
+
+  .successCard {
+    width: 600px;
+    min-height: 196px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+
+    .successDesc {
+      color: var(--text-primary);
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+  }
+}
+
+.leaveDialog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
+
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin-top: 8px;
+
+    >button {
+      padding-inline: 20px;
     }
   }
 }
@@ -44,7 +133,7 @@
     align-items: flex-start;
 
     .actions {
-      display:flex;
+      display: flex;
       justify-content: flex-end;
       align-items: center;
       gap: 12px;
@@ -68,10 +157,15 @@
     width: 220px;
     height: 145px;
     background-color: var(--background-header-input);
+    /* border: 1px solid var(--devider); */
+    border-radius: 4px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     cursor: pointer;
+    overflow: hidden;
+    position: relative;
 
     .uploadPlaceholder {
       display: flex;
@@ -91,6 +185,18 @@
   .inputHolder {
     label {
       margin: 0;
+      color: var(--text-secondary);
+      font-size: 15px;
+      font-weight: 400;
+      line-height: 20px;
+
+      span {
+        margin-left: 8px;
+        color: var(--text-tertiary);
+        font-size: 12px;
+        font-weight: 400;
+        line-height: 20px;
+      }
     }
     input {
       width: 332px;
@@ -331,4 +437,184 @@ input.textInput {
   font-size: 12px;
   font-weight: 400;
   line-height: 12px;
+}
+
+.closeIcon {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-secondary);
+  -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
+  mask: url(../../assets/icons/close.svg) no-repeat center;
+}
+
+
+@keyframes fadeInUploadHover {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 0.75;
+  }
+}
+
+@keyframes fadeOutUploadHover {
+  0% {
+    opacity: 0.75;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+
+.uploadButton {
+  position: relative;
+  width: fit-content;
+  height: fit-content;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 0;
+
+  .uploadOverlay {
+    position: absolute;
+    color: var(--text-secondary);
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 20px;
+    cursor: pointer;
+    background-color: var(--background-site);
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    opacity: 0;
+    -webkit-animation: fadeOutUploadHover 0.3s ease-out;
+    -moz-animation: fadeOutUploadHover 0.3s ease-out;
+    -o-animation: fadeOutUploadHover 0.3s ease-out;
+    animation: fadeOutUploadHover 0.3s ease-out;
+
+    &:hover {
+      opacity: 0.75;
+
+      -webkit-animation: fadeInUploadHover 0.3s ease-out;
+      -moz-animation: fadeInUploadHover 0.3s ease-out;
+      -o-animation: fadeInUploadHover 0.3s ease-out;
+      animation: fadeInUploadHover 0.3s ease-out;
+    }
+
+    .closeBtn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background-color: black;
+      border-radius: 99px;
+    }
+  }
+}
+
+
+.uploadingOverlay {
+  width: 100%;
+  height: 260px;
+  position: relative;
+  cursor: pointer;
+
+  color: var(--text-tertiary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 14px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .closeBtn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background-color: black;
+    border-radius: 99px;
+  }
+}
+
+.uploadProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+
+  .progressLabelContainer {
+    display: flex;
+    justify-content: space-between;
+  }
+  .progressLabel,
+  .progressValue {
+    color: var(--text-tertiary-2);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 14px;
+  }
+
+  .progressTrackContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .iconClose {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: var(--text-secondary);
+      -webkit-mask: url(../../assets/icons/close.svg) no-repeat center;
+      mask: url(../../assets/icons/close.svg) no-repeat center;
+    }
+
+    .iconCheck {
+      width: 8px;
+      height: 8px;
+      display: inline-block;
+      margin: 0px 0px;
+      background-color: var(--success-bright);
+      -webkit-mask: url(../../assets/icons/check.svg) no-repeat center;
+      mask: url(../../assets/icons/check.svg) no-repeat center;
+    }
+  }
+  .progressTrack {
+    width: 100%;
+    height: 2px;
+    background-color: var(--background-input);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .progressFill {
+    background-color: var(--accent);
+    height: 2px;
+    border-radius: 1px;
+    width: var(--kb-progress-fill-width);
+    transition: width 250ms linear;
+  }
+  /* .progressFill[data-progress="complete"] {
+    background-color: var(--success-bright);
+  } */
+}
+
+.previewHolder {
+  background-color: var(--background-header-input);
+  border: 1px solid var(--subtile-devider);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
 }

@@ -15,6 +15,7 @@ import {
   NostrUserContent,
   NoteActions,
   PrimalArticle,
+  PrimalDraft,
   PrimalNote,
   PrimalUser,
   PrimalZap,
@@ -25,19 +26,19 @@ import {
   UserStats,
 } from "./types/primal";
 import { parseBolt11 } from "./utils";
-import { convertToNotesMega, convertToReadsMega, convertToUsersMega } from "./stores/megaFeed";
+import { convertToDraftsMega, convertToNotesMega, convertToReadsMega, convertToUsersMega } from "./stores/megaFeed";
 import { getRecomendedArticleIds, getScoredUsers } from "./lib/search";
 import { fetchArticles } from "./handleNotes";
 import { APP_ID } from "./App";
 import { decodeIdentifier } from "./lib/keys";
-import { getExploreMedia, getExplorePeople, getExploreTopics, getExploreZaps } from "./lib/profile";
-import { nip19 } from "nostr-tools";
+import { getExploreMedia, getExplorePeople, getExploreTopics, getExploreZaps, getUserProfiles } from "./lib/profile";
 import { convertToUser, emptyUser } from "./stores/profile";
 import { emptyStats } from "./contexts/ProfileContext";
 import { getMessageCounts, getNewMessages, getOldMessages } from "./lib/messages";
 import { LeaderboardSort } from "./pages/Premium/PremiumLegendLeaderboard";
 import { LegendCustomizationConfig, fetchLeaderboard } from "./lib/premium";
 import { CohortInfo } from "./contexts/AppContext";
+import { nip19 } from './lib/nTools';
 
 export type PaginationInfo = {
   since: number,
@@ -67,6 +68,7 @@ export type MegaFeedResults = {
   users: PrimalUser[],
   notes: PrimalNote[],
   reads: PrimalArticle[],
+  drafts: PrimalDraft[],
   zaps: PrimalZap[],
   topicStats: TopicStat[],
   paging: PaginationInfo,
@@ -89,6 +91,7 @@ export const emptyMegaFeedPage: () => MegaFeedPage = () => ({
   users: {},
   notes: [],
   reads: [],
+  drafts: [],
   zaps: [],
   topicStats: {},
   noteStats: {},
@@ -117,6 +120,7 @@ export const emptyMegaFeedResults = () => ({
   users: [],
   notes: [],
   reads: [],
+  drafts: [],
   zaps: [],
   topicStats: [],
   dmContacts: [],
@@ -604,7 +608,32 @@ export const fetchLeaderboardThread = (
   });
 }
 
-const pageResolve = (page: MegaFeedPage) => {
+export const fetchPeople = (
+  pubkeys: string[],
+  subId: string,
+) => {
+  return new Promise<MegaFeedResults>((resolve) => {
+    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        content && updateFeedPage(page, content);
+      },
+      onEose: () => {
+        unsub();
+        resolve(pageResolve(page));
+      },
+      onNotice: (_, reason) => {
+        unsub();
+        resolve({ ...emptyMegaFeedResults() });
+      }
+    });
+
+    getUserProfiles(pubkeys, subId);
+  });
+}
+
+export const pageResolve = (page: MegaFeedPage) => {
 
   // If there are reposts that have empty content,
   // we need to add the content manualy
@@ -625,6 +654,7 @@ const pageResolve = (page: MegaFeedPage) => {
   const users = convertToUsersMega(page);
   const notes = convertToNotesMega(page);
   const reads = convertToReadsMega(page);
+  const drafts = convertToDraftsMega(page);
   const zaps = convertToZapsMega(page);
   const topicStats = convertToTopicStatsMega(page);
   const dmContacts = convertToContactsMega(page);
@@ -637,6 +667,7 @@ const pageResolve = (page: MegaFeedPage) => {
     users,
     notes,
     reads,
+    drafts,
     zaps,
     topicStats,
     dmContacts,
@@ -654,7 +685,7 @@ const pageResolve = (page: MegaFeedPage) => {
   };
 }
 
-const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
+export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
   if (content.kind === Kind.FeedRange) {
     const feedRange: FeedRange = JSON.parse(content.content || '{}');
 
@@ -694,6 +725,13 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
     page.reads.push({ ...message });
     return;
   }
+
+  if ([Kind.Draft].includes(content.kind)) {
+      const message = content as NostrNoteContent;
+
+      page.drafts.push({ ...message });
+      return;
+    }
 
   if (content.kind === Kind.NoteStats) {
     const statistic = content as NostrStatsContent;
@@ -747,7 +785,15 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
       }
     }
 
-    const eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+    let eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'a') || [])[1];
+
+    if (eventId && eventId.includes(':')) {
+      const [kind, pubkey, identifier] = eventId.split(':');
+
+      eventId = nip19.naddrEncode({ kind, pubkey, identifier })
+    } else {
+      eventId = (zapInfo.tags.find((t: string[]) => t[0] === 'e') || [])[1];
+    }
 
     const topZap: TopZap = {
       id: zapInfo.id,
@@ -756,6 +802,7 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
       message: zapInfo.content,
       eventId,
     };
+
 
     const oldZaps = page.topZaps[eventId];
 
@@ -771,6 +818,7 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
     const newZaps = [ ...oldZaps, { ...topZap }].sort((a, b) => b.amount - a.amount);
 
     page.topZaps[eventId] = [ ...newZaps ];
+
     return;
   }
 
@@ -855,11 +903,16 @@ const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) => {
 };
 
 export const filterAndSortNotes = (notes: PrimalNote[], paging: PaginationInfo) => {
+  let processedIds: string[] = [];
   return paging.elements.reduce<PrimalNote[]>(
     (acc, id) => {
       let note = notes.find(n => [n.id, n.repost?.note.id].includes(id));
 
-      return note ? [ ...acc, { ...note } ] : acc;
+      if (!note || processedIds.includes(note.id)) return acc;
+
+      processedIds.push(note.id);
+
+      return [ ...acc, { ...note } ];
     },
     [],
   );
@@ -869,6 +922,17 @@ export const filterAndSortReads = (reads: PrimalArticle[], paging: PaginationInf
   return paging.elements.reduce<PrimalArticle[]>(
     (acc, id) => {
       const read = reads.find(n => n.id === id);
+
+      return read ? [ ...acc, { ...read } ] : acc;
+    },
+    [],
+  );
+}
+
+export const filterAndSortDrafts = (drafts: PrimalDraft[], paging: PaginationInfo) => {
+  return paging.elements.reduce<PrimalDraft[]>(
+    (acc, id) => {
+      const read = drafts.find(n => n.id === id);
 
       return read ? [ ...acc, { ...read } ] : acc;
     },

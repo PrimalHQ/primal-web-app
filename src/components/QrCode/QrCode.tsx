@@ -16,6 +16,8 @@ const QrCode: Component<{
   image?: string,
   imageSize?: number,
   type?: string,
+  width?: number,
+  height?: number,
 }> = (props) => {
   let qrSlot: HTMLDivElement | undefined;
 
@@ -37,16 +39,16 @@ const QrCode: Component<{
 
   createEffect(() => {
     const qrCode = new QRCodeStyling({
-      width: 280,
-      height: 280,
+      width: props.width || 280,
+      height: props.height || 280,
       type: "svg",
       data: props.data,
-      margin: 1,
+      margin: 0,
       image: qrType(),
       qrOptions: {
         typeNumber: 0,
         mode: "Byte",
-        errorCorrectionLevel :"Q",
+        errorCorrectionLevel: props.ecl || "Q",
       },
       imageOptions: {
         hideBackgroundDots: false,
@@ -54,7 +56,7 @@ const QrCode: Component<{
         margin: 0,
       },
       dotsOptions:{
-        type: "rounded",
+        type: "dots",
         color: 'black',
       },
       cornersSquareOptions: {
@@ -62,7 +64,7 @@ const QrCode: Component<{
         color: 'black',
       },
       cornersDotOptions: {
-        type: 'square',
+        type: 'dot',
         color: 'black',
       },
       backgroundOptions: {

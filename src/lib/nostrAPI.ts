@@ -1,3 +1,5 @@
+import { unwrap } from "solid-js/store";
+import { accountStore, dequeUnsignedEvent, enqueUnsignedEvent } from "../stores/accountStore";
 import {
   NostrExtension,
   NostrRelayEvent,
@@ -7,6 +9,8 @@ import {
   SendPaymentResponse,
   WebLnExtension,
  } from "../types/primal";
+import { uuidv4 } from "../utils";
+import { PrimalNip46 } from "./PrimalNip46";
 import { PrimalNostr } from "./PrimalNostr";
 
 
@@ -16,7 +20,7 @@ type QueueItem = {
   reject: (reason: any) => void,
 };
 
-class Queue {
+export class Queue {
   #items: QueueItem[];
   #pendingPromise: boolean;
 
@@ -56,6 +60,10 @@ class Queue {
     return true;
   }
 
+  abortCurrent() {
+    return this.#items.shift();
+  }
+
   get size() {
     return this.#items.length;
   }
@@ -75,26 +83,79 @@ const enqueueWebLn = async <T>(action: (webln: WebLnExtension) => Promise<T>) =>
 }
 
 const enqueueNostr = async <T>(action: (nostr: NostrExtension) => Promise<T>) => {
-  const win = window as NostrWindow;
-  const nostr = win.nostr || PrimalNostr();
+  const loginType = accountStore.loginType;
+
+  if (['none', 'guest', 'npub'].includes(loginType)) throw('no_login');
+
+  let nostr: NostrExtension | undefined;
+
+  if (loginType === 'extension') {
+    const win = window as NostrWindow;
+    nostr = win.nostr;
+
+    if (nostr === undefined) {
+      throw('no_nostr_extension');
+    }
+  }
+
+  if (loginType === 'local') {
+    nostr = PrimalNostr();
+
+    if (nostr === undefined) {
+      throw('no_nostr_local');
+    }
+  }
+
+  if (loginType === 'nip46') {
+    nostr = PrimalNip46();
+
+    if (nostr === undefined) {
+      throw('no_nostr_nip46');
+    }
+  }
 
   if (nostr === undefined) {
-    throw('no_nostr_extension');
+    throw('unknown_login');
   }
 
   return await eventQueue.enqueue<T>(() => action(nostr));
 }
 
+export const SIGN_TIMEOUT = 12_000;
+
+export const timeoutPromise = (timeout = 8_000) => {
+  return new Promise((_resolve, reject) => {
+    setTimeout(() => {
+      reject('promise_timeout');
+    }, timeout);
+  });
+}
+
 export const signEvent = async (event: NostrRelayEvent) => {
+  const tempId = event.id || `${uuidv4()}`;
   try {
     return await enqueueNostr<NostrRelaySignedEvent>(async (nostr) => {
       try {
-        return await nostr.signEvent(event);
+        const signed = await Promise.race([
+          nostr.signEvent(unwrap(event)),
+          timeoutPromise(),
+        ]) as NostrRelaySignedEvent;
+        // const signed = await nostr.signEvent(event);
+
+        dequeUnsignedEvent(unwrap(event), tempId);
+        return signed;
       } catch(reason) {
         throw(reason);
       }
     })
-  } catch (reason) {
+  } catch (reason: any) {
+    eventQueue.abortCurrent();
+
+    if (reason === 'user rejected' || reason?.message?.includes('denied') || reason?.message?.includes('reject')) {
+      dequeUnsignedEvent(unwrap(event), tempId);
+      throw(reason);
+    }
+    enqueUnsignedEvent(unwrap(event), tempId);
     throw(reason);
   }
 };

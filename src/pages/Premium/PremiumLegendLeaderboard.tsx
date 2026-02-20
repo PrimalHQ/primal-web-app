@@ -1,38 +1,12 @@
 import { Component, createEffect, createSignal, For, Match, on, Show, Switch } from 'solid-js';
 
 import styles from './Premium.module.scss';
-import PageCaption from '../../components/PageCaption/PageCaption';
-import PageTitle from '../../components/PageTitle/PageTitle';
-import StickySidebar from '../../components/StickySidebar/StickySidebar';
-import Wormhole from '../../components/Wormhole/Wormhole';
-import Search from '../Search';
-import PremiumSidebarActive from './PremiumSidebarActive';
-import PremiumSidebarInactve from './PremiumSidebarInactive';
-import { useIntl } from '@cookbook/solid-intl';
-import { premium as t } from '../../translations';
 
-import foreverPremium from '../../assets/images/premium_forever_small.png';
-import privateBetaBuilds from '../../assets/images/private_beta_builds.png';
-import customProfile from '../../assets/images/preston_small.png';
-import heart from '../../assets/images/heart.png';
-
-import { appStoreLink, playstoreLink } from '../../constants';
-import { A, useNavigate } from '@solidjs/router';
-import ButtonLink from '../../components/Buttons/ButtonLink';
-import ButtonPremium from '../../components/Buttons/ButtonPremium';
-import { PremiumStore } from './Premium';
-import PremiumUserInfo from './PremiumUserInfo';
-import { useAccountContext } from '../../contexts/AccountContext';
-import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
+import { A } from '@solidjs/router';
 import { createStore } from 'solid-js/store';
-import { fetchLeaderboard, LegendCustomizationConfig, LegendCustomizationStyle } from '../../lib/premium';
-import CheckBox2 from '../../components/Checkbox/CheckBox2';
+import { LegendCustomizationConfig } from '../../lib/premium';
 import { CohortInfo, useAppContext } from '../../contexts/AppContext';
-import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
-import { TextField } from '@kobalte/core/text-field';
-import { useToastContext } from '../../components/Toaster/Toaster';
 import { APP_ID } from '../../App';
-import { subsTo } from '../../sockets';
 import { emptyPaging, fetchLeaderboardThread, filterAndSortLeaderboard, LeaderboardInfo, PaginationInfo } from '../../megaFeeds';
 import { PrimalUser } from '../../types/primal';
 import { userName } from '../../stores/profile';

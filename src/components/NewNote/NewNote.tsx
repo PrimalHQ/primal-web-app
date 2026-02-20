@@ -1,15 +1,12 @@
 import { Component } from "solid-js";
-import { useAccountContext } from "../../contexts/AccountContext";
 import { SendNoteResult } from "../../types/primal";
 import Avatar from "../Avatar/Avatar";
 import EditBox from "./EditBox/EditBox";
 import styles from  "./NewNote.module.scss";
+import { accountStore, hideNewNoteForm } from "../../stores/accountStore";
 
 const NewNote: Component<{ onSuccess: (note: SendNoteResult) => void}> = (props) => {
-
-  const account = useAccountContext();
-
-  const activeUser = () => account?.activeUser;
+  const activeUser = () => accountStore.activeUser;
 
   return (
     <>
@@ -25,8 +22,8 @@ const NewNote: Component<{ onSuccess: (note: SendNoteResult) => void}> = (props)
             <div class={styles.rightSide}>
               <EditBox
                 onSuccess={props.onSuccess}
-                open={account?.showNewNoteForm}
-                onClose={account?.actions?.hideNewNoteForm}
+                open={accountStore.showNewNoteForm}
+                onClose={hideNewNoteForm}
               />
             </div>
           </div>

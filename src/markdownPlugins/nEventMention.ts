@@ -1,5 +1,5 @@
 
-import { InputRuleMatch, mergeAttributes, Node, nodePasteRule, NodeViewRenderer, Range } from '@tiptap/core';
+import { Editor, InputRuleMatch, mergeAttributes, Node, nodePasteRule, NodeViewRenderer, Range } from '@tiptap/core';
 import type { Node as ProsemirrorNode } from '@tiptap/pm/model';
 import type { MarkdownSerializerState } from 'prosemirror-markdown';
 import { nip19 } from '../lib/nTools';
@@ -15,7 +15,8 @@ export const createInputRuleMatch = <T extends Record<string, unknown>>(
 ): InputRuleMatch => ({ index: match.index!, replaceWith: match[2], text: match[0], match, data })
 
 
-export const findMissingEvent = async (nevent: string) => {
+export const findMissingEvent = async (nevent: string, editor: Editor) => {
+  if (!nevent) return;
   const decode = nip19.decode(nevent);
 
   let id = '';
@@ -43,6 +44,8 @@ export const findMissingEvent = async (nevent: string) => {
       includeEmbeds: true,
       hideFooter: true,
       noLinks: "links",
+      noPlaceholders: true,
+      noLightbox: true,
     })
 
     mentions.forEach(mention => {
@@ -56,6 +59,9 @@ export const findMissingEvent = async (nevent: string) => {
   const el = document.querySelector('.tiptap.ProseMirror');
   el?.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
 
+  setTimeout(() => {
+    editor.chain().focus().enter().run();
+  }, 100)
 }
 
 export type NEventAttributes = {
@@ -96,7 +102,7 @@ export const makeNEventNode = (bech32: string, options?: any) => ({
   attrs: makeNEventAttrs(bech32, options),
 })
 
-export const EVENT_REGEX = /(?<![\w./:?=])(nostr:)?(n(ote|event)1[0-9a-z]+)/g
+export const EVENT_REGEX = /nostr:(n(ote|event)1[qpzry9x8gf2tvdw0s3jn54khce6mua7l]+)/g;
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -112,8 +118,8 @@ declare module '@tiptap/core' {
 export const NEventExtension = Node.create({
   name: 'nevent',
   group: 'block',
-  selectable: true,
-  draggable: true,
+  selectable: false,
+  draggable: false,
   priority: 1000,
 
   addNodeView(): NodeViewRenderer {
@@ -132,7 +138,7 @@ export const NEventExtension = Node.create({
       // Append paragraph to the main div
       // dom.appendChild(contentP);
 
-      findMissingEvent(node.attrs.bech32);
+      findMissingEvent(node.attrs.bech32, editor);
 
       return {
         dom,
@@ -158,7 +164,7 @@ export const NEventExtension = Node.create({
     return {
       markdown: {
         serialize(state: MarkdownSerializerState, node: ProsemirrorNode) {
-          state.write('nostr:' + node.attrs.bech32 + ' ')
+          state.write('nostr:' + node.attrs.bech32 + '\n')
         },
         parse: {},
       },
@@ -197,6 +203,7 @@ export const NEventExtension = Node.create({
       applyNostrPasteRules:
         (text) =>
         ({ tr, state, dispatch }) => {
+          // const text = state.doc.textContent;
           const matches = Array.from(text.matchAll(EVENT_REGEX));
 
           if (matches.length === 0) return false;
@@ -206,11 +213,11 @@ export const NEventExtension = Node.create({
               .sort((a, b) => (b.index || 0) - (a.index || 0))
               .forEach(match => {
                 try {
-                  const attrs = makeNEventAttrs(match[2], this.options);
+                  const attrs = makeNEventAttrs(match[1], this.options);
                   const node = state.schema.nodes[this.name].create(attrs);
 
-                  const start = match.index || 0;
-                  const end = start + match[0].length + 1;
+                  const start = match.index ? match.index-2 : 0;
+                  const end = start + match[0].length;
 
                   tr.replaceWith(start, end, node);
                 } catch (e) {
@@ -224,11 +231,11 @@ export const NEventExtension = Node.create({
       insertNEvent:
         ({ nevent }) =>
         ({ commands }) =>
-          commands.insertContent([makeNEventNode(nevent, this.options), { type: 'text', text: ' '}], { updateSelection: false }),
+          commands.insertContent([makeNEventNode(nevent, this.options)], { updateSelection: false }),
       insertNEventAt:
         (range, { nevent }) =>
         ({ commands }) =>
-          commands.insertContentAt(range, [makeNEventNode(nevent, this.options), { type: 'text', text: ' '}], { updateSelection: false }),
+          commands.insertContentAt(range, [makeNEventNode(nevent, this.options)], { updateSelection: false }),
     }
   },
 

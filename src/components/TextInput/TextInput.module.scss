@@ -95,6 +95,10 @@
 
       &[data-validation="invalid"] {
         border: 1px solid var(--warning-bright);
+
+        .input {
+          padding-inline: 0 !important;
+        }
       }
 
       .inputAfter {

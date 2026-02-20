@@ -16,6 +16,10 @@
   justify-content: center;
   align-items: center;
   margin-inline: 4px;
+
+  &.inline {
+    display: inline-flex;
+  }
 }
 
 .verificationIconL {
@@ -26,6 +30,10 @@
   justify-content: center;
   align-items: center;
   margin-inline: 4px;
+
+  &.inline {
+    display: inline-flex;
+  }
 }
 
 .verifiedIconPrimal {

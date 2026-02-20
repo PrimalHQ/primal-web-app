@@ -28,7 +28,13 @@ const Feed: Component<{ scope: string, timeframe: string}> = () => {
         fallback={<Loader />}
       >
         <For each={explore?.notes} >
-          {(note) => <Note note={note} shorten={true} />}
+          {(note) => <Note
+            note={note}
+            shorten={true}
+            onRemove={(id: string) => {
+              explore?.actions.removeEvent(id, 'notes');
+            }}
+          />}
         </For>
         <Paginator loadNextPage={explore?.actions.fetchNextPage} />
       </Show>

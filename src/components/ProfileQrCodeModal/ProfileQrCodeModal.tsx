@@ -27,17 +27,17 @@ const ProfileQrCodeModal: Component<{
   const profileData = () => Object.entries({
     pubkey: {
       title: intl.formatMessage(tProfile.qrModal.pubkey),
-      data: `nostr:${props.profile.npub || hexToNpub(props.profile.pubkey)}`,
-      dataLabel: props.profile.npub || hexToNpub(props.profile.pubkey) || '',
+      data: `nostr:${props.profile?.npub || hexToNpub(props.profile?.pubkey)}`,
+      dataLabel: props.profile?.npub || hexToNpub(props.profile?.pubkey) || '',
       type: 'nostr',
-      test: props.profile.npub || hexToNpub(props.profile.pubkey),
+      test: props.profile?.npub || hexToNpub(props.profile?.pubkey),
     },
     lnAddress: {
       title: intl.formatMessage(tProfile.qrModal.ln),
-      data: `lightning:${props.profile.lud16 || props.profile.lud06}`,
-      dataLabel: props.profile.lud16 || props.profile.lud06 || '',
+      data: `lightning:${props.profile?.lud16 || props.profile?.lud06}`,
+      dataLabel: props.profile?.lud16 || props.profile?.lud06 || '',
       type: 'lightning',
-      test: props.profile.lud16 || props.profile.lud06,
+      test: props.profile?.lud16 || props.profile?.lud06,
     }
   });
 

@@ -5,12 +5,40 @@
   width: 100%;
   min-height: 200px;
   padding: 20px;
+  padding-top: 16px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
   gap: 12px;
   /* border:1px solid red; */
+}
+
+.noArticlePhone {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  padding-top: 48px;
+  padding-inline: 20px;
+  border-top: 1px solid var(--devider);
+
+}
+
+.caption {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-top: 48px;
+
+  p {
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 20px;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
 }
 
 .toolbar {
@@ -25,7 +53,7 @@
   >div {
     /* position:fixed; */
     display: flex;
-    gap: 8px;
+    gap: 6px;
     width: 640px;
     height: 64px;
     justify-content: flex-start;
@@ -154,7 +182,7 @@
   }
 
   hr {
-    border-top:1px solid var(--subtile-devider);
+    border-top: 1px solid var(--subtile-devider);
     margin-top: 10px;
     margin-bottom: 20px;
   }
@@ -730,6 +758,7 @@ input.textInput {
 .noTitleImagePlaceholder {
   width: 100%;
   height: 300px;
+  background-color: var(--background-sheet);
   border: 1px solid var(--devider);
   border-radius: 12px;
 
@@ -966,12 +995,14 @@ input.textInput {
   .sidebarOptions {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     gap: 16px;
     .caption {
       color: var(--text-secondary);
       font-size: 16px;
       font-weight: 400;
       line-height: 20px;
+      margin-top: 0;
     }
   }
 
@@ -979,11 +1010,13 @@ input.textInput {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    align-items: flex-start;
     .caption {
       color: var(--text-secondary);
       font-size: 16px;
       font-weight: 400;
       line-height: 20px;
+      margin-top: 0;
     }
     .toolButton {
       border-radius: 99px;
@@ -1010,11 +1043,13 @@ input.textInput {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    align-items: flex-start;
     .caption {
       color: var(--text-secondary);
       font-size: 16px;
       font-weight: 400;
       line-height: 20px;
+      margin-top: 0;
     }
     .status {
       margin-top: -12px;
@@ -1022,6 +1057,25 @@ input.textInput {
       font-size: 12px;
       font-weight: 400;
       line-height: 20px;
+
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 6px;
+
+      .statusBulb {
+        width: 5px;
+        height: 5px;
+        border-radius: 99px;
+
+        &.savedBulb {
+          background-color: var(--success-bright);
+        }
+        &.unsavedBulb {
+          background-color: var(--warning-bright-two);
+        }
+      }
+
     }
     .toolButton {
       border-radius: 99px;
@@ -1092,4 +1146,134 @@ input.textInput {
   justify-content: center;
   align-items: center;
   margin-top: 36px;
+}
+
+.tableOptions {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 25;
+  background-color: var(--background-input);
+  padding: 8px 4px;
+  border-radius: 8px;
+  border: 1px solid var(--subtile-devider);
+  width: 220px;
+
+  button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    margin: 0;
+    padding: 0;
+    outline: none;
+    border: none;
+    border-radius: 0;
+    background: none;
+    height: 36px;
+    padding-inline: 8px;
+
+    &:hover {
+      background-color: var(--subtile-devider);
+      border-radius: 4px;
+    }
+  }
+}
+
+.delTableIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--warning-bright);
+  -webkit-mask: url(../assets/icons/table/del_table.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/del_table.svg) no-repeat 0px / 18px;
+}
+
+.colAfterIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/col_after.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/col_after.svg) no-repeat 0px / 18px;
+}
+
+.colBeforeIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/col_before.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/col_before.svg) no-repeat 0px / 18px;
+}
+
+.rowBellowIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/row_below.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/row_below.svg) no-repeat 0px / 18px;
+}
+
+.rowAboveIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/row_above.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/row_above.svg) no-repeat 0px / 18px;
+}
+
+.mergeIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/merge.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/merge.svg) no-repeat 0px / 18px;
+}
+
+.splitIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/split.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/split.svg) no-repeat 0px / 18px;
+}
+
+.delRowIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-image: url(../assets/icons/table/del_row_dark.svg);
+  background-size: 18px;
+  /* background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/del_row_dark.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/del_row_dark.svg) no-repeat 0px / 18px; */
+}
+
+.delColIcon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin: 0px 0px;
+  background-image: url(../assets/icons/table/del_col_dark.svg);
+  background-size: 18px;
+  /* background-color: var(--text-primary);
+  -webkit-mask: url(../assets/icons/table/head_col.svg) no-repeat 0px / 18px;
+  mask: url(../assets/icons/table/head_col.svg) no-repeat 0px / 18px; */
 }

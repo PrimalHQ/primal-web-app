@@ -6,7 +6,6 @@ import ButtonSecondary from '../../components/Buttons/ButtonSecondary';
 import { PremiumStore } from './Premium';
 
 import styles from './Premium.module.scss';
-import PremiumSubscriptionOptions from './PremiumSubscriptionOptions';
 import PremiumSidebarActive from './PremiumSidebarActive';
 import TextInput from '../../components/TextInput/TextInput';
 import { RadioGroup } from '@kobalte/core/radio-group';

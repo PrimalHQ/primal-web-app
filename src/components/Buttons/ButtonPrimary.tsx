@@ -9,6 +9,7 @@ const ButtonPrimary: Component<{
   onClick?: (e: MouseEvent) => void,
   children?: JSXElement,
   disabled?: boolean,
+  loading?: boolean,
   type?: 'button' | 'submit' | 'reset' | undefined,
 }> = (props) => {
   return (
@@ -19,7 +20,12 @@ const ButtonPrimary: Component<{
       disabled={props.disabled}
       type={props.type}
     >
-      {props.children}
+      <Show
+        when={props.loading}
+        fallback={props.children}
+      >
+        <div class={styles.spinner}></div>
+      </Show>
     </Button>
   )
 }

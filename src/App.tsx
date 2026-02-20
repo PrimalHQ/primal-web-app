@@ -1,5 +1,4 @@
-import { Component, onCleanup, onMount } from 'solid-js';
-import { AccountProvider } from './contexts/AccountContext';
+import { Component, createEffect, on, onCleanup, onMount } from 'solid-js';
 import { connect, disconnect } from './sockets';
 import Toaster from './components/Toaster/Toaster';
 import { HomeProvider } from './contexts/HomeContext';
@@ -16,27 +15,79 @@ import { AppProvider } from './contexts/AppContext';
 import { ReadsProvider } from './contexts/ReadsContext';
 import { AdvancedSearchProvider } from './contexts/AdvancedSearchContext';
 import { DMProvider } from './contexts/DMContext';
+import 'media-chrome';
+import "media-chrome/media-theme-element";
+import 'hls-video-element';
+import 'videojs-video-element';
+import { accountStore, dequeEvent, enqueEvent, refreshQueue, startEventQueueMonitor, updateRelays } from './stores/accountStore';
+import { triggerImportEvents } from './lib/notes';
 
 
 export const version = import.meta.env.PRIMAL_VERSION;
 export const APP_ID = `web_${version}_${Math.floor(Math.random()*10000000000)}`;
 
+export const relayWorker = new Worker(
+  new URL(`../relayWorker.ts`, import.meta.url),
+  {
+    type: 'module'
+  },
+);
+
+
 const App: Component = () => {
 
   onMount(() => {
     connect();
+    initRelayWorker();
   });
 
   onCleanup(() => {
     disconnect();
+    relayWorker?.terminate();
   });
+
+  createEffect(() => {
+    const relays = Object.keys(accountStore.relaySettings);
+
+    if (relays.length === 0) {
+      setTimeout(() => {
+        updateRelays();
+      }, 200);
+    }
+  });
+
+  const initRelayWorker = () => {
+    relayWorker.addEventListener('message', (e: MessageEvent) => {
+      const message = e.data;
+
+      if (message.type === 'ENQUE_EVENT' && message.event) {
+        enqueEvent(message.event);
+        startEventQueueMonitor();
+      }
+
+      if (message.type === 'DEQUE_EVENT' && message.event) {
+        dequeEvent(message.event);
+      }
+
+      if (message.type === 'EVENT_SENT' && message.event) {
+        triggerImportEvents([message.event], `import_event_${message.event.id}_${APP_ID}`);
+      }
+    });
+
+    relayWorker.postMessage({type: 'INIT'});
+  }
+
+  createEffect(on(() => accountStore.eventQueueRetry, (countdown) => {
+    if (countdown > 0) return;
+
+    refreshQueue();
+  }));
 
   return (
     <AppProvider>
       <TranslatorProvider>
         <Toaster>
           <MediaProvider>
-            <AccountProvider>
               <SearchProvider>
                 <AdvancedSearchProvider>
                   <SettingsProvider>
@@ -58,7 +109,6 @@ const App: Component = () => {
                   </SettingsProvider>
                 </AdvancedSearchProvider>
               </SearchProvider>
-            </AccountProvider>
           </MediaProvider>
         </Toaster>
       </TranslatorProvider>
