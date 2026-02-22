@@ -21,6 +21,7 @@ import 'hls-video-element';
 import 'videojs-video-element';
 import { accountStore, dequeEvent, enqueEvent, refreshQueue, startEventQueueMonitor, updateRelays } from './stores/accountStore';
 import { triggerImportEvents } from './lib/notes';
+import { WotProvider } from './contexts/WotContext';
 
 
 export const version = import.meta.env.PRIMAL_VERSION;
@@ -98,7 +99,9 @@ const App: Component = () => {
                             <HomeProvider>
                               <ExploreProvider>
                                 <ThreadProvider>
-                                  <AppRouter />
+                                  <WotProvider>
+                                    <AppRouter />
+                                  </WotProvider>
                                 </ThreadProvider>
                               </ExploreProvider>
                             </HomeProvider>

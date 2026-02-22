@@ -36,6 +36,8 @@
       align-items: center;
 
       .name {
+        display: flex;
+        align-items: center;
         color: var(--text-secondary-2);
         font-weight: 800;
         max-width: 216px;

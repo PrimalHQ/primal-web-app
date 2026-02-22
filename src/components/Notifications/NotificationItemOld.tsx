@@ -61,6 +61,7 @@ import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import ArticleCompactPreview from '../ArticlePreview/ArticleCompactPreview';
 import ArticleHighlight from '../ArticleHighlight/ArticleHighlight';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
+import WotBadge from '../WotBadge/WotBadge';
 import { date } from '../../lib/dates';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { StreamingData } from '../../lib/streaming';
@@ -370,6 +371,9 @@ const NotificationItemOld: Component<NotificationItemProps> = (props) => {
               <span class={styles.firstUserName}>{userName(user())}</span>
               <div class={styles.verification}>
                 <VerificationCheck user={user()} />
+                <Show when={user()?.pubkey}>
+                  <WotBadge pubkey={user()!.pubkey} />
+                </Show>
               </div>
             </div>
             <div class={styles.restUsers}>{typeDescription()}</div>

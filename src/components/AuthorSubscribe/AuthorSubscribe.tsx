@@ -13,6 +13,7 @@ import { isDev } from '../../utils';
 import AuthorSubscribeSkeleton from '../Skeleton/AuthorSubscribeSkeleton';
 import { Tier, TierCost } from '../SubscribeToAuthorModal/SubscribeToAuthorModal';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
+import WotBadge from '../WotBadge/WotBadge';
 
 import styles from './AuthorSubscribe.module.scss';
 import { accountStore } from '../../stores/accountStore';
@@ -127,6 +128,9 @@ const AuthorSubscribe: Component<{
               <div class={styles.userName}>
                 {userName(props.author)}
                 <VerificationCheck user={props.author} />
+                <Show when={props.author?.pubkey}>
+                  <WotBadge pubkey={props.author!.pubkey} />
+                </Show>
               </div>
               <Show when={props.author?.nip05}>
                 <div class={styles.nip05}>

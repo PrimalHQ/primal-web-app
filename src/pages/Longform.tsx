@@ -25,6 +25,7 @@ import NoteImage from "../components/NoteImage/NoteImage";
 import { nip19 } from "../lib/nTools";
 import { sortByRecency, convertToNotes, convertToArticles } from "../stores/note";
 import VerificationCheck from "../components/VerificationCheck/VerificationCheck";
+import WotBadge from "../components/WotBadge/WotBadge";
 import BookmarkArticle from "../components/BookmarkNote/BookmarkArticle";
 import NoteContextTrigger from "../components/Note/NoteContextTrigger";
 import { CustomZapInfo, useAppContext } from "../contexts/AppContext";
@@ -977,6 +978,9 @@ const Longform: Component< { naddr: string } > = (props) => {
                       <div class={styles.userName}>
                         {userName(store.article?.user)}
                         <VerificationCheck user={store.article?.user} />
+                        <Show when={store.article?.user?.pubkey}>
+                          <WotBadge pubkey={store.article!.user.pubkey} />
+                        </Show>
                       </div>
                       <Show when={store.article?.user.nip05}>
                         <div class={styles.nip05}>

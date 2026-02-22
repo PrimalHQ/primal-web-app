@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal, Show } from 'solid-js';
+import { Component, createSignal, Show } from 'solid-js';
 import { MenuItem, NostrRelaySignedEvent, PrimalNote } from '../../../types/primal';
 
 import styles from './NoteHeader.module.scss';
@@ -16,6 +16,7 @@ import { hexToNpub } from '../../../lib/keys';
 import { hookForDev } from '../../../lib/devTools';
 import { useAppContext } from '../../../contexts/AppContext';
 import { accountStore, addToMuteList, removeFromMuteList } from '../../../stores/accountStore';
+import WotBadge from '../../WotBadge/WotBadge';
 
 const NoteHeader: Component<{
   note: PrimalNote,
@@ -226,6 +227,7 @@ const NoteHeader: Component<{
             <VerificationCheck
               user={props.note.user}
             />
+            <WotBadge pubkey={props.note.post.pubkey} />
           </div>
           <Show
             when={props.note.user?.nip05}

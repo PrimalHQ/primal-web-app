@@ -9,6 +9,7 @@ import Avatar from '../../components/Avatar/Avatar';
 import Paginator from '../../components/Paginator/Paginator';
 import FollowButton from '../../components/FollowButton/FollowButton';
 import VerificationCheck from '../../components/VerificationCheck/VerificationCheck';
+import WotBadge from '../../components/WotBadge/WotBadge';
 import { humanizeNumber } from '../../lib/stats';
 import { useAppContext } from '../../contexts/AppContext';
 import { accountStore } from '../../stores/accountStore';
@@ -72,6 +73,7 @@ const ExplorePeople: Component<{ open?: boolean }> = (props) => {
                     <div class={styles.userName}>
                       {userName(user)}
                       <VerificationCheck user={user} />
+                      <WotBadge pubkey={user.pubkey} />
                     </div>
                     <Show when={user.nip05}>
                       <div class={styles.nip05}>

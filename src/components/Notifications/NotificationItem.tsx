@@ -66,6 +66,7 @@ import { truncateNumber } from '../../lib/notifications';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import { useSettingsContext } from '../../contexts/SettingsContext';
 import { StreamingData } from '../../lib/streaming';
+import WotBadge from '../WotBadge/WotBadge';
 
 const typeIcons: Record<string, string> = {
   [NotificationType.NEW_USER_FOLLOWED_YOU]: userFollow,
@@ -353,6 +354,9 @@ const NotificationItem: Component<NotificationItemProps> = (props) => {
               <span class={styles.firstUserName}>{firstUserName()}</span>
               <div class={styles.verification}>
                 <VerificationCheck user={sortedUsers()[0]} />
+                <Show when={sortedUsers()[0]?.pubkey}>
+                  <WotBadge pubkey={sortedUsers()[0].pubkey} />
+                </Show>
               </div>
             </div>
             <div class={styles.restUsers}>{typeDescription()}</div>

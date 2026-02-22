@@ -27,6 +27,8 @@
         padding-left: 8px;
 
         .name {
+          display: flex;
+          align-items: center;
           color: var(--text-primary);
           font-size: 16px;
           font-weight: 700;

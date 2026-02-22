@@ -9,6 +9,8 @@ import FollowButton from '../FollowButton/FollowButton';
 
 import styles from './PeopleList.module.scss';
 import { accountStore } from '../../stores/accountStore';
+import { useWotContext } from '../../contexts/WotContext';
+import WotBadge from '../WotBadge/WotBadge';
 
 
 const MentionedPerson: Component<{
@@ -17,6 +19,7 @@ const MentionedPerson: Component<{
   noAbout?: boolean,
 }> = (props) => {
   const app = useAppContext();
+  const wot = useWotContext();
 
   return (
     <A href={app?.actions.profileLink(props.person?.npub) || ''} class={styles.mentionedPerson}>
@@ -28,6 +31,9 @@ const MentionedPerson: Component<{
         <div class={styles.content}>
           <div class={styles.name}>
             {authorName(props.person)}
+            <Show when={wot?.isConnected}>
+              <WotBadge pubkey={props.person?.pubkey} variant="minimal" />
+            </Show>
           </div>
           <div class={styles.verification} title={props.person?.nip05}>
             <Show when={props.person?.nip05}>

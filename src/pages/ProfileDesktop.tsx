@@ -38,6 +38,7 @@ import { APP_ID } from '../App';
 import ProfileTabs from '../components/ProfileTabs/ProfileTabs';
 import ButtonSecondary from '../components/Buttons/ButtonSecondary';
 import VerificationCheck from '../components/VerificationCheck/VerificationCheck';
+import WotBadge from '../components/WotBadge/WotBadge';
 
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import NoteImage from '../components/NoteImage/NoteImage';
@@ -871,6 +872,10 @@ const ProfileDesktop: Component = () => {
                           </div>
                         </Show>
 
+                        <Show when={profile?.profileKey}>
+                          <WotBadge pubkey={profile!.profileKey!} />
+                        </Show>
+
                         <Show when={isVisibleLegend()}>
                           <PremiumCohortInfo
                             user={profile?.userProfile}
@@ -962,6 +967,10 @@ const ProfileDesktop: Component = () => {
                           <div class={styles.vc}>
                             <VerificationCheck user={profile?.userProfile} large={true} />
                           </div>
+                        </Show>
+
+                        <Show when={profile?.profileKey}>
+                          <WotBadge pubkey={profile!.profileKey!} />
                         </Show>
 
                         <Show when={isVisibleLegend()}>

@@ -8,6 +8,7 @@ import { authorName, nip05Verification } from '../../stores/profile';
 import { hookForDev } from '../../lib/devTools';
 import { date } from '../../lib/dates';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
+import WotBadge from '../WotBadge/WotBadge';
 
 const NoteAuthorInfo: Component<{
   author: PrimalUser,
@@ -28,6 +29,8 @@ const NoteAuthorInfo: Component<{
       <VerificationCheck user={props.author} fallback={
         <div class={styles.verificationFailed}></div>
       } />
+
+      <WotBadge pubkey={props.author.pubkey} />
 
       <Show
         when={props.author.nip05}

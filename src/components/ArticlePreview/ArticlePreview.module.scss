@@ -43,19 +43,17 @@
       gap: 4px;
 
       .userName {
+        display: flex;
+        align-items: center;
         color: var(--text-secondary);
         font-family: Nacelle;
         font-size: 14px;
         font-weight: 700;
         line-height: 14px;
-
         max-width: 218px;
-
         overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
-        line-clamp: 1;
-        -webkit-box-orient: vertical;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
 
       .nip05 {
@@ -809,19 +807,17 @@
       gap: 4px;
 
       .userName {
+        display: flex;
+        align-items: center;
         color: var(--text-secondary);
         font-family: Nacelle;
         font-size: 14px;
         font-weight: 700;
         line-height: 14px;
-
         max-width: 218px;
-
         overflow: hidden;
-        display: -webkit-box;
-        -webkit-line-clamp: 1;
-        line-clamp: 1;
-        -webkit-box-orient: vertical;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
 
       .nip05 {

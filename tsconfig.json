@@ -3,7 +3,7 @@
     "strict": true,
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "node", // or whatever works for @cookbook/solid-intl
+    "moduleResolution": "bundler",
     "paths": {
       "nostr-tools/nip46": ["./node_modules/nostr-tools/lib/esm/nip46.js"]
     },

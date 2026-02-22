@@ -1317,3 +1317,164 @@
   gap: 8px;
   margin: 20px;
 }
+
+// Web of Trust styles
+.settingsContentSection {
+  margin-top: 24px;
+}
+
+.settingsContentSectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 20px;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.wotStatus {
+  padding: 12px 16px;
+  background: var(--background-input);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.wotStatusConnected {
+  color: var(--success-color, #22c55e);
+  font-weight: 600;
+}
+
+.wotStatusNotAvailable {
+  color: var(--text-tertiary);
+  font-weight: 600;
+}
+
+.wotStatusChecking {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.wotInstallPrompt {
+  padding: 16px;
+  background: var(--background-input);
+  border-radius: 8px;
+
+  p {
+    margin: 0 0 16px 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+.wotInstallButton {
+  display: inline-block;
+  padding: 10px 20px;
+  background: var(--accent);
+  color: var(--text-primary-button);
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.wotInfo {
+  padding: 16px;
+  background: var(--background-input);
+  border-radius: 8px;
+
+  p {
+    margin: 0 0 16px 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.wotHint {
+  margin-top: 16px !important;
+  font-size: 13px !important;
+  color: var(--text-tertiary) !important;
+  font-style: italic;
+}
+
+.wotGradientSection {
+  margin-bottom: 20px;
+}
+
+.wotGradientLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.wotGradientBar {
+  height: 12px;
+  border-radius: 6px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.wotGradientMarkers {
+  position: relative;
+  height: 28px;
+  margin-top: 4px;
+}
+
+.wotGradientMarker {
+  position: absolute;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.wotMarkerTick {
+  width: 1px;
+  height: 6px;
+  background: var(--text-tertiary);
+}
+
+.wotMarkerLabel {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.wotLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.wotLegendItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.wotBadgeSample {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}

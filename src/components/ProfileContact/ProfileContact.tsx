@@ -14,6 +14,7 @@ import { A } from '@solidjs/router';
 import { humanizeNumber } from '../../lib/stats';
 import { useAppContext } from '../../contexts/AppContext';
 import { accountStore } from '../../stores/accountStore';
+import WotBadge from '../WotBadge/WotBadge';
 
 
 const ProfileContact: Component<{
@@ -34,7 +35,12 @@ const ProfileContact: Component<{
           <Avatar src={props.profile?.picture} size="sm" />
 
           <div class={styles.profileInfo}>
-            <div class={styles.name}>{userName(props.profile)}</div>
+            <div class={styles.name}>
+              {userName(props.profile)}
+              <Show when={props.profile?.pubkey}>
+                <WotBadge pubkey={props.profile!.pubkey} />
+              </Show>
+            </div>
             <div class={styles.nip05}>
               <Show when={props.profile?.nip05}>
                 <span
