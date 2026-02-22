@@ -13,6 +13,7 @@ import { hookForDev } from '../../lib/devTools';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import { useAppContext } from '../../contexts/AppContext';
 import { nip19 } from 'nostr-tools';
+import WotBadge from '../WotBadge/WotBadge';
 
 
 const SmallNote: Component<{ note: PrimalNote, children?: JSXElement, id?: string }> = (props) => {
@@ -97,6 +98,9 @@ const SmallNote: Component<{ note: PrimalNote, children?: JSXElement, id?: strin
         <div class={styles.header}>
           <div class={styles.name} title={nameOfAuthor()}>
             {nameOfAuthor()}
+            <Show when={props.note.user?.pubkey}>
+              <WotBadge pubkey={props.note.user.pubkey} />
+            </Show>
           </div>
           <div class={styles.time}>
             <Show

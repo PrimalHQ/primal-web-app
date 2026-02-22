@@ -7,11 +7,13 @@ import PageCaption from '../../components/PageCaption/PageCaption';
 import { A, useNavigate } from '@solidjs/router';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
 import { accountStore, hasPublicKey, logout } from '../../stores/accountStore';
+import { useExtension } from '../../contexts/WotContext';
 
 const Menu: Component = () => {
 
   const intl = useIntl();
   const navigate = useNavigate();
+  const extension = useExtension();
 
   const version = import.meta.env.PRIMAL_VERSION;
 
@@ -80,6 +82,16 @@ const Menu: Component = () => {
 
         <A href="/settings/network">
           {intl.formatMessage(t.network.title)}
+          <div class={styles.chevron}></div>
+        </A>
+
+        <A href="/settings/wot">
+          {intl.formatMessage(t.webOfTrust.title)}
+          <Show when={extension.isConnected()}>
+            <div class={styles.bubble}>
+              <div></div>
+            </div>
+          </Show>
           <div class={styles.chevron}></div>
         </A>
 

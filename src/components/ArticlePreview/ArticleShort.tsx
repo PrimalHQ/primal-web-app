@@ -9,6 +9,7 @@ import { userName } from '../../stores/profile';
 import { PrimalArticle } from '../../types/primal';
 import { urlEncode } from '../../utils';
 import Avatar from '../Avatar/Avatar';
+import WotBadge from '../WotBadge/WotBadge';
 
 import styles from './ArticlePreview.module.scss';
 import { nip19 } from 'nostr-tools';
@@ -92,7 +93,12 @@ const ArticleShort: Component<{
     >
       <div class={styles.header}>
         <Avatar user={props.article.user} size="micro"/>
-        <div class={styles.userName}>{userName(props.article.user)}</div>
+        <div class={styles.userName}>
+          {userName(props.article.user)}
+          <Show when={props.article.user?.pubkey}>
+            <WotBadge pubkey={props.article.user.pubkey} />
+          </Show>
+        </div>
         <div class={styles.time}>
           &bull;&nbsp;
           {date(props.article.published).label}

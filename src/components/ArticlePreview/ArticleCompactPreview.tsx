@@ -13,6 +13,7 @@ import { urlEncode, uuidv4 } from '../../utils';
 import Avatar from '../Avatar/Avatar';
 import { NoteReactionsState } from '../Note/Note';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
+import WotBadge from '../WotBadge/WotBadge';
 
 import defaultAvatarDark from '../../assets/images/reads_image_dark.png';
 import defaultAvatarLight from '../../assets/images/reads_image_light.png';
@@ -392,6 +393,9 @@ const ArticleCompactPreview: Component<{
             <Avatar user={props.article.user} size="micro"/>
             <div class={styles.userName}>{userName(props.article.user)}</div>
             <VerificationCheck user={props.article.user} />
+            <Show when={props.article.user?.pubkey}>
+              <WotBadge pubkey={props.article.user.pubkey} />
+            </Show>
             <div class={styles.nip05}>{props.article.user?.nip05 || ''}</div>
           </div>
           <div class={styles.time}>

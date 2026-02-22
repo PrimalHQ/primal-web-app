@@ -1979,6 +1979,53 @@ export const settings = {
     defaultMessage: 'Dev Tools',
     description: 'Title of the dev tools section on the settings page',
   },
+  webOfTrust: {
+    title: {
+      id: 'settings.webOfTrust.title',
+      defaultMessage: 'Web of Trust',
+      description: 'Title of the Web of Trust settings sub-page',
+    },
+    description: {
+      id: 'settings.webOfTrust.description',
+      defaultMessage: 'Web of Trust shows trust indicators based on your social graph. Install the nostr-wot browser extension to enable this feature.',
+      description: 'Description of the Web of Trust settings',
+    },
+    extensionStatus: {
+      id: 'settings.webOfTrust.extensionStatus',
+      defaultMessage: 'Extension Status',
+      description: 'Label for extension status section',
+    },
+    connected: {
+      id: 'settings.webOfTrust.connected',
+      defaultMessage: 'Connected',
+      description: 'Status when extension is connected',
+    },
+    notAvailable: {
+      id: 'settings.webOfTrust.notAvailable',
+      defaultMessage: 'Not Available',
+      description: 'Status when extension is not available',
+    },
+    checking: {
+      id: 'settings.webOfTrust.checking',
+      defaultMessage: 'Checking...',
+      description: 'Status when checking for extension',
+    },
+    installExtension: {
+      id: 'settings.webOfTrust.installExtension',
+      defaultMessage: 'Install Extension',
+      description: 'Button to install the extension',
+    },
+    trustDistance: {
+      id: 'settings.webOfTrust.trustDistance',
+      defaultMessage: 'Trust Distance',
+      description: 'Label for trust distance indicator',
+    },
+    trustScore: {
+      id: 'settings.webOfTrust.trustScore',
+      defaultMessage: 'Trust Score',
+      description: 'Label for trust score indicator',
+    },
+  },
   notifications: {
     title: {
       id: 'pages.settings.sections.notifications',

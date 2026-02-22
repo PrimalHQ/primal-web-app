@@ -6,6 +6,8 @@ import Avatar from '../Avatar/Avatar';
 import { nip05Verification, userName } from '../../stores/profile';
 import { DMContact } from '../../megaFeeds';
 import { date } from '../../lib/dates';
+import { useWotContext } from '../../contexts/WotContext';
+import WotBadge from '../WotBadge/WotBadge';
 
 const DirectMessageContact: Component<{
   id?: string,
@@ -13,6 +15,7 @@ const DirectMessageContact: Component<{
   isSelected?: boolean,
   onSelect?: (pubkey: string) => void,
 }> = (props) => {
+  const wot = useWotContext();
 
   const user = () => props.dmContact.user;
   const contactInfo = () => props.dmContact.dmInfo;
@@ -31,6 +34,9 @@ const DirectMessageContact: Component<{
         <div class={styles.firstLine}>
           <div class={styles.senderName}>
             {userName(user())}
+            <Show when={wot?.isConnected}>
+              <WotBadge pubkey={user().pubkey} variant="minimal" />
+            </Show>
           </div>
           <Show when={contactInfo().latest_at > 0}>
             <div class={styles.dotSeparator}></div>

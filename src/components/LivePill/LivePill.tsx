@@ -6,6 +6,7 @@ import { StreamingData } from "../../lib/streaming";
 import { useAppContext } from "../../contexts/AppContext";
 import { date } from "../../lib/dates";
 import { userName } from "../../stores/profile";
+import WotBadge from "../WotBadge/WotBadge";
 
 const LivePill: Component<{
   liveEvent: StreamingData,
@@ -26,7 +27,12 @@ const LivePill: Component<{
       <div class={styles.leftSide}>
         <Avatar user={props.liveAuthor} size="xxs" />
         <div class={styles.eventInfo}>
-          <div class={styles.authorName}>{props.liveEvent?.title || userName(props.liveAuthor)}</div>
+          <div class={styles.authorName}>
+            {props.liveEvent?.title || userName(props.liveAuthor)}
+            <Show when={props.liveAuthor?.pubkey}>
+              <WotBadge pubkey={props.liveAuthor!.pubkey} />
+            </Show>
+          </div>
           <div class={styles.ribbon}>
             <Show
               when={props.liveEvent.status === 'live'}

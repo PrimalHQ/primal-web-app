@@ -12,6 +12,7 @@ import Avatar from "../Avatar/Avatar";
 import styles from  "./ProfileNoteZap.module.scss";
 import { isPhone } from "../../utils";
 import { nip19 } from "nostr-tools";
+import WotBadge from "../WotBadge/WotBadge";
 
 
 const ProfileNoteZap: Component<{
@@ -87,6 +88,9 @@ const ProfileNoteZap: Component<{
         <div class={styles.contentZapPhone} data-zap-id={props.zap.id}>
           <div class={styles.zapSender}>
             <Avatar size="xxs" user={props.zap.sender} />
+            <Show when={typeof props.zap.sender !== 'string' && props.zap.sender?.pubkey}>
+              <WotBadge pubkey={(props.zap.sender as PrimalUser).pubkey} />
+            </Show>
             <div class={styles.amount}>
               <div class={styles.zapIcon}></div>
               <div class={styles.number}>{props.zap.amount.toLocaleString()}</div>
@@ -114,7 +118,10 @@ const ProfileNoteZap: Component<{
           <div class={styles.zapInfo}>
             <A href={app?.actions.profileLink(userNpub(props.zap.sender)) || ''} class={styles.sender}>
               <Avatar size="vs2" user={props.zap.sender} />
-            </A >
+            </A>
+            <Show when={typeof props.zap.sender !== 'string' && props.zap.sender?.pubkey}>
+              <WotBadge pubkey={(props.zap.sender as PrimalUser).pubkey} />
+            </Show>
 
             <div class={styles.data}>
               <div class={styles.amount}>

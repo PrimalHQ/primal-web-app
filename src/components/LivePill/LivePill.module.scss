@@ -19,16 +19,15 @@
     gap: 2px;
 
     .authorName {
+      display: flex;
+      align-items: center;
       color: var(--text-primary);
       font-size: 14px;
       font-weight: 700;
       line-height: 16px;
-
       overflow: hidden;
-      display: -webkit-box;
-      -webkit-line-clamp: 1;
-      line-clamp: 1;
-      -webkit-box-orient: vertical;
+      white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     .ribbon {

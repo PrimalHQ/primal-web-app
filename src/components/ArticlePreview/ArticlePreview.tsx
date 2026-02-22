@@ -16,6 +16,7 @@ import NoteContextTrigger from '../Note/NoteContextTrigger';
 import ArticleFooter from '../Note/NoteFooter/ArticleFooter';
 import NoteTopZapsCompact from '../Note/NoteTopZapsCompact';
 import VerificationCheck from '../VerificationCheck/VerificationCheck';
+import WotBadge from '../WotBadge/WotBadge';
 
 import defaultAvatarDark from '../../assets/images/reads_image_dark.png';
 import defaultAvatarLight from '../../assets/images/reads_image_light.png';
@@ -380,6 +381,9 @@ const ArticlePreview: Component<ArticleProps> = (props) => {
           <Avatar user={props.article.user} size="micro"/>
           <div class={styles.userName}>{userName(props.article.user)}</div>
           <VerificationCheck user={props.article.user} />
+          <Show when={props.article.user?.pubkey}>
+            <WotBadge pubkey={props.article.user.pubkey} />
+          </Show>
           <div class={styles.nip05}>{props.article.user?.nip05 || ''}</div>
         </div>
         <div class={styles.time}>

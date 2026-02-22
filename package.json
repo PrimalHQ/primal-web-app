@@ -75,6 +75,7 @@
     "media-chrome": "4.12.0",
     "medium-zoom": "1.0.8",
     "nostr-tools": "2.17.0",
+    "nostr-wot-sdk": "file:../nostr-wot-sdk",
     "pako": "2.1.0",
     "photoswipe": "5.4.3",
     "photoswipe-dynamic-caption-plugin": "1.2.7",
