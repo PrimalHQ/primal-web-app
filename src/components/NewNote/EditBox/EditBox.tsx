@@ -143,6 +143,7 @@ const EditBox: Component<{
   const [referencedArticles, setReferencedArticles] = createStore<Record<string, FeedPage>>();
 
   const [isConfirmEditorClose, setConfirmEditorClose] = createSignal(false);
+  const [justClosedModal, setJustClosedModal] = createSignal(false);
 
   const [fileToUpload, setFileToUpload] = createSignal<File | undefined>();
 
@@ -672,6 +673,11 @@ const EditBox: Component<{
   });
 
   const onEscape = (e: KeyboardEvent) => {
+    if (justClosedModal()) {
+      setJustClosedModal(false);
+      return;
+    }
+
     if (isConfirmEditorClose()) return;
 
     e.stopPropagation();
@@ -2322,6 +2328,7 @@ const EditBox: Component<{
         }}
         onCancel={() => {
           setConfirmEditorClose(false);
+          setJustClosedModal(true);
           textArea?.focus();
         }}
       />
