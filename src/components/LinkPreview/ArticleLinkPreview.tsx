@@ -52,12 +52,19 @@ const ArticleLinkPreview: Component<{ preview: any, id?: string, bordered?: bool
 
   const [errorCount, setErrorCount] = createSignal(0);
 
+  const hostname = () => {
+    try {
+      return new URL(props.preview.url).hostname;
+    } catch {
+      return "";
+    }
+  }
+
   const onError = (event: any) => {
     if (errorCount() > errorCountLimit) return;
     setErrorCount(v => v + 1);
     const image = event.target;
-    image.onerror = '';
-    image.src = props.preview.images[0];
+    image.style.display = 'none';
     return true;
   };
 
@@ -67,14 +74,24 @@ const ArticleLinkPreview: Component<{ preview: any, id?: string, bordered?: bool
       href={props.preview.url}
       class={klass()}
     >
-      <Show when={errorCount() < errorCountLimit && (image() || props.preview.images[0])}>
-        <img
-          class={styles.previewImage}
-          src={image()?.media_url || props.preview.images[0]}
-          style={`width: 100%; height: ${height()}`}
-          onerror={onError}
-        />
-      </Show>
+      <div class={styles.previewMediaContainer} style="position: relative; width: 100%; overflow: hidden; background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 100%);">
+        <Show 
+          when={errorCount() < errorCountLimit && (image() || props.preview.images[0])}
+          fallback={
+            <div class="fallback-preview" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center;">
+              <div style="font-size: 32px; margin-bottom: 8px;">🔗</div>
+              <div style="font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">{hostname()}</div>
+            </div>
+          }
+        >
+          <img
+            class={styles.previewImage}
+            src={image()?.media_url || props.preview.images[0]}
+            style={`width: 100%; height: ${height()}; object-fit: cover;`}
+            onerror={onError}
+          />
+        </Show>
+      </div>
 
       <div class={styles.previewInfo}>
         <Show when={props.preview.title}>
