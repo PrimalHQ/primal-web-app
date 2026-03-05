@@ -291,6 +291,11 @@ export const actions = {
     defaultMessage: 'Copy Primal link',
     description: 'Label for the copy Primal note link context menu item',
   },
+  keepWebLink: {
+    id: 'actions.keepWebLink',
+    defaultMessage: 'Keep web link',
+    description: 'Toggle label for preserving web links instead of converting to nostr: format',
+  },
   notePostNew: {
     id: 'actions.notePostNew',
     defaultMessage: 'Post',

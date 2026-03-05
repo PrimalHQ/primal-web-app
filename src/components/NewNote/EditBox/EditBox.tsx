@@ -75,6 +75,8 @@ import SimpleArticlePreview from "../../ArticlePreview/SimpleArticlePreview";
 import ArticleHighlight from "../../ArticleHighlight/ArticleHighlight";
 import DOMPurify from "dompurify";
 import { useAppContext } from "../../../contexts/AppContext";
+import { checkForNostrWebLinks, convertNostrWebLinksToNative } from "../../../lib/nostrLinks";
+import CheckBox from "../../Checkbox/CheckBox";
 import UploaderBlossom from "../../Uploader/UploaderBlossom";
 import LiveEventPreview from "../../LiveVideo/LiveEventPreview";
 import { StreamingData, getStreamingEvent } from "../../../lib/streaming";
@@ -126,6 +128,10 @@ const EditBox: Component<{
   const [isEmojiInput, setEmojiInput] = createSignal(false);
   const [emojiQuery, setEmojiQuery] = createSignal('');
   const [emojiResults, setEmojiResults] = createStore<EmojiOption[]>([]);
+
+  const [preserveWebLinks, setPreserveWebLinks] = createSignal(false);
+  const hasNostrWebLinks = () => checkForNostrWebLinks(message());
+  const showWebLinkToggle = () => preserveWebLinks() || hasNostrWebLinks();
 
   const [userRefs, setUserRefs] = createStore<Record<string, PrimalUser>>({});
   const [noteRefs, setNoteRefs] = createStore<Record<string, PrimalNote>>({});
@@ -696,6 +702,7 @@ const EditBox: Component<{
     setEmojiInput(false);
     setEmojiQuery('')
     setEmojiResults(() => []);
+    setPreserveWebLinks(false);
 
     resetUpload();
 
@@ -806,8 +813,12 @@ const EditBox: Component<{
       return `${anythingBefore}nostr:${nprofile}`;
     });
 
+    const finalMessage = preserveWebLinks()
+      ? messageToSend
+      : convertNostrWebLinksToNative(messageToSend);
+
     if (accountStore) {
-      let tags = referencesToTags(messageToSend, relayHints);
+      let tags = referencesToTags(finalMessage, relayHints);
       const rep = props.replyToNote;
 
       // @ts-ignore
@@ -913,7 +924,7 @@ const EditBox: Component<{
       setIsPostingInProgress(true);
 
       const { success, reasons, note } = await sendNote(
-        messageToSend,
+        finalMessage,
         tags,
       );
 
@@ -1579,7 +1590,8 @@ const EditBox: Component<{
     if (delayForMedia) {
       window.clearTimeout(delayForMedia);
     }
-    const msg = sanitize(message());
+    const raw = sanitize(message());
+    const msg = preserveWebLinks() ? raw : convertNostrWebLinksToNative(raw);
 
     delayForMedia = setTimeout(async () => {
       const p = await parseForReferece(msg);
@@ -2053,6 +2065,15 @@ const EditBox: Component<{
             </Show>
           </div>
         </div>
+        <Show when={showWebLinkToggle()}>
+          <div class={styles.webLinkToggle}>
+            <CheckBox
+              checked={preserveWebLinks()}
+              onChange={(v: boolean) => setPreserveWebLinks(v)}
+              label={intl.formatMessage(tActions.keepWebLink)}
+            />
+          </div>
+        </Show>
         <div class={styles.editorDescision}>
           <ButtonPrimary
             onClick={postNote}

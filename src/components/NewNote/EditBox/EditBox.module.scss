@@ -66,6 +66,13 @@
 
 }
 
+.webLinkToggle {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
 .controls {
   position: absolute;
   bottom: 4px;
