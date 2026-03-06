@@ -11,6 +11,16 @@ const LinkPreviewInternal: Component<{ preview: any, id?: string, bordered?: boo
 
   const media = useMediaContext();
 
+  const hostname = () => {
+    try {
+      return new URL(props.preview.url).hostname;
+    } catch {
+      return props.preview.url || '';
+    }
+  };
+
+  const faviconUrl = () => `https://www.google.com/s2/favicons?domain=${hostname()}&sz=32`;
+
   const image = () => {
     const i = media?.actions.getMedia(props.preview.images[0] || '', 'm');
 
@@ -36,8 +46,14 @@ const LinkPreviewInternal: Component<{ preview: any, id?: string, bordered?: boo
     return `${h}px`;
   };
 
+  const hasImage = () => errorCount() < errorCountLimit && (image() || props.preview.images[0]);
+
   const klass = () => {
     let k = image() && ratio() <= 1.2 ? styles.linkPreviewH : styles.linkPreview;
+
+    if (!hasImage()) {
+      k = `${styles.linkPreviewH} ${styles.noImage}`;
+    }
 
     if (props.bordered) {
       k += ` ${styles.bordered}`;
@@ -67,7 +83,19 @@ const LinkPreviewInternal: Component<{ preview: any, id?: string, bordered?: boo
       href={props.preview.url}
       class={klass()}
     >
-      <Show when={errorCount() < errorCountLimit && (image() || props.preview.images[0])}>
+      <Show
+        when={hasImage()}
+        fallback={
+          <div class={styles.noImagePlaceholder}>
+            <img
+              class={styles.fallbackIcon}
+              src={faviconUrl()}
+              alt={hostname()}
+            />
+            <span class={styles.fallbackDomain}>{hostname()}</span>
+          </div>
+        }
+      >
         <img
           class={styles.previewImage}
           src={image()?.media_url || props.preview.images[0]}
@@ -78,9 +106,9 @@ const LinkPreviewInternal: Component<{ preview: any, id?: string, bordered?: boo
 
       <div class={styles.previewInfo}>
         <div class={styles.previewUrlLine}>
-          {/* <Show when={props.preview.url}>
-            <div class={styles.previewUrl}>{props.preview.url}</div>
-          </Show> */}
+          <Show when={hostname()}>
+            <div class={styles.previewUrl}>{hostname()}</div>
+          </Show>
         </div>
 
         <Show when={props.preview.title}>
