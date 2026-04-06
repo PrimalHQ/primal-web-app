@@ -216,6 +216,10 @@ const NoteFooter: Component<{
     e.preventDefault();
     e.stopPropagation();
 
+    if (props.state.liked) {
+      return;
+    }
+
     if (!hasPublicKey()) {
       showGetStarted();
       return;

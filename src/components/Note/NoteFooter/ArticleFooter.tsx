@@ -153,6 +153,10 @@ const ArticleFooter: Component<{
     e.preventDefault();
     e.stopPropagation();
 
+    if (props.state.liked) {
+      return;
+    }
+
     if (!hasPublicKey()) {
       showGetStarted();
       return;
