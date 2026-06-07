@@ -56,7 +56,7 @@ import PremiumManageModal from './PremiumManageModal';
 import PremiumLegendLeaderBoard from './PremiumLegendLeaderboard';
 import PremiumStripeModal from './PremiumStripeModal';
 import PrimalProInfoDialog from './PrimalProInfoDialog';
-import {loadStripe, Stripe} from '@stripe/stripe-js';
+import {loadStripe, Stripe} from '@stripe/stripe-js/pure';
 import PremiumFailModal from './PremiumFailModal';
 import { accountStore, clearPremiumRemider, hasPublicKey, showGetStarted, updateAccountProfile } from '../../stores/accountStore';
 
@@ -176,6 +176,10 @@ const Premium: Component = () => {
   const [stripe, setStripe] = createSignal<Stripe>();
 
   const initStripe = async () => {
+    // Deployments that don't use Primal's hosted card payments (e.g. self-hosted
+    // builds) can set PRIMAL_ENABLE_STRIPE=false to skip loading Stripe.js from
+    // js.stripe.com entirely. Defaults to enabled when the flag is unset.
+    if (import.meta.env.PRIMAL_ENABLE_STRIPE === 'false') return;
     const stripe = await loadStripe('pk_live_51RVHYpFwkeNa1BHGECLthTjCyKDMtxQKCvIELbfjm1eE5yMMSwkJB44zcbioVWDCLhpKpkbL3wVhfWGvp6NTyHjf00TSUW1RVL');
     // @ts-ignore
     setStripe(stripe);
