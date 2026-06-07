@@ -5,7 +5,7 @@ import QrCode from '../../components/QrCode/QrCode';
 import TransactionAmount from '../../components/TransactionAmount/TransactionAmount';
 import { PrimalPremiumSubscription, PremiumStore } from './Premium';
 
-import { Stripe, StripeEmbeddedCheckout } from '@stripe/stripe-js';
+import { Stripe, StripeEmbeddedCheckout } from '@stripe/stripe-js/pure';
 import styles from './Premium.module.scss';
 import { subsTo } from '../../sockets';
 import { subTo } from '../../lib/sockets';
