@@ -15,7 +15,7 @@ import { nip19 } from 'nostr-tools';
 import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
-import { urlEncode } from '../../utils';
+import { getLang, urlEncode } from '../../utils';
 import { accountStore, addToMuteList, hasPublicKey, removeFromMuteList, setShowPin, showGetStarted } from '../../stores/accountStore';
 
 const NoteContextMenu: Component<{
@@ -135,19 +135,39 @@ const NoteContextMenu: Component<{
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalLinkCoppied));
   };
 
+  const noteText = () => {
+    if ([Kind.UserPoll, Kind.ZapPoll].includes(note().msg.kind)) {
+      // @ts-ignore
+      return `${note().question ||''}`;
+    }
+
+    // @ts-ignore
+    return `${note().content || ''}`;
+  };
+
   const copyNoteText = () => {
     if (!props.data) return;
 
-    if ([Kind.UserPoll, Kind.ZapPoll].includes(note().msg.kind)) {
-      // @ts-ignore
-      navigator.clipboard.writeText(`${note().question ||''}`);
-    } else {
-      // @ts-ignore
-      navigator.clipboard.writeText(`${note().content}`);
-    }
-
+    navigator.clipboard.writeText(noteText());
     props.onClose()
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalTextCoppied));
+  };
+
+  const translateNote = () => {
+    if (!props.data) return;
+
+    const text = noteText().trim();
+
+    if (!text) {
+      props.onClose();
+      return;
+    }
+
+    const targetLanguage = (getLang() || 'en').split('-')[0];
+    const translateUrl = `https://translate.google.com/?sl=auto&tl=${encodeURIComponent(targetLanguage)}&text=${encodeURIComponent(text)}&op=translate`;
+
+    window.open(translateUrl, '_blank', 'noopener,noreferrer');
+    props.onClose();
   };
 
   const copyNoteId = () => {
@@ -276,6 +296,11 @@ const NoteContextMenu: Component<{
         label: [Kind.UserPoll, Kind.ZapPoll].includes(props.data?.note?.msg.kind) ? intl.formatMessage(tActions.pollContext.copyText) : intl.formatMessage(tActions.noteContext.copyText),
         action: copyNoteText,
         icon: 'copy_note_text',
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.translate),
+        action: translateNote,
+        icon: 'global',
       },
       {
         label: [Kind.UserPoll, Kind.ZapPoll].includes(props.data?.note?.msg.kind) ? intl.formatMessage(tActions.pollContext.copyId) : intl.formatMessage(tActions.noteContext.copyId),
