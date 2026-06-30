@@ -19,6 +19,7 @@ import { date, veryLongDate } from '../../lib/dates';
 import { isPhone, uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
+import NoteTranslation from './NoteTranslation';
 import { addrRegexG, imageRegexG, linebreakRegex, noteRegex, urlRegexG } from '../../constants';
 import { TranslatorProvider } from '../../contexts/TranslatorContext';
 import { accountStore } from '../../stores/accountStore';
@@ -414,6 +415,13 @@ const Note: Component<NoteProps> = (props) => {
               />
             </div>
 
+            <NoteTranslation
+              note={props.note}
+              width={Math.min(598, window.innerWidth)}
+              margins={isPhone() ? 42 : 1}
+              primary={true}
+            />
+
             <div class={styles.topZaps}>
               <NoteTopZaps
                 topZaps={reactionsState.topZapsFeed}
@@ -557,6 +565,12 @@ const Note: Component<NoteProps> = (props) => {
             />
           </div>
 
+          <NoteTranslation
+            note={props.note}
+            width={window.innerWidth}
+            margins={45}
+          />
+
           <NoteTopZapsCompact
             note={props.note}
             action={() => openReactionModal('zaps')}
@@ -643,6 +657,13 @@ const Note: Component<NoteProps> = (props) => {
                   footerSize="short"
                 />
               </div>
+
+              <NoteTranslation
+                note={props.note}
+                width={Math.min(510, window.innerWidth - 72)}
+                margins={1}
+                footerSize="short"
+              />
 
               <NoteTopZapsCompact
                 note={props.note}
@@ -759,6 +780,13 @@ const Note: Component<NoteProps> = (props) => {
                   footerSize="short"
                 />
               </div>
+
+              <NoteTranslation
+                note={props.note}
+                width={Math.min(508, window.innerWidth - 72)}
+                margins={58}
+                footerSize="short"
+              />
             </div>
           </div>
         </div>

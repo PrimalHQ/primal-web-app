@@ -4,6 +4,7 @@ import { PrimalNote } from '../../../types/primal';
 import ParsedNote from '../../ParsedNote/ParsedNote';
 import NoteFooter from '../NoteFooter/NoteFooter';
 import NoteHeader from '../NoteHeader/NoteHeader';
+import NoteTranslation from '../NoteTranslation';
 
 import styles from './NotePrimary.module.scss';
 
@@ -24,6 +25,8 @@ const NotePrimary: Component<{ note: PrimalNote, id?: string }> = (props) => {
         <div class={styles.message}>
           <ParsedNote note={props.note} width={Math.min(574, window.innerWidth)} />
         </div>
+
+        <NoteTranslation note={props.note} width={Math.min(574, window.innerWidth)} />
 
         <NoteFooter note={props.note} wide={true} />
       </div>

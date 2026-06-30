@@ -1782,6 +1782,59 @@ export const eventQueue = {
   },
 }
 
+export const translation = {
+  translate: {
+    id: 'translation.translate',
+    defaultMessage: 'Translate',
+    description: 'Button label for translating a note',
+  },
+  translating: {
+    id: 'translation.translating',
+    defaultMessage: 'Translating...',
+    description: 'Button label while a note translation is loading',
+  },
+  showTranslation: {
+    id: 'translation.showTranslation',
+    defaultMessage: 'Show translation',
+    description: 'Button label for showing a cached note translation',
+  },
+  showOriginal: {
+    id: 'translation.showOriginal',
+    defaultMessage: 'Show original',
+    description: 'Button label for hiding an inline note translation',
+  },
+  detectedSource: {
+    id: 'translation.detectedSource',
+    defaultMessage: 'Translated from {language}',
+    description: 'Label showing the detected source language',
+  },
+  fromCache: {
+    id: 'translation.fromCache',
+    defaultMessage: 'cached',
+    description: 'Label indicating a translation came from local cache',
+  },
+  configureProvider: {
+    id: 'translation.configureProvider',
+    defaultMessage: 'Configure a translation provider to translate notes.',
+    description: 'Message shown when translation provider settings are missing',
+  },
+  requestFailed: {
+    id: 'translation.requestFailed',
+    defaultMessage: 'Translation failed. Please try again later.',
+    description: 'Message shown when a translation request fails',
+  },
+  genericError: {
+    id: 'translation.genericError',
+    defaultMessage: 'Unable to translate this note.',
+    description: 'Generic translation error message',
+  },
+  settingsLink: {
+    id: 'translation.settingsLink',
+    defaultMessage: 'Translation settings',
+    description: 'Link label to translation settings',
+  },
+};
+
 export const settings = {
   index: {
     title: {
@@ -1856,6 +1909,63 @@ export const settings = {
       id: 'settings.readsFeeds.caption',
       defaultMessage: 'Edit and order your reads page feeds',
       description: 'Caption for reads feed ordering',
+    },
+  },
+  translation: {
+    title: {
+      id: 'settings.translation.title',
+      defaultMessage: 'Translation',
+      description: 'Title of the translation settings sub-page',
+    },
+    provider: {
+      id: 'settings.translation.provider',
+      defaultMessage: 'Translation Provider',
+      description: 'Title of the translation provider settings section',
+    },
+    description: {
+      id: 'settings.translation.description',
+      defaultMessage: 'Primal can translate note text inline by calling a documented LibreTranslate-compatible endpoint. URLs, Nostr references, hashtags, and mentions are protected before the request and restored afterward.',
+      description: 'Description of translation provider settings',
+    },
+    endpoint: {
+      id: 'settings.translation.endpoint',
+      defaultMessage: 'Endpoint URL',
+      description: 'Label for translation endpoint input',
+    },
+    endpointPlaceholder: {
+      id: 'settings.translation.endpointPlaceholder',
+      defaultMessage: 'https://libretranslate.example/translate',
+      description: 'Placeholder for translation endpoint input',
+    },
+    apiKey: {
+      id: 'settings.translation.apiKey',
+      defaultMessage: 'API key',
+      description: 'Label for translation API key input',
+    },
+    apiKeyPlaceholder: {
+      id: 'settings.translation.apiKeyPlaceholder',
+      defaultMessage: 'Optional',
+      description: 'Placeholder for translation API key input',
+    },
+    targetLanguage: {
+      id: 'settings.translation.targetLanguage',
+      defaultMessage: 'Target language',
+      description: 'Label for translation target language input',
+    },
+    invalidEndpoint: {
+      id: 'settings.translation.invalidEndpoint',
+      defaultMessage: 'Enter a valid HTTP or HTTPS endpoint.',
+      description: 'Error shown for invalid translation endpoint',
+    },
+    saved: {
+      id: 'settings.translation.saved',
+      defaultMessage: 'Translation settings saved.',
+      description: 'Message shown after translation settings are saved',
+    },
+    clear: {
+      id: 'settings.translation.clear',
+      defaultMessage: 'Clear translation settings',
+      description: 'Label for clearing translation settings',
     },
   },
   moderation: {
