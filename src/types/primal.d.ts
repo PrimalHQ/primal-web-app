@@ -644,6 +644,37 @@ export type NoteActions = {
   voted_for_option?: string,
 };
 
+export type NoteTranslationProtectedEntity = {
+  placeholder: string,
+  value: string,
+};
+
+export type NoteTranslationRequestPayload = {
+  event_id: string,
+  content_hash: string,
+  text: string,
+  target_language: string,
+  protected_entities: NoteTranslationProtectedEntity[],
+};
+
+export type NoteTranslationStoredResponse = {
+  translatedText: string,
+  detectedSourceLanguage?: string,
+  targetLanguage: string,
+  provider?: string,
+  cached?: boolean,
+};
+
+export type NoteTranslationResponse = NoteTranslationStoredResponse & {
+  cacheKey: string,
+  contentHash: string,
+};
+
+export type NoteTranslationCacheEntry = {
+  createdAt: number,
+  response: NoteTranslationStoredResponse,
+};
+
 export type FeedStore = {
   posts: PrimalNote[],
   isFetching: boolean,

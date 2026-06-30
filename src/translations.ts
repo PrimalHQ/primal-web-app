@@ -1103,6 +1103,36 @@ export const note = {
     defaultMessage: 'replying to',
     description: 'Label indicating that the note is a reply',
   },
+  translate: {
+    id: 'note.translate',
+    defaultMessage: 'Translate',
+    description: 'Button label for translating a note',
+  },
+  translating: {
+    id: 'note.translating',
+    defaultMessage: 'Translating...',
+    description: 'Button label shown while a note is being translated',
+  },
+  showOriginal: {
+    id: 'note.showOriginal',
+    defaultMessage: 'Show original',
+    description: 'Button label for switching a translated note back to original text',
+  },
+  showTranslation: {
+    id: 'note.showTranslation',
+    defaultMessage: 'Show translation',
+    description: 'Button label for switching a note back to translated text',
+  },
+  translatedFrom: {
+    id: 'note.translatedFrom',
+    defaultMessage: 'Translated from {language}',
+    description: 'Label indicating the detected source language of a translated note',
+  },
+  translationUnavailable: {
+    id: 'note.translationUnavailable',
+    defaultMessage: 'Translation unavailable',
+    description: 'Inline error shown when translating a note fails',
+  },
   saveNoteDraft: {
     title: {
       id: 'note.saveNoteDraft.title',

@@ -143,6 +143,18 @@ export const sha256 = async (file: File) => {
   });
 }
 
+export const sha256Text = async (text: string) => {
+  const obj = new TextEncoder().encode(text);
+
+  return crypto.subtle.digest('SHA-256', obj).then((hashBuffer) => {
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+      .map((bytes) => bytes.toString(16).padStart(2, '0'))
+      .join('');
+    return hashHex;
+  });
+}
+
 export const convertHtmlEntityToAngleBrackets = (fieldText: string) => {
   const htmlEntities = /&(lt|gt);/
   const isHtmlEntityUsed = htmlEntities.test(fieldText)
