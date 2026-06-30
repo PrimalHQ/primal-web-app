@@ -23,6 +23,7 @@ import { addrRegexG, imageRegexG, linebreakRegex, noteRegex, urlRegexG } from '.
 import { TranslatorProvider } from '../../contexts/TranslatorContext';
 import { accountStore } from '../../stores/accountStore';
 import { useNavigate } from '@solidjs/router';
+import NoteTranslation from './NoteTranslation';
 
 export type NoteReactionsState = {
   bookmarks?: number,
@@ -407,7 +408,7 @@ const Note: Component<NoteProps> = (props) => {
           <div class={styles.content}>
 
             <div class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}>
-              <ParsedNote
+              <NoteTranslation
                 note={props.note}
                 width={Math.min(598, window.innerWidth)}
                 margins={isPhone() ? 42 : 1}
@@ -549,7 +550,7 @@ const Note: Component<NoteProps> = (props) => {
             // href={!props.onClick ? noteLinkId() : ''}
             onClick={() => navToThread(props.note)}
           >
-            <ParsedNote
+            <NoteTranslation
               note={props.note}
               shorten={props.shorten}
               width={window.innerWidth}
@@ -635,7 +636,7 @@ const Note: Component<NoteProps> = (props) => {
                   navToThread(props.note)
                 }}
               >
-                <ParsedNote
+                <NoteTranslation
                   note={props.note}
                   shorten={props.shorten}
                   width={Math.min(510, window.innerWidth - 72)}

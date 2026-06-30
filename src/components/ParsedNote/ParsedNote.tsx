@@ -196,6 +196,7 @@ const ParsedNote: Component<{
   rootNote?: PrimalNote,
   noPlaceholders?: boolean,
   footerSize?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'mini',
+  contentOverride?: string,
 }> = (props) => {
 
   const intl = useIntl();
@@ -205,7 +206,7 @@ const ParsedNote: Component<{
   const dev = localStorage.getItem('devMode') === 'true';
 
   const id = () => {
-    // if (props.id) return props.id;
+    if (props.id) return props.id;
 
     return `note_${props.note.noteId}`;
   }
@@ -242,7 +243,7 @@ const ParsedNote: Component<{
   const rootNote = () => props.rootNote || props.note;
 
   const noteContent = () => {
-    const content = props.note.content || '';
+    const content = props.contentOverride ?? props.note.content ?? '';
     const charLimit = 7 * shortNoteChars;
 
     if (!props.shorten || content.length < charLimit) return content;
@@ -2088,7 +2089,7 @@ const ParsedNote: Component<{
       <For each={content}>
         {(item, index) => renderContent(item, index(), content.length)}
       </For>
-      <Show when={isNoteTooLong() || noteContent().length < (props.note.content?.length || 0)}>
+      <Show when={isNoteTooLong() || noteContent().length < ((props.contentOverride ?? props.note.content)?.length || 0)}>
         <span class={styles.more}>
           ... <span class="linkish">{intl.formatMessage(actions.seeMore)}</span>
         </span>
