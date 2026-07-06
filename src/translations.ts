@@ -750,6 +750,59 @@ export const actions = {
   },
 };
 
+export const noteTranslation = {
+  translateNote: {
+    id: 'noteTranslation.translateNote',
+    defaultMessage: 'Translate',
+    description: 'Button label to translate a note',
+  },
+  showOriginal: {
+    id: 'noteTranslation.showOriginal',
+    defaultMessage: 'Show original',
+    description: 'Button label to show the original (untranslated) note text',
+  },
+  translateFailed: {
+    id: 'noteTranslation.translateFailed',
+    defaultMessage: 'Translation failed. Check your translation settings and try again.',
+    description: 'Error message shown when note translation fails',
+  },
+  settingsTitle: {
+    id: 'noteTranslation.settingsTitle',
+    defaultMessage: 'Note Translation',
+    description: 'Title of the translation settings section',
+  },
+  settingsEndpoint: {
+    id: 'noteTranslation.settingsEndpoint',
+    defaultMessage: 'Translation service URL',
+    description: 'Label for the translation API endpoint input',
+  },
+  settingsApiKey: {
+    id: 'noteTranslation.settingsApiKey',
+    defaultMessage: 'API key (optional)',
+    description: 'Label for the optional translation API key input',
+  },
+  settingsTargetLang: {
+    id: 'noteTranslation.settingsTargetLang',
+    defaultMessage: 'Target language',
+    description: 'Label for the target language input',
+  },
+  settingsEnabled: {
+    id: 'noteTranslation.settingsEnabled',
+    defaultMessage: 'Show translate button on notes',
+    description: 'Label for the toggle that enables the inline translate feature',
+  },
+  settingsHelp: {
+    id: 'noteTranslation.settingsHelp',
+    defaultMessage: 'Uses a LibreTranslate-compatible service. The default points to the public LibreTranslate instance; for reliability and privacy, consider self-hosting your own or using a paid key.',
+    description: 'Help text explaining the translation service configuration',
+  },
+  settingsSaved: {
+    id: 'noteTranslation.settingsSaved',
+    defaultMessage: 'Translation settings saved',
+    description: 'Toast message when translation settings are saved',
+  },
+};
+
 export const branding = {
   id: 'branding',
   defaultMessage: 'Primal',

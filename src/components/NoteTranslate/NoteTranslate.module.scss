@@ -1,0 +1,85 @@
+.noteTranslate {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.translation {
+  padding: 8px 10px;
+  border-left: 3px solid var(--accent-color, #ff8a00);
+  background: var(--color-surface, rgba(255, 255, 255, 0.04));
+  border-radius: 4px;
+  font-size: 15px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text-color, inherit);
+}
+
+.error {
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--warning-color, #e5484d);
+  background: rgba(229, 72, 77, 0.08);
+  border-radius: 4px;
+}
+
+.translateButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent-color, #ff8a00);
+  border-radius: 4px;
+  transition: background 0.15s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--hover-bg, rgba(255, 138, 0, 0.1));
+  }
+
+  &:disabled {
+    cursor: progress;
+    opacity: 0.7;
+  }
+}
+
+.active {
+  color: var(--text-secondary, #888);
+}
+
+.icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.label {
+  line-height: 1;
+}
+
+.detected {
+  color: var(--text-secondary, #888);
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--accent-color, #ff8a00);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: noteTranslateSpin 0.6s linear infinite;
+}
+
+@keyframes noteTranslateSpin {
+  to { transform: rotate(360deg); }
+}

@@ -2,7 +2,7 @@ import { Component, Show } from 'solid-js';
 import styles from './Settings.module.scss';
 
 import { useIntl } from '@cookbook/solid-intl';
-import { settings as t, actions as tActions } from '../../translations';
+import { settings as t, actions as tActions, noteTranslation as tTr } from '../../translations';
 import PageCaption from '../../components/PageCaption/PageCaption';
 import { A, useNavigate } from '@solidjs/router';
 import ButtonPrimary from '../../components/Buttons/ButtonPrimary';
@@ -80,6 +80,11 @@ const Menu: Component = () => {
 
         <A href="/settings/network">
           {intl.formatMessage(t.network.title)}
+          <div class={styles.chevron}></div>
+        </A>
+
+        <A href="/settings/translation">
+          {intl.formatMessage(tTr.settingsTitle)}
           <div class={styles.chevron}></div>
         </A>
 
