@@ -66,10 +66,8 @@ export type ThreadContextStore = {
 export const initialData = {
   primaryNote: undefined,
   noteId: '',
-  parentNotes: [],
   notes: [],
   users: [],
-  replyNotes: [],
   isFetching: false,
   isFetchingTopZaps: false,
   page: {
@@ -440,32 +438,6 @@ export const ThreadProvider = (props: { children: ContextChildren }) => {
   }
 
 // STORES ---------------------------------------
-
-  const primaryNote: () => PrimalNote | undefined = () =>
-    store.notes.find(n => n.post.id === store.noteId);
-
-  const parentNotes: () => PrimalNote[] = () => {
-    const note = primaryNote();
-
-    if (!note) {
-      return [];
-    }
-
-    return store.notes.filter(n =>
-      n.post.id !== note.post.id && n.post.created_at <= note.post.created_at,
-    );
-  };
-  const replyNotes: () => PrimalNote[] = () => {
-    const note = primaryNote();
-
-    if (!note) {
-      return [];
-    }
-
-    return store.notes.filter(n =>
-      n.post.id !== note.post.id && n.post.created_at >= note.post.created_at,
-    );
-  };
 
   const [store, updateStore] = createStore<ThreadContextStore>({
     ...initialData,

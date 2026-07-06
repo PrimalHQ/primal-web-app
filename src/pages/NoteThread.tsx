@@ -71,23 +71,43 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     return note;
   });
 
-  const parentNotes = () => {
+  // Walk up the reply chain from the primary note, using each note's `replyTo`
+  // (derived from its NIP-10 `e` tags) rather than creation date, to collect
+  // the ids of the primary note's ancestors — i.e. the notes it is replying to.
+  const parentIds = () => {
     const note = primaryNote();
 
     if (!note) {
       return [];
     }
 
+    const notesById = new Map<string, PrimalNote | PrimalUserPoll>(
+      (threadContext?.notes || []).map((n): [string, PrimalNote | PrimalUserPoll] => [n.id, n]),
+    );
+
+    const ids: string[] = [];
+    let current = note.replyTo ? notesById.get(note.replyTo) : undefined;
+
+    while (current && !ids.includes(current.id)) {
+      ids.push(current.id);
+      current = current.replyTo ? notesById.get(current.replyTo) : undefined;
+    }
+
+    return ids;
+  };
+
+  const parentNotes = () => {
+    const ids = parentIds();
+
     return sortEventsByRecency(
-      threadContext?.notes.filter(n =>
-        n.id !== note.id &&
-        // n.created_at <= note.created_at &&
-        !n.tags?.find(t => t[0] === 'e' && (t[3] === 'reply' || t[3] === 'root' || t[3] === 'fork') && t[1] === note.id),
-      ) || [],
+      threadContext?.notes.filter(n => ids.includes(n.id)) || [],
       true,
     );
   };
 
+  // Only direct replies to the primary note — i.e. notes whose NIP-10 parent
+  // (`replyTo`) is the primary note. Replies to a reply are shown when that
+  // reply itself becomes the primary note.
   const replyNotes = () => {
     const note = primaryNote();
 
@@ -96,9 +116,7 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     }
 
     return threadContext?.notes?.filter(n =>
-      n.id !== note.id &&
-      // n.created_at >= note.created_at &&
-      n.tags.find(t => t[0] === 'e' && (t[3] === 'reply' || t[3] === 'root') && t[1] === note.id),
+      n.id !== note.id && n.replyTo === note.id,
     ) || [];
   };
 
