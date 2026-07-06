@@ -9,6 +9,7 @@ import ReplyToNote from '../components/ReplyToNote/ReplyToNote';
 import { useThreadContext } from '../contexts/ThreadContext';
 import Wormhole from '../components/Wormhole/Wormhole';
 import { sortByRecency, sortEventsByRecency } from '../stores/note';
+import { buildPostedNote } from '../stores/megaFeed';
 import { useIntl } from '@cookbook/solid-intl';
 import Search from '../components/Search/Search';
 import { placeholders as tPlaceholders, thread as t } from '../translations';
@@ -166,26 +167,29 @@ const NoteThread: Component<{ noteId: string }> = (props) => {
     const pNote = primaryNote();
     if (!meta || !result.note || !accountStore.activeUser || !pNote ) return;
 
-    const modifiedMeta = {
-      ...meta,
-      noteRefs: { ...meta.noteRefs, [pNote.id]: {...pNote} }
+    // Polls carry server-side data (options, vote tallies) that we can't
+    // synthesize locally, so they still need a cache round-trip.
+    if (result.note.kind === Kind.UserPoll || result.note.kind === Kind.ZapPoll) {
+      const subId = `posted_note_${APP_ID}`;
+      const { userPolls, zapPolls } = await fetchEvents(accountStore.publicKey, [result.note.id], subId);
+      const poll = result.note.kind === Kind.UserPoll ? userPolls[0] : zapPolls[0];
+      poll && threadContext?.actions.insertNote(poll);
+      return;
     }
 
-    const subId = `posted_note_${APP_ID}`;
+    // For a plain text reply we already have everything needed to render it:
+    // the signed event, the current user as author, and the mention refs the
+    // editor collected. Build it locally so the reply shows up immediately,
+    // without depending on the cache import/fetch round-trip (which can hang).
+    const note = buildPostedNote(result.note, accountStore.activeUser, {
+      noteRefs: { ...meta.noteRefs, [pNote.id]: { ...pNote } },
+      userRefs: meta.userRefs,
+      articleRefs: meta.articleRefs,
+      highlightRefs: meta.highlightRefs,
+      relayHints: meta.relayHints,
+    });
 
-    const { notes, userPolls, zapPolls } = await fetchEvents(accountStore.publicKey, [result.note.id], subId);
-
-    let event: PrimalNote | PrimalUserPoll | undefined = notes[0];
-
-    if (result.note.kind === Kind.UserPoll) {
-      event = userPolls[0];
-    }
-
-    if (result.note.kind === Kind.ZapPoll) {
-      event = zapPolls[0];
-    }
-
-    threadContext?.actions.insertNote(event);
+    threadContext?.actions.insertNote(note);
   };
 
 

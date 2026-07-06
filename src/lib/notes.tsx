@@ -493,9 +493,14 @@ export const sendNote = (text: string, tags: string[][], waitForImport?: boolean
     sendEvent(event, {
       success: (noteEvent) => {
         if (noteEvent) {
-          const then = waitForImport ? () => { resolve({ success: true, note: noteEvent })} : () => {};
-          triggerImportEvents([noteEvent], `import_${APP_ID}`, then)
-          !waitForImport && resolve({ success: true, note: noteEvent });
+          // On the worker path the event is imported centrally on EVENT_SENT
+          // (see the relayWorker listener in App.tsx). Only the proxy path,
+          // which broadcasts directly and emits no EVENT_SENT, needs us to
+          // import it explicitly here — otherwise the event is imported twice.
+          if (accountStore.proxyThroughPrimal) {
+            triggerImportEvents([noteEvent], `import_${APP_ID}`);
+          }
+          resolve({ success: true, note: noteEvent });
           return;
         }
 
@@ -883,12 +888,24 @@ export const sendEvent = async (event: NostrEvent, callbacks?: { success?: (even
 
 export const triggerImportEvents = (events: NostrRelaySignedEvent[], subId: string, then?: () => void) => {
 
+  let settled = false;
+  let timeout: ReturnType<typeof setTimeout>;
+
+  const finish = () => {
+    if (settled) return;
+    settled = true;
+    clearTimeout(timeout);
+    unsub();
+    then && then();
+  };
+
   const unsub = subsTo(subId, {
-    onEose: () => {
-      unsub();
-      then && then();
-    }
+    onEose: () => finish(),
   });
+
+  // Safety net: a missing or very late EOSE from the import must not block the
+  // caller (and therefore the user's post-success feedback) indefinitely.
+  timeout = setTimeout(finish, 8000);
 
   importEvents(events, subId);
 };

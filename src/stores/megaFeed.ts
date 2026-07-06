@@ -2,7 +2,7 @@ import { nip19 } from "nostr-tools";
 import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { PollVote, sanitize } from "../lib/notes";
-import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, PrimalArticle, PrimalDraft, PrimalNote, PrimalUser, PrimalUserPoll, PrimalZap, TopZap, UserStats } from "../types/primal";
+import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, NostrRelaySignedEvent, PrimalArticle, PrimalDraft, PrimalNote, PrimalUser, PrimalUserPoll, PrimalZap, TopZap, UserStats } from "../types/primal";
 import { convertToUser } from "./profile";
 import { now, parseBolt11, selectRelayTags } from "../utils";
 import { logError, logWarning } from "../lib/logger";
@@ -806,6 +806,80 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
     notes.push(newNote);
   }
   return notes;
+};
+
+// Build a PrimalNote locally from a freshly-signed event, the author profile and
+// the mention refs we already have in hand (the ones the editor collected). This
+// lets us render a just-posted note optimistically without a cache round-trip:
+// stats are all zero for a brand-new note, and the mentions are already resolved.
+export const buildPostedNote = (
+  event: NostrRelaySignedEvent,
+  author: PrimalUser,
+  refs?: {
+    noteRefs?: Record<string, PrimalNote>,
+    userRefs?: Record<string, PrimalUser>,
+    articleRefs?: Record<string, PrimalArticle>,
+    highlightRefs?: Record<string, any>,
+    relayHints?: Record<string, string>,
+  },
+): PrimalNote => {
+  const tags = event.tags || [];
+  const replyTo = extractReplyTo(tags);
+  const relayHints = refs?.relayHints;
+
+  const eventPointer: nip19.EventPointer = {
+    id: event.id,
+    author: event.pubkey,
+    kind: event.kind,
+    relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 2),
+  };
+
+  const eventPointerShort: nip19.EventPointer = {
+    id: event.id,
+  };
+
+  const noteId = nip19.neventEncode(eventPointer);
+  const noteIdShort = nip19.neventEncode(eventPointerShort);
+  const content = sanitize(event.content);
+
+  return {
+    user: author,
+    post: {
+      id: event.id,
+      pubkey: event.pubkey,
+      created_at: event.created_at || 0,
+      tags,
+      content,
+      kind: event.kind,
+      sig: event.sig,
+      likes: 0,
+      mentions: 0,
+      reposts: 0,
+      replies: 0,
+      zaps: 0,
+      score: 0,
+      score24h: 0,
+      satszapped: 0,
+      noteId,
+      noteIdShort,
+      noteActions: noActions(event.id),
+      relayHints,
+    },
+    msg: event,
+    mentionedNotes: refs?.noteRefs,
+    mentionedUsers: refs?.userRefs,
+    mentionedArticles: refs?.articleRefs,
+    mentionedHighlights: refs?.highlightRefs,
+    replyTo: replyTo && replyTo[1],
+    id: event.id,
+    pubkey: event.pubkey,
+    noteId,
+    noteIdShort,
+    tags,
+    topZaps: [],
+    content,
+    relayHints,
+  };
 };
 
 export const convertSingleReadMega = (read: NostrNoteContent, page: MegaFeedPage) => {

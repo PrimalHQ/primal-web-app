@@ -34,7 +34,17 @@ import Search from "../components/Search/Search";
 import ArticleSidebar from "../components/HomeSidebar/ArticleSidebar";
 import ReplyToNote from "../components/ReplyToNote/ReplyToNote";
 import { fetchNotes } from "../handleNotes";
+import { buildPostedNote } from "../stores/megaFeed";
 import { Tier, TierCost } from "../components/SubscribeToAuthorModal/SubscribeToAuthorModal";
+
+// Mention refs the editor collects and hands to the reply success callback.
+type ReplyMeta = {
+  userRefs: Record<string, PrimalUser>,
+  noteRefs: Record<string, PrimalNote>,
+  articleRefs: Record<string, PrimalArticle>,
+  highlightRefs: Record<string, any>,
+  relayHints: Record<string, string>,
+};
 import { zapSubscription } from "../lib/zap";
 import ArticleHighlightComments from "../components/ArticleHighlight/ArticleHighlightComments";
 import ReplyToHighlight from "../components/ReplyToNote/ReplyToHighlight";
@@ -726,26 +736,56 @@ const Longform: Component< { naddr: string } > = (props) => {
     );
   }
 
-  const onReplyPosted = async (result: SendNoteResult) => {
+  const onReplyPosted = async (result: SendNoteResult, meta?: ReplyMeta) => {
     const { success, note } = result;
 
-    if (!success || !note) return;
+    if (!success || !note || !accountStore.activeUser) return;
 
-    const replies = await fetchNotes(accountStore.publicKey, [note.id], `reads_reply_${APP_ID}`);
+    // Polls carry server-side data (options, vote tallies) we can't synthesize
+    // locally, so they still need a cache round-trip.
+    if (note.kind === Kind.UserPoll || note.kind === Kind.ZapPoll) {
+      const replies = await fetchNotes(accountStore.publicKey, [note.id], `reads_reply_${APP_ID}`);
+      updateStore('replies', (reps) => [ ...replies, ...reps]);
+      return;
+    }
 
-    updateStore('replies', (reps) => [ ...replies, ...reps]);
+    // A plain text reply can be built from data already in hand (signed event,
+    // current user as author, and the mention refs the editor collected), so it
+    // renders immediately without depending on the cache import/fetch round-trip.
+    const article = store.article;
+
+    const reply = buildPostedNote(note, accountStore.activeUser, {
+      noteRefs: meta?.noteRefs,
+      userRefs: meta?.userRefs,
+      articleRefs: article ? { ...meta?.articleRefs, [article.id]: { ...article } } : meta?.articleRefs,
+      highlightRefs: meta?.highlightRefs,
+      relayHints: meta?.relayHints,
+    });
+
+    updateStore('replies', (reps) => [ reply, ...reps]);
   };
 
-  const onHighlightPosted = async (result: SendNoteResult) => {
+  const onHighlightPosted = async (result: SendNoteResult, meta?: ReplyMeta) => {
     const { success, note } = result;
 
-    if (!success || !note) return;
+    if (!success || !note || !accountStore.activeUser) return;
 
     scrollToHighlight(store.replyToHighlight.id);
 
-    const replies = await fetchNotes(accountStore.publicKey, [note.id], `reads_reply_${APP_ID}`);
-
-    updateStore('heightlightReplies' , (reps) => [ ...replies, ...reps]);
+    if (note.kind === Kind.UserPoll || note.kind === Kind.ZapPoll) {
+      const replies = await fetchNotes(accountStore.publicKey, [note.id], `reads_reply_${APP_ID}`);
+      updateStore('heightlightReplies' , (reps) => [ ...replies, ...reps]);
+    }
+    else {
+      const reply = buildPostedNote(note, accountStore.activeUser, {
+        noteRefs: meta?.noteRefs,
+        userRefs: meta?.userRefs,
+        articleRefs: meta?.articleRefs,
+        highlightRefs: meta?.highlightRefs,
+        relayHints: meta?.relayHints,
+      });
+      updateStore('heightlightReplies' , (reps) => [ reply, ...reps]);
+    }
 
     updateStore('replyToHighlight', () => undefined);
   };

@@ -1237,10 +1237,13 @@ const EditBox: Component<{
 
       setIsPostingInProgress(true);
 
+      // Don't wait for the cache import to confirm: the note is already published
+      // on EVENT_SENT, and reply surfaces now render it locally (see buildPostedNote),
+      // so gating success feedback on the import EOSE only risks a hang with no upside.
       const { success, reasons, note } = await sendNote(
         messageToSend,
         tags,
-        props.replyToNote !== undefined,
+        false,
       );
 
       if (success && note) {
