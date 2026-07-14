@@ -312,8 +312,9 @@ const Layout: Component<any> = (props) => {
           onConfirm={accountStore.signerUnreachableDialogInfo?.onConfirm}
           abortLabel={accountStore.signerUnreachableDialogInfo?.abortLabel}
           onAbort={accountStore.signerUnreachableDialogInfo?.onAbort}
-          onCancel={() => updateAccountStore('showSignerUnreachableDialog', false)}
-          hideCancelButton={true}
+          cancelLabel={accountStore.signerUnreachableDialogInfo?.cancelLabel}
+          onCancel={accountStore.signerUnreachableDialogInfo?.onCancel}
+          onDismiss={() => accountStore.signerUnreachableDialogInfo?.onAbort?.()}
         />
 
         <NoteContextMenu

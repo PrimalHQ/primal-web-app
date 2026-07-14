@@ -104,6 +104,7 @@ import {
   supportedBookmarkTypes,
   primalBlossom,
   pinEncodePrefix,
+  settingsDescription,
 } from "../constants";
 
 import {
@@ -316,6 +317,43 @@ export const initAccountStore: AccountStore = {
     return index;
   }
 
+  // Descriptors (the d-tag's 3rd element) of kind-30078 events that are READ
+  // requests — a throwaway settings event signed only to authenticate a fetch.
+  // These must never sit in the retry queue (the monitor would reopen the signer
+  // dialog on retry). Keep in sync with the isRead call sites in src/lib.
+  const readSettingsDescriptors = new Set<string>([
+    settingsDescription.getSettings,
+    settingsDescription.getHomeSettings,
+    settingsDescription.getReadsSettings,
+    settingsDescription.getNWCSettings,
+    settingsDescription.sendSettings,
+    settingsDescription.setHomeSettings,
+    settingsDescription.setReadsSettings,
+    settingsDescription.setNWCSettings,
+    settingsDescription.getMembershipStatus,
+    settingsDescription.getPremiumQRCode,
+    settingsDescription.getLegendQRCode,
+    settingsDescription.getPremiumStatus,
+    settingsDescription.getPremiumMediaStats,
+    settingsDescription.getPremiumMediaList,
+    settingsDescription.getContactListHistory,
+    settingsDescription.getContentDownloadData,
+    settingsDescription.getContentListHistory,
+    settingsDescription.startListeningForContentBroadcastStaus,
+    settingsDescription.getOrderListHistory,
+    settingsDescription.initStripe,
+    settingsDescription.resolveStripe,
+    settingsDescription.resetDirectMessages,
+    settingsDescription.markAllAsRead,
+    settingsDescription.nofiticationsLastSeen,
+  ]);
+
+  export const isReadQueuedEvent = (event: NostrRelaySignedEvent) => {
+    if (event.kind !== Kind.Settings) return false;
+    const dTag = event.tags.find(t => t[0] === 'd');
+    return !!dTag && readSettingsDescriptors.has(dTag[2]);
+  };
+
   export const enqueEvent = (event: NostrRelaySignedEvent) => {
     const pubkey = accountStore.publicKey;
     if (!pubkey) return;
@@ -369,10 +407,30 @@ export const initAccountStore: AccountStore = {
     saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
-  export const enqueUnsignedEvent = (event: NostrRelayEvent, id: string) => {
+  // Reverts for optimistically-applied UI effects, keyed by the queued event's
+  // tempId. Registered when a write lands in the pending queue, removed once it
+  // signs successfully, and run when the user aborts the signer-unreachable flow.
+  let pendingReverts: Record<string, () => void> = {};
+
+  // tempIds the user aborted. An in-flight signing (e.g. a queue-monitor retry
+  // that is mid-timeout when the user hits Abort) would otherwise re-enqueue its
+  // event and reopen the dialog after we cleared the queue — this lets that
+  // signing bail out instead. Each id is consumed once.
+  let abortedEventIds = new Set<string>();
+
+  export const consumeAbortedEvent = (id: string) => {
+    if (!abortedEventIds.has(id)) return false;
+    abortedEventIds.delete(id);
+    return true;
+  };
+
+  export const enqueUnsignedEvent = (event: NostrRelayEvent, id: string, onAbort?: () => void) => {
     const pubkey = accountStore.publicKey;
     const ev = { ...event, id, pubkey } as NostrRelaySignedEvent;
     if (!pubkey) return;
+
+    // Keep the first revert for this id — retries re-enqueue without an onAbort.
+    if (onAbort) pendingReverts[id] = onAbort;
 
     const index = eventInQueueIndex(ev)
 
@@ -401,6 +459,12 @@ export const initAccountStore: AccountStore = {
   }
 
   export const dequeUnsignedEvent = (event: NostrRelayEvent, id: string) => {
+    // The event either signed successfully or was explicitly rejected — either
+    // way the optimistic effect stands or was handled by the caller, so drop the
+    // revert without running it.
+    delete pendingReverts[id];
+    abortedEventIds.delete(id);
+
     const pubkey = accountStore.publicKey;
     const quedEvent = accountStore.eventQueue.find(e => e.id === id);
 
@@ -410,6 +474,34 @@ export const initAccountStore: AccountStore = {
     updateAccountStore('eventQueue', () => queue);
 
     saveEventQueue(pubkey, accountStore.eventQueue);
+  }
+
+  // Abort every pending write: run each registered revert (undoing optimistic UI
+  // effects) and clear the queue. Used by the signer-unreachable dialog's Abort
+  // and Logout actions.
+  export const abortAllPendingEvents = () => {
+    const pubkey = accountStore.publicKey;
+
+    // Remember these ids so any signing still in flight for them bails out
+    // instead of re-queueing the event and reopening the dialog.
+    accountStore.eventQueue.forEach((e) => { if (e.id) abortedEventIds.add(e.id); });
+    Object.keys(pendingReverts).forEach((id) => abortedEventIds.add(id));
+
+    Object.values(pendingReverts).forEach((revert) => {
+      try {
+        revert();
+      } catch (e) {
+        logWarning('Failed to revert optimistic effect on abort: ', e);
+      }
+    });
+
+    pendingReverts = {};
+
+    clearInterval(countdownInterval);
+    updateAccountStore('eventQueueRetry', () => 0);
+    updateAccountStore('eventQueue', () => []);
+
+    if (pubkey) saveEventQueue(pubkey, accountStore.eventQueue);
   }
 
   let monitorInterval = 0;
@@ -865,12 +957,20 @@ export const initAccountStore: AccountStore = {
     updateAccountStore('showNewNoteForm', () => false);
   };
 
-  export const addLike = async (note: PrimalNote | PrimalArticle | PrimalDVM) => {
+  export const addLike = async (note: PrimalNote | PrimalArticle | PrimalDVM, onRevert?: () => void) => {
     if (accountStore.likes.includes(note.id)) {
       return false;
     }
 
-    const { success } = await sendLike(note);
+    // Undo both layers of the optimistic like if the signing is aborted: the
+    // store's `likes` set here and the note-footer count/flag via onRevert.
+    const revert = () => {
+      updateAccountStore('likes', (likes) => likes.filter(id => id !== note.id));
+      saveLikes(accountStore.publicKey, accountStore.likes);
+      onRevert && onRevert();
+    };
+
+    const { success } = await sendLike(note, { onAbort: revert });
 
     if (success) {
       updateAccountStore('likes', (likes) => [ ...likes, note.id]);
@@ -1069,8 +1169,9 @@ export const initAccountStore: AccountStore = {
     tags: string[][],
     relayInfo: string,
     cb?: (remove: boolean, pubkey: string) => void,
+    onAbort?: () => void,
   ) => {
-    const { success, note: event } = await sendContacts(tags, date, relayInfo);
+    const { success, note: event } = await sendContacts(tags, date, relayInfo, { onAbort });
 
     if (success && event) {
       updateAccountStore('following', () => following);
@@ -1114,6 +1215,12 @@ export const initAccountStore: AccountStore = {
     }
 
     updateAccountStore('followInProgress', () => pubkey);
+
+    // Undo the optimistic follow (added below) if the signing is aborted.
+    const revertFollow = () => {
+      updateAccountStore('following', (fl) => fl.filter(f => f !== pubkey));
+      updateAccountStore('followInProgress', () => '');
+    };
 
     // let contactsReceived = false;
 
@@ -1166,7 +1273,7 @@ export const initAccountStore: AccountStore = {
             }));
           }
           else {
-            resolveContacts(pubkey, following, date, tags, relayInfo, cb);
+            resolveContacts(pubkey, following, date, tags, relayInfo, cb, revertFollow);
           }
         }
       },
@@ -1175,7 +1282,7 @@ export const initAccountStore: AccountStore = {
           const date = Math.floor((new Date()).getTime() / 1000);
           const tags = [['p', pubkey]];
 
-          resolveContacts(pubkey, [pubkey], date, tags, accountStore.activeRelays[0], cb);
+          resolveContacts(pubkey, [pubkey], date, tags, accountStore.activeRelays[0], cb, revertFollow);
         }
         updateAccountStore('followInProgress', () => '');
         unsub();
@@ -1197,6 +1304,12 @@ export const initAccountStore: AccountStore = {
     }
 
     updateAccountStore('followInProgress', () => pubkey);
+
+    // Undo the optimistic unfollow (applied below) if the signing is aborted.
+    const revertUnfollow = () => {
+      updateAccountStore('following', (fl) => fl.includes(pubkey) ? fl : [ ...fl, pubkey ]);
+      updateAccountStore('followInProgress', () => '');
+    };
 
     let contactData: ContactsData = {
       content: '',
@@ -1244,7 +1357,7 @@ export const initAccountStore: AccountStore = {
             }));
           }
           else {
-            resolveContacts(pubkey, following, date, tags, relayInfo, cb);
+            resolveContacts(pubkey, following, date, tags, relayInfo, cb, revertUnfollow);
           }
         }
 
@@ -1283,6 +1396,22 @@ export const initAccountStore: AccountStore = {
 
     const subId = `before_mute_${APP_ID}`;
 
+    // Undo the optimistic mute if the signing is aborted. Targeted removal (not a
+    // snapshot restore) so it stays correct when several mutes are aborted at once.
+    const revertMute = () => {
+      const flags: Record<string, string> = { word: 'word', hashtag: 't', thread: 'e' };
+
+      if (muteKind === 'user') {
+        updateAccountStore('muted', (m) => m.filter(x => x !== pubkey));
+        updateAccountStore('mutedTags', (tgs) => tgs.filter(t => !(t[0] === 'p' && t[1] === pubkey)));
+        saveMuted(accountStore.publicKey, accountStore.muted, accountStore.mutedSince);
+      }
+      else {
+        const flag = flags[muteKind];
+        updateAccountStore('mutedTags', (tgs) => tgs.filter(t => !(t[0] === flag && t[1] === pubkey)));
+      }
+    };
+
     const unsub = subsTo(subId, {
       onEvent: (_, content) => {
         if (content &&
@@ -1304,7 +1433,7 @@ export const initAccountStore: AccountStore = {
 
           const tags = [ ...unwrap(accountStore.mutedTags), ['p', pubkey]];
 
-          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate);
+          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate, { onAbort: revertMute });
 
           if (success) {
             updateAccountStore('muted', () => muted);
@@ -1328,7 +1457,7 @@ export const initAccountStore: AccountStore = {
 
           const tags = [ ...unwrap(accountStore.mutedTags), [flags[muteKind], pubkey]];
 
-          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate);
+          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate, { onAbort: revertMute });
 
           if (success) {
             updateAccountStore('mutedTags', () => tags);
@@ -1378,6 +1507,21 @@ export const initAccountStore: AccountStore = {
 
     const muteKind = kind || 'user';
 
+    // Undo the optimistic unmute if the signing is aborted (re-add the entry).
+    const revertUnmute = () => {
+      const flags: Record<string, string> = { word: 'word', hashtag: 't', thread: 'e' };
+
+      if (muteKind === 'user') {
+        updateAccountStore('muted', (m) => m.includes(pubkey) ? m : [ ...m, pubkey ]);
+        updateAccountStore('mutedTags', (tgs) => tgs.some(t => t[0] === 'p' && t[1] === pubkey) ? tgs : [ ...tgs, ['p', pubkey] ]);
+        saveMuted(accountStore.publicKey, accountStore.muted, accountStore.mutedSince);
+      }
+      else {
+        const flag = flags[muteKind];
+        updateAccountStore('mutedTags', (tgs) => tgs.some(t => t[0] === flag && t[1] === pubkey) ? tgs : [ ...tgs, [flag, pubkey] ]);
+      }
+    };
+
     const unsub = subsTo(`before_unmute_${APP_ID}`, {
       onEvent: (_, content) => {
         if (content &&
@@ -1399,7 +1543,7 @@ export const initAccountStore: AccountStore = {
 
           const tags = unwrap(accountStore.mutedTags).filter(t => t[0] !== 'p' || t[1] !== pubkey);
 
-          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate);
+          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate, { onAbort: revertUnmute });
 
           if (success) {
             updateAccountStore('muted', () => muted);
@@ -1423,7 +1567,7 @@ export const initAccountStore: AccountStore = {
 
           const tags = unwrap(accountStore.mutedTags).filter(t => t[0] !== flags[muteKind] || t[1] !== pubkey).filter(t => t[1] !== "");
 
-          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate);
+          const { success, note } = await sendMuteList(tags, date, accountStore.mutedPrivate, { onAbort: revertUnmute });
 
           if (success) {
             updateAccountStore('mutedTags', () => tags);
@@ -2088,7 +2232,15 @@ export const initAccountStore: AccountStore = {
 
 // ===========================================
 
-    const eventQueue = loadEventQueue(pubkey);
+    // Drop any read requests left in the persisted queue (e.g. enqueued by an
+    // older build) so the monitor never retries them and reopens the signer
+    // dialog. Persist the cleaned queue so they don't reload next time.
+    const storedQueue = loadEventQueue(pubkey);
+    const eventQueue = storedQueue.filter(e => !isReadQueuedEvent(e));
+
+    if (eventQueue.length !== storedQueue.length) {
+      saveEventQueue(pubkey, eventQueue);
+    }
 
     updateAccountStore('eventQueue', () => [ ...eventQueue]);
 

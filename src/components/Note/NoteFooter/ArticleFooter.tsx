@@ -124,7 +124,14 @@ const ArticleFooter: Component<{
 
     props.updateState('isRepostMenuVisible', () => false);
 
-    const { success } = await sendArticleRepost(props.note);
+    const { success } = await sendArticleRepost(props.note, {
+      onAbort: () => {
+        batch(() => {
+          props.updateState('reposts', (r) => r - 1);
+          props.updateState('reposted', () => false);
+        });
+      },
+    });
 
     if (success) {
       batch(() => {
@@ -168,7 +175,12 @@ const ArticleFooter: Component<{
       }
     }
 
-    const success = await addLike(props.note);
+    const success = await addLike(props.note, () => {
+      batch(() => {
+        props.updateState('likes', (l) => l - 1);
+        props.updateState('liked', () => false);
+      });
+    });
 
     if (success) {
       batch(() => {

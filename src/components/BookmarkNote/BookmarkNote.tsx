@@ -25,7 +25,7 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
     setIsBookmarked(() => accountStore.bookmarks.includes(props.note.id) || false);
   })
 
-  const updateTheBookmarks = (bookmarkTags: string[][], temp?: boolean) => {
+  const updateTheBookmarks = (bookmarkTags: string[][], temp?: boolean, onAbort?: () => void) => {
 
     const bookmarks = bookmarkTags.reduce((acc, t) =>
       t[0] === 'e' ? [...acc, t[1]] : [...acc]
@@ -38,10 +38,10 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
     if (temp) return;
 
     saveBookmarks(accountStore.publicKey, bookmarks);
-    sendBookmarks([...bookmarkTags], date, '');
+    sendBookmarks([...bookmarkTags], date, '', { onAbort });
   };
 
-  const addBookmark = (bookmarkTags: string[][], temp?: boolean) => {
+  const addBookmark = (bookmarkTags: string[][], temp?: boolean, onAbort?: () => void) => {
     if (!hasPublicKey()) {
       showGetStarted();
       return;
@@ -67,7 +67,7 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
           confirmLabel: intl.formatMessage(tBookmarks.confirm.confirm),
           abortLabel: intl.formatMessage(tBookmarks.confirm.abort),
           onConfirm: () => {
-            updateTheBookmarks(bookmarksToAdd, temp);
+            updateTheBookmarks(bookmarksToAdd, temp, onAbort);
             app.actions.closeConfirmModal();
           },
           onAbort: app.actions.closeConfirmModal,
@@ -76,11 +76,11 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
         return;
       }
 
-      updateTheBookmarks(bookmarksToAdd, temp);
+      updateTheBookmarks(bookmarksToAdd, temp, onAbort);
     }
   }
 
-  const removeBookmark = async (bookmarks: string[][], temp?: boolean) => {
+  const removeBookmark = async (bookmarks: string[][], temp?: boolean, onAbort?: () => void) => {
     if (bookmarks.find(b => b[0] === 'e' && b[1] === props.note.id)) {
       const bookmarksToAdd = bookmarks.filter(b => b[0] !== 'e' || b[1] !== props.note.id);
 
@@ -93,7 +93,7 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
           confirmLabel: intl.formatMessage(tBookmarks.confirm.confirmZero),
           abortLabel: intl.formatMessage(tBookmarks.confirm.abortZero),
           onConfirm: () => {
-            updateTheBookmarks(bookmarksToAdd, temp);
+            updateTheBookmarks(bookmarksToAdd, temp, onAbort);
             app.actions.closeConfirmModal();
           },
           onAbort: app.actions.closeConfirmModal,
@@ -102,12 +102,25 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
         return;
       }
 
-      updateTheBookmarks(bookmarksToAdd, temp);
+      updateTheBookmarks(bookmarksToAdd, temp, onAbort);
     }
   }
 
   const doBookmark = (remove: boolean, then?: () => void) => {
     let bookmarks: string[][] = [];
+
+    // Undo just this note's optimistic toggle if the signing is aborted. Targeted
+    // (not a full-list snapshot) so it stays correct when several bookmark toggles
+    // are aborted at once.
+    const revertBookmark = () => {
+      const noteId = props.note.id;
+      const reverted = remove
+        ? (accountStore.bookmarks.includes(noteId) ? accountStore.bookmarks : [ ...accountStore.bookmarks, noteId ])
+        : accountStore.bookmarks.filter(id => id !== noteId);
+
+      updateBookmarks(reverted);
+      saveBookmarks(accountStore.publicKey, reverted);
+    };
 
     const unsub = subsTo(`before_bookmark_${APP_ID}`, {
       onEvent: (_, content) => {
@@ -117,10 +130,10 @@ const BookmarkNote: Component<{ note: PrimalNote, large?: boolean, right?: boole
       },
       onEose: () => {
         if (remove) {
-          removeBookmark(bookmarks);
+          removeBookmark(bookmarks, false, revertBookmark);
         }
         else {
-          addBookmark(bookmarks);
+          addBookmark(bookmarks, false, revertBookmark);
         }
 
         then && then();

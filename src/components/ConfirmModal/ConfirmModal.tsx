@@ -15,8 +15,10 @@ export type ConfirmDialogInfo = {
   description?: string,
   confirmLabel?: string,
   abortLabel?: string
+  cancelLabel?: string,
   onConfirm?: () => void,
   onAbort?: () => void,
+  onCancel?: () => void,
 };
 
 const ConfirmModal: Component<ConfirmDialogInfo & {

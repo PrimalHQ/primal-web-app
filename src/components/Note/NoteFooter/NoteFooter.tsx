@@ -186,7 +186,14 @@ const NoteFooter: Component<{
 
     props.updateState && props.updateState('isRepostMenuVisible', () => false);
 
-    const { success } = await sendRepost(props.note);
+    const { success } = await sendRepost(props.note, {
+      onAbort: () => {
+        batch(() => {
+          props.updateState && props.updateState('reposts', (r) => r - 1);
+          props.updateState && props.updateState('reposted', () => false);
+        });
+      },
+    });
 
     if (success) {
       batch(() => {
@@ -231,7 +238,12 @@ const NoteFooter: Component<{
       }
     }
 
-    const success = await addLike(props.note);
+    const success = await addLike(props.note, () => {
+      batch(() => {
+        props.updateState && props.updateState('likes', (l) => l - 1);
+        props.updateState && props.updateState('liked', () => false);
+      });
+    });
 
     if (success) {
       batch(() => {

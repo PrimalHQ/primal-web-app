@@ -348,7 +348,7 @@ export const sendContentReport = async (noteId: string, pubkey: string, reason: 
 
 }
 
-export const sendLike = async (note: PrimalNote | PrimalArticle | PrimalDVM) => {
+export const sendLike = async (note: PrimalNote | PrimalArticle | PrimalDVM, opts?: SendEventOpts) => {
   const event = {
     content: '+',
     kind: Kind.Reaction,
@@ -365,11 +365,11 @@ export const sendLike = async (note: PrimalNote | PrimalArticle | PrimalDVM) => 
     event.tags.push(['a', note.coordinate]);
   }
 
-  return await sendEvent(event);
+  return await sendEvent(event, undefined, opts);
 
 }
 
-export const sendRepost = async (note: PrimalNote) => {
+export const sendRepost = async (note: PrimalNote, opts?: SendEventOpts) => {
   const event = {
     content: JSON.stringify(note.msg),
     kind: Kind.Repost,
@@ -380,7 +380,7 @@ export const sendRepost = async (note: PrimalNote) => {
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event);
+  return await sendEvent(event, undefined, opts);
 }
 
 export const sendBlossomEvent = async (list: string[]) => {
@@ -394,7 +394,7 @@ export const sendBlossomEvent = async (list: string[]) => {
   return await sendEvent(event);
 }
 
-export const sendArticleRepost = async (note: PrimalArticle) => {
+export const sendArticleRepost = async (note: PrimalArticle, opts?: SendEventOpts) => {
   const event = {
     content: JSON.stringify(note.msg),
     kind: Kind.Repost,
@@ -406,7 +406,7 @@ export const sendArticleRepost = async (note: PrimalArticle) => {
     created_at: Math.floor((new Date()).getTime() / 1000),
   };
 
-  return await sendEvent(event);
+  return await sendEvent(event, undefined, opts);
 }
 
 export const proxyEvent = async (event: NostrRelaySignedEvent, relays: Relay[], relaySettings?: NostrRelays) => {
@@ -695,7 +695,7 @@ export const sendDraft = async (
 //   return await sendEvent(event);
 // }
 
-export const sendContacts = async (tags: string[][], date: number, content: string) => {
+export const sendContacts = async (tags: string[][], date: number, content: string, opts?: SendEventOpts) => {
   const event = {
     content,
     kind: Kind.Contacts,
@@ -703,10 +703,10 @@ export const sendContacts = async (tags: string[][], date: number, content: stri
     created_at: date,
   };
 
-  return await sendEvent(event);
+  return await sendEvent(event, undefined, opts);
 };
 
-export const sendMuteList = async (muteList: string[][], date: number, content: string) => {
+export const sendMuteList = async (muteList: string[][], date: number, content: string, opts?: SendEventOpts) => {
   const event = {
     content,
     kind: Kind.MuteList,
@@ -714,7 +714,7 @@ export const sendMuteList = async (muteList: string[][], date: number, content: 
     created_at: date,
   };
 
-  return await sendEvent(event);
+  return await sendEvent(event, undefined, opts);
 };
 
 export const sendStreamMuteList = async (muteList: string[][], date: number, content: string) => {
@@ -839,12 +839,16 @@ export const sendSignedEvent = (event: NostrRelaySignedEvent, callbacks?: { succ
   relayWorker.postMessage({type: 'SEND_EVENT', eventData: { event: unwrap(event), relays: allRelays }});
 }
 
-export const sendEvent = async (event: NostrEvent, callbacks?: { success?: (event?: NostrRelaySignedEvent) => void, fail?: (event?: NostrRelaySignedEvent) => void}) => {
+// onAbort reverts any optimistic UI effect the caller applied; it runs if the
+// user aborts the signer-unreachable flow before this event is signed.
+export type SendEventOpts = { onAbort?: () => void };
+
+export const sendEvent = async (event: NostrEvent, callbacks?: { success?: (event?: NostrRelaySignedEvent) => void, fail?: (event?: NostrRelaySignedEvent) => void}, opts?: SendEventOpts) => {
   const relays = accountStore.activeRelays;
   const relaySettings = accountStore.relaySettings;
   const shouldProxy = accountStore.proxyThroughPrimal;
 
-  signEvent(event).then(async (signedNote) => {
+  signEvent(event, opts).then(async (signedNote) => {
     if (!signedNote) return { success: false , reasons: ['event_not_signed']} as SendNoteResult;
 
     if (shouldProxy) {

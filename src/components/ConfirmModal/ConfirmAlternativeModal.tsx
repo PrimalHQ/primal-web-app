@@ -21,6 +21,7 @@ const ConfirmAlternativeModal: Component<{
   onConfirm?: () => void,
   onCancel?: () => void,
   onAbort?: () => void,
+  onDismiss?: () => void,
   onOpen?: () => void,
   hideCancelButton?: boolean,
 }> = (props) => {
@@ -39,7 +40,13 @@ const ConfirmAlternativeModal: Component<{
   return (
     <AdvancedSearchDialog
       open={props.open}
-      setOpen={(isOpen: boolean) => !isOpen && props.onCancel && props.onCancel()}
+      setOpen={(isOpen: boolean) => {
+        if (isOpen) return;
+        // A dismiss (backdrop / X) runs onDismiss when provided, so callers can
+        // route it to a non-destructive action instead of the cancel button.
+        const handler = props.onDismiss ?? props.onCancel;
+        handler && handler();
+      }}
       title={
         <div class={styles.feedConfirmationTitle}>
           {props.title || intl.formatMessage(t.title)}

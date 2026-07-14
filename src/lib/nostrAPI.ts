@@ -1,5 +1,5 @@
 import { unwrap } from "solid-js/store";
-import { accountStore, closeConfirmDialog, closeSignerUnreachableDialog, dequeUnsignedEvent, enqueUnsignedEvent, logout, openConfirmDialog, openSignerUnreachableDialog, refreshQueue, updateAccountStore } from "../stores/accountStore";
+import { abortAllPendingEvents, accountStore, closeConfirmDialog, closeSignerUnreachableDialog, consumeAbortedEvent, dequeUnsignedEvent, enqueUnsignedEvent, logout, openConfirmDialog, openSignerUnreachableDialog, refreshQueue, updateAccountStore } from "../stores/accountStore";
 import {
   NostrExtension,
   NostrRelayEvent,
@@ -133,12 +133,14 @@ export const timeoutPromise = (timeout = 8_000) => {
   });
 }
 
-export const handleSignerFailure = (reason: any, tempId: string, isRead = false) => {
+export const handleSignerFailure = (reason: any, tempId: string, suppressDialog = false) => {
   isDev() && updateAccountStore('sendErrors', () => ({ [tempId]: `${reason}` }));
 
-  // Read requests sign a throwaway settings event just to authenticate a fetch.
-  // A signer failure there should be silent — don't nag the user with the popup.
-  if (isRead) return;
+  // Only user-initiated event publishing (signEvent of a write) should surface
+  // the unreachable dialog. Reads (throwaway settings events) and background
+  // crypto/auth ops (getPublicKey, encrypt/decrypt, webln) pass suppressDialog so
+  // a disconnected signer doesn't nag the user without any action on their part.
+  if (suppressDialog) return;
 
   if (reason === 'promise_timeout' && accountStore.loginType === 'nip46') {
     openSignerUnreachableDialog({
@@ -149,11 +151,20 @@ export const handleSignerFailure = (reason: any, tempId: string, isRead = false)
         refreshQueue();
         closeSignerUnreachableDialog();
       },
-      abortLabel: 'Log out',
+      // Abort (also triggered by dismissing the dialog): drop every pending
+      // write and revert the optimistic UI effects they applied.
+      abortLabel: 'Abort',
       onAbort: () => {
+        abortAllPendingEvents();
+        closeSignerUnreachableDialog();
+      },
+      // Log out: abort pending writes as above, then end the session.
+      cancelLabel: 'Log out',
+      onCancel: () => {
+        abortAllPendingEvents();
         logout();
         closeSignerUnreachableDialog();
-      }
+      },
     });
   }
 
@@ -187,7 +198,7 @@ export const timeoutPromiseResolve = (timeout = 8_000) => {
   });
 }
 
-export const signEvent = async (e: NostrRelayEvent, opts?: { isRead?: boolean }) => {
+export const signEvent = async (e: NostrRelayEvent, opts?: { isRead?: boolean, onAbort?: () => void }) => {
   let event = {...e};
   const tempId = event.id || `${uuidv4()}`;
 
@@ -207,6 +218,13 @@ export const signEvent = async (e: NostrRelayEvent, opts?: { isRead?: boolean })
         // const signed = await nostr.signEvent(event);
 
         updateAccountStore('signerTimeout', false);
+
+        // The user aborted this event while this signing was in flight (e.g. the
+        // signer reconnected just after Abort). Forget it: don't broadcast.
+        if (consumeAbortedEvent(tempId)) {
+          throw('event_aborted');
+        }
+
         dequeUnsignedEvent(unwrap(event), tempId);
         return signed;
       } catch(reason) {
@@ -216,12 +234,30 @@ export const signEvent = async (e: NostrRelayEvent, opts?: { isRead?: boolean })
   } catch (reason: any) {
     eventQueue.abortCurrent();
 
+    // Aborted after a successful sign — already forgotten above; don't re-queue
+    // or reopen the dialog.
+    if (reason === 'event_aborted') {
+      throw(reason);
+    }
+
     if (reason === 'user rejected' || reason?.message?.includes('denied') || reason?.message?.includes('reject')) {
       dequeUnsignedEvent(unwrap(event), tempId);
       throw(reason);
     }
-    enqueUnsignedEvent(unwrap(event), tempId);
-    handleSignerFailure(reason, tempId, opts?.isRead);
+    // The user aborted this event's signer flow while this signing was in flight
+    // (e.g. a queue-monitor retry mid-timeout). Don't re-queue it or reopen the dialog.
+    if (consumeAbortedEvent(tempId)) {
+      throw(reason);
+    }
+    // Reads sign a throwaway settings event just to authenticate a fetch. Never
+    // enqueue them: the queue monitor would retry via signEvent(item) without the
+    // isRead flag and reopen the dialog later, "by just waiting". Fail silently.
+    if (opts?.isRead) {
+      handleSignerFailure(reason, tempId, true);
+      throw(reason);
+    }
+    enqueUnsignedEvent(unwrap(event), tempId, opts?.onAbort);
+    handleSignerFailure(reason, tempId);
     throw(reason);
   }
 };
@@ -239,7 +275,7 @@ export const getPublicKey = async () => {
         return pubkey;
 
       } catch(reason) {
-        handleSignerFailure(reason, 'getPublicKey');
+        handleSignerFailure(reason, 'getPublicKey', true);
         throw(reason);
       }
     });
@@ -260,7 +296,7 @@ export const getRelays = async () => {
         updateAccountStore('signerTimeout', false);
         return relays;
       } catch(reason) {
-        handleSignerFailure(reason, 'getRelays');
+        handleSignerFailure(reason, 'getRelays', true);
         throw(reason);
       }
     });
@@ -281,7 +317,7 @@ export const encrypt = async (pubkey: string, message: string) => {
         updateAccountStore('signerTimeout', false);
         return enc;
       } catch(reason) {
-        handleSignerFailure(reason, 'encrypt');
+        handleSignerFailure(reason, 'encrypt', true);
         throw(reason);
       }
     });
@@ -302,7 +338,7 @@ export const decrypt = async (pubkey: string, message: string) => {
         updateAccountStore('signerTimeout', false);
         return dec;
       } catch(reason) {
-        handleSignerFailure(reason, 'decrypt');
+        handleSignerFailure(reason, 'decrypt', true);
         throw(reason);
       }
     });
@@ -324,7 +360,7 @@ export const encrypt44 = async (pubkey: string, message: string) => {
         updateAccountStore('signerTimeout', false);
         return enc;
       } catch(reason) {
-        handleSignerFailure(reason, 'encrypt44');
+        handleSignerFailure(reason, 'encrypt44', true);
         throw(reason);
       }
     });
@@ -345,7 +381,7 @@ export const decrypt44 = async (pubkey: string, message: string) => {
         updateAccountStore('signerTimeout', false);
         return dec;
       } catch(reason) {
-        handleSignerFailure(reason, 'decrypt44');
+        handleSignerFailure(reason, 'decrypt44', true);
         throw(reason);
       }
     });
@@ -367,7 +403,7 @@ export const enableWebLn = async () => {
 
         return;
       } catch(reason) {
-        handleSignerFailure(reason, 'webln');
+        handleSignerFailure(reason, 'webln', true);
         throw(reason);
       }
     });
@@ -388,7 +424,7 @@ export const sendPayment = async (paymentRequest: string) => {
         updateAccountStore('signerTimeout', false);
         return pay;
       } catch(reason) {
-        handleSignerFailure(reason, 'sendPayment');
+        handleSignerFailure(reason, 'sendPayment', true);
         throw(reason);
       }
     });

@@ -5,7 +5,7 @@ import { userName } from "../stores/profile";
 import { Filterlist, NostrRelays, PrimalUser, SendNoteResult, VanityProfiles } from "../types/primal";
 import { logError } from "./logger";
 import { signEvent } from "./nostrAPI";
-import { sendEvent } from "./notes";
+import { sendEvent, SendEventOpts } from "./notes";
 
 export const getUserProfiles = (pubkeys: string[], subid: string) => {
   sendMessage(JSON.stringify([
@@ -387,7 +387,7 @@ export const sendRelays = async (relaySettings: NostrRelays) => {
   return result;
 };
 
-export const sendBookmarks = async (tags: string[][], date: number, content: string) => {
+export const sendBookmarks = async (tags: string[][], date: number, content: string, opts?: SendEventOpts) => {
   const event = {
     content,
     kind: Kind.Bookmarks,
@@ -395,7 +395,7 @@ export const sendBookmarks = async (tags: string[][], date: number, content: str
     created_at: date,
   };
 
-  return await sendEvent(event);
+  return await sendEvent(event, undefined, opts);
 };
 
 export const getBookmarks = async (pubkey: string | undefined, subid: string) => {
