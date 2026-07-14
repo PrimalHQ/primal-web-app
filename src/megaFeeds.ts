@@ -948,7 +948,7 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
     return;
   }
 
-  if ([Kind.Text].includes(content.kind)) {
+  if ([Kind.Text, Kind.Comment].includes(content.kind)) {
     const message = content as NostrNoteContent;
 
     page.notes.push({ ...message });

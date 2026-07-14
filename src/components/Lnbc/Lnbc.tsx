@@ -149,7 +149,7 @@ const Lnbc: Component< {
     };
 
     try {
-      const signedEvent = await signEvent(event);
+      const signedEvent = await signEvent(event, { isRead: true });
 
       sendMessage(socket, JSON.stringify([
         "REQ",

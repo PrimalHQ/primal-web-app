@@ -90,7 +90,7 @@ export const setLastSeen = async (
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     sendMessage(JSON.stringify([
       "REQ",

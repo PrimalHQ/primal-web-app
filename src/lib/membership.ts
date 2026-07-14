@@ -13,7 +13,7 @@ export const getMembershipStatus = async (pubkey: string | undefined, subId: str
   };
 
   try {
-    signEvent(event).then(signedNote => {
+    signEvent(event, { isRead: true }).then(signedNote => {
       const message = JSON.stringify([
         "REQ",
         subId,
@@ -74,7 +74,7 @@ export const getExchangeRate = async (pubkey: string | undefined, subId: string,
     tags: [],
   };
 
-  const signedEvent = await signEvent(event);
+  const signedEvent = await signEvent(event, { isRead: true });
 
   const message = JSON.stringify([
     "REQ",

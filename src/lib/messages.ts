@@ -30,7 +30,7 @@ export const resetMessageCount = async (sender: string, subid: string) => {
   };
 
   try {
-    const signedEvent = await signEvent(event);
+    const signedEvent = await signEvent(event, { isRead: true });
 
     sendMessage(JSON.stringify([
       "REQ",
@@ -118,7 +118,7 @@ export const markAllAsRead = async (subid: string) => {
   };
 
   try {
-    signEvent(event).then(signedEvent => {
+    signEvent(event, { isRead: true }).then(signedEvent => {
       sendMessage(JSON.stringify([
         "REQ",
         subid,

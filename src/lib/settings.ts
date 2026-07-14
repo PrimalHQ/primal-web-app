@@ -23,7 +23,7 @@ export const sendSettings = async (settings: PrimalSettings, subid: string) => {
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     sendMessage(JSON.stringify([
       "REQ",
@@ -48,7 +48,7 @@ export const getSettings = async (pubkey: string | undefined, subid: string) => 
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     sendMessage(JSON.stringify([
       "REQ",
@@ -75,7 +75,7 @@ export const getHomeSettings = async (subid: string) => {
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     sendMessage(JSON.stringify([
       "REQ",
@@ -105,7 +105,7 @@ export const setHomeSettings = async (subid: string, feeds: PrimalArticleFeed[])
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     sendMessage(JSON.stringify([
       "REQ",
@@ -132,7 +132,7 @@ export const getReadsSettings = async (subid: string) => {
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     sendMessage(JSON.stringify([
       "REQ",
@@ -162,7 +162,7 @@ export const setReadsSettings = async (subid: string, feeds: PrimalArticleFeed[]
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     sendMessage(JSON.stringify([
       "REQ",
@@ -199,7 +199,7 @@ export const getNWCSettings = async (subid: string) => {
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     sendMessage(JSON.stringify([
       "REQ",
@@ -229,7 +229,7 @@ export const setNWCSettings = async (subid: string, nwcSettings: { nwcList: stri
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     sendMessage(JSON.stringify([
       "REQ",

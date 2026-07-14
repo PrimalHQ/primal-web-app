@@ -1219,7 +1219,7 @@ const Longform: Component< { naddr: string } > = (props) => {
               <For each={store.replies}>
                 {reply => (
                   <Switch>
-                    <Match when={reply?.msg.kind === Kind.Text}>
+                    <Match when={reply?.msg.kind === Kind.Text || reply?.msg.kind === Kind.Comment}>
                       <Note
                         note={reply}
                         noteType='thread'

@@ -109,6 +109,7 @@ export enum Kind  {
   UserPollVote = 1018,
   ZapPoll = 6969,
 
+  Comment = 1_111,
   LiveChatMessage = 1_311,
   ReportContent = 1_984,
 

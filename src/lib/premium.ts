@@ -99,7 +99,7 @@ export const getPremiumQRCode = async (pubkey: string | undefined, name: string,
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     const message = JSON.stringify([
       "REQ",
@@ -175,7 +175,7 @@ export const getLegendQRCode = async (pubkey: string | undefined, name: string, 
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     const message = JSON.stringify([
       "REQ",
@@ -245,7 +245,7 @@ export const getPremiumStatus = async (pubkey: string | undefined, subId: string
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     const message = JSON.stringify([
       "REQ",
@@ -283,7 +283,7 @@ export const getPremiumMediaStats = async (pubkey: string | undefined, subId: st
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     const message = JSON.stringify([
       "REQ",
@@ -319,7 +319,7 @@ export const getPremiumMediaList = async (pubkey: string | undefined, until: num
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     let payload = {
       event_from_user: signedNote,
@@ -410,7 +410,7 @@ export const getContactListHistory = async (pubkey: string | undefined, until: n
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     let payload = {
       event_from_user: signedNote,
@@ -461,7 +461,7 @@ export const getContentListHistory = async (pubkey: string | undefined, subId: s
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     let payload = {
       event_from_user: signedNote,
@@ -501,7 +501,7 @@ export const getContentDownloadData = async (pubkey: string | undefined, kinds: 
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     let payload = {
       event_from_user: signedNote,
@@ -631,7 +631,7 @@ export const startListeningForContentBroadcastStaus = async (pubkey: string | un
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     let payload = {
       event_from_user: signedNote,
@@ -709,7 +709,7 @@ export const getOrderListHistory = async (pubkey: string | undefined, until: num
   };
 
   try {
-    const signedNote = await signEvent(event);
+    const signedNote = await signEvent(event, { isRead: true });
 
     let payload = {
       event_from_user: signedNote,
@@ -919,7 +919,7 @@ export const initStripe = async (pubkey: string | undefined, name: string, produ
 
 
     try {
-      const signedNote = await signEvent(event);
+      const signedNote = await signEvent(event, { isRead: true });
 
       const message = JSON.stringify([
         "REQ",
@@ -983,7 +983,7 @@ export const resolveStripe = async (pubkey: string | undefined, session_id: stri
 
 
     try {
-      const signedNote = await signEvent(event);
+      const signedNote = await signEvent(event, { isRead: true });
 
       const message = JSON.stringify([
         "REQ",

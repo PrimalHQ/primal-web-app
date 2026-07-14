@@ -133,8 +133,13 @@ export const timeoutPromise = (timeout = 8_000) => {
   });
 }
 
-export const handleSignerFailure = (reason: any, tempId: string) => {
+export const handleSignerFailure = (reason: any, tempId: string, isRead = false) => {
   isDev() && updateAccountStore('sendErrors', () => ({ [tempId]: `${reason}` }));
+
+  // Read requests sign a throwaway settings event just to authenticate a fetch.
+  // A signer failure there should be silent — don't nag the user with the popup.
+  if (isRead) return;
+
   if (reason === 'promise_timeout' && accountStore.loginType === 'nip46') {
     openSignerUnreachableDialog({
       title: 'Remote signer unreachable',
@@ -182,7 +187,7 @@ export const timeoutPromiseResolve = (timeout = 8_000) => {
   });
 }
 
-export const signEvent = async (e: NostrRelayEvent) => {
+export const signEvent = async (e: NostrRelayEvent, opts?: { isRead?: boolean }) => {
   let event = {...e};
   const tempId = event.id || `${uuidv4()}`;
 
@@ -216,7 +221,7 @@ export const signEvent = async (e: NostrRelayEvent) => {
       throw(reason);
     }
     enqueUnsignedEvent(unwrap(event), tempId);
-    handleSignerFailure(reason, tempId);
+    handleSignerFailure(reason, tempId, opts?.isRead);
     throw(reason);
   }
 };
