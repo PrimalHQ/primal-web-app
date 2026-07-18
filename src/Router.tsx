@@ -43,6 +43,7 @@ const Premiums = lazy(() => import('./pages/Premium/Premiums'));
 const NotifSettings = lazy(() => import('./pages/Settings/Notifications'));
 const Account = lazy(() => import('./pages/Settings/Account'));
 const Appearance = lazy(() => import('./pages/Settings/Appearance'));
+const Translation = lazy(() => import('./pages/Settings/Translation'));
 const HomeFeeds = lazy(() => import('./pages/Settings/HomeFeeds'));
 const ReadsFeeds = lazy(() => import('./pages/Settings/ReadsFeeds'));
 const DevTools = lazy(() => import('./pages/Settings/DevTools'));
@@ -156,6 +157,7 @@ const AppRouter: Component = () => {
             <Route path="/" component={Menu} />
             <Route path="/account" component={Account} />
             <Route path="/appearance" component={Appearance} />
+            <Route path="/translation" component={Translation} />
             <Route path="/home_feeds" component={HomeFeeds} />
             <Route path="/reads_feeds" component={ReadsFeeds} />
             <Route path="/notifications" component={NotifSettings} />

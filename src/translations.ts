@@ -176,6 +176,14 @@ export const pin = {
 };
 
 export const actions = {
+  translation: {
+    translate: { id: 'actions.translation.translate', defaultMessage: 'Translate', description: 'Translate note context-menu action' },
+    showOriginal: { id: 'actions.translation.showOriginal', defaultMessage: 'Show original', description: 'Show original note action' },
+    showTranslation: { id: 'actions.translation.showTranslation', defaultMessage: 'Show translation', description: 'Show translated note action' },
+    translating: { id: 'actions.translation.translating', defaultMessage: 'Translating…', description: 'Translation loading status' },
+    failed: { id: 'actions.translation.failed', defaultMessage: 'Translation unavailable. Check Translation settings.', description: 'Translation error status' },
+    attribution: { id: 'actions.translation.attribution', defaultMessage: 'Translated by {provider}', description: 'Translation provider attribution' },
+  },
   resetRelays: {
     id: 'actions.resetRelays',
     defaultMessage: 'Reset relays',
@@ -1783,6 +1791,15 @@ export const eventQueue = {
 }
 
 export const settings = {
+  translation: {
+    title: { id: 'settings.translation.title', defaultMessage: 'Translation', description: 'Title of translation settings' },
+    caption: { id: 'settings.translation.caption', defaultMessage: 'Translate notes with your chosen provider', description: 'Translation settings description' },
+    enable: { id: 'settings.translation.enable', defaultMessage: 'Enable note translation', description: 'Enable translation setting' },
+    provider: { id: 'settings.translation.provider', defaultMessage: 'Translation provider', description: 'Translation provider setting label' },
+    apiKey: { id: 'settings.translation.apiKey', defaultMessage: 'API key', description: 'Translation API key setting label' },
+    libreTranslateUrl: { id: 'settings.translation.libreTranslateUrl', defaultMessage: 'LibreTranslate URL', description: 'LibreTranslate server URL setting label' },
+    targetLanguage: { id: 'settings.translation.targetLanguage', defaultMessage: 'Target language', description: 'Translation target language setting label' },
+  },
   index: {
     title: {
       id: 'settings.index.title',

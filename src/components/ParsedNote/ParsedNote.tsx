@@ -94,6 +94,7 @@ import NoteVideo from './NoteVideo';
 import { accountStore } from '../../stores/accountStore';
 import UserPoll from '../UserPoll/UserPoll';
 import ZapPoll from '../UserPoll/ZapPoll';
+import { noteTranslations, toggleOriginal, translationProviderName } from '../../lib/translation';
 
 const groupGridLimit = 5;
 
@@ -242,7 +243,8 @@ const ParsedNote: Component<{
   const rootNote = () => props.rootNote || props.note;
 
   const noteContent = () => {
-    const content = props.note.content || '';
+    const translation = noteTranslations[props.note.id];
+    const content = translation?.status === 'translated' && !translation.showOriginal ? translation.text || '' : props.note.content || '';
     const charLimit = 7 * shortNoteChars;
 
     if (!props.shorten || content.length < charLimit) return content;
@@ -2092,6 +2094,20 @@ const ParsedNote: Component<{
         <span class={styles.more}>
           ... <span class="linkish">{intl.formatMessage(actions.seeMore)}</span>
         </span>
+      </Show>
+      <Show when={noteTranslations[props.note.id]?.status === 'loading'}>
+        <div class={styles.translationStatus}>{intl.formatMessage(actions.translation.translating)}</div>
+      </Show>
+      <Show when={noteTranslations[props.note.id]?.status === 'error'}>
+        <div class={styles.translationStatus}>{intl.formatMessage(actions.translation.failed)}</div>
+      </Show>
+      <Show when={noteTranslations[props.note.id]?.status === 'translated'}>
+        <div class={styles.translationStatus}>
+          <span>{intl.formatMessage(actions.translation.attribution, { provider: translationProviderName(noteTranslations[props.note.id].provider!) })}</span>
+          <button type="button" onClick={() => toggleOriginal(props.note.id)}>
+            {intl.formatMessage(noteTranslations[props.note.id].showOriginal ? actions.translation.showTranslation : actions.translation.showOriginal)}
+          </button>
+        </div>
       </Show>
     </div>
   );
