@@ -87,6 +87,25 @@
   border-top: 1px solid var(--devider);
 }
 
+.translationField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 20px;
+  color: var(--text-secondary);
+
+  input, select {
+    box-sizing: border-box;
+    width: min(440px, 100%);
+    min-height: 38px;
+    padding: 8px;
+    border: 1px solid var(--devider);
+    border-radius: var(--border-radius-small);
+    background: var(--background-input);
+    color: var(--text-primary);
+  }
+}
+
 .settingsContentFull {
   padding-inline: 0px;
   padding-block: 8px;

@@ -17,6 +17,7 @@ import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
 import { urlEncode } from '../../utils';
 import { accountStore, addToMuteList, hasPublicKey, removeFromMuteList, setShowPin, showGetStarted } from '../../stores/accountStore';
+import { translateNote } from '../../lib/translation';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -251,6 +252,14 @@ const NoteContextMenu: Component<{
   const noteContextForEveryone: () => MenuItem[] = () => {
 
     return [
+      {
+        label: intl.formatMessage(tActions.translation.translate),
+        action: () => {
+          const currentNote = note();
+          if (currentNote) translateNote(currentNote);
+          props.onClose();
+        },
+      },
       {
         label: intl.formatMessage(tActions.noteContext.reactions),
         action: () => {

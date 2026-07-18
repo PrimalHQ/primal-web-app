@@ -119,6 +119,21 @@
   }
 }
 
+.translationStatus {
+  color: var(--text-tertiary-2);
+  font-size: 12px;
+  margin-top: 8px;
+
+  button {
+    color: var(--accent-links);
+    background: none;
+    border: 0;
+    padding: 0;
+    margin-left: 8px;
+    cursor: pointer;
+  }
+}
+
 .reactionNote {
   display: flex;
   width: fit-content;
