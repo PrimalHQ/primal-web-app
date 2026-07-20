@@ -1235,6 +1235,12 @@ const EditBox: Component<{
 
       tags = [...tags, ...relayTags, ...mediaTagsToAdd];
 
+      // TODO: Move this into `sendEvent` so it will be applied to all events.
+      // TODO: Add Primal's app handler addr according to NIP-89: https://github.com/nostr-protocol/nips/blob/master/89.md#client-tag
+      if (accountStore.discloseClient) {
+        tags.push(['client', 'Primal']);
+      }
+
       setIsPostingInProgress(true);
 
       // Don't wait for the cache import to confirm: the note is already published
