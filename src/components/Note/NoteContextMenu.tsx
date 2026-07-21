@@ -17,6 +17,7 @@ import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
 import { urlEncode } from '../../utils';
 import { accountStore, addToMuteList, hasPublicKey, removeFromMuteList, setShowPin, showGetStarted } from '../../stores/accountStore';
+import { translateNoteContent } from '../../lib/translation';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -275,6 +276,17 @@ const NoteContextMenu: Component<{
       {
         label: [Kind.UserPoll, Kind.ZapPoll].includes(props.data?.note?.msg.kind) ? intl.formatMessage(tActions.pollContext.copyText) : intl.formatMessage(tActions.noteContext.copyText),
         action: copyNoteText,
+        icon: 'copy_note_text',
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.translate),
+        action: () => {
+          const n = note();
+          if (n?.id) {
+            void translateNoteContent(n.id, n.content || '');
+          }
+          props.onClose();
+        },
         icon: 'copy_note_text',
       },
       {

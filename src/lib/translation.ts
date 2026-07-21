@@ -1,0 +1,232 @@
+import { createStore } from 'solid-js/store';
+import {
+  restoreTranslationContent,
+  sanitizeForTranslation,
+} from './translationSanitizer';
+
+export type TranslationProvider = 'libretranslate' | 'google' | 'deepl';
+
+export type TranslationSettings = {
+  enabled: boolean;
+  provider: TranslationProvider;
+  apiKey: string;
+  libreTranslateUrl: string;
+  targetLanguage: string;
+};
+
+export type NoteTranslation = {
+  status: 'idle' | 'loading' | 'translated' | 'error';
+  text?: string;
+  provider?: TranslationProvider;
+  showOriginal?: boolean;
+  error?: string;
+};
+
+const SETTINGS_KEY = 'primal.translation.settings.v1';
+const CACHE_KEY = 'primal.translation.cache.v1';
+const CACHE_MAX_ENTRIES = 100;
+const CACHE_MAX_BYTES = 1024 * 1024;
+
+const defaultTargetLanguage = () => {
+  if (typeof navigator !== 'undefined' && navigator.language) {
+    return navigator.language;
+  }
+  return 'en';
+};
+
+export const defaultTranslationSettings = (): TranslationSettings => ({
+  enabled: true,
+  provider: 'libretranslate',
+  apiKey: '',
+  libreTranslateUrl: 'https://libretranslate.com',
+  targetLanguage: defaultTargetLanguage(),
+});
+
+const readSettings = (): TranslationSettings => {
+  try {
+    const raw = localStorage.getItem(SETTINGS_KEY);
+    if (!raw) return defaultTranslationSettings();
+    return { ...defaultTranslationSettings(), ...JSON.parse(raw) };
+  } catch {
+    return defaultTranslationSettings();
+  }
+};
+
+export const [translationSettings, setTranslationSettings] =
+  createStore<TranslationSettings>(readSettings());
+
+export const [noteTranslations, setNoteTranslations] = createStore<
+  Record<string, NoteTranslation>
+>({});
+
+export const saveTranslationSettings = (
+  patch: Partial<TranslationSettings>,
+) => {
+  setTranslationSettings(patch);
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...translationSettings }));
+};
+
+type CacheEntry = {
+  key: string;
+  text: string;
+  provider: TranslationProvider;
+  savedAt: number;
+};
+
+const readCache = (): CacheEntry[] => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const writeCache = (entry: CacheEntry) => {
+  let cache = [entry, ...readCache().filter((e) => e.key !== entry.key)].slice(
+    0,
+    CACHE_MAX_ENTRIES,
+  );
+  while (
+    cache.length > 0 &&
+    new Blob([JSON.stringify(cache)]).size > CACHE_MAX_BYTES
+  ) {
+    cache = cache.slice(0, -1);
+  }
+  localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+};
+
+const sha256Hex = async (value: string): Promise<string> => {
+  const bytes = new Uint8Array(
+    await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)),
+  );
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+};
+
+export const translationProviderLabel = (
+  provider: TranslationProvider,
+): string =>
+  ({
+    libretranslate: 'LibreTranslate',
+    google: 'Google Cloud Translation',
+    deepl: 'DeepL',
+  })[provider];
+
+const normalizeTarget = (lang: string) => lang.trim() || 'en';
+
+async function translateWithProvider(
+  text: string,
+  settings: TranslationSettings,
+): Promise<string> {
+  const target = normalizeTarget(settings.targetLanguage);
+
+  if (settings.provider === 'google') {
+    if (!settings.apiKey) throw new Error('missing_key');
+    const url = `https://translation.googleapis.com/language/translate/v2?key=${encodeURIComponent(settings.apiKey)}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ q: text, target, format: 'text' }),
+    });
+    const data = await response.json();
+    const translated = data?.data?.translations?.[0]?.translatedText;
+    if (!response.ok || !translated) throw new Error('provider_error');
+    return translated as string;
+  }
+
+  if (settings.provider === 'deepl') {
+    if (!settings.apiKey) throw new Error('missing_key');
+    const response = await fetch('https://api.deepl.com/v2/translate', {
+      method: 'POST',
+      headers: {
+        Authorization: `DeepL-Auth-Key ${settings.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text: [text],
+        target_lang: target.split('-')[0].toUpperCase(),
+      }),
+    });
+    const data = await response.json();
+    const translated = data?.translations?.[0]?.text;
+    if (!response.ok || !translated) throw new Error('provider_error');
+    return translated as string;
+  }
+
+  const base = (settings.libreTranslateUrl || '').replace(/\/$/, '');
+  if (!base) throw new Error('missing_url');
+  const body: Record<string, string> = {
+    q: text,
+    source: 'auto',
+    target,
+    format: 'text',
+  };
+  if (settings.apiKey) body.api_key = settings.apiKey;
+
+  const response = await fetch(`${base}/translate`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await response.json();
+  if (!response.ok || !data?.translatedText) throw new Error('provider_error');
+  return data.translatedText as string;
+}
+
+export const translateNoteContent = async (
+  noteId: string,
+  content: string,
+): Promise<void> => {
+  if (!noteId) return;
+  if (noteTranslations[noteId]?.status === 'loading') return;
+
+  const settings = { ...translationSettings };
+  if (!settings.enabled) {
+    setNoteTranslations(noteId, {
+      status: 'error',
+      error: 'disabled',
+    });
+    return;
+  }
+
+  setNoteTranslations(noteId, { status: 'loading', showOriginal: false });
+
+  try {
+    const { content: sanitized, placeholders } = sanitizeForTranslation(
+      content || '',
+    );
+    const cacheKey = await sha256Hex(
+      `${content}\n${settings.targetLanguage}\n${settings.provider}\n${settings.libreTranslateUrl}`,
+    );
+    const cached = readCache().find((e) => e.key === cacheKey);
+    const raw =
+      cached?.text ?? (await translateWithProvider(sanitized, settings));
+    if (!cached) {
+      writeCache({
+        key: cacheKey,
+        text: raw,
+        provider: settings.provider,
+        savedAt: Date.now(),
+      });
+    }
+    setNoteTranslations(noteId, {
+      status: 'translated',
+      text: restoreTranslationContent(raw, placeholders),
+      provider: settings.provider,
+      showOriginal: false,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'provider_error';
+    setNoteTranslations(noteId, { status: 'error', error: message });
+  }
+};
+
+export const toggleShowOriginal = (noteId: string) => {
+  const current = noteTranslations[noteId];
+  if (!current || current.status !== 'translated') return;
+  setNoteTranslations(noteId, 'showOriginal', !(current.showOriginal ?? false));
+};
+
+export const clearNoteTranslation = (noteId: string) => {
+  setNoteTranslations(noteId, { status: 'idle' });
+};
