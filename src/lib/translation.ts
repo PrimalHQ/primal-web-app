@@ -63,7 +63,16 @@ export const saveTranslationSettings = (
   patch: Partial<TranslationSettings>,
 ) => {
   setTranslationSettings(patch);
-  localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...translationSettings }));
+  // Merge explicitly so localStorage always gets the full latest snapshot.
+  const next: TranslationSettings = {
+    enabled: translationSettings.enabled,
+    provider: translationSettings.provider,
+    apiKey: translationSettings.apiKey,
+    libreTranslateUrl: translationSettings.libreTranslateUrl,
+    targetLanguage: translationSettings.targetLanguage,
+    ...patch,
+  };
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
 };
 
 type CacheEntry = {

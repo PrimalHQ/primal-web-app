@@ -7,10 +7,21 @@ const PLACEHOLDER_RE = /__PRIMAL_PROTECTED_(\d+)__/g;
 
 /**
  * Tokens that must not be sent to a translation provider (Nostr refs, URLs,
- * hashtags, emoji shortcodes, lightning invoices/offers, LNURLs, cashu, bc1).
+ * hashtags, @mentions, emoji shortcodes, lightning invoices/offers, LNURLs,
+ * cashu, bc1).
  */
 const PROTECTED_TOKEN_RE =
-  /nostr:(?:npub|nprofile|note|nevent|naddr|nrelay)1[023456789acdefghjklmnpqrstuvwxyz]+|(?:npub|nprofile|note|nevent|naddr|nrelay)1[023456789acdefghjklmnpqrstuvwxyz]+|lightning:(?:lnbc|lno|lni|lnurl)[0-9a-z]+|lnbc[0-9a-z]+|lno1[0-9a-z]+|lni1[0-9a-z]+|lnurl1[0-9a-z]+|cashu[A-Za-z0-9][A-Za-z0-9+/=_-]+|bc1[0-9a-z]+|https?:\/\/[^\s<>"']+|www\.[^\s<>"']+|#[\p{L}\p{N}_-]+|:[A-Za-z0-9_+-]+:/giu;
+  /nostr:(?:npub|nprofile|note|nevent|naddr|nrelay)1[023456789acdefghjklmnpqrstuvwxyz]+|(?:npub|nprofile|note|nevent|naddr|nrelay)1[023456789acdefghjklmnpqrstuvwxyz]+|lightning:(?:lnbc|lno|lni|lnurl)[0-9a-z]+|lnbc[0-9a-z]+|lno1[0-9a-z]+|lni1[0-9a-z]+|lnurl1[0-9a-z]+|cashu[A-Za-z0-9][A-Za-z0-9+/=_-]+|bc1[0-9a-z]+|https?:\/\/[^\s<>"']+|www\.[^\s<>"']+|#[\p{L}\p{N}_-]+|@[\p{L}\p{N}_.-]+|:[A-Za-z0-9_+-]+:/giu;
+
+/** Minimum length (after trim) before offering Translate on a note. */
+export const MIN_TRANSLATE_LENGTH = 12;
+
+/** Hide Translate on tiny / non-letter notes (matches Android/iOS). */
+export const shouldOfferTranslation = (content: string): boolean => {
+  const trimmed = (content || '').trim();
+  if (trimmed.length < MIN_TRANSLATE_LENGTH) return false;
+  return /[\p{L}]/u.test(trimmed);
+};
 
 // Providers sometimes mangle underscores / spacing in placeholders.
 const MANGLED_PLACEHOLDER_RE =

@@ -625,6 +625,21 @@ export const actions = {
       defaultMessage: 'Translation failed. Check settings or try again.',
       description: 'Translation error message',
     },
+    errorMissingKey: {
+      id: 'actions.noteTranslate.errorMissingKey',
+      defaultMessage: 'API key required. Add one in Settings → Note Translation.',
+      description: 'Missing provider API key',
+    },
+    errorMissingUrl: {
+      id: 'actions.noteTranslate.errorMissingUrl',
+      defaultMessage: 'Set a LibreTranslate URL in Settings → Note Translation.',
+      description: 'Missing LibreTranslate base URL',
+    },
+    errorDisabled: {
+      id: 'actions.noteTranslate.errorDisabled',
+      defaultMessage: 'Note translation is disabled in settings.',
+      description: 'Translation feature disabled',
+    },
     retry: {
       id: 'actions.noteTranslate.retry',
       defaultMessage: 'Retry translation',

@@ -27,6 +27,8 @@ assert.match(sanitizerSrc, /bc1/);
 assert.match(sanitizerSrc, /nrelay/);
 assert.match(sanitizerSrc, /lno1/);
 assert.match(sanitizerSrc, /cashu/);
+assert.match(sanitizerSrc, /@\[\\p\{L\}/);
+assert.match(sanitizerSrc, /shouldOfferTranslation/);
 assert.match(sanitizerSrc, /MANGLED_PLACEHOLDER_RE/);
 assert.match(translationSrc, /export const translateNoteContent/);
 assert.match(translationSrc, /AbortController/);
@@ -66,7 +68,7 @@ function restoreTranslationContent(content, placeholders) {
 }
 
 const sample =
-  'Hola see https://example.com and nostr:npub1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq and #bitcoin and lnbc1testinvoice and lno1offerxyz and lightning:lnbc1viauri and lnurl1abc and cashuAabc123 and bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh and :wave:';
+  'Hola see https://example.com and @alice and nostr:npub1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq and #bitcoin and lnbc1testinvoice and lno1offerxyz and lightning:lnbc1viauri and lnurl1abc and cashuAabc123 and bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh and :wave:';
 
 const protectedPayload = sanitizeForTranslation(sample);
 const roundTrip = restoreTranslationContent(
@@ -76,10 +78,12 @@ const roundTrip = restoreTranslationContent(
 
 assert.ok(protectedPayload.content.includes('__PRIMAL_PROTECTED_'), 'tokens protected');
 assert.ok(!protectedPayload.content.includes('https://example.com'), 'url stripped');
+assert.ok(!protectedPayload.content.includes('@alice'), 'mention stripped');
 assert.ok(!protectedPayload.content.includes('bc1qxy'), 'bc1 stripped from outbound');
 assert.ok(!protectedPayload.content.includes('lno1offer'), 'bolt12 offer stripped');
 assert.ok(!protectedPayload.content.includes('cashuA'), 'cashu stripped');
 assert.ok(roundTrip.includes('https://example.com'), 'url restored');
+assert.ok(roundTrip.includes('@alice'), 'mention restored');
 assert.ok(roundTrip.includes('nostr:npub1'), 'nostr restored');
 assert.ok(roundTrip.includes('#bitcoin'), 'hashtag restored');
 assert.ok(roundTrip.includes('lnbc1testinvoice'), 'invoice restored');
@@ -87,6 +91,16 @@ assert.ok(roundTrip.includes('lno1offerxyz'), 'bolt12 restored');
 assert.ok(roundTrip.includes('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'), 'bc1 restored');
 assert.ok(roundTrip.includes(':wave:'), 'shortcode restored');
 assert.ok(roundTrip.includes('Hello'), 'text can change');
+
+// Offer gating (inline import of logic mirrored from source)
+function shouldOfferTranslation(content) {
+  const trimmed = (content || '').trim();
+  if (trimmed.length < 12) return false;
+  return /[\p{L}]/u.test(trimmed);
+}
+assert.equal(shouldOfferTranslation('hi'), false);
+assert.equal(shouldOfferTranslation('123456789012345'), false);
+assert.equal(shouldOfferTranslation('This note is long enough.'), true);
 
 // Mangled placeholder restore (provider drops underscores)
 const mangled = restoreTranslationContent(
