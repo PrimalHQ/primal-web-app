@@ -112,7 +112,15 @@ export const translationProviderLabel = (
     deepl: 'DeepL',
   })[provider];
 
-const normalizeTarget = (lang: string) => lang.trim() || 'en';
+/** Normalize BCP-47 / locale tags to a primary language subtag when needed. */
+const normalizeTarget = (lang: string) => {
+  const trimmed = (lang || '').trim();
+  if (!trimmed) return 'en';
+  return trimmed;
+};
+
+const primaryLang = (lang: string) =>
+  normalizeTarget(lang).split(/[-_]/)[0].toLowerCase() || 'en';
 
 async function translateWithProvider(
   text: string,
@@ -120,6 +128,7 @@ async function translateWithProvider(
   signal?: AbortSignal,
 ): Promise<string> {
   const target = normalizeTarget(settings.targetLanguage);
+  const iso639 = primaryLang(target);
 
   if (settings.provider === 'google') {
     if (!settings.apiKey) throw new Error('missing_key');
@@ -127,7 +136,8 @@ async function translateWithProvider(
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ q: text, target, format: 'text' }),
+      // Google accepts en or en-US; prefer primary subtag for consistency.
+      body: JSON.stringify({ q: text, target: iso639, format: 'text' }),
       signal,
     });
     const data = await response.json();
@@ -146,7 +156,7 @@ async function translateWithProvider(
       },
       body: JSON.stringify({
         text: [text],
-        target_lang: target.split('-')[0].toUpperCase(),
+        target_lang: iso639.toUpperCase(),
       }),
       signal,
     });
@@ -159,11 +169,10 @@ async function translateWithProvider(
   const base = (settings.libreTranslateUrl || '').replace(/\/$/, '');
   if (!base) throw new Error('missing_url');
   // LibreTranslate expects ISO 639-1 (en) not BCP-47 (en-US)
-  const ltTarget = target.split(/[-_]/)[0].toLowerCase() || 'en';
   const body: Record<string, string> = {
     q: text,
     source: 'auto',
-    target: ltTarget,
+    target: iso639,
     format: 'text',
   };
   if (settings.apiKey) body.api_key = settings.apiKey;

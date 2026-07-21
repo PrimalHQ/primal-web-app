@@ -25,9 +25,12 @@ assert.match(sanitizerSrc, /export const sanitizeForTranslation/);
 assert.match(sanitizerSrc, /export const restoreTranslationContent/);
 assert.match(sanitizerSrc, /bc1/);
 assert.match(sanitizerSrc, /nrelay/);
+assert.match(sanitizerSrc, /lno1/);
+assert.match(sanitizerSrc, /cashu/);
+assert.match(sanitizerSrc, /MANGLED_PLACEHOLDER_RE/);
 assert.match(translationSrc, /export const translateNoteContent/);
 assert.match(translationSrc, /AbortController/);
-assert.match(translationSrc, /ltTarget|libretranslate/);
+assert.match(translationSrc, /ltTarget|libretranslate|primaryLang/);
 assert.match(translationSrc, /translation\.googleapis\.com/);
 assert.match(translationSrc, /api\.deepl\.com/);
 
@@ -36,6 +39,8 @@ const reMatch = sanitizerSrc.match(/const PROTECTED_TOKEN_RE =\s*(\/[\s\S]*?\/[a
 assert.ok(reMatch, 'PROTECTED_TOKEN_RE extractable from source');
 const PROTECTED_TOKEN_RE = eval(reMatch[1]);
 const PLACEHOLDER_RE = /__PRIMAL_PROTECTED_(\d+)__/g;
+const MANGLED_PLACEHOLDER_RE =
+  /[_*]{0,2}PRIMAL[_*\s-]?PROTECTED[_*\s-]?(\d+)[_*]{0,2}/gi;
 
 function sanitizeForTranslation(content) {
   const placeholders = [];
@@ -47,14 +52,19 @@ function sanitizeForTranslation(content) {
 }
 
 function restoreTranslationContent(content, placeholders) {
-  return content.replace(PLACEHOLDER_RE, (_m, index) => {
+  let out = content.replace(PLACEHOLDER_RE, (_m, index) => {
     const i = Number(index);
     return Number.isInteger(i) && placeholders[i] !== undefined ? placeholders[i] : _m;
   });
+  out = out.replace(MANGLED_PLACEHOLDER_RE, (match, index) => {
+    const i = Number(index);
+    return Number.isInteger(i) && placeholders[i] !== undefined ? placeholders[i] : match;
+  });
+  return out;
 }
 
 const sample =
-  'Hola see https://example.com and nostr:npub1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq and #bitcoin and lnbc1testinvoice and bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh and :wave:';
+  'Hola see https://example.com and nostr:npub1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq and #bitcoin and lnbc1testinvoice and lno1offerxyz and lightning:lnbc1viauri and lnurl1abc and cashuAabc123 and bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh and :wave:';
 
 const protectedPayload = sanitizeForTranslation(sample);
 const roundTrip = restoreTranslationContent(
@@ -65,14 +75,25 @@ const roundTrip = restoreTranslationContent(
 assert.ok(protectedPayload.content.includes('__PRIMAL_PROTECTED_'), 'tokens protected');
 assert.ok(!protectedPayload.content.includes('https://example.com'), 'url stripped');
 assert.ok(!protectedPayload.content.includes('bc1qxy'), 'bc1 stripped from outbound');
+assert.ok(!protectedPayload.content.includes('lno1offer'), 'bolt12 offer stripped');
+assert.ok(!protectedPayload.content.includes('cashuA'), 'cashu stripped');
 assert.ok(roundTrip.includes('https://example.com'), 'url restored');
 assert.ok(roundTrip.includes('nostr:npub1'), 'nostr restored');
 assert.ok(roundTrip.includes('#bitcoin'), 'hashtag restored');
 assert.ok(roundTrip.includes('lnbc1testinvoice'), 'invoice restored');
+assert.ok(roundTrip.includes('lno1offerxyz'), 'bolt12 restored');
 assert.ok(roundTrip.includes('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'), 'bc1 restored');
 assert.ok(roundTrip.includes(':wave:'), 'shortcode restored');
 assert.ok(roundTrip.includes('Hello'), 'text can change');
-assert.ok(translationSrc.includes('ltTarget') || translationSrc.includes("split(/[-_]/)"), 'locale normalize present');
+
+// Mangled placeholder restore (provider drops underscores)
+const mangled = restoreTranslationContent(
+  'Hello PRIMAL_PROTECTED_0 and more',
+  ['https://example.com'],
+);
+assert.ok(mangled.includes('https://example.com'), 'mangled placeholder restored');
+
+assert.ok(translationSrc.includes('primaryLang') || translationSrc.includes("split(/[-_]/)"), 'locale normalize present');
 assert.ok(!sanitizerSrc.includes('\u2014') && !translationSrc.includes('\u2014'), 'no em dash');
 
 const keyMaterial = `${sample}\nen\nlibretranslate\nhttps://libretranslate.com`;
