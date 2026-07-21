@@ -179,12 +179,13 @@ async function translateWithProvider(
   return data.translatedText as string;
 }
 
+const translateControllers = new Map<string, AbortController>();
+
 export const translateNoteContent = async (
   noteId: string,
   content: string,
 ): Promise<void> => {
   if (!noteId) return;
-  if (noteTranslations[noteId]?.status === 'loading') return;
 
   const settings = { ...translationSettings };
   if (!settings.enabled) {
@@ -195,11 +196,12 @@ export const translateNoteContent = async (
     return;
   }
 
-  setNoteTranslations(noteId, { status: 'loading', showOriginal: false });
-
+  // Abort any in-flight request for this note, then start a new one.
   translateControllers.get(noteId)?.abort();
   const controller = new AbortController();
   translateControllers.set(noteId, controller);
+
+  setNoteTranslations(noteId, { status: 'loading', showOriginal: false });
 
   try {
     const { content: sanitized, placeholders } = sanitizeForTranslation(
@@ -242,8 +244,6 @@ export const toggleShowOriginal = (noteId: string) => {
   if (!current || current.status !== 'translated') return;
   setNoteTranslations(noteId, 'showOriginal', !(current.showOriginal ?? false));
 };
-
-const translateControllers = new Map<string, AbortController>();
 
 export const clearNoteTranslation = (noteId: string) => {
   translateControllers.get(noteId)?.abort();

@@ -26,6 +26,7 @@ assert.match(sanitizerSrc, /export const restoreTranslationContent/);
 assert.match(sanitizerSrc, /bc1/);
 assert.match(sanitizerSrc, /nrelay/);
 assert.match(translationSrc, /export const translateNoteContent/);
+assert.match(translationSrc, /AbortController/);
 assert.match(translationSrc, /ltTarget|libretranslate/);
 assert.match(translationSrc, /translation\.googleapis\.com/);
 assert.match(translationSrc, /api\.deepl\.com/);
