@@ -33,6 +33,8 @@ assert.match(translationSrc, /AbortController/);
 assert.match(translationSrc, /ltTarget|libretranslate|primaryLang/);
 assert.match(translationSrc, /translation\.googleapis\.com/);
 assert.match(translationSrc, /api\.deepl\.com/);
+assert.match(translationSrc, /api-free\.deepl\.com/);
+assert.match(translationSrc, /:fx/);
 
 // Extract PROTECTED_TOKEN_RE from shipped source and execute it
 const reMatch = sanitizerSrc.match(/const PROTECTED_TOKEN_RE =\s*(\/[\s\S]*?\/[a-z]*);/);

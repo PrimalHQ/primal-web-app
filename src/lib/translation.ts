@@ -148,7 +148,11 @@ async function translateWithProvider(
 
   if (settings.provider === 'deepl') {
     if (!settings.apiKey) throw new Error('missing_key');
-    const response = await fetch('https://api.deepl.com/v2/translate', {
+    // Free keys end with ":fx" and must use the free API host.
+    const deeplHost = settings.apiKey.trim().endsWith(':fx')
+      ? 'https://api-free.deepl.com'
+      : 'https://api.deepl.com';
+    const response = await fetch(`${deeplHost}/v2/translate`, {
       method: 'POST',
       headers: {
         Authorization: `DeepL-Auth-Key ${settings.apiKey}`,
