@@ -234,6 +234,63 @@ const ParsedNote: Component<{
   const [tokens, setTokens] = createStore<string[]>([]);
 
   const [wordsDisplayed, setWordsDisplayed] = createSignal(0);
+  const [translatedText, setTranslatedText] = createSignal<string>();
+  const [translationError, setTranslationError] = createSignal<string>();
+  const [isTranslating, setIsTranslating] = createSignal(false);
+  const [showTranslationSettings, setShowTranslationSettings] = createSignal(false);
+  const [translationEndpoint, setTranslationEndpoint] = createSignal('');
+  const [translationApiKey, setTranslationApiKey] = createSignal('');
+
+  const targetLanguage = () => navigator.language.split('-')[0] || 'en';
+
+  const saveTranslationSettings = () => {
+    localStorage.setItem('primal_translation_endpoint', translationEndpoint().trim());
+    localStorage.setItem('primal_translation_api_key', translationApiKey().trim());
+    setTranslationError();
+    setShowTranslationSettings(false);
+  };
+
+  const translateNote = async () => {
+    const endpoint = translationEndpoint().trim();
+    const text = props.note.content?.trim();
+
+    if (!text) return;
+
+    if (!endpoint) {
+      setTranslationError('Add a translation endpoint before translating notes.');
+      setShowTranslationSettings(true);
+      return;
+    }
+
+    setIsTranslating(true);
+    setTranslationError();
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          q: text,
+          source: 'auto',
+          target: targetLanguage(),
+          format: 'text',
+          ...(translationApiKey() ? { api_key: translationApiKey() } : {}),
+        }),
+      });
+      const body = await response.json();
+      const result = body.translatedText || body?.data?.translations?.[0]?.translatedText;
+
+      if (!response.ok || !result) {
+        throw new Error(body.error || 'The translation service did not return translated text.');
+      }
+
+      setTranslatedText(result);
+    } catch (error) {
+      setTranslationError(error instanceof Error ? error.message : 'Unable to translate this note.');
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   const isNoteTooLong = () => {
     return props.shorten && wordsDisplayed() > shortNoteWords;
@@ -2080,6 +2137,8 @@ const ParsedNote: Component<{
   };
 
   onMount(() => {
+    setTranslationEndpoint(localStorage.getItem('primal_translation_endpoint') || '');
+    setTranslationApiKey(localStorage.getItem('primal_translation_api_key') || '');
     generateContent();
   });
 
@@ -2088,6 +2147,61 @@ const ParsedNote: Component<{
       <For each={content}>
         {(item, index) => renderContent(item, index(), content.length)}
       </For>
+      <Show when={!props.veryShort && !!props.note.content?.trim()}>
+        <div class={styles.translation}>
+          <button
+            class={styles.translateButton}
+            type="button"
+            disabled={isTranslating()}
+            onClick={translateNote}
+          >
+            {isTranslating() ? 'Translating…' : translatedText() ? 'Refresh translation' : 'Translate'}
+          </button>
+          <button
+            class={styles.translationSettingsButton}
+            type="button"
+            onClick={() => setShowTranslationSettings(!showTranslationSettings())}
+          >
+            Translation settings
+          </button>
+          <Show when={translationError()}>
+            <div class={styles.translationError}>{translationError()}</div>
+          </Show>
+          <Show when={showTranslationSettings()}>
+            <div class={styles.translationSettings}>
+              <label>
+                Translation endpoint
+                <input
+                  type="url"
+                  placeholder="https://your-libretranslate-server/translate"
+                  value={translationEndpoint()}
+                  onInput={(event) => setTranslationEndpoint(event.currentTarget.value)}
+                />
+              </label>
+              <label>
+                API key (optional)
+                <input
+                  type="password"
+                  autocomplete="off"
+                  value={translationApiKey()}
+                  onInput={(event) => setTranslationApiKey(event.currentTarget.value)}
+                />
+              </label>
+              <div class={styles.translationSettingsActions}>
+                <button type="button" onClick={saveTranslationSettings}>Save</button>
+                <button type="button" onClick={() => setShowTranslationSettings(false)}>Cancel</button>
+              </div>
+              <p>Translation requests are sent only to the endpoint you configure.</p>
+            </div>
+          </Show>
+          <Show when={translatedText()}>
+            <div class={styles.translatedText}>
+              <strong>Translation</strong>
+              <p>{translatedText()}</p>
+            </div>
+          </Show>
+        </div>
+      </Show>
       <Show when={isNoteTooLong() || noteContent().length < (props.note.content?.length || 0)}>
         <span class={styles.more}>
           ... <span class="linkish">{intl.formatMessage(actions.seeMore)}</span>

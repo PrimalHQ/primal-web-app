@@ -119,6 +119,87 @@
   }
 }
 
+.translation {
+  margin-top: 12px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.translateButton,
+.translationSettingsButton,
+.translationSettingsActions button {
+  border: 0;
+  border-radius: var(--border-radius-small);
+  background: var(--background-header-input);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font: inherit;
+  padding: 5px 8px;
+}
+
+.translateButton:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.translationSettingsButton {
+  background: transparent;
+  margin-left: 6px;
+  text-decoration: underline;
+}
+
+.translationError {
+  color: var(--brand-1);
+  margin-top: 6px;
+}
+
+.translationSettings,
+.translatedText {
+  background: var(--background-header-input);
+  border: 1px solid var(--subtile-devider);
+  border-radius: var(--border-radius-small);
+  margin-top: 8px;
+  padding: 10px;
+}
+
+.translationSettings {
+  display: grid;
+  gap: 8px;
+
+  label {
+    display: grid;
+    gap: 4px;
+  }
+
+  input {
+    background: var(--background-input);
+    border: 1px solid var(--subtile-devider);
+    border-radius: var(--border-radius-small);
+    color: var(--text-primary);
+    font: inherit;
+    padding: 6px;
+  }
+
+  p {
+    color: var(--text-tertiary);
+    margin: 0;
+  }
+}
+
+.translationSettingsActions {
+  display: flex;
+  gap: 6px;
+}
+
+.translatedText {
+  color: var(--text-primary);
+
+  p {
+    margin: 6px 0 0;
+    white-space: pre-wrap;
+  }
+}
+
 .reactionNote {
   display: flex;
   width: fit-content;
