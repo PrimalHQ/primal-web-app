@@ -1924,7 +1924,7 @@ export const settings = {
     },
     apiKey: {
       id: 'settings.translation.apiKey',
-      defaultMessage: 'API key (optional for some providers)',
+      defaultMessage: 'API key (required for Google/DeepL; free DeepL keys end with :fx)',
       description: 'Translation API key label',
     },
     privacyNote: {

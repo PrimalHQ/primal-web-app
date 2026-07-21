@@ -67,7 +67,7 @@ const TranslationSettingsPage: Component = () => {
         >
           <option value="libretranslate">LibreTranslate (self-hostable)</option>
           <option value="google">Google Cloud Translation (API key)</option>
-          <option value="deepl">DeepL (API key)</option>
+          <option value="deepl">DeepL (pro or free :fx API key)</option>
         </select>
 
         <label class={styles.settingsCaption} for="translation-target">
