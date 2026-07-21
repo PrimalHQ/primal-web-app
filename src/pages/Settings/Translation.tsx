@@ -5,6 +5,7 @@ import PageCaption from '../../components/PageCaption/PageCaption';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import CheckBox from '../../components/Checkbox/CheckBox';
 import {
+  normalizeLibreTranslateBaseUrl,
   saveTranslationSettings,
   translationSettings,
   TranslationProvider,
@@ -101,6 +102,14 @@ const TranslationSettingsPage: Component = () => {
           onInput={(e) =>
             saveTranslationSettings({ libreTranslateUrl: e.currentTarget.value })
           }
+          onBlur={(e) => {
+            const normalized = normalizeLibreTranslateBaseUrl(
+              e.currentTarget.value,
+            );
+            if (normalized && normalized !== translationSettings.libreTranslateUrl) {
+              saveTranslationSettings({ libreTranslateUrl: normalized });
+            }
+          }}
           placeholder="https://libretranslate.com"
           style={{
             width: '100%',

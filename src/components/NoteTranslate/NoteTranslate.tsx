@@ -23,6 +23,8 @@ const errorMessage = (
       return intl.formatMessage(tActions.noteTranslate.errorMissingUrl);
     case 'disabled':
       return intl.formatMessage(tActions.noteTranslate.errorDisabled);
+    case 'empty_prose':
+      return intl.formatMessage(tActions.noteTranslate.errorEmptyProse);
     default:
       return intl.formatMessage(tActions.noteTranslate.error);
   }
@@ -69,6 +71,13 @@ const NoteTranslate: Component<{ note: PrimalNote }> = (props) => {
           <Match when={state()?.status === 'translated' && state()?.text}>
             <Show when={!state()?.showOriginal}>
               <div class={styles.translatedText}>{state()?.text}</div>
+              <Show when={state()?.detectedLanguage}>
+                <div class={styles.meta}>
+                  {intl.formatMessage(tActions.noteTranslate.fromLanguage, {
+                    language: (state()?.detectedLanguage || '').toUpperCase(),
+                  })}
+                </div>
+              </Show>
             </Show>
             <div class={styles.row}>
               <button

@@ -640,6 +640,11 @@ export const actions = {
       defaultMessage: 'Note translation is disabled in settings.',
       description: 'Translation feature disabled',
     },
+    errorEmptyProse: {
+      id: 'actions.noteTranslate.errorEmptyProse',
+      defaultMessage: 'Nothing to translate after protecting identifiers.',
+      description: 'Note is only protected tokens',
+    },
     retry: {
       id: 'actions.noteTranslate.retry',
       defaultMessage: 'Retry translation',
@@ -649,6 +654,11 @@ export const actions = {
       id: 'actions.noteTranslate.via',
       defaultMessage: 'Translated by {provider}',
       description: 'Provider attribution for translated note',
+    },
+    fromLanguage: {
+      id: 'actions.noteTranslate.fromLanguage',
+      defaultMessage: 'Translated from {language}',
+      description: 'Detected source language for translated note',
     },
   },
   pollContext: {

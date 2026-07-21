@@ -30,13 +30,17 @@ assert.match(sanitizerSrc, /cashu/);
 assert.match(sanitizerSrc, /@\[\\p\{L\}/);
 assert.match(sanitizerSrc, /shouldOfferTranslation/);
 assert.match(sanitizerSrc, /MANGLED_PLACEHOLDER_RE/);
+assert.match(sanitizerSrc, /sanitizeForTranslation\(trimmed\)/);
 assert.match(translationSrc, /export const translateNoteContent/);
+assert.match(translationSrc, /export const normalizeLibreTranslateBaseUrl/);
 assert.match(translationSrc, /AbortController/);
 assert.match(translationSrc, /ltTarget|libretranslate|primaryLang/);
 assert.match(translationSrc, /translation\.googleapis\.com/);
 assert.match(translationSrc, /api\.deepl\.com/);
 assert.match(translationSrc, /api-free\.deepl\.com/);
 assert.match(translationSrc, /:fx/);
+assert.match(translationSrc, /detectedLanguage|detected_source_language/);
+assert.match(translationSrc, /empty_prose/);
 
 // Extract PROTECTED_TOKEN_RE from shipped source and execute it
 const reMatch = sanitizerSrc.match(/const PROTECTED_TOKEN_RE =\s*(\/[\s\S]*?\/[a-z]*);/);
@@ -92,15 +96,51 @@ assert.ok(roundTrip.includes('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'), 'bc1
 assert.ok(roundTrip.includes(':wave:'), 'shortcode restored');
 assert.ok(roundTrip.includes('Hello'), 'text can change');
 
-// Offer gating (inline import of logic mirrored from source)
+// Offer gating: length + letters + real prose after token strip
 function shouldOfferTranslation(content) {
   const trimmed = (content || '').trim();
   if (trimmed.length < 12) return false;
-  return /[\p{L}]/u.test(trimmed);
+  if (!/[\p{L}]/u.test(trimmed)) return false;
+  const { content: sanitized } = sanitizeForTranslation(trimmed);
+  const prose = sanitized.replace(/__PRIMAL_PROTECTED_\d+__/g, ' ').trim();
+  return prose.length >= 4 && /[\p{L}]/u.test(prose);
 }
 assert.equal(shouldOfferTranslation('hi'), false);
 assert.equal(shouldOfferTranslation('123456789012345'), false);
 assert.equal(shouldOfferTranslation('This note is long enough.'), true);
+assert.equal(
+  shouldOfferTranslation('https://example.com/a/b/c/d/e/f/g/h and npub1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq'),
+  false,
+  'token-only notes must not offer translate',
+);
+
+// Endpoint normalize: base URL or full /translate path
+function normalizeLibreTranslateBaseUrl(raw) {
+  const trimmed = (raw || '').trim();
+  if (!trimmed) return '';
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+    let path = url.pathname.replace(/\/+$/, '') || '';
+    if (path.toLowerCase().endsWith('/translate')) {
+      path = path.slice(0, -'/translate'.length) || '';
+    }
+    url.pathname = path || '/';
+    url.search = '';
+    url.hash = '';
+    return url.toString().replace(/\/$/, '');
+  } catch {
+    return trimmed.replace(/\/translate\/?$/i, '').replace(/\/$/, '');
+  }
+}
+assert.equal(
+  normalizeLibreTranslateBaseUrl('https://libretranslate.com/translate'),
+  'https://libretranslate.com',
+);
+assert.equal(
+  normalizeLibreTranslateBaseUrl('https://libretranslate.com'),
+  'https://libretranslate.com',
+);
 
 // Mangled placeholder restore (provider drops underscores)
 const mangled = restoreTranslationContent(
@@ -124,6 +164,10 @@ assert.match(router, /Translation/);
 assert.match(menu, /\/settings\/translation/);
 assert.match(note, /NoteTranslate/);
 assert.match(ctx, /translateNoteContent|noteTranslate/);
+const notePrimary = readFileSync(join(root, 'src/components/Note/NotePrimary/NotePrimary.tsx'), 'utf8');
+assert.match(notePrimary, /NoteTranslate/);
+// Phone feed + suggestion layouts must host inline Translate.
+assert.equal((note.match(/NoteTranslate/g) || []).length >= 3, true, 'Note.tsx must place NoteTranslate in multiple layouts');
 
 console.log('check-translation-sanitize: PASS');
 console.log(JSON.stringify({

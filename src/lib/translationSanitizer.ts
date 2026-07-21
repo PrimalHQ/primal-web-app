@@ -16,13 +16,6 @@ const PROTECTED_TOKEN_RE =
 /** Minimum length (after trim) before offering Translate on a note. */
 export const MIN_TRANSLATE_LENGTH = 12;
 
-/** Hide Translate on tiny / non-letter notes (matches Android/iOS). */
-export const shouldOfferTranslation = (content: string): boolean => {
-  const trimmed = (content || '').trim();
-  if (trimmed.length < MIN_TRANSLATE_LENGTH) return false;
-  return /[\p{L}]/u.test(trimmed);
-};
-
 // Providers sometimes mangle underscores / spacing in placeholders.
 const MANGLED_PLACEHOLDER_RE =
   /[_*]{0,2}PRIMAL[_*\s-]?PROTECTED[_*\s-]?(\d+)[_*]{0,2}/gi;
@@ -54,4 +47,18 @@ export const restoreTranslationContent = (
       : match;
   });
   return out;
+};
+
+/**
+ * Hide Translate on tiny notes, notes with no letters, or notes that are only
+ * protected tokens (npubs, invoices, URLs, etc.) after sanitization.
+ */
+export const shouldOfferTranslation = (content: string): boolean => {
+  const trimmed = (content || '').trim();
+  if (trimmed.length < MIN_TRANSLATE_LENGTH) return false;
+  if (!/[\p{L}]/u.test(trimmed)) return false;
+  // Require real prose after stripping Nostr/Lightning/URL tokens.
+  const { content: sanitized } = sanitizeForTranslation(trimmed);
+  const prose = sanitized.replace(/__PRIMAL_PROTECTED_\d+__/g, ' ').trim();
+  return prose.length >= 4 && /[\p{L}]/u.test(prose);
 };

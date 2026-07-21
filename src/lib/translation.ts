@@ -20,6 +20,7 @@ export type NoteTranslation = {
   provider?: TranslationProvider;
   showOriginal?: boolean;
   error?: string;
+  detectedLanguage?: string;
 };
 
 const SETTINGS_KEY = 'primal.translation.settings.v1';
@@ -79,7 +80,59 @@ type CacheEntry = {
   key: string;
   text: string;
   provider: TranslationProvider;
+  detectedLanguage?: string;
   savedAt: number;
+};
+
+/**
+ * Accept a LibreTranslate base URL or a full `/translate` path.
+ * Prevents accidental `.../translate/translate` when users paste the API path.
+ */
+export const normalizeLibreTranslateBaseUrl = (raw: string): string => {
+  const trimmed = (raw || '').trim();
+  if (!trimmed) return '';
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+    let path = url.pathname.replace(/\/+$/, '') || '';
+    if (path.toLowerCase().endsWith('/translate')) {
+      path = path.slice(0, -'/translate'.length) || '';
+    }
+    url.pathname = path || '/';
+    url.search = '';
+    url.hash = '';
+    // Drop trailing slash for stable cache keys.
+    return url.toString().replace(/\/$/, '');
+  } catch {
+    return trimmed.replace(/\/translate\/?$/i, '').replace(/\/$/, '');
+  }
+};
+
+const extractTranslatedText = (data: Record<string, unknown>): string | undefined => {
+  const candidates = [data.translatedText, data.translation, data.text];
+  for (const value of candidates) {
+    if (typeof value === 'string' && value.length > 0) return value;
+  }
+  return undefined;
+};
+
+const extractDetectedLanguage = (data: Record<string, unknown>): string | undefined => {
+  const raw =
+    data.detectedLanguage ??
+    data.detected_language ??
+    data.detected_source_language;
+  if (typeof raw === 'string' && raw.trim()) return raw.trim();
+  if (raw && typeof raw === 'object') {
+    const obj = raw as Record<string, unknown>;
+    if (typeof obj.language === 'string') return obj.language;
+    if (typeof obj.lang === 'string') return obj.lang;
+  }
+  return undefined;
+};
+
+type ProviderResult = {
+  text: string;
+  detectedLanguage?: string;
 };
 
 const readCache = (): CacheEntry[] => {
@@ -135,7 +188,7 @@ async function translateWithProvider(
   text: string,
   settings: TranslationSettings,
   signal?: AbortSignal,
-): Promise<string> {
+): Promise<ProviderResult> {
   const target = normalizeTarget(settings.targetLanguage);
   const iso639 = primaryLang(target);
 
@@ -150,9 +203,16 @@ async function translateWithProvider(
       signal,
     });
     const data = await response.json();
-    const translated = data?.data?.translations?.[0]?.translatedText;
+    const first = data?.data?.translations?.[0];
+    const translated = first?.translatedText;
     if (!response.ok || !translated) throw new Error('provider_error');
-    return translated as string;
+    return {
+      text: translated as string,
+      detectedLanguage:
+        typeof first?.detectedSourceLanguage === 'string'
+          ? first.detectedSourceLanguage
+          : undefined,
+    };
   }
 
   if (settings.provider === 'deepl') {
@@ -174,12 +234,19 @@ async function translateWithProvider(
       signal,
     });
     const data = await response.json();
-    const translated = data?.translations?.[0]?.text;
+    const first = data?.translations?.[0];
+    const translated = first?.text;
     if (!response.ok || !translated) throw new Error('provider_error');
-    return translated as string;
+    return {
+      text: translated as string,
+      detectedLanguage:
+        typeof first?.detected_source_language === 'string'
+          ? first.detected_source_language
+          : undefined,
+    };
   }
 
-  const base = (settings.libreTranslateUrl || '').replace(/\/$/, '');
+  const base = normalizeLibreTranslateBaseUrl(settings.libreTranslateUrl);
   if (!base) throw new Error('missing_url');
   // LibreTranslate expects ISO 639-1 (en) not BCP-47 (en-US)
   const body: Record<string, string> = {
@@ -196,9 +263,13 @@ async function translateWithProvider(
     body: JSON.stringify(body),
     signal,
   });
-  const data = await response.json();
-  if (!response.ok || !data?.translatedText) throw new Error('provider_error');
-  return data.translatedText as string;
+  const data = (await response.json()) as Record<string, unknown>;
+  const translated = extractTranslatedText(data);
+  if (!response.ok || !translated) throw new Error('provider_error');
+  return {
+    text: translated,
+    detectedLanguage: extractDetectedLanguage(data),
+  };
 }
 
 const translateControllers = new Map<string, AbortController>();
@@ -229,26 +300,47 @@ export const translateNoteContent = async (
     const { content: sanitized, placeholders } = sanitizeForTranslation(
       content || '',
     );
+    const prose = sanitized.replace(/__PRIMAL_PROTECTED_\d+__/g, ' ').trim();
+    if (!prose || !/[\p{L}]/u.test(prose)) {
+      setNoteTranslations(noteId, {
+        status: 'error',
+        error: 'empty_prose',
+      });
+      return;
+    }
+
+    const normalizedLibre = normalizeLibreTranslateBaseUrl(
+      settings.libreTranslateUrl,
+    );
     const cacheKey = await sha256Hex(
-      `${content}\n${settings.targetLanguage}\n${settings.provider}\n${settings.libreTranslateUrl}`,
+      `${content}\n${settings.targetLanguage}\n${settings.provider}\n${normalizedLibre}`,
     );
     const cached = readCache().find((e) => e.key === cacheKey);
-    const raw =
-      cached?.text ?? (await translateWithProvider(sanitized, settings, controller.signal));
-    if (!cached) {
+    let rawText = cached?.text;
+    let detectedLanguage = cached?.detectedLanguage;
+    if (!rawText) {
+      const result = await translateWithProvider(
+        sanitized,
+        { ...settings, libreTranslateUrl: normalizedLibre || settings.libreTranslateUrl },
+        controller.signal,
+      );
+      rawText = result.text;
+      detectedLanguage = result.detectedLanguage;
       writeCache({
         key: cacheKey,
-        text: raw,
+        text: rawText,
         provider: settings.provider,
+        detectedLanguage,
         savedAt: Date.now(),
       });
     }
     if (controller.signal.aborted) return;
     setNoteTranslations(noteId, {
       status: 'translated',
-      text: restoreTranslationContent(raw, placeholders),
+      text: restoreTranslationContent(rawText, placeholders),
       provider: settings.provider,
       showOriginal: false,
+      detectedLanguage,
     });
   } catch (err) {
     if (controller.signal.aborted) return;

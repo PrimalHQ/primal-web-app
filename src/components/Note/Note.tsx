@@ -557,6 +557,7 @@ const Note: Component<NoteProps> = (props) => {
               width={window.innerWidth}
               margins={45}
             />
+            <NoteTranslate note={props.note} />
           </div>
 
           <NoteTopZapsCompact
@@ -761,6 +762,7 @@ const Note: Component<NoteProps> = (props) => {
                   margins={58}
                   footerSize="short"
                 />
+                <NoteTranslate note={props.note} />
               </div>
             </div>
           </div>
