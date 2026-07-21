@@ -55,15 +55,15 @@ function restoreTranslationContent(content, placeholders) {
 const sample =
   'Hola see https://example.com and nostr:npub1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq and #bitcoin and lnbc1testinvoice and bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh and :wave:';
 
-const protected = sanitizeForTranslation(sample);
+const protectedPayload = sanitizeForTranslation(sample);
 const roundTrip = restoreTranslationContent(
-  protected.content.replace(/Hola/g, 'Hello'),
-  protected.placeholders,
+  protectedPayload.content.replace(/Hola/g, 'Hello'),
+  protectedPayload.placeholders,
 );
 
-assert.ok(protected.content.includes('__PRIMAL_PROTECTED_'), 'tokens protected');
-assert.ok(!protected.content.includes('https://example.com'), 'url stripped');
-assert.ok(!protected.content.includes('bc1qxy'), 'bc1 stripped from outbound');
+assert.ok(protectedPayload.content.includes('__PRIMAL_PROTECTED_'), 'tokens protected');
+assert.ok(!protectedPayload.content.includes('https://example.com'), 'url stripped');
+assert.ok(!protectedPayload.content.includes('bc1qxy'), 'bc1 stripped from outbound');
 assert.ok(roundTrip.includes('https://example.com'), 'url restored');
 assert.ok(roundTrip.includes('nostr:npub1'), 'nostr restored');
 assert.ok(roundTrip.includes('#bitcoin'), 'hashtag restored');
@@ -89,6 +89,6 @@ assert.match(ctx, /translateNoteContent|noteTranslate/);
 
 console.log('check-translation-sanitize: PASS');
 console.log(JSON.stringify({
-  protected_tokens: protected.placeholders.length,
+  protected_tokens: protectedPayload.placeholders.length,
   cache_key_prefix: key.slice(0, 12),
 }, null, 2));
