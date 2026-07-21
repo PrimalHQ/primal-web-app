@@ -117,6 +117,7 @@ const normalizeTarget = (lang: string) => lang.trim() || 'en';
 async function translateWithProvider(
   text: string,
   settings: TranslationSettings,
+  signal?: AbortSignal,
 ): Promise<string> {
   const target = normalizeTarget(settings.targetLanguage);
 
@@ -127,6 +128,7 @@ async function translateWithProvider(
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ q: text, target, format: 'text' }),
+      signal,
     });
     const data = await response.json();
     const translated = data?.data?.translations?.[0]?.translatedText;
@@ -146,6 +148,7 @@ async function translateWithProvider(
         text: [text],
         target_lang: target.split('-')[0].toUpperCase(),
       }),
+      signal,
     });
     const data = await response.json();
     const translated = data?.translations?.[0]?.text;
@@ -169,6 +172,7 @@ async function translateWithProvider(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
+    signal,
   });
   const data = await response.json();
   if (!response.ok || !data?.translatedText) throw new Error('provider_error');
@@ -193,6 +197,10 @@ export const translateNoteContent = async (
 
   setNoteTranslations(noteId, { status: 'loading', showOriginal: false });
 
+  translateControllers.get(noteId)?.abort();
+  const controller = new AbortController();
+  translateControllers.set(noteId, controller);
+
   try {
     const { content: sanitized, placeholders } = sanitizeForTranslation(
       content || '',
@@ -202,7 +210,7 @@ export const translateNoteContent = async (
     );
     const cached = readCache().find((e) => e.key === cacheKey);
     const raw =
-      cached?.text ?? (await translateWithProvider(sanitized, settings));
+      cached?.text ?? (await translateWithProvider(sanitized, settings, controller.signal));
     if (!cached) {
       writeCache({
         key: cacheKey,
@@ -211,6 +219,7 @@ export const translateNoteContent = async (
         savedAt: Date.now(),
       });
     }
+    if (controller.signal.aborted) return;
     setNoteTranslations(noteId, {
       status: 'translated',
       text: restoreTranslationContent(raw, placeholders),
@@ -218,8 +227,13 @@ export const translateNoteContent = async (
       showOriginal: false,
     });
   } catch (err) {
+    if (controller.signal.aborted) return;
     const message = err instanceof Error ? err.message : 'provider_error';
     setNoteTranslations(noteId, { status: 'error', error: message });
+  } finally {
+    if (translateControllers.get(noteId) === controller) {
+      translateControllers.delete(noteId);
+    }
   }
 };
 
@@ -229,6 +243,10 @@ export const toggleShowOriginal = (noteId: string) => {
   setNoteTranslations(noteId, 'showOriginal', !(current.showOriginal ?? false));
 };
 
+const translateControllers = new Map<string, AbortController>();
+
 export const clearNoteTranslation = (noteId: string) => {
+  translateControllers.get(noteId)?.abort();
+  translateControllers.delete(noteId);
   setNoteTranslations(noteId, { status: 'idle' });
 };
