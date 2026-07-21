@@ -10,7 +10,7 @@ const PLACEHOLDER_RE = /__PRIMAL_PROTECTED_(\d+)__/g;
  * hashtags, emoji shortcodes, lightning invoices).
  */
 const PROTECTED_TOKEN_RE =
-  /nostr:(?:npub|nprofile|note|nevent|naddr)1[023456789acdefghjklmnpqrstuvwxyz]+|(?:npub|nprofile|note|nevent|naddr)1[023456789acdefghjklmnpqrstuvwxyz]+|lnbc[0-9a-z]+|https?:\/\/[^\s<>"']+|www\.[^\s<>"']+|#[\p{L}\p{N}_-]+|:[A-Za-z0-9_+-]+:/giu;
+  /nostr:(?:npub|nprofile|note|nevent|naddr|nrelay)1[023456789acdefghjklmnpqrstuvwxyz]+|(?:npub|nprofile|note|nevent|naddr|nrelay)1[023456789acdefghjklmnpqrstuvwxyz]+|lnbc[0-9a-z]+|bc1[0-9a-z]+|https?:\/\/[^\s<>"']+|www\.[^\s<>"']+|#[\p{L}\p{N}_-]+|:[A-Za-z0-9_+-]+:/giu;
 
 export const sanitizeForTranslation = (content: string): SanitizedContent => {
   const placeholders: string[] = [];

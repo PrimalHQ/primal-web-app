@@ -155,10 +155,12 @@ async function translateWithProvider(
 
   const base = (settings.libreTranslateUrl || '').replace(/\/$/, '');
   if (!base) throw new Error('missing_url');
+  // LibreTranslate expects ISO 639-1 (en) not BCP-47 (en-US)
+  const ltTarget = target.split(/[-_]/)[0].toLowerCase() || 'en';
   const body: Record<string, string> = {
     q: text,
     source: 'auto',
-    target,
+    target: ltTarget,
     format: 'text',
   };
   if (settings.apiKey) body.api_key = settings.apiKey;
