@@ -9,12 +9,11 @@ import { useDMContext } from '../../contexts/DMContext';
 import { A } from '@solidjs/router';
 import { useAppContext } from '../../contexts/AppContext';
 import { decodeIdentifier, hexToNpub } from '../../lib/keys';
-import { isDev } from '../../utils';
+import { isDev, uuidv4 } from '../../utils';
 import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, specialCharsRegex, urlExtractRegex } from '../../constants';
 import { createStore } from 'solid-js/store';
 import { NoteContent } from '../ParsedNote/ParsedNote';
 import { isInterpunction, isUrl, isImage, isMp4Video, isOggVideo, isWebmVideo, isYouTube, isSpotify, isTwitch, isMixCloud, isSoundCloud, isAppleMusic, isWavelake, getLinkPreview, isNoteMention, isUserMention, isAddrMention, isTagMention, isHashtag, isCustomEmoji, isUnitifedLnAddress, isLnbc, is3gppVideo } from '../../lib/notes';
-import { generatePrivateKey } from '../../lib/nTools';
 import { useMediaContext } from '../../contexts/MediaContext';
 import NoteImage from '../NoteImage/NoteImage';
 import { getMediaUrl as getMediaUrlDefault } from "../../lib/media";
@@ -392,7 +391,7 @@ const DirectMessageParsedContent: Component<{
   const renderImage = (item: NoteContent, index?: number) => {
 
     const groupCount = item.tokens.length;
-    const imageGroup = generatePrivateKey();
+    const imageGroup = uuidv4();
 
     // Remove bottom margin if media is the last thing in the note
     const lastClass = index === content.length-1 ?

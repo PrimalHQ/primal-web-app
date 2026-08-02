@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, JSX,  JSXElement,  onMount, Show } from "solid-js";
 import styles from "./NoteImage.module.scss";
-import { generatePrivateKey } from "../../lib/nTools";
+import { uuidv4 } from "../../utils";
 import { MediaVariant } from "../../types/primal";
 import { useAppContext } from "../../contexts/AppContext";
 import { cacheImages, isImageCached } from "../../lib/cache";
@@ -27,7 +27,7 @@ const NoteImage: Component<{
   isGallery?: boolean,
 }> = (props) => {
   const app = useAppContext();
-  const imgId = generatePrivateKey();
+  const imgId = uuidv4();
 
   let imgVirtual: HTMLImageElement | undefined;
   let imgActual: HTMLImageElement | undefined;

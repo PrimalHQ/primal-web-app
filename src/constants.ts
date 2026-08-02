@@ -492,6 +492,8 @@ export const profileContactListPage = 50;
 
 export const pinEncodePrefix = 'prpec';
 export const pinEncodeIVSeparator = '?iv=';
+export const pinEncodePrefixV2 = 'prpec2';
+export const deviceEncodePrefix = 'prdev1';
 
 export const suggestedUsersToFollow = [
   "82341f882b6eabcd2ba7f1ef90aad961cf074af15b9ef44a09f9d2a8fbfbe6a2", //jack
