@@ -2343,7 +2343,7 @@ export const initAccountStore: AccountStore = {
   export const loginUsingNip46 = async (pk?: string) => {
     setLoginType('nip46');
 
-    const sec = getAppSK();
+    const sec = await getAppSK();
     const bunkerUrl = localStorage.getItem('bunkerUrl');
 
     if (!sec || !bunkerUrl) {

@@ -62,14 +62,14 @@ const GetStartedModal: Component<{
 
   const setupSigner = async () => {
     try {
-      generateAppKeys();
+      await generateAppKeys();
       const cUrl = generateClientConnectionUrl();
 
       if (cUrl.length === 0) return;
 
       setClientUrl(cUrl);
 
-      const sec = getAppSK();
+      const sec = await getAppSK();
 
       if (!sec) return;
 
