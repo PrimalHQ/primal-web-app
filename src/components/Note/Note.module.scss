@@ -1370,3 +1370,60 @@
 .missingThumb {
   border:1px solid red;
 }
+
+.noteTranslate {
+  margin-top: 6px;
+
+  .noteTranslateButton {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 18px;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--text-primary);
+      text-decoration: underline;
+    }
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.6;
+    }
+  }
+
+  .noteTranslateError {
+    color: var(--text-tertiary);
+    font-size: 14px;
+    line-height: 18px;
+  }
+
+  .noteTranslated {
+    padding: 8px 12px;
+    margin-top: 4px;
+    border-left: 2px solid var(--devider);
+    border-radius: 4px;
+    background-color: var(--background-card);
+
+    .noteTranslatedText {
+      color: var(--text-primary);
+      font-size: 15px;
+      line-height: 22px;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+
+    .noteTranslatedMeta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      color: var(--text-tertiary);
+      font-size: 13px;
+      line-height: 16px;
+    }
+  }
+}
