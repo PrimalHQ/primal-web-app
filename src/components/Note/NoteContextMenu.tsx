@@ -1,5 +1,5 @@
 import { Component, createEffect, createSignal } from 'solid-js';
-import { MenuItem, NostrRelaySignedEvent, PrimalArticle } from '../../types/primal';
+import { MenuItem, NostrRelaySignedEvent, PrimalArticle, PrimalNote } from '../../types/primal';
 
 import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
@@ -17,6 +17,7 @@ import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
 import { urlEncode } from '../../utils';
 import { accountStore, addToMuteList, hasPublicKey, removeFromMuteList, setShowPin, showGetStarted } from '../../stores/accountStore';
+import { useTranslatorContext } from '../../contexts/TranslatorContext';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -27,6 +28,7 @@ const NoteContextMenu: Component<{
   const toaster = useToastContext();
   const intl = useIntl();
   const app = useAppContext();
+  const translator = useTranslatorContext();
   const navigate = useNavigate();
 
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
@@ -150,6 +152,14 @@ const NoteContextMenu: Component<{
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalTextCoppied));
   };
 
+  const translateNote = () => {
+    const current = note();
+    if (!current || [Kind.UserPoll, Kind.ZapPoll].includes(current.msg.kind)) return;
+
+    translator?.actions.translateNote(current as PrimalNote);
+    props.onClose();
+  };
+
   const copyNoteId = () => {
     if (!props.data) return;
     navigator.clipboard.writeText(`nostr:${note().noteId}`);
@@ -249,6 +259,7 @@ const NoteContextMenu: Component<{
   }
 
   const noteContextForEveryone: () => MenuItem[] = () => {
+    const isPoll = [Kind.UserPoll, Kind.ZapPoll].includes(props.data?.note?.msg.kind);
 
     return [
       {
@@ -277,6 +288,15 @@ const NoteContextMenu: Component<{
         action: copyNoteText,
         icon: 'copy_note_text',
       },
+      ...(isPoll ? [] : [{
+        label: intl.formatMessage({
+          id: 'actions.noteContext.translate',
+          defaultMessage: 'Translate',
+          description: 'Translate a note into the selected language',
+        }),
+        action: translateNote,
+        icon: 'copy_note_text',
+      }]),
       {
         label: [Kind.UserPoll, Kind.ZapPoll].includes(props.data?.note?.msg.kind) ? intl.formatMessage(tActions.pollContext.copyId) : intl.formatMessage(tActions.noteContext.copyId),
         action: copyNoteId,

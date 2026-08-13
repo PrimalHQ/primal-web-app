@@ -1108,6 +1108,31 @@
   line-height: 16px;
 }
 
+.translationSettings {
+  margin-block: 24px;
+  padding-block: 16px;
+  border-top: 1px solid var(--devider);
+  border-bottom: 1px solid var(--devider);
+}
+
+.translationTitle {
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.translationSelect {
+  min-width: 220px;
+  height: 36px;
+  padding-inline: 10px;
+  border: 1px solid var(--subtile-devider);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  background-color: var(--background-input);
+  font-size: 15px;
+}
+
 
 .devToolsList {
   display: flex;

@@ -9,10 +9,12 @@ import { A } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import CheckBox from '../../components/Checkbox/CheckBox';
 import { useSettingsContext } from '../../contexts/SettingsContext';
+import { useTranslatorContext } from '../../contexts/TranslatorContext';
 
 const Appearance: Component = () => {
 
   const settings = useSettingsContext();
+  const translator = useTranslatorContext();
   const intl = useIntl();
 
   return (
@@ -30,6 +32,28 @@ const Appearance: Component = () => {
         </div>
 
         <ThemeChooser />
+
+        <div class={styles.translationSettings}>
+          <div class={styles.translationTitle}>Post translation language</div>
+          <select
+            class={styles.translationSelect}
+            value={translator?.translationLanguage || 'en'}
+            onChange={(event) => translator?.actions.setTranslationLanguage(event.currentTarget.value)}
+          >
+            <option value="en">English</option>
+            <option value="es">Español</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="it">Italiano</option>
+            <option value="pt">Português</option>
+            <option value="ja">日本語</option>
+            <option value="ko">한국어</option>
+            <option value="zh">中文</option>
+          </select>
+          <div class={styles.settingsDescription}>
+            Choose the language used when you translate a post from its context menu.
+          </div>
+        </div>
 
         <div>
           <CheckBox
