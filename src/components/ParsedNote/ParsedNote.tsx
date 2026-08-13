@@ -54,6 +54,7 @@ import { nip19, generatePrivateKey } from '../../lib/nTools';
 import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { useMediaContext } from '../../contexts/MediaContext';
+import { useTranslatorContext } from '../../contexts/TranslatorContext';
 import { hookForDev } from '../../lib/devTools';
 import { getMediaVariantFromTags, getMediaUrl as getMediaUrlDefault } from "../../lib/media";
 import NoteImage from '../NoteImage/NoteImage';
@@ -200,6 +201,7 @@ const ParsedNote: Component<{
   const intl = useIntl();
   const media = useMediaContext();
   const app = useAppContext();
+  const translator = useTranslatorContext();
 
   const dev = localStorage.getItem('devMode') === 'true';
 
@@ -2163,6 +2165,25 @@ const ParsedNote: Component<{
 
   return (
     <div ref={thisNote} id={id()} class={`${styles.parsedNote} ${props.veryShort ? styles.shortNote : ''}`} >
+      <Show when={translator?.translations[props.note.id]?.status === 'loading'}>
+        <div class={styles.translationStatus}>Translating…</div>
+      </Show>
+      <Show when={translator?.translations[props.note.id]?.status === 'error'}>
+        <button
+          class={styles.translationRetry}
+          onClick={() => translator?.actions.translateNote(props.note)}
+        >
+          Translation failed — retry
+        </button>
+      </Show>
+      <Show when={translator?.translations[props.note.id]?.status === 'success' && translator?.translations[props.note.id]?.text}>
+        <div class={styles.translation}>
+          <div class={styles.translationLabel}>
+            Translation ({translator?.translations[props.note.id]?.targetLanguage})
+          </div>
+          <div>{translator?.translations[props.note.id]?.text}</div>
+        </div>
+      </Show>
       <For each={content}>
         {(item, index) => renderContent(item, index(), content.length)}
       </For>
