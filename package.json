@@ -66,7 +66,7 @@
     "blossom-client-sdk": "3.0.1",
     "d3-format": "3.1.0",
     "dayjs": "1.11.11",
-    "dompurify": "3.0.5",
+    "dompurify": "^3.4.13",
     "fuse.js": "7.0.0",
     "highlight.js": "11.9.0",
     "hls-video-element": "1.5.6",
