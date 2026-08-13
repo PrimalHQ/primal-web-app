@@ -205,3 +205,37 @@
 .audio {
   margin-top: 12px;
 }
+
+.translation {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--subtile-devider);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--border-radius-small);
+  color: var(--text-primary);
+  background-color: var(--background-header-input);
+  white-space: pre-wrap;
+}
+
+.translationLabel {
+  margin-bottom: 4px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.translationStatus,
+.translationRetry {
+  margin-bottom: 10px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.translationRetry {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
