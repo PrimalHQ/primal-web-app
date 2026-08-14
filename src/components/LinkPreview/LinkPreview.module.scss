@@ -35,6 +35,9 @@
 
   &.noImage {
     display: flex !important;
+    grid-template-columns: unset;
+    align-items: center;
+    padding: 0;
   }
 
   .previewImage {
@@ -77,6 +80,41 @@
     }
   }
 
+}
+
+.noImagePlaceholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  min-width: 64px;
+  height: 100%;
+  background-color: var(--background-section);
+  border-right: 1px solid var(--subtile-devider);
+  padding: 8px;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.fallbackIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.fallbackDomain {
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-align: center;
+  word-break: break-all;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .previewInfo {

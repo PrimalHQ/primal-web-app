@@ -10,7 +10,23 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
 
   const media = useMediaContext();
 
-  const encodedUrl = encodeURI(new URL(props.preview.url.toLowerCase()).origin);
+  const hostname = () => {
+    try {
+      return new URL(props.preview.url).hostname;
+    } catch {
+      return props.preview.url || '';
+    }
+  };
+
+  const encodedUrl = () => {
+    try {
+      return encodeURI(new URL(props.preview.url.toLowerCase()).origin);
+    } catch {
+      return props.preview.url || '';
+    }
+  };
+
+  const faviconUrl = () => `https://www.google.com/s2/favicons?domain=${hostname()}&sz=32`;
 
   const image = () => {
     const i = media?.actions.getMedia(props.preview.images[0] || '', 'm');
@@ -88,7 +104,19 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
       class={klass()}
       target="_blank"
     >
-      <Show when={hasImage()}>
+      <Show
+        when={hasImage()}
+        fallback={
+          <div class={styles.noImagePlaceholder}>
+            <img
+              class={styles.fallbackIcon}
+              src={faviconUrl()}
+              alt={hostname()}
+            />
+            <span class={styles.fallbackDomain}>{hostname()}</span>
+          </div>
+        }
+      >
         <img
           class={styles.previewImage}
           src={image()?.media_url || props.preview.images[0]}
@@ -107,8 +135,8 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
         </Show>
 
         <div class={styles.previewUrlLine}>
-          <Show when={encodedUrl}>
-            <div class={styles.previewUrl}>{encodedUrl}</div>
+          <Show when={encodedUrl()}>
+            <div class={styles.previewUrl}>{hostname()}</div>
           </Show>
         </div>
       </div>
