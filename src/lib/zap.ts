@@ -98,7 +98,7 @@ export const zapNote = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
+    const event = JSON.stringify(signedEvent);
 
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
@@ -165,7 +165,7 @@ export const zapArticle = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
+    const event = JSON.stringify(signedEvent);
 
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
@@ -223,7 +223,7 @@ export const zapProfile = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
+    const event = JSON.stringify(signedEvent);
 
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
@@ -300,7 +300,7 @@ export const zapSubscription = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
+    const event = JSON.stringify(signedEvent);
 
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
@@ -367,7 +367,7 @@ export const zapDVM = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
+    const event = JSON.stringify(signedEvent);
 
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
@@ -434,7 +434,7 @@ export const zapStream = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
+    const event = JSON.stringify(signedEvent);
 
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
@@ -566,7 +566,7 @@ export const zapVote = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
+    const event = JSON.stringify(signedEvent);
 
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
