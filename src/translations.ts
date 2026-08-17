@@ -593,6 +593,73 @@ export const actions = {
       defaultMessage: 'Quote',
       description: 'Label for quoting note from context menu',
     },
+    translate: {
+      id: 'actions.noteContext.translate',
+      defaultMessage: 'Translate note',
+      description: 'Label for translating note from context menu',
+    },
+  },
+  noteTranslate: {
+    translate: {
+      id: 'actions.noteTranslate.translate',
+      defaultMessage: 'Translate',
+      description: 'Inline translate button',
+    },
+    showOriginal: {
+      id: 'actions.noteTranslate.showOriginal',
+      defaultMessage: 'Show original',
+      description: 'Toggle to original note text',
+    },
+    showTranslation: {
+      id: 'actions.noteTranslate.showTranslation',
+      defaultMessage: 'Show translation',
+      description: 'Toggle to translated note text',
+    },
+    loading: {
+      id: 'actions.noteTranslate.loading',
+      defaultMessage: 'Translating…',
+      description: 'Translation in progress',
+    },
+    error: {
+      id: 'actions.noteTranslate.error',
+      defaultMessage: 'Translation failed. Check settings or try again.',
+      description: 'Translation error message',
+    },
+    errorMissingKey: {
+      id: 'actions.noteTranslate.errorMissingKey',
+      defaultMessage: 'API key required. Add one in Settings → Note Translation.',
+      description: 'Missing provider API key',
+    },
+    errorMissingUrl: {
+      id: 'actions.noteTranslate.errorMissingUrl',
+      defaultMessage: 'Set a LibreTranslate URL in Settings → Note Translation.',
+      description: 'Missing LibreTranslate base URL',
+    },
+    errorDisabled: {
+      id: 'actions.noteTranslate.errorDisabled',
+      defaultMessage: 'Note translation is disabled in settings.',
+      description: 'Translation feature disabled',
+    },
+    errorEmptyProse: {
+      id: 'actions.noteTranslate.errorEmptyProse',
+      defaultMessage: 'Nothing to translate after protecting identifiers.',
+      description: 'Note is only protected tokens',
+    },
+    retry: {
+      id: 'actions.noteTranslate.retry',
+      defaultMessage: 'Retry translation',
+      description: 'Retry failed translation',
+    },
+    via: {
+      id: 'actions.noteTranslate.via',
+      defaultMessage: 'Translated by {provider}',
+      description: 'Provider attribution for translated note',
+    },
+    fromLanguage: {
+      id: 'actions.noteTranslate.fromLanguage',
+      defaultMessage: 'Translated from {language}',
+      description: 'Detected source language for translated note',
+    },
   },
   pollContext: {
     reactions: {
@@ -1832,6 +1899,48 @@ export const settings = {
       id: 'settings.appearance.caption',
       defaultMessage: 'Select a theme',
       description: 'Caption for theme selection',
+    },
+  },
+  translation: {
+    title: {
+      id: 'settings.translation.title',
+      defaultMessage: 'Note Translation',
+      description: 'Title of the note translation settings page',
+    },
+    caption: {
+      id: 'settings.translation.caption',
+      defaultMessage: 'Translate notes into your preferred language using a provider you control (LibreTranslate, Google, or DeepL).',
+      description: 'Caption for translation settings',
+    },
+    enable: {
+      id: 'settings.translation.enable',
+      defaultMessage: 'Enable note translation',
+      description: 'Enable translation checkbox',
+    },
+    provider: {
+      id: 'settings.translation.provider',
+      defaultMessage: 'Provider',
+      description: 'Translation provider label',
+    },
+    targetLanguage: {
+      id: 'settings.translation.targetLanguage',
+      defaultMessage: 'Target language',
+      description: 'Target language label',
+    },
+    libreUrl: {
+      id: 'settings.translation.libreUrl',
+      defaultMessage: 'LibreTranslate URL',
+      description: 'LibreTranslate instance URL',
+    },
+    apiKey: {
+      id: 'settings.translation.apiKey',
+      defaultMessage: 'API key (required for Google/DeepL; free DeepL keys end with :fx)',
+      description: 'Translation API key label',
+    },
+    privacyNote: {
+      id: 'settings.translation.privacyNote',
+      defaultMessage: 'Note text (with Nostr refs/URLs protected) is sent only to the provider you configure. Prefer a self-hosted LibreTranslate instance for privacy.',
+      description: 'Privacy note for translation settings',
     },
   },
   homeFeeds: {
