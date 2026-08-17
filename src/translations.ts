@@ -1211,6 +1211,21 @@ export const note = {
       description: 'Continue editing the poll',
     },
   },
+  translate: {
+    id: 'note.translate',
+    defaultMessage: 'Translate',
+    description: 'Button label to translate note content',
+  },
+  translating: {
+    id: 'note.translating',
+    defaultMessage: 'Translating...',
+    description: 'Label shown while translation is in progress',
+  },
+  showOriginal: {
+    id: 'note.showOriginal',
+    defaultMessage: 'Show original',
+    description: 'Button label to show original untranslated content',
+  },
 };
 
 export const notificationTypeTranslations: Record<string, string> = {

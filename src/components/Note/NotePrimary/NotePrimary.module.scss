@@ -44,6 +44,39 @@
       }
 
     }
+
+    .translateButton {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 4px 0;
+      margin-bottom: 8px;
+      text-align: left;
+      width: fit-content;
+
+      &:hover {
+        color: var(--text-primary);
+        text-decoration: underline;
+      }
+
+      &:disabled {
+        cursor: default;
+        opacity: 0.5;
+      }
+    }
+
+    .translated {
+      color: var(--text-secondary);
+      font-size: 16px;
+      line-height: 22px;
+      padding: 8px 0;
+      margin-bottom: 8px;
+      border-top: 1px solid var(--line-divider);
+      word-break: break-word;
+    }
   }
 }
 
