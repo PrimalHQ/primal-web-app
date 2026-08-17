@@ -3,6 +3,7 @@ import { batch, Component, createEffect, Match, on, onMount, Show, Switch } from
 import { PrimalNote, PrimalUser, TopZap, ZapOption } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import NoteFooter from './NoteFooter/NoteFooter';
+import NoteTranslate from '../NoteTranslate/NoteTranslate';
 
 import styles from './Note.module.scss';
 import { useThreadContext } from '../../contexts/ThreadContext';
@@ -412,6 +413,7 @@ const Note: Component<NoteProps> = (props) => {
                 width={Math.min(598, window.innerWidth)}
                 margins={isPhone() ? 42 : 1}
               />
+              <NoteTranslate note={props.note} />
             </div>
 
             <div class={styles.topZaps}>
