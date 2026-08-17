@@ -63,6 +63,33 @@
   align-items: center;
 }
 
+.settingsSelectRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: -10px;
+  margin-bottom: 20px;
+}
+
+.settingsSelect {
+  width: fit-content;
+  min-width: 180px;
+  padding: 8px 12px;
+  color: var(--text-primary);
+  background-color: var(--background-card);
+  border: 1px solid var(--devider);
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 18px;
+  cursor: pointer;
+}
+
+.settingsSelectHint {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  line-height: 16px;
+}
+
 .settingsCaptionDarker {
   font-size: 18px;
   font-weight: 400;

@@ -1,4 +1,4 @@
-import { Component } from 'solid-js';
+import { Component, For } from 'solid-js';
 import styles from './Settings.module.scss';
 
 import ThemeChooser from '../../components/ThemeChooser/ThemeChooser';
@@ -9,6 +9,11 @@ import { A } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import CheckBox from '../../components/Checkbox/CheckBox';
 import { useSettingsContext } from '../../contexts/SettingsContext';
+import {
+  getTranslateLang,
+  setTranslateLang,
+  TRANSLATION_LANGUAGES,
+} from '../../lib/noteTranslation';
 
 const Appearance: Component = () => {
 
@@ -30,6 +35,26 @@ const Appearance: Component = () => {
         </div>
 
         <ThemeChooser />
+
+        <div class={styles.settingsCaption}>
+          Translation language
+        </div>
+
+        <div class={styles.settingsSelectRow}>
+          <select
+            class={styles.settingsSelect}
+            value={getTranslateLang()}
+            onChange={(e) => setTranslateLang((e.target as HTMLSelectElement).value)}
+          >
+            <For each={TRANSLATION_LANGUAGES}>
+              {(lang) => <option value={lang.code}>{lang.name}</option>}
+            </For>
+          </select>
+
+          <div class={styles.settingsSelectHint}>
+            Notes will be translated into this language with the "Translate" button.
+          </div>
+        </div>
 
         <div>
           <CheckBox
