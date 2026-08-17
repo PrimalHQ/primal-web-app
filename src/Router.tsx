@@ -49,6 +49,7 @@ const DevTools = lazy(() => import('./pages/Settings/DevTools'));
 const ZapSettings = lazy(() => import('./pages/Settings/Zaps'));
 const Muted = lazy(() => import('./pages/Settings/Muted'));
 const Network = lazy(() => import('./pages/Settings/Network'));
+const TranslationSettings = lazy(() => import('./pages/Settings/Translation'));
 const Moderation = lazy(() => import('./pages/Settings/Moderation'));
 const NostrWalletConnect = lazy(() => import('./pages/Settings/NostrWalletConnect'));
 const Menu = lazy(() => import('./pages/Settings/Menu'));
@@ -162,6 +163,7 @@ const AppRouter: Component = () => {
             <Route path="/zaps" component={ZapSettings} />
             <Route path="/muted" component={Muted} />
             <Route path="/network" component={Network} />
+            <Route path="/translation" component={TranslationSettings} />
             <Route path="/filters" component={Moderation} />
             <Route path="/nwc" component={NostrWalletConnect} />
             <Route path="/devtools" component={DevTools} />
