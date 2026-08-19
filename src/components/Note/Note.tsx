@@ -3,6 +3,7 @@ import { batch, Component, createEffect, Match, on, onMount, Show, Switch } from
 import { PrimalNote, PrimalUser, TopZap, ZapOption } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import NoteFooter from './NoteFooter/NoteFooter';
+import NoteTranslate from '../NoteTranslate/NoteTranslate';
 
 import styles from './Note.module.scss';
 import { useThreadContext } from '../../contexts/ThreadContext';
@@ -19,7 +20,7 @@ import { date, veryLongDate } from '../../lib/dates';
 import { isPhone, uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
-import { addrRegexG, imageRegexG, linebreakRegex, noteRegex, urlRegexG } from '../../constants';
+import { addrRegexG, imageRegexG, Kind, linebreakRegex, noteRegex, urlRegexG } from '../../constants';
 import { TranslatorProvider } from '../../contexts/TranslatorContext';
 import { accountStore } from '../../stores/accountStore';
 import { useNavigate } from '@solidjs/router';
@@ -83,6 +84,12 @@ const Note: Component<NoteProps> = (props) => {
   });
 
   const noteType = () => props.noteType || 'feed';
+
+  // Only kind-1 notes (and reposts of them) are eligible for inline translation;
+  // long-form articles and drafts are excluded.
+  const isTextKind = () => {
+    return props.note.post.kind === Kind.Text || props.note.post.kind === Kind.Repost;
+  };
 
   const repost = () => props.note.repost;
 
@@ -414,6 +421,10 @@ const Note: Component<NoteProps> = (props) => {
               />
             </div>
 
+            <Show when={isTextKind()}>
+              <NoteTranslate note={props.note} />
+            </Show>
+
             <div class={styles.topZaps}>
               <NoteTopZaps
                 topZaps={reactionsState.topZapsFeed}
@@ -557,6 +568,10 @@ const Note: Component<NoteProps> = (props) => {
             />
           </div>
 
+          <Show when={isTextKind()}>
+            <NoteTranslate note={props.note} />
+          </Show>
+
           <NoteTopZapsCompact
             note={props.note}
             action={() => openReactionModal('zaps')}
@@ -643,6 +658,10 @@ const Note: Component<NoteProps> = (props) => {
                   footerSize="short"
                 />
               </div>
+
+              <Show when={isTextKind()}>
+                <NoteTranslate note={props.note} />
+              </Show>
 
               <NoteTopZapsCompact
                 note={props.note}
