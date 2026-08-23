@@ -140,38 +140,38 @@ export const login = {
 export const pin = {
   title: {
     id: 'pin.title',
-    defaultMessage: 'Create Pin',
-    description: 'Create Pin modal title',
+    defaultMessage: 'Create encryption password',
+    description: 'Create encryption password modal title',
   },
   description: {
     id: 'pin.description',
-    defaultMessage: 'Create a PIN to secure your account. You will need to enter this PIN every time you login to the Primal web app:',
-    description: 'Label describing what the pin is used for',
+    defaultMessage: 'Create an encryption password to secure your account. You will need to enter this password every time you login to the Primal web app:',
+    description: 'Label describing what the encryption password is used for',
   },
   enter: {
     id: 'pin.enter',
-    defaultMessage: 'Enter your PIN to login: ',
-    description: 'Label instructing the user to enter the pin',
+    defaultMessage: 'Enter your encryption password to login: ',
+    description: 'Label instructing the user to enter the encryption password',
   },
   enterTitle: {
     id: 'pin.enterTitle',
-    defaultMessage: 'Enter Pin',
-    description: 'Enter Pin modal title',
+    defaultMessage: 'Enter encryption password',
+    description: 'Enter encryption password modal title',
   },
   reEnter: {
     id: 'pin.reEnter',
-    defaultMessage: 'Re-type your PIN:',
-    description: 'Label instructing the user to re-enter the pin',
+    defaultMessage: 'Re-type your encryption password:',
+    description: 'Label instructing the user to re-enter the encryption password',
   },
   invalidPin: {
     id: 'pin.invalidPin',
-    defaultMessage: 'PIN must be at least 4 characters',
-    description: 'Label instructing the user on the valid pin requirements',
+    defaultMessage: 'Encryption password must be at least 4 characters',
+    description: 'Label instructing the user on the valid encryption password requirements',
   },
   invalidRePin: {
     id: 'pin.invalidRePin',
-    defaultMessage: 'PINs don\'t match',
-    description: 'Label instructing the user that the two pins don\'t match',
+    defaultMessage: 'Encryption passwords don\'t match',
+    description: 'Label instructing the user that the two encryption passwords don\'t match',
   },
 };
 
@@ -198,13 +198,13 @@ export const actions = {
   },
   createPin: {
     id: 'actions.createPin',
-    defaultMessage: 'Set PIN',
-    description: 'Create PIN action, button label',
+    defaultMessage: 'Set encryption password',
+    description: 'Create encryption password action, button label',
   },
   optoutPin: {
     id: 'actions.optoutPin',
-    defaultMessage: 'Continue without a PIN',
-    description: 'opt-out of PIN action, button label',
+    defaultMessage: 'Continue without an encryption password',
+    description: 'opt-out of encryption password action, button label',
   },
   createAccount: {
     id: 'actions.createAccount',
@@ -238,8 +238,8 @@ export const actions = {
   },
   forgotPin: {
     id: 'actions.forgotPin',
-    defaultMessage: 'I forgot my PIN',
-    description: 'Forgot PIN action, button label',
+    defaultMessage: 'I forgot my encryption password',
+    description: 'Forgot encryption password action, button label',
   },
   cancel: {
     id: 'actions.cancel',

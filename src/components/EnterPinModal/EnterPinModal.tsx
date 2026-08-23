@@ -57,7 +57,7 @@ const EnterPinModal: Component<{
       props.onSuccess && props.onSuccess(enc);
     } catch(e) {
       logError('Failed to decode nsec: ', e);
-      toast?.sendWarning('PIN is incorrect');
+      toast?.sendWarning('Encryption password is incorrect');
     }
 
   };
