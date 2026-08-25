@@ -15,7 +15,7 @@ import { nip19 } from 'nostr-tools';
 import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
-import { urlEncode } from '../../utils';
+import { getLang, urlEncode } from '../../utils';
 import { accountStore, addToMuteList, hasPublicKey, removeFromMuteList, setShowPin, showGetStarted } from '../../stores/accountStore';
 
 const NoteContextMenu: Component<{
@@ -150,6 +150,28 @@ const NoteContextMenu: Component<{
     toaster?.sendSuccess(intl.formatMessage(tToast.notePrimalTextCoppied));
   };
 
+  const translateNote = () => {
+    if (!props.data) return;
+
+    const text = [Kind.UserPoll, Kind.ZapPoll].includes(note().msg.kind) ?
+      // @ts-ignore
+      `${note().question || ''}` :
+      `${note().content || ''}`;
+
+    if (text.trim().length === 0) return;
+
+    const targetLang = (getLang() || 'en').split('-')[0];
+    const params = new URLSearchParams({
+      sl: 'auto',
+      tl: targetLang,
+      text,
+      op: 'translate',
+    });
+
+    window.open(`https://translate.google.com/?${params.toString()}`, '_blank', 'noopener,noreferrer');
+    props.onClose();
+  };
+
   const copyNoteId = () => {
     if (!props.data) return;
     navigator.clipboard.writeText(`nostr:${note().noteId}`);
@@ -275,6 +297,11 @@ const NoteContextMenu: Component<{
       {
         label: [Kind.UserPoll, Kind.ZapPoll].includes(props.data?.note?.msg.kind) ? intl.formatMessage(tActions.pollContext.copyText) : intl.formatMessage(tActions.noteContext.copyText),
         action: copyNoteText,
+        icon: 'copy_note_text',
+      },
+      {
+        label: [Kind.UserPoll, Kind.ZapPoll].includes(props.data?.note?.msg.kind) ? intl.formatMessage(tActions.pollContext.translate) : intl.formatMessage(tActions.noteContext.translate),
+        action: translateNote,
         icon: 'copy_note_text',
       },
       {
