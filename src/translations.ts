@@ -518,6 +518,11 @@ export const actions = {
       defaultMessage: 'Copy Note Text',
       description: 'Label for copy note text from context menu',
     },
+    translate: {
+      id: 'actions.noteContext.translate',
+      defaultMessage: 'Translate Note',
+      description: 'Label for translating note text from context menu',
+    },
     copyId: {
       id: 'actions.noteContext.copyId',
       defaultMessage: 'Copy Note ID',
@@ -614,6 +619,11 @@ export const actions = {
       id: 'actions.noteContext.copytext',
       defaultMessage: 'Copy Poll Question',
       description: 'Label for copy note text from context menu',
+    },
+    translate: {
+      id: 'actions.noteContext.translatePoll',
+      defaultMessage: 'Translate Poll',
+      description: 'Label for translating poll text from context menu',
     },
     copyId: {
       id: 'actions.noteContext.copyId',
