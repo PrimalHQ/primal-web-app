@@ -56,9 +56,16 @@
 
   .intro {
     margin-top: 1.5rem;
-    font-size: 1.125rem;
-    line-height: 1.625;
-    color: var(--ms-muted);
+
+    p {
+      font-size: 1.125rem;
+      line-height: 1.625;
+      color: var(--ms-muted);
+    }
+
+    p + p {
+      margin-top: 1rem;
+    }
   }
 
   /* ----------------------------------------------------------------- body */
@@ -122,8 +129,7 @@
       padding-top: 0;
     }
 
-    // Mirrors Tailwind's `last:border-b-0`: the outro paragraph is the last
-    // child here, so no section ever matches — every section keeps its rule.
+    // The document ends on its own contact section, so drop the trailing rule.
     &:last-child {
       border-bottom: none;
     }
@@ -164,21 +170,35 @@
     }
   }
 
-  .outro {
-    margin-top: 2.5rem;
-    font-size: 0.875rem;
-    line-height: 1.625;
-    color: rgba(255, 255, 255, 0.4);
+  // Sub-clauses repeat the section's number + heading anatomy at a smaller
+  // scale, so a long agreement stays scannable inside a section.
+  .clause {
+    margin-top: 1.75rem;
 
-    a {
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  .clauseHead {
+    margin-bottom: 0.625rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+
+    .clauseIndex {
+      flex: none;
+      font-family: var(--ms-font-mono);
+      font-size: 0.75rem;
+      line-height: 1rem;
       color: var(--ms-accent);
-      text-decoration-line: underline;
-      text-decoration-color: rgba(0, 130, 255, 0.4);
-      text-underline-offset: 4px;
+    }
 
-      &:hover {
-        text-decoration-color: var(--ms-accent);
-      }
+    h3 {
+      font-size: 1rem;
+      line-height: 1.5rem;
+      font-weight: 600;
+      color: #ffffff;
     }
   }
 }

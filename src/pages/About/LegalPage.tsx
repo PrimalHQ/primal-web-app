@@ -2,9 +2,18 @@ import { Component, For } from 'solid-js';
 
 import styles from './LegalPage.module.scss';
 
-export type LegalSection = {
+// A numbered sub-clause, e.g. "4.3 Maximum Wallet Balance". Its number is
+// derived from its position so it always tracks the section numbering that
+// the documents cross-reference.
+export type LegalClause = {
   heading: string,
   body: string[],
+};
+
+export type LegalSection = {
+  heading: string,
+  body?: string[],
+  clauses?: LegalClause[],
 };
 
 export type LegalPageProps = {
@@ -12,7 +21,7 @@ export type LegalPageProps = {
   kicker: string,
   title: string,
   updated: string,
-  intro: string,
+  intro: string[],
   sections: LegalSection[],
 };
 
@@ -33,7 +42,11 @@ const LegalPage: Component<LegalPageProps> = (props) => {
           <p class={styles.meta}>
             {props.index} · LAST UPDATED {props.updated}
           </p>
-          <p class={styles.intro}>{props.intro}</p>
+          <div class={styles.intro}>
+            <For each={props.intro}>
+              {paragraph => <p>{paragraph}</p>}
+            </For>
+          </div>
         </header>
 
         {/* Body: index rail + prose */}
@@ -60,18 +73,26 @@ const LegalPage: Component<LegalPageProps> = (props) => {
                     <h2>{s.heading}</h2>
                   </div>
                   <div class={styles.sectionBody}>
-                    <For each={s.body}>
+                    <For each={s.body || []}>
                       {paragraph => <p>{paragraph}</p>}
+                    </For>
+                    <For each={s.clauses || []}>
+                      {(c, j) => (
+                        <div class={styles.clause}>
+                          <div class={styles.clauseHead}>
+                            <span class={styles.clauseIndex}>{i() + 1}.{j() + 1}</span>
+                            <h3>{c.heading}</h3>
+                          </div>
+                          <For each={c.body}>
+                            {paragraph => <p>{paragraph}</p>}
+                          </For>
+                        </div>
+                      )}
                     </For>
                   </div>
                 </section>
               )}
             </For>
-
-            <p class={styles.outro}>
-              Questions about this document? Contact us at{' '}
-              <a href="mailto:support@primal.net">support@primal.net</a>.
-            </p>
           </div>
         </div>
 

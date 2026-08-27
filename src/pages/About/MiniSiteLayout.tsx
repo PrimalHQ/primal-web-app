@@ -23,8 +23,13 @@ const MiniSiteLayout: Component<{ children?: JSXElement }> = (props) => {
     return item ? item.key : 'about';
   });
 
+  let rootStyle: string | null = null;
+
   onMount(() => {
+    // The mini-site paints on black regardless of the app's active theme.
+    // Remember what was there so the app gets it back on the way out.
     const container = document.querySelector('#root');
+    rootStyle = container?.getAttribute('style') || null;
     container && container.setAttribute('style', 'background-color: black');
 
     document.documentElement.style.scrollBehavior = 'smooth';
@@ -35,6 +40,13 @@ const MiniSiteLayout: Component<{ children?: JSXElement }> = (props) => {
   });
 
   onCleanup(() => {
+    const container = document.querySelector('#root');
+    if (container) {
+      rootStyle === null ?
+        container.removeAttribute('style') :
+        container.setAttribute('style', rootStyle);
+    }
+
     document.documentElement.style.removeProperty('scroll-behavior');
     document.documentElement.style.removeProperty('font-size');
   });
@@ -54,7 +66,7 @@ const MiniSiteLayout: Component<{ children?: JSXElement }> = (props) => {
       {/* Desktop: fixed left sidebar */}
       <aside class={styles.sidebar}>
         <div>
-          <A href="/about" class={styles.sidebarLogo} aria-label="Primal home" onClick={scrollToTop}>
+          <A href="/home" class={styles.sidebarLogo} aria-label="Primal home" onClick={scrollToTop}>
             <img src={logo} alt="Primal" />
           </A>
           <nav class={styles.sidebarNav}>
@@ -84,7 +96,7 @@ const MiniSiteLayout: Component<{ children?: JSXElement }> = (props) => {
 
       {/* Mobile: top bar */}
       <header class={styles.mobileHeader}>
-        <A href="/about" aria-label="Primal home" onClick={scrollToTop}>
+        <A href="/home" aria-label="Primal home" onClick={scrollToTop}>
           <img src={logo} alt="Primal" />
         </A>
         <button

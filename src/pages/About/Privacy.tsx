@@ -2,56 +2,87 @@ import { Component } from 'solid-js';
 
 import LegalPage, { LegalSection } from './LegalPage';
 
+const intro = [
+  'This Privacy Policy explains how Primal Systems Inc. and its affiliates, (“Primal”, “we”, “us”, or “our”) process information about you. This Privacy Policy applies when you use any Primal products and services, including but not limited to the Primal web app, Primal iOS app, Primal Android app, Primal browser extension, Primal Premium Service, or Primal Hosted Wallet Service (collectively referred to as “Services”). It also applies when you contact our customer service team, engage with us on social media, or otherwise interact with us or our Services.',
+];
+
 const sections: LegalSection[] = [
   {
-    heading: 'Our Approach to Privacy',
+    heading: 'Policy Overview',
     body: [
-      'Nostr is designed so that you control your identity and your data. Primal aims to collect as little information as possible and to keep you in control of what you share.',
-      "Content you publish to Nostr is public by nature of the protocol and is stored on independent relays outside of Primal's control.",
+      'Primal doesn’t monetize your personal information. We don’t generate revenue via advertising, we don’t monetize user attention, and we don’t sell personal information we collect from our users. Primal’s policy is to maximize user privacy by collecting only the minimum amount of personal information required to provide quality Services to our users and be compliant with the relevant laws.',
     ],
   },
   {
-    heading: 'Information We Handle',
-    body: [
-      'We do not require an email address, phone number, or real name to use our apps. Your Nostr public key serves as your identity.',
-      'When you use our hosted services — such as caching, media hosting, or the bitcoin wallet — we may process technical data necessary to provide those features, including public keys, transaction data required for wallet operation, and media you choose to upload.',
+    heading: 'Information We Collect',
+    clauses: [
+      {
+        heading: 'Account Creation',
+        body: [
+          'Primal Services enable you to create an account on the public Nostr network. All information you provide during the account creation process is optional, except for the desired username. Any personal information you disclose during the account creation process is published to the relays on the public Nostr network as a normal manner of course for all Nostr accounts. This information is public and can be seen by anyone on the Nostr network. Primal does not collect any further information about you during the account creation process.',
+        ],
+      },
+      {
+        heading: 'Primal Mobile Apps',
+        body: [
+          'Primal does not collect any data via our mobile apps – Primal for iOS and Primal for Android – beyond the data you specifically submit for publishing on the public Nostr network and when activating the optional Hosted Wallet Service, as described in section 2.4. Privacy and data collection notices on the public Apple App Store and Google Play Store listings display data collection settings for our mobile apps.',
+        ],
+      },
+      {
+        heading: 'Premium Service',
+        body: [
+          "Primal Premium Service is an optional, subscription-based, paid tier offered to you, which includes Primal Orange Check as defined in our Terms of Service agreement, and certain premium features, as defined on Primal's Website. Our Premium Service is specifically designed for maximum protection of user privacy, and as such, does not require disclosing any personal information.",
+        ],
+      },
+      {
+        heading: 'Hosted Wallet Service',
+        body: [
+          'Primal Hosted Wallet Service is an optional service offered to you, which includes storing small amounts of bitcoin on your behalf, the ability to send and receive bitcoin transactions on your behalf, the display of your transaction history, and hosting a Bitcoin Lightning Address assigned to you. In order to activate the Hosted Wallet Service in a legally compliant manner, we collect the minimum amount of personal information required by law, as shown on the Wallet Activation screen.',
+        ],
+      },
+      {
+        heading: 'Support Services',
+        body: [
+          'Primal provides support via email and over social media. The information you provide during the regular course of communication with us will be stored in our email systems and otherwise be recorded on the various social media systems we use to communicate with you.',
+        ],
+      },
     ],
   },
   {
-    heading: 'Private Keys',
+    heading: 'How We Use Your Information',
     body: [
-      'Your private key never needs to leave your device to use core features. Primal does not store or have access to your private key, and cannot recover it for you.',
+      'We use your personal information to provide high quality service to you, including offering Support Services, and to generally operate Primal Services and communicate with you as necessary.',
     ],
   },
   {
-    heading: 'Analytics and Diagnostics',
+    heading: 'Sharing Your Information',
     body: [
-      'We may collect aggregated, non-identifying diagnostic information to understand app performance and improve reliability. Where analytics are used, we minimize the data collected and avoid tying it to your identity wherever possible.',
+      'Primal will not share your information with third parties, except when required by law. We may share your personal data with law enforcement, data protection authorities, government officials and other authorities when: (i) compelled by subpoena, court order or other legal procedure; (ii) we believe that disclosure is necessary to prevent damage or financial loss; (iii) disclosure is necessary to report suspected illegal activity; or (iv) disclosure is necessary to investigate violations of our Terms of Service or Privacy Policy.',
+      'Primal’s Hosted Wallet Service is offered in partnership with our affiliate Zap Solutions, Inc. ("Strike"). In order to provide a legally compliant service, we are required to share your information related to the Hosted Wallet Service with Strike.',
     ],
   },
   {
-    heading: 'Third Parties',
+    heading: 'Your Rights and Choices',
     body: [
-      'Nostr relays, Lightning service providers, and app store platforms are independent third parties with their own privacy practices. We encourage you to review their policies.',
-      'We do not sell your personal information.',
+      'You have rights and choices with respect to your personal information, including: (i) accessing and updating your information: you can review and change your personal information by logging into your account; (ii) deactivation and deletion: you can deactivate your account or request the deletion of your information.',
     ],
   },
   {
-    heading: 'Data Retention',
+    heading: 'Security of Your Information',
     body: [
-      'We retain hosted data only as long as necessary to provide the relevant service. You can remove media you have uploaded and disconnect from our hosted services at any time.',
+      'Primal implements robust security measures, based on industry best practices, to protect the confidentiality, integrity, and availability of your personal and financial information. However, no system is completely secure, and we cannot guarantee the absolute security of your information.',
     ],
   },
   {
-    heading: 'Your Choices',
+    heading: 'Changes to This Privacy Policy',
     body: [
-      'Because you hold your own keys, you can move to another Nostr client at any time and take your identity and social graph with you. You are never locked into Primal.',
+      'We may change this Privacy Policy from time to time. If we make changes, we will notify you by revising the date at the top of this notice and, in some cases, we may provide you with additional notice (such as adding a statement to our Website or sending you a notification). We encourage you to review this Privacy Policy regularly to stay informed about our information handling practices and the choices available to you.',
     ],
   },
   {
-    heading: 'Contact',
+    heading: 'Contact Us',
     body: [
-      'If you have questions about this Privacy Policy or how your information is handled, please reach out to us and we will be glad to help.',
+      'If you have any questions regarding this Privacy Policy, you may contact us at support@primal.net.',
     ],
   },
 ];
@@ -63,8 +94,8 @@ const Privacy: Component = () => {
       index="03"
       kicker="LEGAL"
       title="Privacy Policy"
-      updated="AUG 2026"
-      intro="Primal is built on an open, decentralized protocol, and privacy is central to how we design our products. This policy explains what information we handle and how we treat it."
+      updated="FEBRUARY 21, 2024"
+      intro={intro}
       sections={sections}
     />
   );
