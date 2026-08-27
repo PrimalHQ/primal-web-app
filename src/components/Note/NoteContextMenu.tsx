@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal } from 'solid-js';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
 import { MenuItem, NostrRelaySignedEvent, PrimalArticle } from '../../types/primal';
 
 import styles from './Note.module.scss';
@@ -17,6 +17,7 @@ import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
 import { urlEncode } from '../../utils';
 import { accountStore, addToMuteList, hasPublicKey, removeFromMuteList, setShowPin, showGetStarted } from '../../stores/accountStore';
+import { useTranslatorContext } from '../../contexts/TranslatorContext';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -28,10 +29,32 @@ const NoteContextMenu: Component<{
   const intl = useIntl();
   const app = useAppContext();
   const navigate = useNavigate();
+  const translatorCtx = useTranslatorContext();
 
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [confirmMuteThread, setConfirmMuteThread] = createSignal(false);
   const [confirmRequestDelete, setConfirmRequestDelete] = createSignal(false);
+  const [translatedNote, setTranslatedNote] = createSignal('');
+  const [translating, setTranslating] = createSignal(false);
+
+  const doTranslateNote = async () => {
+    const content = note()?.content || '';
+    if (!content) return;
+    setTranslating(true);
+    const target = translatorCtx?.locale || 'en';
+    try {
+      const res = await fetch(
+        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(target)}&dt=t&q=${encodeURIComponent(content)}`,
+      );
+      if (!res.ok) throw new Error('translate failed');
+      const data = await res.json();
+      const translated = (data?.[0] || []).map((part: any[]) => part?.[0] || '').join('');
+      setTranslatedNote(translated || content);
+    } catch (e) {
+      setTranslatedNote(content);
+    }
+    setTranslating(false);
+  };
 
   const [orientation, setOrientation] = createSignal<'down' | 'up'>('down')
 
@@ -297,6 +320,14 @@ const NoteContextMenu: Component<{
         action: copyUserNpub,
         icon: 'copy_pubkey',
       },
+      {
+        label: intl.formatMessage(tActions.noteContext.translate),
+        action: () => {
+          doTranslateNote();
+          props.onClose();
+        },
+        icon: 'translate',
+      },
     ];
   };
 
@@ -408,15 +439,27 @@ const NoteContextMenu: Component<{
       />
 
       <ConfirmModal
-        open={confirmRequestDelete()}
-        title="Delete note?"
-        description="This will issue a “request delete” command to the relays where the note was published. Do you want to continue? "
-        onConfirm={() => {
-          doRequestDelete();
-          setConfirmRequestDelete(false);
-        }}
-        onAbort={() => setConfirmRequestDelete(false)}
-      />
+              open={confirmRequestDelete()}
+              title="Delete note?"
+              description="This will issue a “request delete” command to the relays where the note was published. Do you want to continue? "
+              onConfirm={() => {
+                doRequestDelete();
+                setConfirmRequestDelete(false);
+              }}
+              onAbort={() => setConfirmRequestDelete(false)}
+            />
+
+            <Show when={translatedNote()}>
+              <div class={styles.translatedModal}>
+                <div class={styles.translatedTitle}>
+                  {translating() ? 'Translating…' : intl.formatMessage(tActions.noteContext.translated)}
+                </div>
+                <div class={styles.translatedBody}>{translatedNote()}</div>
+                <button class={styles.translatedClose} onClick={() => setTranslatedNote('')}>
+                  Close
+                </button>
+              </div>
+            </Show>
 
       <PrimalMenu
         id={`note_context_${note()?.id}`}
