@@ -12,6 +12,27 @@
 
     <link href="/public/fonts.css" rel="stylesheet">
 
+    <script>
+      // The /about, /terms and /privacy pages are set in Geist + JetBrains Mono.
+      // Start fetching those faces during HTML parse so they are ready before
+      // first paint and the text never re-flows from the fallback.
+      (function () {
+        if (!/^\/(about|terms|privacy)\/?$/.test(location.pathname)) return;
+        [
+          '/public/Geist/Geist-latin.woff2',
+          '/public/JetBrainsMono/JetBrainsMono-latin.woff2'
+        ].forEach(function (href) {
+          var l = document.createElement('link');
+          l.rel = 'preload';
+          l.as = 'font';
+          l.type = 'font/woff2';
+          l.crossOrigin = 'anonymous';
+          l.href = href;
+          document.head.appendChild(l);
+        });
+      })();
+    </script>
+
     <link rel="icon" type="image/ico" href="/src/assets/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="/src/assets/favicon_32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/src/assets/favicon_16x16.png" />

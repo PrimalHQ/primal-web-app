@@ -1,3 +1,7 @@
+// Retained for reference only: this is the previous long-form Terms of Service.
+// /terms now renders src/pages/About/Terms.tsx (the Primal mini-site design).
+// Still the source of the shared Terms.module.scss used by Csae and Support.
+
 import { Component, onMount } from 'solid-js';
 import styles from './Terms.module.scss';
 

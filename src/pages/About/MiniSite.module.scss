@@ -1,0 +1,368 @@
+/*
+ * Shared shell for the standalone Primal mini-site (/about, /terms, /privacy).
+ * Design tokens mirror the Figma project: dark canvas, blue accent, Geist + JetBrains Mono.
+ *
+ * Everything is nested under `.miniSite` so the element resets below outrank
+ * Pico's base styles, while the page modules (nested under their own root
+ * class) outrank these resets in turn.
+ */
+
+.miniSite {
+  --ms-ink: #ffffff;
+  --ms-canvas: #000000;
+  --ms-accent: #0082ff;
+  --ms-muted: #8a8f98;
+  --ms-hairline: rgba(255, 255, 255, 0.1);
+  --ms-panel: #0a0a0b;
+  --ms-font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --ms-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--ms-canvas);
+  color: var(--ms-ink);
+  font-family: var(--ms-font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+
+  /* --- neutralize Pico / global base styles for the elements used below --- */
+
+  h1, h2, h3, h4, p, ul, ol, li, figure, blockquote, hgroup, small, address {
+    margin: 0;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    --pico-font-weight: inherit;
+  }
+
+  header, footer, section, nav, aside, main, article {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+  }
+
+  // Pico gives `nav` flex layout and pads/negative-margins `nav a`; the
+  // layouts below set their own, so strip Pico's first.
+  nav {
+    display: block;
+    justify-content: normal;
+    align-items: normal;
+
+    a, button {
+      margin: 0;
+      padding: 0;
+      border-radius: 0;
+    }
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+    background: none;
+  }
+
+  button {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    width: auto;
+    background: none;
+    color: inherit;
+    font: inherit;
+    line-height: inherit;
+    text-align: inherit;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    box-shadow: none;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* -------------------------------------------------------------- sidebar */
+
+  .sidebar {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    z-index: 30;
+    display: none;
+    width: 18rem;
+    flex-direction: column;
+    justify-content: space-between;
+    border-right: 1px solid var(--ms-hairline);
+    padding-inline: 2rem;
+    padding-block: 2.5rem;
+  }
+
+  .sidebarLogo {
+    display: block;
+    margin-bottom: 4rem;
+
+    img {
+      height: 2rem;
+      width: auto;
+      object-fit: contain;
+    }
+  }
+
+  .sidebarNav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .navLink {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding-block: 0.5rem;
+    text-align: left;
+    color: var(--ms-muted);
+    transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    .navIndex {
+      font-family: var(--ms-font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      color: rgba(255, 255, 255, 0.25);
+      transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .navLabel {
+      font-size: 0.95rem;
+    }
+
+    &:hover {
+      color: #ffffff;
+
+      .navIndex {
+        color: rgba(255, 255, 255, 0.5);
+      }
+    }
+
+    &.navLinkActive {
+      color: #ffffff;
+
+      .navIndex {
+        color: var(--ms-accent);
+      }
+    }
+  }
+
+  .sidebarFooter {
+    font-family: var(--ms-font-mono);
+    font-size: 0.7rem;
+    line-height: 1.625;
+    color: rgba(255, 255, 255, 0.35);
+
+    .footerRule {
+      margin-bottom: 0.75rem;
+      height: 1px;
+      width: 2rem;
+      background-color: var(--ms-accent);
+    }
+
+    a {
+      color: rgba(255, 255, 255, 0.5);
+      transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+      &:hover {
+        color: var(--ms-accent);
+      }
+    }
+  }
+
+  /* ----------------------------------------------------------- mobile bar */
+
+  .mobileHeader {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--ms-hairline);
+    background-color: rgba(0, 0, 0, 0.9);
+    padding-inline: 1.25rem;
+    padding-block: 1rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    img {
+      height: 1.5rem;
+      width: auto;
+      object-fit: contain;
+    }
+  }
+
+  .burger {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0.5rem;
+
+    span {
+      display: block;
+      height: 1px;
+      width: 1.5rem;
+      background-color: #ffffff;
+    }
+
+    span:nth-child(1),
+    span:nth-child(3) {
+      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    span:nth-child(2) {
+      transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    &.burgerOpen {
+      span:nth-child(1) {
+        transform: translateY(6px) rotate(45deg);
+      }
+
+      span:nth-child(2) {
+        opacity: 0;
+      }
+
+      span:nth-child(3) {
+        transform: translateY(-6px) rotate(-45deg);
+      }
+    }
+  }
+
+  .mobileMenu {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--ms-canvas);
+    padding-inline: 1.25rem;
+    padding-top: 6rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.mobileMenuOpen {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+
+  .mobileNav {
+    display: flex;
+    flex-direction: column;
+    border-block: 1px solid var(--ms-hairline);
+
+    > * + * {
+      border-top: 1px solid var(--ms-hairline);
+    }
+  }
+
+  .mobileNavLink {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 1.25rem;
+    text-align: left;
+
+    .mobileNavText {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+    }
+
+    .mobileNavIndex {
+      font-family: var(--ms-font-mono);
+      font-size: 0.75rem;
+      line-height: 1rem;
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .mobileNavLabel {
+      font-size: 1.5rem;
+      line-height: 2rem;
+      color: var(--ms-muted);
+    }
+
+    .mobileNavArrow {
+      color: var(--ms-accent);
+    }
+
+    &.mobileNavLinkActive {
+      .mobileNavIndex {
+        color: var(--ms-accent);
+      }
+
+      .mobileNavLabel {
+        color: #ffffff;
+      }
+    }
+  }
+
+  .mobileFooter {
+    margin-top: auto;
+    padding-bottom: 2.5rem;
+    font-family: var(--ms-font-mono);
+    font-size: 0.75rem;
+    line-height: 1.625;
+    color: rgba(255, 255, 255, 0.4);
+
+    a {
+      color: var(--ms-accent);
+    }
+  }
+
+  /* -------------------------------------------------------------- content */
+
+  .main {
+    display: block;
+  }
+
+  ::selection {
+    background: #0082ff;
+    color: #ffffff;
+  }
+}
+
+:root .miniSite ::selection {
+  background: #0082ff;
+  color: #ffffff;
+}
+
+@media only screen and (min-width: 1024px) {
+  .miniSite {
+    .sidebar {
+      display: flex;
+    }
+
+    .mobileHeader,
+    .mobileMenu {
+      display: none;
+    }
+
+    .main {
+      padding-left: 18rem;
+    }
+  }
+}

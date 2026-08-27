@@ -1,0 +1,225 @@
+/* Shared template for /terms and /privacy on the Primal mini-site. */
+
+.legal {
+  --ms-accent: #0082ff;
+  --ms-muted: #8a8f98;
+  --ms-hairline: rgba(255, 255, 255, 0.1);
+  --ms-font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  padding-inline: 1.25rem;
+  padding-top: 3rem;
+  padding-bottom: 6rem;
+
+  /* --------------------------------------------------------------- header */
+
+  .header {
+    max-width: 48rem;
+    border-bottom: 1px solid var(--ms-hairline);
+    padding-bottom: 2.5rem;
+  }
+
+  .kicker {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--ms-font-mono);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    letter-spacing: 0.1em;
+    color: var(--ms-accent);
+
+    .kickerRule {
+      display: block;
+      height: 1px;
+      width: 2rem;
+      background-color: var(--ms-accent);
+    }
+  }
+
+  .title {
+    font-size: 2.25rem;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+    font-weight: 600;
+    color: #ffffff;
+  }
+
+  .meta {
+    margin-top: 1.5rem;
+    font-family: var(--ms-font-mono);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .intro {
+    margin-top: 1.5rem;
+    font-size: 1.125rem;
+    line-height: 1.625;
+    color: var(--ms-muted);
+  }
+
+  /* ----------------------------------------------------------------- body */
+
+  .body {
+    margin-top: 3rem;
+    display: grid;
+    gap: 3rem;
+  }
+
+  .rail {
+    display: none;
+  }
+
+  .railInner {
+    position: sticky;
+    top: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-left: 1px solid var(--ms-hairline);
+    padding-left: 1.25rem;
+  }
+
+  .railLink {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding-block: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: var(--ms-muted);
+    transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    .railIndex {
+      font-family: var(--ms-font-mono);
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.3);
+      transition: color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    &:hover {
+      color: #ffffff;
+
+      .railIndex {
+        color: var(--ms-accent);
+      }
+    }
+  }
+
+  .prose {
+    max-width: 42rem;
+  }
+
+  .section {
+    scroll-margin-top: 6rem;
+    border-bottom: 1px solid var(--ms-hairline);
+    padding-block: 2rem;
+
+    &:first-child {
+      padding-top: 0;
+    }
+
+    // Mirrors Tailwind's `last:border-b-0`: the outro paragraph is the last
+    // child here, so no section ever matches — every section keeps its rule.
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .sectionHead {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+
+    .sectionIndex {
+      font-family: var(--ms-font-mono);
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+      color: var(--ms-accent);
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      line-height: 1.75rem;
+      letter-spacing: -0.025em;
+      font-weight: 600;
+      color: #ffffff;
+    }
+  }
+
+  .sectionBody {
+    padding-left: 0;
+
+    p {
+      line-height: 1.625;
+      color: var(--ms-muted);
+    }
+
+    p + p {
+      margin-top: 1rem;
+    }
+  }
+
+  .outro {
+    margin-top: 2.5rem;
+    font-size: 0.875rem;
+    line-height: 1.625;
+    color: rgba(255, 255, 255, 0.4);
+
+    a {
+      color: var(--ms-accent);
+      text-decoration-line: underline;
+      text-decoration-color: rgba(0, 130, 255, 0.4);
+      text-underline-offset: 4px;
+
+      &:hover {
+        text-decoration-color: var(--ms-accent);
+      }
+    }
+  }
+}
+
+/* -------------------------------------------------------------- breakpoints */
+
+@media only screen and (min-width: 640px) {
+  .legal {
+    padding-inline: 2.5rem;
+
+    .title {
+      font-size: 3rem;
+    }
+  }
+}
+
+@media only screen and (min-width: 1024px) {
+  .legal {
+    padding-inline: 5rem;
+    padding-top: 6rem;
+
+    .title {
+      font-size: 3.75rem;
+    }
+
+    .body {
+      grid-template-columns: 220px 1fr;
+      gap: 4rem;
+    }
+
+    .rail {
+      display: block;
+    }
+
+    .sectionHead h2 {
+      font-size: 1.5rem;
+      line-height: 2rem;
+    }
+
+    .sectionBody {
+      padding-left: 2.25rem;
+    }
+  }
+}

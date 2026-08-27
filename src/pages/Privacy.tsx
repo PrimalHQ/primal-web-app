@@ -1,3 +1,7 @@
+// Retained for reference only: this is the previous long-form Privacy Policy.
+// /privacy now renders src/pages/About/Privacy.tsx (the Primal mini-site design).
+// Still the source of the shared Terms.module.scss used by Csae and Support.
+
 import { Component, onMount } from 'solid-js';
 import styles from './Terms.module.scss';
 

@@ -57,8 +57,10 @@ const BlossomSettings = lazy(() => import('./pages/Settings/Blossom'));
 const AppDownloadQr = lazy(() => import('./pages/appDownloadQr'));
 const EventQueuePage = lazy(() => import('./pages/EventQueue'));
 
-const Terms = lazy(() => import('./pages/Terms'));
-const Privacy = lazy(() => import('./pages/Privacy'));
+const MiniSiteLayout = lazy(() => import('./pages/About/MiniSiteLayout'));
+const About = lazy(() => import('./pages/About/About'));
+const Terms = lazy(() => import('./pages/About/Terms'));
+const Privacy = lazy(() => import('./pages/About/Privacy'));
 const Support = lazy(() => import('./pages/Support'));
 const Csae = lazy(() => import('./pages/Csae'));
 
@@ -130,9 +132,12 @@ const AppRouter: Component = () => {
   return (
       <Router>
         <Route path="/app-download-qr" component={AppDownloadQr} />
-        <Route path="/terms" component={Terms} />
+        <Route path="/" component={MiniSiteLayout}>
+          <Route path="/about" component={About} />
+          <Route path="/terms" component={Terms} />
+          <Route path="/privacy" component={Privacy} />
+        </Route>
         <Route path="/csae-policy" component={Csae} />
-        <Route path="/privacy" component={Privacy} />
         <Route path="/support" component={Support} />
         <Route path="/" component={Layout} >
           <Route path="/" component={() => <Navigate href="/home" />} />
