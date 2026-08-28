@@ -532,7 +532,17 @@ export const actions = {
       id: 'actions.noteContext.copyPubkey',
       defaultMessage: 'Copy User Public Key',
       description: 'Label for copy note author\'s pubkey from context menu',
-    },
+          },
+          translate: {
+            id: 'actions.noteContext.translate',
+            defaultMessage: 'Translate Note',
+            description: 'Label for translate note from context menu',
+          },
+          translated: {
+            id: 'actions.noteContext.translated',
+            defaultMessage: 'Translated Note',
+            description: 'Title for translated note modal',
+          },
     breadcast: {
       id: 'actions.noteContext.breadcast',
       defaultMessage: 'Broadcast Note',
@@ -629,7 +639,17 @@ export const actions = {
       id: 'actions.noteContext.copyPubkey',
       defaultMessage: 'Copy User Public Key',
       description: 'Label for copy note author\'s pubkey from context menu',
-    },
+          },
+          translate: {
+            id: 'actions.noteContext.translate',
+            defaultMessage: 'Translate Note',
+            description: 'Label for translate note from context menu',
+          },
+          translated: {
+            id: 'actions.noteContext.translated',
+            defaultMessage: 'Translated Note',
+            description: 'Title for translated note modal',
+          },
     breadcast: {
       id: 'actions.noteContext.breadcast',
       defaultMessage: 'Broadcast Note',
