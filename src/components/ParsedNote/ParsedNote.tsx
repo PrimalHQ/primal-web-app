@@ -73,6 +73,7 @@ import {
 } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
+import PostTranslation from '../PostTranslation/PostTranslation';
 
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import Lnbc from '../Lnbc/Lnbc';
@@ -2170,6 +2171,14 @@ const ParsedNote: Component<{
         <span class={styles.more}>
           ... <span class="linkish">{intl.formatMessage(actions.seeMore)}</span>
         </span>
+      </Show>
+      <Show when={
+        !props.veryShort &&
+        !props.isEmbeded &&
+        !props.noLinks &&
+        noteContent().trim().length > 0
+      }>
+        <PostTranslation text={noteContent()} />
       </Show>
     </div>
   );
