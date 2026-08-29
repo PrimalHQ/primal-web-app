@@ -98,11 +98,9 @@ export const zapNote = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
-
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
-    url.searchParams.set('nostr', event);
+    url.searchParams.set('nostr', JSON.stringify(signedEvent));
 
     const r2 = await (await fetch(url.toString())).json();
 
@@ -165,11 +163,9 @@ export const zapArticle = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
-
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
-    url.searchParams.set('nostr', event);
+    url.searchParams.set('nostr', JSON.stringify(signedEvent));
 
     const r2 = await (await fetch(url.toString())).json();
     const pr = r2.pr;
@@ -223,11 +219,9 @@ export const zapProfile = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
-
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
-    url.searchParams.set('nostr', event);
+    url.searchParams.set('nostr', JSON.stringify(signedEvent));
 
     const r2 = await (await fetch(url.toString())).json();
 
@@ -300,11 +294,9 @@ export const zapSubscription = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
-
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
-    url.searchParams.set('nostr', event);
+    url.searchParams.set('nostr', JSON.stringify(signedEvent));
 
     const r2 = await (await fetch(url.toString())).json();
     const pr = r2.pr;
@@ -367,11 +359,9 @@ export const zapDVM = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
-
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
-    url.searchParams.set('nostr', event);
+    url.searchParams.set('nostr', JSON.stringify(signedEvent));
 
     const r2 = await (await fetch(url.toString())).json();
     const pr = r2.pr;
@@ -434,11 +424,9 @@ export const zapStream = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
-
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
-    url.searchParams.set('nostr', event);
+    url.searchParams.set('nostr', JSON.stringify(signedEvent));
 
     const r2 = await (await fetch(url.toString())).json();
     const pr = r2.pr;
@@ -566,11 +554,9 @@ export const zapVote = async (
   try {
     const signedEvent = await signEvent(zapReq);
 
-    const event = encodeURIComponent(JSON.stringify(signedEvent));
-
     const url = new URL(callback);
     url.searchParams.set('amount', String(sats));
-    url.searchParams.set('nostr', event);
+    url.searchParams.set('nostr', JSON.stringify(signedEvent));
 
     const r2 = await (await fetch(url.toString())).json();
     const pr = r2.pr;
