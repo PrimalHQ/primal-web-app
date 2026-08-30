@@ -711,21 +711,51 @@ const ParsedNote: Component<{
 
   const renderText = (item: NoteContent) => {
     let tokens = [];
-
-    for (let i=0;i<item.tokens.length;i++) {
-      const token = item.tokens[i];
-
-      if (isNoteTooLong()) break;
-      if (token.trim().length > 0) {
-        setWordsDisplayed(w => w + 1);
-      }
-      tokens.push(token)
+    for (let i = 0; i < item.tokens.length; i++) {
+        const token = item.tokens[i];
+        if (isNoteTooLong()) break;
+        if (token.trim().length > 0) {
+            setWordsDisplayed(w => w + 1);
+        }
+        tokens.push(token);
     }
 
     const text = tokens.join(' ').replaceAll('&lt;', '<').replaceAll('&gt;', '>');
 
-    return <>{text}</>;
-  };
+    // Translation state
+    const [translatedText, set'TranslatedText] = createSignal('');
+    const [showTranslation, setShowTranslation] = createSignal(false);
+
+    // Translation function },
+
+    const translateText = async () => {
+        try {
+            // Using LibreTranslate (free, no API key needed)
+            const response = await fetch               ('https://libretranslate.com/translate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json body: JSON.stringify({
+                    q: text,
+                    source: 'en',
+                    target: 'es'
+                })
+            });
+            const data = await response.json();
+            setTranslatedText(data.translatedText);
+            setShowTranslation(true);
+        } catch (error) {
+            console.error('Translation failed:', error);
+        }
+    };
+
+    // Return the JSX
+    return (
+        <div>
+            <button onClick={translateText}>Translate</button>
+            <div>{text}</div>
+            {showTranslation() && <p><strong>Translation:</strong> {translatedText()}</p>}
+        </div>
+    );
+};
 
   const renderImage = (item: NoteContent, index?: number) => {
 

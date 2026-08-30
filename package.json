@@ -19,7 +19,7 @@
     "@types/d3-format": "3.0.4",
     "@types/pako": "2.0.3",
     "typescript": "5.2.2",
-    "vite": "4.4.9",
+    "vite": "^4.5.14",
     "vite-plugin-pwa": "1.0.1",
     "vite-plugin-solid": "2.7.0"
   },
@@ -91,7 +91,7 @@
     "remark-parse": "11.0.0",
     "remark-rehype": "11.1.2",
     "sass": "1.67.0",
-    "solid-js": "1.9.9",
+    "solid-js": "^1.9.15",
     "solid-tiptap": "0.7.0",
     "solid-transition-group": "0.2.3",
     "tippy.js": "6.3.7",
