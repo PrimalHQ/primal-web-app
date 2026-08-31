@@ -1,4 +1,4 @@
-import { generatePrivateKey, getPublicKey, nip04, nip44, nip19, finalizeEvent, verifyEvent, generateNsec } from '../lib/nTools';
+import { generatePrivateKey, getPublicKey, nip04, nip44, nip19, finalizeEvent, verifyEvent } from '../lib/nTools';
 import { NostrExtension, NostrRelayEvent, NostrRelays, NostrRelaySignedEvent } from '../types/primal';
 import { readSecFromStorage, storeSec } from './localStore';
 import { base64 } from '@scure/base';
@@ -11,14 +11,9 @@ export const [currentPin, setCurrentPin] = createSignal('');
 
 export const [tempNsec, setTempNsec] = createSignal<string | undefined>();
 
-export const generateKeys = (forceNewKey?: boolean) => {
-  let sec = generatePrivateKey();
-  let nsec = readSecFromStorage();
-
-  if (forceNewKey) {
-    nsec = nip19.nsecEncode(sec);
-  }
-
+export const generateKeys = () => {
+  const sec = generatePrivateKey();
+  const nsec = nip19.nsecEncode(sec);
   const pubkey = getPublicKey(sec);
 
   return { sec, nsec, pubkey };
@@ -85,7 +80,11 @@ export const decryptWithPin = async (pin: string, cipher: string) => {
 
 export const PrimalNostr: (pk?: string) => NostrExtension = (pk?: string) => {
   const getSec = async () => {
-    let sec: string = pk || readSecFromStorage() || tempNsec() || generateNsec();
+    let sec: string | undefined = pk || readSecFromStorage() || tempNsec();
+
+    if (!sec) {
+      throw('no-nsec');
+    }
 
     if (sec.startsWith(pinEncodePrefix)) {
       sec = await decryptWithPin(currentPin(), sec);

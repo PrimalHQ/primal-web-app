@@ -5,6 +5,7 @@ import { getMembershipStatus } from "../lib/membership";
 import {
   areUrlsSame,
   handleSubscription,
+  uuidv4,
 } from "../utils";
 
 import {
@@ -32,7 +33,6 @@ import { NostrEventContent,
 } from "../types/primal";
 
 import {
-  generatePrivateKey,
   Relay,
   getPublicKey as nostrGetPubkey,
   nip19,
@@ -1788,7 +1788,7 @@ export const initAccountStore: AccountStore = {
       return;
     }
 
-    const random = generatePrivateKey();
+    const random = uuidv4();
     const subId = `fl_${random}_${APP_ID}`;
     let filterlists: Filterlist[] = [];
 
@@ -1814,7 +1814,7 @@ export const initAccountStore: AccountStore = {
       return;
     }
 
-    const random = generatePrivateKey();
+    const random = uuidv4();
     const subId = `bma_${random}_${APP_ID}`;
 
     let filterlists: Filterlist[] = [...accountStore.mutelists];
@@ -1859,7 +1859,7 @@ export const initAccountStore: AccountStore = {
       return;
     }
 
-    const random = generatePrivateKey();
+    const random = uuidv4();
     const subId = `bmr_${random}_${APP_ID}`;
     let filterlists: Filterlist[] = [...accountStore.mutelists];
 
@@ -1897,7 +1897,7 @@ export const initAccountStore: AccountStore = {
     if (!pubkey) {
       return;
     }
-    const random = generatePrivateKey();
+    const random = uuidv4();
     const subId = `bmu_${random}_${APP_ID}`;
 
     const unsub = subsTo(subId, {
@@ -1979,7 +1979,7 @@ export const initAccountStore: AccountStore = {
     if (!pubkey) {
       return;
     }
-    const random = generatePrivateKey();
+    const random = uuidv4();
     const subId = `baa_${random}_${APP_ID}`;
 
     const unsub = subsTo(subId, {
@@ -2021,7 +2021,7 @@ export const initAccountStore: AccountStore = {
     if (!pubkey) {
       return;
     }
-    const random = generatePrivateKey();
+    const random = uuidv4();
     const subId = `allow_list_remove_${random}_${APP_ID}`;
 
     const unsub = subsTo(subId, {

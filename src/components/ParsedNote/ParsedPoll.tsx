@@ -51,7 +51,7 @@ import {
 } from '../../types/primal';
 
 import styles from './ParsedNote.module.scss';
-import { nip19, generatePrivateKey } from '../../lib/nTools';
+import { nip19 } from '../../lib/nTools';
 import LinkPreview from '../LinkPreview/LinkPreview';
 import MentionedUserLink from '../Note/MentionedUserLink/MentionedUserLink';
 import { useMediaContext } from '../../contexts/MediaContext';
@@ -85,7 +85,7 @@ import { APP_ID } from '../../App';
 import { getEvents } from '../../lib/feed';
 import { subsTo } from '../../sockets';
 import ProfileNoteZap from '../ProfileNoteZap/ProfileNoteZap';
-import { parseBolt11 } from '../../utils';
+import { parseBolt11, uuidv4 } from '../../utils';
 import SimpleArticlePreview from '../ArticlePreview/SimpleArticlePreview';
 import NostrImage from '../NostrImage/NostrImage';
 import { StreamingData } from '../../lib/streaming';
@@ -650,7 +650,7 @@ const ParsedNote: Component<{
   const renderImage = (item: NoteContent, index?: number) => {
 
     const groupCount = item.tokens.length;
-    const imageGroup = generatePrivateKey();
+    const imageGroup = uuidv4();
 
     const imageError = (event: any) => {
       // const image = event.target;
