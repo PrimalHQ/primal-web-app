@@ -1,4 +1,4 @@
-import { Component, createEffect, createSignal } from 'solid-js';
+import { Component, createEffect, createSignal, Show } from 'solid-js';
 import { MenuItem, NostrRelaySignedEvent, PrimalArticle } from '../../types/primal';
 
 import styles from './Note.module.scss';
@@ -17,6 +17,12 @@ import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
 import { urlEncode } from '../../utils';
 import { accountStore, addToMuteList, hasPublicKey, removeFromMuteList, setShowPin, showGetStarted } from '../../stores/accountStore';
+import { useTranslatorContext } from '../../contexts/TranslatorContext';
+import {
+  loadTranslationSettings,
+  translateNote,
+  translationErrorMessage,
+} from '../../lib/translation';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -28,10 +34,65 @@ const NoteContextMenu: Component<{
   const intl = useIntl();
   const app = useAppContext();
   const navigate = useNavigate();
+  const translatorCtx = useTranslatorContext();
 
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [confirmMuteThread, setConfirmMuteThread] = createSignal(false);
   const [confirmRequestDelete, setConfirmRequestDelete] = createSignal(false);
+  const [translatedNote, setTranslatedNote] = createSignal('');
+  const [originalNote, setOriginalNote] = createSignal('');
+  const [showOriginal, setShowOriginal] = createSignal(false);
+  const [translatedMeta, setTranslatedMeta] = createSignal('');
+  const [translating, setTranslating] = createSignal(false);
+  const [translateError, setTranslateError] = createSignal('');
+
+  // Explicit user action only — note text is never sent anywhere on render.
+  const doTranslateNote = async () => {
+    const content = note()?.content || '';
+    if (!content) return;
+
+    setTranslating(true);
+    setTranslateError('');
+    setShowOriginal(false);
+
+    try {
+      const outcome = await translateNote(content, translatorCtx?.locale || 'en', loadTranslationSettings());
+      setOriginalNote(content);
+      setTranslatedNote(outcome.translated);
+      setTranslatedMeta([
+        outcome.detected ? `${outcome.detected} → ${translatorCtx?.locale || 'en'}` : '',
+        outcome.entityCount > 0 ? `${outcome.entityCount} reference(s) protected` : '',
+      ].filter(Boolean).join(' · '));
+    } catch (error) {
+      setTranslatedNote('');
+      setOriginalNote('');
+      setTranslatedMeta('');
+      setTranslateError(translationErrorMessage(error));
+    }
+
+    setTranslating(false);
+  };
+
+  const resetTranslation = () => {
+    setTranslatedNote('');
+    setOriginalNote('');
+    setTranslatedMeta('');
+    setTranslateError('');
+    setShowOriginal(false);
+  };
+
+  const translateErrorMessage = (intlShape: ReturnType<typeof useIntl>): string => {
+    switch (translateError()) {
+      case 'translation-error-not-configured':
+        return intlShape.formatMessage(tActions.noteContext.translateErrorSetup);
+      case 'translation-error-unofficial-disabled':
+        return intlShape.formatMessage(tActions.noteContext.translateErrorUnofficialDisabled);
+      case 'translation-error-provider':
+        return intlShape.formatMessage(tActions.noteContext.translateErrorProvider);
+      default:
+        return intlShape.formatMessage(tActions.noteContext.translateErrorGeneric);
+    }
+  };
 
   const [orientation, setOrientation] = createSignal<'down' | 'up'>('down')
 
@@ -297,6 +358,14 @@ const NoteContextMenu: Component<{
         action: copyUserNpub,
         icon: 'copy_pubkey',
       },
+      {
+        label: intl.formatMessage(tActions.noteContext.translate),
+        action: () => {
+          doTranslateNote();
+          props.onClose();
+        },
+        icon: 'translate',
+      },
     ];
   };
 
@@ -408,15 +477,46 @@ const NoteContextMenu: Component<{
       />
 
       <ConfirmModal
-        open={confirmRequestDelete()}
-        title="Delete note?"
-        description="This will issue a “request delete” command to the relays where the note was published. Do you want to continue? "
-        onConfirm={() => {
-          doRequestDelete();
-          setConfirmRequestDelete(false);
-        }}
-        onAbort={() => setConfirmRequestDelete(false)}
-      />
+              open={confirmRequestDelete()}
+              title="Delete note?"
+              description="This will issue a “request delete” command to the relays where the note was published. Do you want to continue? "
+              onConfirm={() => {
+                doRequestDelete();
+                setConfirmRequestDelete(false);
+              }}
+              onAbort={() => setConfirmRequestDelete(false)}
+            />
+
+            <Show when={translatedNote() || translateError()}>
+              <div class={styles.translatedModal}>
+                <div class={styles.translatedTitle}>
+                  {translating()
+                    ? 'Translating…'
+                    : intl.formatMessage(tActions.noteContext.translated)}
+                </div>
+                <div class={styles.translatedBody}>
+                  {translateError()
+                    ? translateErrorMessage(intl)
+                    : (showOriginal() ? originalNote() : translatedNote())}
+                </div>
+                <Show when={translatedMeta()}>
+                  <div class={styles.translatedMeta}>{translatedMeta()}</div>
+                </Show>
+                <Show when={translatedNote() && !translateError()}>
+                  <button
+                    class={styles.translatedClose}
+                    onClick={() => setShowOriginal((value) => !value)}
+                  >
+                    {showOriginal()
+                      ? intl.formatMessage(tActions.noteContext.showTranslation)
+                      : intl.formatMessage(tActions.noteContext.showOriginal)}
+                  </button>
+                </Show>
+                <button class={styles.translatedClose} onClick={resetTranslation}>
+                  Close
+                </button>
+              </div>
+            </Show>
 
       <PrimalMenu
         id={`note_context_${note()?.id}`}

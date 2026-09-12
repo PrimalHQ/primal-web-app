@@ -532,7 +532,47 @@ export const actions = {
       id: 'actions.noteContext.copyPubkey',
       defaultMessage: 'Copy User Public Key',
       description: 'Label for copy note author\'s pubkey from context menu',
-    },
+          },
+          translate: {
+            id: 'actions.noteContext.translate',
+            defaultMessage: 'Translate Note',
+            description: 'Label for translate note from context menu',
+          },
+          translated: {
+            id: 'actions.noteContext.translated',
+            defaultMessage: 'Translated Note',
+            description: 'Title for translated note modal',
+          },
+          showOriginal: {
+            id: 'actions.noteContext.showOriginal',
+            defaultMessage: 'Show original',
+            description: 'Toggle label to show the untranslated note text',
+          },
+          showTranslation: {
+            id: 'actions.noteContext.showTranslation',
+            defaultMessage: 'Show translation',
+            description: 'Toggle label to switch back to the translated note text',
+          },
+          translateErrorSetup: {
+            id: 'actions.noteContext.translateErrorSetup',
+            defaultMessage: 'Set a translation endpoint in Settings → Translation first.',
+            description: 'Shown when the user has not configured a translation provider yet',
+          },
+          translateErrorUnofficialDisabled: {
+            id: 'actions.noteContext.translateErrorUnofficialDisabled',
+            defaultMessage: 'The unofficial Google endpoint is opt-in only. Enable it in Settings → Translation or use a LibreTranslate endpoint.',
+            description: 'Shown when the opt-in unofficial endpoint was selected but not enabled',
+          },
+          translateErrorProvider: {
+            id: 'actions.noteContext.translateErrorProvider',
+            defaultMessage: 'The translation provider did not answer. Check the endpoint and try again.',
+            description: 'Shown when the configured provider returns an error',
+          },
+          translateErrorGeneric: {
+            id: 'actions.noteContext.translateErrorGeneric',
+            defaultMessage: 'Could not translate this note.',
+            description: 'Generic translation failure message',
+          },
     breadcast: {
       id: 'actions.noteContext.breadcast',
       defaultMessage: 'Broadcast Note',
@@ -629,7 +669,47 @@ export const actions = {
       id: 'actions.noteContext.copyPubkey',
       defaultMessage: 'Copy User Public Key',
       description: 'Label for copy note author\'s pubkey from context menu',
-    },
+          },
+          translate: {
+            id: 'actions.noteContext.translate',
+            defaultMessage: 'Translate Note',
+            description: 'Label for translate note from context menu',
+          },
+          translated: {
+            id: 'actions.noteContext.translated',
+            defaultMessage: 'Translated Note',
+            description: 'Title for translated note modal',
+          },
+          showOriginal: {
+            id: 'actions.noteContext.showOriginal',
+            defaultMessage: 'Show original',
+            description: 'Toggle label to show the untranslated note text',
+          },
+          showTranslation: {
+            id: 'actions.noteContext.showTranslation',
+            defaultMessage: 'Show translation',
+            description: 'Toggle label to switch back to the translated note text',
+          },
+          translateErrorSetup: {
+            id: 'actions.noteContext.translateErrorSetup',
+            defaultMessage: 'Set a translation endpoint in Settings → Translation first.',
+            description: 'Shown when the user has not configured a translation provider yet',
+          },
+          translateErrorUnofficialDisabled: {
+            id: 'actions.noteContext.translateErrorUnofficialDisabled',
+            defaultMessage: 'The unofficial Google endpoint is opt-in only. Enable it in Settings → Translation or use a LibreTranslate endpoint.',
+            description: 'Shown when the opt-in unofficial endpoint was selected but not enabled',
+          },
+          translateErrorProvider: {
+            id: 'actions.noteContext.translateErrorProvider',
+            defaultMessage: 'The translation provider did not answer. Check the endpoint and try again.',
+            description: 'Shown when the configured provider returns an error',
+          },
+          translateErrorGeneric: {
+            id: 'actions.noteContext.translateErrorGeneric',
+            defaultMessage: 'Could not translate this note.',
+            description: 'Generic translation failure message',
+          },
     breadcast: {
       id: 'actions.noteContext.breadcast',
       defaultMessage: 'Broadcast Note',
