@@ -139,6 +139,16 @@ export const translateNoteText = async (
     throw new Error('translation-unsupported');
   }
 
+  // 'auto' is only valid on builds that accept it; reject early on builds
+  // that require a concrete source language so the UI can offer the
+  // external fallback instead of waiting on a rejection.
+  if (sourceLanguage === 'auto' && Translator.availability) {
+    const avail = await Translator.availability({ sourceLanguage: 'auto', targetLanguage } as any).catch(() => 'unavailable');
+    if (avail === 'unavailable') {
+      throw new Error('detection-unavailable');
+    }
+  }
+
   const pairKey = `${sourceLanguage}:${targetLanguage}`;
   let translator = translatorCache.get(pairKey);
 
@@ -151,7 +161,11 @@ export const translateNoteText = async (
   }
 
   const result = await translator.translate([text]);
-  const translated = result?.[0] || '';
+
+  // Chrome's translate() may return the translation split across many array
+  // elements (per character/grapheme) rather than one string per input.
+  // Joining handles both shapes.
+  const translated = Array.isArray(result) ? result.join('') : String(result || '');
 
   if (translated) {
     translationCache.set(cacheKey, translated);

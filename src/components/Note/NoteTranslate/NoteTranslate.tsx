@@ -18,7 +18,7 @@ const NoteTranslate: Component<{ note: PrimalNote }> = (props) => {
 
   const intl = useIntl();
 
-  const [state, setState] = createSignal<'idle' | 'translating' | 'done' | 'error'>('idle');
+  const [state, setState] = createSignal<'idle' | 'translating' | 'done' | 'error' | 'external'>('idle');
   const [translated, setTranslated] = createSignal('');
   const [detected, setDetected] = createSignal<string | undefined>(undefined);
   const [showTranslation, setShowTranslation] = createSignal(true);
@@ -54,13 +54,18 @@ const NoteTranslate: Component<{ note: PrimalNote }> = (props) => {
       setState('done');
       setShowTranslation(true);
     } catch (e) {
-      setState('error');
+      const cause = String((e as Error)?.message || e);
+      if (cause.includes('detection-unavailable') || cause.includes('translation-unsupported')) {
+        setState('external');
+      } else {
+        setState('error');
+      }
     }
   };
 
-  const fallbackLink = () => (
+  const fallbackLink = (standalone = false) => (
     <a
-      class={styles.externalLink}
+      class={standalone ? styles.translateButton : styles.externalLink}
       href={externalTranslateUrl(text(), targetLanguage())}
       target="_blank"
       rel="noopener noreferrer"
@@ -75,7 +80,7 @@ const NoteTranslate: Component<{ note: PrimalNote }> = (props) => {
       class={styles.translationSection}
       onClick={(e: MouseEvent) => e.stopPropagation()}
     >
-      <Show when={state() !== 'done' || !showTranslation()}>
+      <Show when={state() !== 'external' && state() !== 'done' || !showTranslation()}>
         <span>
           <button
             class={styles.translateButton}
@@ -103,6 +108,10 @@ const NoteTranslate: Component<{ note: PrimalNote }> = (props) => {
             {fallbackLink()}
           </Show>
         </span>
+      </Show>
+
+      <Show when={state() === 'external'}>
+        {fallbackLink(true)}
       </Show>
 
       <Show when={state() === 'error'}>
