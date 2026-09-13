@@ -1074,6 +1074,44 @@ export const navBar = {
   },
 };
 
+export const noteTranslate = {
+  translate: {
+    id: 'noteTranslate.translate',
+    defaultMessage: 'Translate post',
+    description: 'Button that translates the note content into the user language',
+  },
+  translating: {
+    id: 'noteTranslate.translating',
+    defaultMessage: 'Translating…',
+    description: 'Label shown while a note is being translated',
+  },
+  retry: {
+    id: 'noteTranslate.retry',
+    defaultMessage: 'Translation failed. Try again',
+    description: 'Label shown when note translation fails',
+  },
+  showTranslated: {
+    id: 'noteTranslate.showTranslated',
+    defaultMessage: 'Show translation',
+    description: 'Button that brings back a hidden note translation',
+  },
+  showOriginal: {
+    id: 'noteTranslate.showOriginal',
+    defaultMessage: 'Show original',
+    description: 'Button that hides the translation and shows the original note text',
+  },
+  translatedFrom: {
+    id: 'noteTranslate.translatedFrom',
+    defaultMessage: 'Translated from {language}',
+    description: 'Label indicating the language a note was translated from',
+  },
+  openExternally: {
+    id: 'noteTranslate.openExternally',
+    defaultMessage: 'Open in Google Translate instead',
+    description: 'Fallback link shown when in-browser translation is not available',
+  },
+};
+
 export const note = {
   newPreview: {
     id: 'note.newPreview',
@@ -1832,6 +1870,18 @@ export const settings = {
       id: 'settings.appearance.caption',
       defaultMessage: 'Select a theme',
       description: 'Caption for theme selection',
+    },
+    translation: {
+      caption: {
+        id: 'settings.appearance.translation.caption',
+        defaultMessage: 'Translate posts into',
+        description: 'Caption for the post translation language selector',
+      },
+      hint: {
+        id: 'settings.appearance.translation.hint',
+        defaultMessage: 'Translation happens on your device when your browser supports it, otherwise an external translation service is offered.',
+        description: 'Hint explaining how post translation works',
+      },
     },
   },
   homeFeeds: {

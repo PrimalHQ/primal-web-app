@@ -9,11 +9,22 @@ import { A } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import CheckBox from '../../components/Checkbox/CheckBox';
 import { useSettingsContext } from '../../contexts/SettingsContext';
+import { TRANSLATABLE_LANGUAGES, getStoredTargetLanguage, setTargetLanguage } from '../../lib/translate';
+import { For, createSignal } from 'solid-js';
 
 const Appearance: Component = () => {
 
   const settings = useSettingsContext();
   const intl = useIntl();
+
+  const [translationLanguage, setTranslationLanguage] = createSignal<string>(
+    getStoredTargetLanguage(),
+  );
+
+  const onTranslationLanguageChange = (value: string) => {
+    setTranslationLanguage(value);
+    setTargetLanguage(value);
+  };
 
   return (
     <div>
@@ -49,6 +60,24 @@ const Appearance: Component = () => {
               Automatically set Dark or Light mode based on your system settings
             </div>
           </CheckBox>
+        </div>
+
+        <div>
+          <div class={styles.settingsCaption}>
+            {intl.formatMessage(t.appearance.translation.caption)}
+          </div>
+          <select
+            class={styles.languageSelect}
+            value={translationLanguage()}
+            onChange={(e) => onTranslationLanguageChange(e.currentTarget.value)}
+          >
+            <For each={Object.entries(TRANSLATABLE_LANGUAGES)}>
+              {([value, label]) => <option value={value}>{label}</option>}
+            </For>
+          </select>
+          <div class={styles.appearanceCheckLabel}>
+            {intl.formatMessage(t.appearance.translation.hint)}
+          </div>
         </div>
       </div>
     </div>

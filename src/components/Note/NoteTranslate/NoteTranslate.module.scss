@@ -1,0 +1,79 @@
+.translationSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0;
+
+  font-size: 1.4rem;
+}
+
+.translateButton {
+  align-self: flex-start;
+
+  padding: 0;
+  border: none;
+  background: none;
+
+  color: var(--accent-links);
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:disabled {
+    color: var(--text-secondary-2);
+    cursor: default;
+
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
+.externalLink {
+  color: var(--text-secondary-2);
+  font-size: 1.4rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.translatedWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+  border-left: 3px solid var(--text-secondary-2);
+}
+
+.translatedText {
+  white-space: pre-wrap;
+  color: var(--text-primary);
+}
+
+.translationMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  color: var(--text-secondary-2);
+  font-size: 1.2rem;
+}
+
+.metaButton {
+  padding: 0;
+  border: none;
+  background: none;
+
+  color: var(--text-secondary-2);
+  font-size: 1.2rem;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
