@@ -1107,7 +1107,7 @@ export const noteTranslate = {
   },
   openExternally: {
     id: 'noteTranslate.openExternally',
-    defaultMessage: 'Open in Google Translate instead',
+    defaultMessage: 'Open in Google Translate',
     description: 'Fallback link shown when in-browser translation is not available',
   },
 };

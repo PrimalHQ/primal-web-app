@@ -58,9 +58,9 @@ const NoteTranslate: Component<{ note: PrimalNote }> = (props) => {
     }
   };
 
-  const fallbackLink = (extraClass: string) => (
+  const fallbackLink = () => (
     <a
-      class={extraClass}
+      class={styles.externalLink}
       href={externalTranslateUrl(text(), targetLanguage())}
       target="_blank"
       rel="noopener noreferrer"
@@ -76,40 +76,42 @@ const NoteTranslate: Component<{ note: PrimalNote }> = (props) => {
       onClick={(e: MouseEvent) => e.stopPropagation()}
     >
       <Show when={state() !== 'done' || !showTranslation()}>
-        <button
-          class={styles.translateButton}
-          disabled={state() === 'translating'}
-          onClick={onTranslate}
-        >
-          <Show
-            when={state() !== 'error'}
-            fallback={intl.formatMessage(t.retry)}
+        <span>
+          <button
+            class={styles.translateButton}
+            disabled={state() === 'translating'}
+            onClick={onTranslate}
           >
             <Show
-              when={state() !== 'done'}
-              fallback={intl.formatMessage(t.showTranslated)}
+              when={state() !== 'error'}
+              fallback={<span>{intl.formatMessage(t.retry)}</span>}
             >
               <Show
-                when={state() !== 'translating'}
-                fallback={intl.formatMessage(t.translating)}
+                when={state() !== 'done'}
+                fallback={<span>{intl.formatMessage(t.showTranslated)}</span>}
               >
-                {intl.formatMessage(t.translate)}
+                <Show
+                  when={state() !== 'translating'}
+                  fallback={<span>{intl.formatMessage(t.translating)}</span>}
+                >
+                  <span>{intl.formatMessage(t.translate)}</span>
+                </Show>
               </Show>
             </Show>
+          </button>
+          <Show when={!isTranslationSupported()}>
+            {fallbackLink()}
           </Show>
-        </button>
-        <Show when={!isTranslationSupported()}>
-          {fallbackLink(styles.externalLink)}
-        </Show>
+        </span>
       </Show>
 
       <Show when={state() === 'error'}>
-        {fallbackLink(styles.externalLink)}
+        {fallbackLink()}
       </Show>
 
       <Show when={state() === 'done' && showTranslation()}>
-        <div class={styles.translatedWrapper}>
-          <div class={styles.translatedText}>{translated()}</div>
+        <div>
+          <p class={styles.translatedText}>{translated()}</p>
           <div class={styles.translationMeta}>
             <Show when={detected() && detected() !== targetLanguage()}>
               <span>{intl.formatMessage(t.translatedFrom, { language: detected() })}</span>
