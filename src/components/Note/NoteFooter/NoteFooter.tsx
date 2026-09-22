@@ -1,4 +1,4 @@
-import { batch, Component, createEffect, Show } from 'solid-js';
+import { batch, Component, createEffect, createSignal, Show } from 'solid-js';
 import { MenuItem, PrimalNote, ZapOption } from '../../../types/primal';
 import { getMyRepostOfEvent, sendDeleteEvent, sendRepost } from '../../../lib/notes';
 
@@ -449,15 +449,43 @@ const NoteFooter: Component<{
     like: styles.likeType,
     reply: styles.replyType,
     repost: styles.repostType,
+    translate: styles.translateType,
   };
 
   createEffect(() => {
     if (props.state.showZapAnim) {
       animateZap();
+    } 
+      });
+const [translatedText, setTranslatedText] = createSignal< | null>(null);
+const handleTranslate = async () => {
+  if (!props.note.content) return;
+
+  try {
+    // ইউজারের পছন্দের ভাষা খুঁজে বের করা হচ্ছে (TranslatorContext থেকে)
+    // যদি না পাওয়া যায়, তাহলে ডিফল্ট 'en' (ইংরেজি) ব্যবহার করা হবে
+    const userLanguage = localStorage.getItem('userLanguage') || 'en'; 
+    
+    const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${userLanguage}&dt=t&q=${encodeURIComponent(props.note.content)}`);
+    const data = await response.json();
+    // Combining all translated parts received from Google Translate
+let finalText = "";
+
+if (data && data[0]) {
+  data[0].forEach((item: any) => {
+    if (item && item[0]) {
+      finalText += item[0];
     }
   });
+}
+    
+    setTranslatedText(finalText);
+  } catch (error) {
+    alert("অনুবাদ করতে সমস্যা হয়েছে!");
+  }
+};
 
-  return (
+return (
     <div
       id={props.id}
       class={`${styles.footer} ${styles[size()]}`}
@@ -484,6 +512,16 @@ const NoteFooter: Component<{
         noteType={props.noteType}
       />
 
+<NoteFooterActionButton
+    note={props.note}
+    onClick={handleTranslate} 
+    type="translate"
+    highlighted={false}
+    label="Translate"
+    title="Translate this post"
+    large={props.large}
+    noteType={props.noteType}
+/>
       <NoteFooterActionButton
         note={props.note}
         onClick={(e: MouseEvent) => e.preventDefault()}
@@ -546,6 +584,18 @@ const NoteFooter: Component<{
           right={true}
         />
       </div>
+      <Show when={translatedText()}>
+  <div style={{ 
+    "margin-top": "10px", 
+    "padding": "8px", 
+    "background-color": "#f0f0f0", 
+    "border-radius": "5px",
+    "color": "#333",
+    "font-size": "14px"
+  }}>
+    <strong>Translation:</strong> {translatedText()}
+  </div>
+</Show>
 
     </div>
   )

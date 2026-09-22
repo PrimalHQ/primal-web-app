@@ -11,7 +11,7 @@ const buttonTypeClasses: Record<string, string> = {
 };
 
 const ArticleFooterActionButton: Component<{
-  type: 'zap' | 'like' | 'reply' | 'repost',
+  type: 'zap' | 'like' | 'reply' | 'repost' | 'translate';
   note: PrimalArticle,
   disabled?: boolean,
   highlighted?: boolean,
