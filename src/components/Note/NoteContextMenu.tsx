@@ -5,6 +5,8 @@ import styles from './Note.module.scss';
 import { useIntl } from '@cookbook/solid-intl';
 import { authorName } from '../../stores/profile';
 import { actions as tActions, toast as tToast } from '../../translations';
+import { canOfferNoteTranslate } from '../../lib/noteTranslate';
+import { askNoteTranslate } from '../../lib/noteTranslateBus';
 import { hookForDev } from '../../lib/devTools';
 import PrimalMenu from '../PrimalMenu/PrimalMenu';
 import { useToastContext } from '../Toaster/Toaster';
@@ -249,8 +251,19 @@ const NoteContextMenu: Component<{
   }
 
   const noteContextForEveryone: () => MenuItem[] = () => {
+    const text = note()?.content || note()?.post?.content || '';
+    const translateItem = canOfferNoteTranslate(text) ? [{
+      label: intl.formatMessage(tActions.noteContext.translate),
+      action: () => {
+        const id = note()?.id || note()?.post?.id;
+        if (id) askNoteTranslate(id);
+        props.onClose();
+      },
+      icon: 'copy_note_text',
+    }] : [];
 
     return [
+      ...translateItem,
       {
         label: intl.formatMessage(tActions.noteContext.reactions),
         action: () => {
