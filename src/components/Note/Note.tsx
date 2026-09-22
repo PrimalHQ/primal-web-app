@@ -45,7 +45,9 @@ export type NoteReactionsState = {
   topZaps: TopZap[],
   topZapsFeed: TopZap[],
   quoteCount: number,
+  translatedText?: string | null,
 };
+
 
 export type NoteProps = {
   note: PrimalNote,
@@ -116,6 +118,7 @@ const Note: Component<NoteProps> = (props) => {
     topZaps: props.note.topZaps || [],
     topZapsFeed: [],
     quoteCount: props.quoteCount || 0,
+    translatedText: null,
   });
 
   const [reactionsState, updateReactionsState] = createStore<NoteReactionsState>(
@@ -369,12 +372,12 @@ const Note: Component<NoteProps> = (props) => {
                 <div class={styles.footer}>
                   <NoteFooter
                     note={props.note}
+                    size={size()}
                     state={reactionsState}
                     updateState={updateReactionsState}
-                    customZapInfo={customZapInfo()}
-                    size="notif"
                     onDelete={props.onRemove}
                   />
+
                 </div>
               </Show>
             </div>

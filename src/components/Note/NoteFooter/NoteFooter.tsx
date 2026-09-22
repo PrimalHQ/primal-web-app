@@ -1,4 +1,4 @@
-import { batch, Component, createEffect, Show } from 'solid-js';
+import { batch, Component, createEffect, Show, createSignal } from 'solid-js';
 import { MenuItem, PrimalNote, ZapOption } from '../../../types/primal';
 import { getMyRepostOfEvent, sendDeleteEvent, sendRepost } from '../../../lib/notes';
 
@@ -56,6 +56,55 @@ const NoteFooter: Component<{
   const settings = useSettingsContext();
   const app = useAppContext();
   const navigate = useNavigate();
+
+    const [translatedText, setTranslatedText] = createSignal<string | null>(null);
+  const [isTranslating, setIsTranslating] = createSignal(false);
+
+  const handleTranslate = async (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (props.state.translatedText) {
+      props.updateState?.('translatedText', () => null);
+      return;
+    }
+
+    setIsTranslating(true);
+    try {
+      const targetLang = (settings && (settings as any).theme && (settings as any).theme.language) || 'en';
+      const textToTranslate = props.note.content || '';
+
+            const response = await fetch('https://bgm.li', {
+        method: 'POST',
+        body: JSON.stringify({
+          q: textToTranslate,
+          source: 'auto',
+          target: targetLang,
+          format: 'text'
+        }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+
+      const data = await response.json();
+      
+      if (data && data.translatedText) {
+        props.updateState?.('translatedText', () => data.translatedText);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+
+
+
+
 
   let medZapAnimation: HTMLElement | undefined;
 
@@ -510,6 +559,16 @@ const NoteFooter: Component<{
         large={props.large}
         noteType={props.noteType}
       />
+
+      <NoteFooterActionButton
+        type="reply"
+        note={props.note}
+        highlighted={!!props.state.translatedText}
+        label={isTranslating() ? "..." : props.state.translatedText ? "Original" : "Translate"}
+        onClick={handleTranslate}
+      />
+
+
 
       <button
         id={`btn_repost_${props.note.id}`}
