@@ -19,6 +19,7 @@ import { date, veryLongDate } from '../../lib/dates';
 import { isPhone, uuidv4 } from '../../utils';
 import NoteTopZaps from './NoteTopZaps';
 import NoteTopZapsCompact from './NoteTopZapsCompact';
+import NoteTranslate from './NoteTranslate';
 import { addrRegexG, imageRegexG, linebreakRegex, noteRegex, urlRegexG } from '../../constants';
 import { TranslatorProvider } from '../../contexts/TranslatorContext';
 import { accountStore } from '../../stores/accountStore';
@@ -412,6 +413,7 @@ const Note: Component<NoteProps> = (props) => {
                 width={Math.min(598, window.innerWidth)}
                 margins={isPhone() ? 42 : 1}
               />
+              <NoteTranslate content={props.note.content} />
             </div>
 
             <div class={styles.topZaps}>
@@ -555,6 +557,7 @@ const Note: Component<NoteProps> = (props) => {
               width={window.innerWidth}
               margins={45}
             />
+            <NoteTranslate content={props.note.content} />
           </div>
 
           <NoteTopZapsCompact
@@ -642,6 +645,7 @@ const Note: Component<NoteProps> = (props) => {
                   margins={1}
                   footerSize="short"
                 />
+                <NoteTranslate content={props.note.content} />
               </div>
 
               <NoteTopZapsCompact
@@ -758,6 +762,7 @@ const Note: Component<NoteProps> = (props) => {
                   margins={58}
                   footerSize="short"
                 />
+                <NoteTranslate content={props.note.content} />
               </div>
             </div>
           </div>
