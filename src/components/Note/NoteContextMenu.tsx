@@ -17,6 +17,8 @@ import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
 import { urlEncode } from '../../utils';
 import { accountStore, addToMuteList, hasPublicKey, removeFromMuteList, setShowPin, showGetStarted } from '../../stores/accountStore';
+import { resolveTargetLanguage } from '../../lib/translate';
+import { useSettingsContext } from '../../contexts/SettingsContext';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -28,6 +30,7 @@ const NoteContextMenu: Component<{
   const intl = useIntl();
   const app = useAppContext();
   const navigate = useNavigate();
+  const settings = useSettingsContext();
 
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [confirmMuteThread, setConfirmMuteThread] = createSignal(false);
@@ -164,6 +167,26 @@ const NoteContextMenu: Component<{
     toaster?.sendSuccess(intl.formatMessage(tToast.noteRawDataCoppied));
   };
 
+
+  const translateNote = () => {
+    if (!props.data) return;
+
+    const text = [Kind.UserPoll, Kind.ZapPoll].includes(note()?.msg?.kind)
+      // @ts-ignore
+      ? `${note()?.question || ''}`
+      : `${note()?.content || ''}`;
+
+    if (!text.trim()) {
+      props.onClose();
+      return;
+    }
+
+    const lang = resolveTargetLanguage(settings?.locale);
+    const url = `https://translate.google.com/?sl=auto&tl=${encodeURIComponent(lang)}&text=${encodeURIComponent(text)}&op=translate`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    props.onClose();
+  };
+
   const copyUserNpub = () => {
     if (!props.data) return;
     navigator.clipboard.writeText(`${note().user.npub}`);
@@ -275,6 +298,11 @@ const NoteContextMenu: Component<{
       {
         label: [Kind.UserPoll, Kind.ZapPoll].includes(props.data?.note?.msg.kind) ? intl.formatMessage(tActions.pollContext.copyText) : intl.formatMessage(tActions.noteContext.copyText),
         action: copyNoteText,
+        icon: 'copy_note_text',
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.translate),
+        action: translateNote,
         icon: 'copy_note_text',
       },
       {

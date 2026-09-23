@@ -593,6 +593,38 @@ export const actions = {
       defaultMessage: 'Quote',
       description: 'Label for quoting note from context menu',
     },
+    translate: {
+      id: 'actions.noteContext.translate',
+      defaultMessage: 'Translate Note',
+      description: 'Label for translating note from context menu',
+    },
+  },
+  noteTranslate: {
+    translate: {
+      id: 'actions.noteTranslate.translate',
+      defaultMessage: 'Translate post',
+      description: 'Button label to translate a note into the user language',
+    },
+    translating: {
+      id: 'actions.noteTranslate.translating',
+      defaultMessage: 'Translating…',
+      description: 'Loading label while a note is being translated',
+    },
+    showOriginal: {
+      id: 'actions.noteTranslate.showOriginal',
+      defaultMessage: 'Show original',
+      description: 'Button label to hide translation and show original note text',
+    },
+    translatedFrom: {
+      id: 'actions.noteTranslate.translatedFrom',
+      defaultMessage: 'Translated from {language}',
+      description: 'Attribution line for translated note content',
+    },
+    failed: {
+      id: 'actions.noteTranslate.failed',
+      defaultMessage: 'Translation failed',
+      description: 'Error prefix when note translation fails',
+    },
   },
   pollContext: {
     reactions: {
