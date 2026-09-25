@@ -35,7 +35,7 @@ import {
 import { convertToUser, truncateNpub, userName } from '../../stores/profile';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import {
-  Component, createSignal, For, JSXElement, Match, onMount, Show, Switch,
+  Component, createEffect, createSignal, For, JSXElement, Match, on, onMount, Show, Switch,
 } from 'solid-js';
 import {
   MediaVariant,
@@ -195,6 +195,9 @@ const ParsedNote: Component<{
   rootNote?: PrimalNote,
   noPlaceholders?: boolean,
   footerSize?: 'xwide' | 'wide' | 'normal' | 'compact' | 'short' | 'mini',
+  // Translated text that replaces the note's raw text content, while media,
+  // links and embeds (parsed from the original) keep rendering normally.
+  overrideText?: string,
 }> = (props) => {
 
   const intl = useIntl();
@@ -243,7 +246,11 @@ const ParsedNote: Component<{
 
   const rootNote = () => props.rootNote || props.note;
 
-  const noteContent = () => props.note.content || '';
+  // When a translation exists, the raw text is replaced by the translated
+  // text (which carries preserved media URLs appended by the translator —
+  // see translateNote in NoteContextMenu), so images and videos keep
+  // rendering through the normal token pipeline.
+  const noteContent = () => props.overrideText ?? props.note.content ?? '';
 
   const parseContent = () => {
     const content = props.ignoreLinebreaks ?
@@ -2157,9 +2164,13 @@ const ParsedNote: Component<{
       <></>;
   };
 
-  onMount(() => {
+  // Re-parse whenever the source text changes: on mount, when a translation
+  // arrives via overrideText, and when the user toggles back to the original.
+  createEffect(on(() => [props.overrideText, props.note.content], () => {
+    setContent(() => []);
+    lastSignificantContent = 'text';
     generateContent();
-  });
+  }));
 
   return (
     <div ref={thisNote} id={id()} class={`${styles.parsedNote} ${props.veryShort ? styles.shortNote : ''}`} >

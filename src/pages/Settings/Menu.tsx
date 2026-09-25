@@ -82,6 +82,10 @@ const Menu: Component = () => {
           {intl.formatMessage(t.network.title)}
           <div class={styles.chevron}></div>
         </A>
+        <A href="/settings/translation">
+          {intl.formatMessage(t.translation.title)}
+          <div class={styles.chevron}></div>
+        </A>
 
         <Show when={hasPublicKey()}>
           <A href="/settings/zaps">

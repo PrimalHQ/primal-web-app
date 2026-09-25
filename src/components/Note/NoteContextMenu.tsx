@@ -14,9 +14,11 @@ import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { nip19 } from 'nostr-tools';
 import { readSecFromStorage } from '../../lib/localStore';
 import { useNavigate } from '@solidjs/router';
-import { Kind } from '../../constants';
+import { Kind, urlRegexG } from '../../constants';
 import { urlEncode } from '../../utils';
 import { accountStore, addToMuteList, hasPublicKey, removeFromMuteList, setShowPin, showGetStarted } from '../../stores/accountStore';
+import { translationService } from '../../services/translation/translationService';
+import { setNoteTranslation } from '../../stores/noteTranslations';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -171,6 +173,57 @@ const NoteContextMenu: Component<{
     toaster?.sendSuccess(intl.formatMessage(tToast.noteAuthorNpubCoppied));
   };
 
+  const translateNote = async () => {
+    const targetLang = accountStore.preferredLanguage || 'en';
+
+    const n: any = note();
+    const content = [Kind.UserPoll, Kind.ZapPoll].includes(n?.msg?.kind)
+      ? n?.question
+      : n?.content;
+
+    if (!content) {
+      toaster?.sendWarning(intl.formatMessage(tToast.translationFailed));
+      return;
+    }
+
+    props.onClose();
+
+    try {
+      // URLs often don't survive translation (and media URLs MUST be kept
+      // verbatim so images/videos keep rendering). Strip them from the text
+      // sent to the translator, then append them back to the result.
+      const urls = content.match(urlRegexG) || [];
+      const textToTranslate = urls.length > 0
+        ? content.replace(urlRegexG, ' ').replace(/\s+/g, ' ').trim()
+        : content;
+
+      let translated: string;
+      if (textToTranslate) {
+        translated = await translationService.translate(
+          textToTranslate,
+          targetLang,
+          n?.id,
+        );
+      } else {
+        // Note is only media/links — nothing to translate.
+        translated = content;
+      }
+
+      // Re-attach the original URLs so ParsedNote re-parses them into
+      // images/videos/links when overrideText is used.
+      const restored = urls.length > 0
+        ? `${translated} ${urls.join(' ')}`
+        : translated;
+
+      // Store globally so every rendered instance of this note
+      // (feed, thread, profile...) swaps to the translated text.
+      setNoteTranslation(n.id, restored);
+    } catch (e) {
+      console.error('Translation failed:', e);
+      toaster?.sendWarning(intl.formatMessage(tToast.translationFailed));
+    }
+  };
+
   const doRequestDelete = async () => {
     const user = accountStore.activeUser;
     const noteToDelete = note();
@@ -276,6 +329,11 @@ const NoteContextMenu: Component<{
         label: [Kind.UserPoll, Kind.ZapPoll].includes(props.data?.note?.msg.kind) ? intl.formatMessage(tActions.pollContext.copyText) : intl.formatMessage(tActions.noteContext.copyText),
         action: copyNoteText,
         icon: 'copy_note_text',
+      },
+      {
+        label: intl.formatMessage(tActions.noteContext.translate),
+        action: translateNote,
+        icon: 'translate',
       },
       {
         label: [Kind.UserPoll, Kind.ZapPoll].includes(props.data?.note?.msg.kind) ? intl.formatMessage(tActions.pollContext.copyId) : intl.formatMessage(tActions.noteContext.copyId),

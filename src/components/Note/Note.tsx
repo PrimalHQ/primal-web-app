@@ -2,6 +2,7 @@
 import { batch, Component, createEffect, Match, on, onMount, Show, Switch } from 'solid-js';
 import { PrimalNote, PrimalUser, TopZap, ZapOption } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
+import TranslatedNoteContent from './TranslatedNoteContent';
 import NoteFooter from './NoteFooter/NoteFooter';
 
 import styles from './Note.module.scss';
@@ -407,7 +408,7 @@ const Note: Component<NoteProps> = (props) => {
           <div class={styles.content}>
 
             <div class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}>
-              <ParsedNote
+              <TranslatedNoteContent
                 note={props.note}
                 width={Math.min(598, window.innerWidth)}
                 margins={isPhone() ? 42 : 1}
@@ -549,7 +550,7 @@ const Note: Component<NoteProps> = (props) => {
             // href={!props.onClick ? noteLinkId() : ''}
             onClick={() => navToThread(props.note)}
           >
-            <ParsedNote
+            <TranslatedNoteContent
               note={props.note}
               shorten={props.shorten}
               width={window.innerWidth}
@@ -635,7 +636,7 @@ const Note: Component<NoteProps> = (props) => {
                   navToThread(props.note)
                 }}
               >
-                <ParsedNote
+                <TranslatedNoteContent
                   note={props.note}
                   shorten={props.shorten}
                   width={Math.min(510, window.innerWidth - 72)}
@@ -700,7 +701,7 @@ const Note: Component<NoteProps> = (props) => {
               <NoteReplyToHeader note={props.note} defaultParentAuthor={props.defaultParentAuthor} />
 
               <div class={styles.message}>
-                <ParsedNote
+                <TranslatedNoteContent
                   note={props.note}
                   shorten={props.shorten}
                   width={Math.min(528, window.innerWidth - 72)}

@@ -51,6 +51,7 @@ const Muted = lazy(() => import('./pages/Settings/Muted'));
 const Network = lazy(() => import('./pages/Settings/Network'));
 const Moderation = lazy(() => import('./pages/Settings/Moderation'));
 const NostrWalletConnect = lazy(() => import('./pages/Settings/NostrWalletConnect'));
+const Translation = lazy(() => import("./pages/Settings/Translation"));
 const Menu = lazy(() => import('./pages/Settings/Menu'));
 const BlossomSettings = lazy(() => import('./pages/Settings/Blossom'));
 // const Landing = lazy(() => import('./pages/Landing'));
@@ -166,6 +167,7 @@ const AppRouter: Component = () => {
             <Route path="/nwc" component={NostrWalletConnect} />
             <Route path="/devtools" component={DevTools} />
             <Route path="/uploads" component={Blossom} />
+            <Route path="/translation" component={Translation} />
           </Route>
           <Route path="/bookmarks" component={Bookmarks} />
           <Route path="/settings/profile" component={EditProfile} />

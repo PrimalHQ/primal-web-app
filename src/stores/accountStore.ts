@@ -199,6 +199,10 @@ export type AccountStore = {
   signerUnreachableDialogInfo: ConfirmDialogInfo | undefined,
 
   resetReactionStates: boolean,
+  translationProvider: 'mymemory' | 'libretranslate' | 'deepl',
+  translationApiKey: string,
+  translationLibreUrl: string,
+  preferredLanguage: string,
 }
 
 let relaysExplicitlyClosed: string[] = [];
@@ -273,6 +277,10 @@ export const initAccountStore: AccountStore = {
   resetReactionStates: false,
   // @ts-ignore
   // relayPool: new SimplePool({ enablePing: true, enableReconnect: true }),
+  translationProvider: 'mymemory',
+  translationApiKey: '',
+  translationLibreUrl: 'https://translate.terraprint.co',
+  preferredLanguage: 'en',
 };
 
   export const getRelayUrls = () => Object.keys(accountStore.relaySettings || {}).map(utils.normalizeURL)
@@ -1102,7 +1110,8 @@ export const initAccountStore: AccountStore = {
       tags: content.tags,
       content: content.content,
     };
-  };
+}
+
 
   export const updateMuted = (content: NostrMutedContent) => {
 
@@ -1732,6 +1741,35 @@ export const initAccountStore: AccountStore = {
 
     reset();
   };
+
+
+  export const initTranslationSettings = () => {
+    const savedProvider = localStorage.getItem('translation_provider');
+    const savedApiKey = localStorage.getItem('translation_api_key');
+    const savedLibreUrl = localStorage.getItem('translation_libre_url');
+    const savedLang = localStorage.getItem('translation_target_language');
+    
+    if (savedProvider) {
+      updateAccountStore('translationProvider', () => savedProvider as any);
+    }
+    if (savedApiKey !== null) {
+      updateAccountStore('translationApiKey', () => savedApiKey);
+    }
+    if (savedLibreUrl !== null) {
+      updateAccountStore('translationLibreUrl', () => savedLibreUrl);
+    }
+    if (savedLang !== null) {
+      updateAccountStore('preferredLanguage', () => savedLang);
+    }
+  };
+
+  export const saveTranslationSettings = () => {
+    localStorage.setItem('translation_provider', accountStore.translationProvider);
+    localStorage.setItem('translation_api_key', accountStore.translationApiKey);
+    localStorage.setItem('translation_libre_url', accountStore.translationLibreUrl);
+    localStorage.setItem('translation_target_language', accountStore.preferredLanguage);
+  };
+
 
   export const updateFilterlists = (mutelists: NostrMutedContent) => {
 
@@ -2665,5 +2703,8 @@ export const initAccountStore: AccountStore = {
 
 // -----------------------------------------------------------------------------
 export const [accountStore, updateAccountStore] = createStore<AccountStore>({
+
   ...initAccountStore,
 });
+
+initTranslationSettings();

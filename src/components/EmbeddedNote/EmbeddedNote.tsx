@@ -15,6 +15,8 @@ import VerificationCheck from '../VerificationCheck/VerificationCheck';
 import styles from './EmbeddedNote.module.scss';
 import { TranslatorProvider } from '../../contexts/TranslatorContext';
 import { accountStore } from '../../stores/accountStore';
+import { useIntl } from '@cookbook/solid-intl';
+import { translationService } from '../../services/translation/translationService';
 
 export type EmbeddedNoteProps = {
   note: PrimalNote | undefined,
@@ -259,18 +261,22 @@ const EmbeddedNote: Component<EmbeddedNoteProps> = (props) => {
         </span>
       </div>
       <div class={styles.noteContent} ref={noteContent}>
-        <ParsedNote
-          note={props.note}
-          shorten={true}
-          isEmbeded={true}
-          embedLevel={(props.embedLevel || 0)+1}
-          rootNote={props.rootNote}
-          width={noteContent?.getBoundingClientRect().width}
-          margins={2}
-          noLinks={props.noLinks}
-          noPlaceholders={props.noPlaceholders}
-          noLightbox={props.noLightbox}
-        />
+        {showTranslation && translatedText ? (
+          <div class={styles.translatedNote}>{translatedText}</div>
+        ) : (
+                  <ParsedNote
+                    note={props.note}
+                    shorten={true}
+                    isEmbeded={true}
+                    embedLevel={(props.embedLevel || 0)+1}
+                    rootNote={props.rootNote}
+                    width={noteContent?.getBoundingClientRect().width}
+                    margins={2}
+                    noLinks={props.noLinks}
+                    noPlaceholders={props.noPlaceholders}
+                    noLightbox={props.noLightbox}
+                  />
+        )}
       </div>
       <div class={styles.footer}>
         <Show when={!props.hideFooter}>

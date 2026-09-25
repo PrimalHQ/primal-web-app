@@ -538,6 +538,11 @@ export const actions = {
       defaultMessage: 'Broadcast Note',
       description: 'Label for note broadcast from context menu',
     },
+    translate: {
+      id: 'actions.noteContext.translate',
+      defaultMessage: 'Translate Note',
+      description: 'Label for translating note from context menu',
+    },
     muteAuthor: {
       id: 'actions.noteContext.muteAuthor',
       defaultMessage: 'Mute User',
@@ -1097,6 +1102,16 @@ export const note = {
       one { and # other}
       other { and # others}}`,
     description: 'Label indicating that the note is reposted more than once',
+  },
+  showOriginal: {
+    id: 'note.showOriginal',
+    defaultMessage: 'Show Original',
+    description: 'Label for showing original note text after translation',
+  },
+  showTranslation: {
+    id: 'note.showTranslation',
+    defaultMessage: 'Show Translation',
+    description: 'Label for showing the translated note text again',
   },
   reply: {
     id: 'note.reply',
@@ -2327,6 +2342,58 @@ export const settings = {
       },
     },
   },
+  translation: {
+    title: {
+      id: 'settings.translation.title',
+      defaultMessage: 'Translation',
+      description: 'Title of the translation settings sub-page',
+    },
+    provider: {
+      id: 'settings.translation.provider',
+      defaultMessage: 'Translation Provider',
+      description: 'Label for the translation provider dropdown',
+    },
+    apiKey: {
+      id: 'settings.translation.apiKey',
+      defaultMessage: 'API Key',
+      description: 'Label for the translation API key input',
+    },
+    libreUrl: {
+      id: 'settings.translation.libreUrl',
+      defaultMessage: 'LibreTranslate URL',
+      description: 'Label for the LibreTranslate URL input (only visible when provider is LibreTranslate)',
+    },
+    preferredLanguage: {
+      id: 'settings.translation.preferredLanguage',
+      defaultMessage: 'Preferred Language',
+      description: 'Label for the preferred language dropdown',
+    },
+    save: {
+      id: 'settings.translation.save',
+      defaultMessage: 'Save',
+      description: 'Label for the save button in translation settings',
+    },
+    saveSuccess: {
+      id: 'settings.translation.saveSuccess',
+      defaultMessage: 'Translation settings saved',
+      description: 'Success message when translation settings are saved',
+    },
+    translating: {
+      id: 'settings.translation.translating',
+      defaultMessage: 'Translating...',
+      description: 'Label for the translate button while translation is in progress',
+    },
+    hideOriginal: {
+      id: 'settings.translation.hideOriginal',
+      defaultMessage: 'Hide original',
+      description: 'Label for the button to hide the original text and show translation',
+    },
+    translate: {
+      id: 'settings.translation.translate',
+      defaultMessage: 'Translate',
+      description: 'Label for the button to translate a note',
+    },
+  },
 };
 
 export const scopeDescriptors: Record<string, ScopeDescriptor> = {
@@ -2569,6 +2636,11 @@ export const toast = {
     id: 'toast.noteBroadcastFail',
     defaultMessage: 'We were unable to broadcast this note',
     description: 'Failure message that the note has not been broadcasted',
+  },
+  translationFailed: {
+    id: 'toast.translationFailed',
+    defaultMessage: 'Translation failed',
+    description: 'Failure message when translating a note fails',
   },
   repostSuccess: {
     id: 'toast.repostSuccess',
