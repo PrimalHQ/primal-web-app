@@ -11,7 +11,8 @@
     "serve": "vite preview",
     "host": "vite preview --host",
     "extract": "formatjs extract",
-    "compile": "formatjs compile"
+    "compile": "formatjs compile",
+    "check:translation": "node scripts/check-translation-sanitize.mjs"
   },
   "license": "MIT",
   "devDependencies": {

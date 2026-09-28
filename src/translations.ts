@@ -518,6 +518,11 @@ export const actions = {
       defaultMessage: 'Copy Note Text',
       description: 'Label for copy note text from context menu',
     },
+    translate: {
+      id: 'actions.noteContext.translate',
+      defaultMessage: 'Translate Note',
+      description: 'Label for translate note from context menu',
+    },
     copyId: {
       id: 'actions.noteContext.copyId',
       defaultMessage: 'Copy Note ID',
@@ -1832,6 +1837,18 @@ export const settings = {
       id: 'settings.appearance.caption',
       defaultMessage: 'Select a theme',
       description: 'Caption for theme selection',
+    },
+  },
+  translation: {
+    title: {
+      id: 'settings.translation.title',
+      defaultMessage: 'Translation',
+      description: 'Title of the note translation settings sub-page',
+    },
+    caption: {
+      id: 'settings.translation.caption',
+      defaultMessage: 'Configure on-demand translation of notes into your preferred language',
+      description: 'Caption for note translation settings',
     },
   },
   homeFeeds: {
