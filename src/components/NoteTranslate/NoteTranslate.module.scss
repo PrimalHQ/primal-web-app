@@ -1,0 +1,51 @@
+.wrap {
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.button {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: var(--text-secondary, #888);
+  cursor: pointer;
+  font: inherit;
+
+  &:hover {
+    text-decoration: underline;
+    color: var(--text-primary, #ddd);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+    text-decoration: none;
+  }
+}
+
+.translated {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-left: 2px solid var(--brand-color, #e45);
+  white-space: pre-wrap;
+  color: var(--text-primary, #eee);
+  line-height: 1.4;
+}
+
+.error {
+  margin-top: 6px;
+  color: #c66;
+  font-size: 12px;
+}
+
+.meta {
+  margin-top: 4px;
+  color: var(--text-secondary, #888);
+  font-size: 11px;
+}

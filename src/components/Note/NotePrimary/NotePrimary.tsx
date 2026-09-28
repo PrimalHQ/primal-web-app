@@ -2,6 +2,7 @@ import { Component } from 'solid-js';
 import { hookForDev } from '../../../lib/devTools';
 import { PrimalNote } from '../../../types/primal';
 import ParsedNote from '../../ParsedNote/ParsedNote';
+import NoteTranslate from '../../NoteTranslate/NoteTranslate';
 import NoteFooter from '../NoteFooter/NoteFooter';
 import NoteHeader from '../NoteHeader/NoteHeader';
 
