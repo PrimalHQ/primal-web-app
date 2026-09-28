@@ -24,6 +24,7 @@ const NotePrimary: Component<{ note: PrimalNote, id?: string }> = (props) => {
 
         <div class={styles.message}>
           <ParsedNote note={props.note} width={Math.min(574, window.innerWidth)} />
+      <NoteTranslate note={props.note} />
         </div>
 
         <NoteFooter note={props.note} wide={true} />
