@@ -394,6 +394,15 @@ export const mentionRegexNostrless = /((note|nevent|naddr|nprofile|npub)1[qpzry9
 
 export const mdImageRegex = /(https?:\/\/.*\.(?:png|jpg|jpeg|webp|gif|format=png))|\!\[(.*?)\]\((https?:\/\/.*)\)/i;
 
+// Video-only: deliberately separate from mdImageRegex, whose alternation also
+// matches the markdown image syntax and would swallow ![alt](clip.mp4).
+export const mdVideoRegex = /(https?:\/\/\S+\.(?:mp4|mov|ogg|webm|3gp))/i;
+export const mdVideoRegexG = /(https?:\/\/\S+\.(?:mp4|mov|ogg|webm|3gp))/gi;
+
+export const mp4VideoRegex = /\.(?:mp4|mov)(\?|#|$)/i;
+export const oggVideoRegex = /\.ogg(\?|#|$)/i;
+export const webmVideoRegex = /\.webm(\?|#|$)/i;
+
 export const specialCharsRegex = /[^A-Za-z0-9]/;
 export const hashtagCharsRegex = /[^A-Za-z0-9\-\_]/;
 

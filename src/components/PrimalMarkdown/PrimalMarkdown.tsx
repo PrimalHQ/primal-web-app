@@ -20,6 +20,10 @@ import {
   eventRegexNostrless,
   Kind,
   mdImageRegex,
+  mdVideoRegex,
+  mp4VideoRegex,
+  oggVideoRegex,
+  webmVideoRegex,
   profileRegex,
   profileRegexG,
   specialCharsRegex,
@@ -31,6 +35,7 @@ import { createStore } from 'solid-js/store';
 import { nip19 } from '../../lib/nTools';
 import EmbeddedNote from '../EmbeddedNote/EmbeddedNote';
 import NoteImage from '../NoteImage/NoteImage';
+import NoteVideo from '../ParsedNote/NoteVideo';
 import PhotoSwipeLightbox from 'photoswipe/lightbox';
 import ArticlePreview from '../ArticlePreview/ArticlePreview';
 import ArticleHighlightActionMenu from '../ArticleHighlight/ArticleHighlightActionMenu';
@@ -48,7 +53,7 @@ export type Coord = {
   y: number;
 };
 
-export type ArticleTokenType = 'md' | 'event' | 'image' | 'user';
+export type ArticleTokenType = 'md' | 'event' | 'image' | 'video' | 'user';
 
 export type ArticleToken = {
   type: ArticleTokenType,
@@ -337,6 +342,11 @@ const PrimalMarkdown: Component<{
     // Parse event refereces
     tokens = parseTokens(tokens, eventRegexLocal, 'event', 'md');
 
+    // Parse videos BEFORE images. mdImageRegex matches the markdown image
+    // syntax ![...](...) with any URL, so it would claim ![alt](clip.mp4)
+    // and render a broken <img> instead of a player.
+    tokens = parseTokens(tokens, mdVideoRegex, 'video', 'md');
+
     // Parse images
     tokens = parseTokens(tokens, mdImageRegex, 'image', 'md');
 
@@ -494,6 +504,60 @@ const PrimalMarkdown: Component<{
           </div>
         );
       }
+    }
+
+    if (token.type === 'video') {
+      let src = token.value;
+
+      // Support ![alt](clip.mp4) as well as a bare URL
+      if (token.value.startsWith('![')) {
+        const videoMatch = token.value.match(/^!\[([^\]]*)\]\((\S+?)(?:\s+"[^"]*")?\)/);
+        src = videoMatch ? videoMatch[2] : '';
+      }
+
+      if (!src) return <>{token.value}</>;
+
+      // Same media lookup ParsedNote uses, so the cache can serve the video
+      // and imeta tags can supply dimensions
+      const mVideo = media?.actions.getMedia(src, 'o');
+
+      let w: number | undefined;
+      let h: number | undefined;
+      let ratio = 1;
+
+      const margins = 20;
+      const avail = Math.min(640, window.innerWidth - margins);
+
+      if (mVideo) {
+        ratio = mVideo.w / mVideo.h;
+
+        if (ratio < 1) {
+          h = 680;
+          w = Math.min(avail, h * ratio);
+          h = w / ratio;
+        } else {
+          w = avail;
+          h = w / ratio;
+        }
+      } else {
+        w = avail;
+      }
+
+      const mime = mp4VideoRegex.test(src) ? 'video/mp4'
+        : oggVideoRegex.test(src) ? 'video/ogg'
+        : webmVideoRegex.test(src) ? 'video/webm'
+        : 'video/mp4';
+
+      return (
+        <NoteVideo
+          class={`notevideo video_${props.noteId}`}
+          src={src}
+          type={mime}
+          width={w}
+          height={h}
+          ratio={ratio}
+        />
+      );
     }
 
     if (token.type === 'image') {
