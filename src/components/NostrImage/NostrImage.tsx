@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, JSX,  JSXElement,  onMount, Show } from "solid-js";
 import styles from "./NostrImage.module.scss";
-import { generatePrivateKey } from "../../lib/nTools";
+import { uuidv4 } from "../../utils";
 import { MediaVariant, NostrImageContent, NostrUserContent } from "../../types/primal";
 import { useAppContext } from "../../contexts/AppContext";
 
@@ -15,7 +15,7 @@ const NostrImage: Component<{
   event: NostrImageContent,
 }> = (props) => {
   const app = useAppContext();
-  const imgId = generatePrivateKey();
+  const imgId = uuidv4();
 
   let imgVirtual: HTMLImageElement | undefined;
   let imgWrapper: HTMLDivElement | undefined;

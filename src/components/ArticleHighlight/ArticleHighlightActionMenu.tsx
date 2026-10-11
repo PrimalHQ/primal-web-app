@@ -3,7 +3,7 @@ import { Component, Match, Show, Switch } from 'solid-js';
 import { Kind } from '../../constants';
 import { hookForDev } from '../../lib/devTools';
 import { removeHighlight, sendHighlight } from '../../lib/highlights';
-import { generatePrivateKey } from '../../lib/nTools';
+import { uuidv4 } from '../../utils';
 import { NostrRelaySignedEvent, PrimalArticle, } from '../../types/primal';
 
 import styles from './ArticleHighlight.module.scss';
@@ -120,7 +120,7 @@ const ArticleHighlightActionMenu: Component<{
       const { content, context } = generateContentAndContext(props.selection);
 
       const highlight = {
-        id: `${generatePrivateKey()}`,
+        id: uuidv4(),
         kind: Kind.Highlight,
         context,
         content,
@@ -151,7 +151,7 @@ const ArticleHighlightActionMenu: Component<{
       const context = (props.highlight.tags.find((t: string[]) => t[0] === 'context') || [])[1];
 
       const highlight = {
-        id: `${generatePrivateKey()}`,
+        id: uuidv4(),
         kind: Kind.Highlight,
         context,
         content,

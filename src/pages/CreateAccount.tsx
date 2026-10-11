@@ -333,7 +333,7 @@ const CreateAccount: Component = () => {
   };
 
   onMount(() => {
-    const { nsec, pubkey } = generateKeys(true);
+    const { nsec, pubkey } = generateKeys();
 
     setSec(nsec);
     setTempNsec(nsec);

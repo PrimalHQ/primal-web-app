@@ -5,6 +5,7 @@ import { uuidv4 } from '../utils';
 import { logWarning } from './logger';
 import primalLogo from '../assets/icons/logo_remote.png';
 import { timeoutPromise } from './nostrAPI';
+import { deviceDecrypt, deviceEncrypt, isDeviceEncrypted } from './deviceCrypto';
 
 export let appSigner: nip46.BunkerSigner | undefined;
 
@@ -12,24 +13,46 @@ export const setAppSigner = (bunker: nip46.BunkerSigner) => {
   appSigner = bunker;
 }
 
-export const generateAppKeys = (opts?: { reset?: boolean }) => {
+export const generateAppKeys = async (opts?: { reset?: boolean }) => {
   if (localStorage.getItem('appNsec') && !opts?.reset) return;
 
   let sk = generatePrivateKey();
   let pk = getPublicKey(sk);
 
-  localStorage.setItem('appNsec', bytesToHex(sk));
+  const enc = await deviceEncrypt(bytesToHex(sk));
+
+  if (!enc) return;
+
+  localStorage.setItem('appNsec', enc);
   localStorage.setItem('appPubkey', pk);
 }
 
 export const getAppPK = () => localStorage.getItem('appPubkey');
 
-export const getAppSK = () => {
-  const nsecHex = localStorage.getItem('appNsec');
+export const getAppSK = async () => {
+  const stored = localStorage.getItem('appNsec');
 
-  if (!nsecHex) return;
+  if (!stored) return;
 
   try {
+    let nsecHex = stored;
+
+    if (isDeviceEncrypted(stored)) {
+      const dec = await deviceDecrypt(stored);
+
+      if (!dec) return;
+
+      nsecHex = dec;
+    }
+    else {
+      // Legacy plaintext key; re-store it encrypted with the device key
+      const enc = await deviceEncrypt(stored);
+
+      if (enc) {
+        localStorage.setItem('appNsec', enc);
+      }
+    }
+
     const sk = hexToBytes(nsecHex);
 
     return sk;
