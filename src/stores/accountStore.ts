@@ -180,6 +180,7 @@ export type AccountStore = {
   bookmarks: string[],
   proxyThroughPrimal: boolean,
   proxySettingSet: boolean,
+  discloseClient: boolean,
   followData: FollowData,
   premiumReminder: boolean,
   activeNWC:string[],
@@ -246,6 +247,7 @@ export const initAccountStore: AccountStore = {
   bookmarks: [],
   proxyThroughPrimal: false,
   proxySettingSet: false,
+  discloseClient: true,
   premiumReminder: false,
   activeNWC: [],
   nwcList: [],
@@ -620,6 +622,10 @@ export const initAccountStore: AccountStore = {
 
   export const reconnectSuspendedRelays = async () => {
     await connectToRelays(accountStore.relaySettings);
+  }
+
+  export const setDiscloseClient = (shouldDisclose: boolean) => {
+    updateAccountStore('discloseClient', () => shouldDisclose);
   }
 
   export const setProxyThroughPrimal = async (shouldProxy: boolean) => {

@@ -40,7 +40,7 @@ import { logError } from "../lib/logger";
 import { fetchDefaultArticleFeeds, fetchDefaultHomeFeeds } from "../lib/feed";
 import { getDefaultBlossomServers } from "../lib/relays";
 import { runColorMode } from "../utils";
-import { accountStore, hasPublicKey, setProxyThroughPrimal } from "../stores/accountStore";
+import { accountStore, hasPublicKey, setProxyThroughPrimal, setDiscloseClient as setStoreDiscloseClient } from "../stores/accountStore";
 
 export type MobileReleases = {
   ios: { date: string, version: string },
@@ -91,6 +91,7 @@ export type SettingsContextStore = {
     modifyContentModeration: (name: string, content?: boolean, trending?: boolean) => void,
     refreshMobileReleases: () => void,
     setProxyThroughPrimal: (shouldProxy: boolean, temp?: boolean) => void,
+    setDiscloseClient: (shouldDisclose: boolean, temp?: boolean) => void,
     getDefaultReadsFeeds: () => void,
     getDefaultHomeFeeds: () => void,
     restoreReadsFeeds: () => void,
@@ -189,6 +190,12 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       saveSettings();
       savePrimalProxySettings(accountStore.publicKey, shouldProxy)
     }
+  }
+
+  const setDiscloseClient = (shouldDisclose: boolean, temp?: boolean) => {
+    setStoreDiscloseClient(shouldDisclose);
+
+    !temp && saveSettings();
   }
 
   const setDefaultZapAmount = (option: ZapOption, temp?: boolean) => {
@@ -673,6 +680,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       applyContentModeration: store.applyContentModeration,
       contentModeration: store.contentModeration,
       proxyThroughPrimal: accountStore.proxyThroughPrimal || false,
+      discloseClient: accountStore.discloseClient ?? true,
       animated: store.isAnimated,
     };
 
@@ -785,6 +793,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
             applyContentModeration,
             contentModeration,
             proxyThroughPrimal,
+            discloseClient,
           } = JSON.parse(content.content || '{}');
 
           if (store.useSystemTheme) {
@@ -858,6 +867,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
           }
 
           setProxyThroughPrimal(proxyThroughPrimal);
+          setStoreDiscloseClient(discloseClient ?? true);
         }
         catch (e) {
           logError('Error parsing settings response: ', e);
@@ -1119,6 +1129,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
       modifyContentModeration,
       refreshMobileReleases,
       setProxyThroughPrimal: setTheProxyThroughPrimal,
+      setDiscloseClient,
       getDefaultReadsFeeds,
       getDefaultHomeFeeds,
       restoreReadsFeeds,
