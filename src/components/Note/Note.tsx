@@ -1,8 +1,9 @@
 // import { A } from '@solidjs/router';
-import { batch, Component, createEffect, Match, on, onMount, Show, Switch } from 'solid-js';
+import { batch, Component, createEffect, createMemo, createSignal, Match, on, onMount, Show, Switch } from 'solid-js';
 import { PrimalNote, PrimalUser, TopZap, ZapOption } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import NoteFooter from './NoteFooter/NoteFooter';
+import TranslateNote from './TranslateNote';
 
 import styles from './Note.module.scss';
 import { useThreadContext } from '../../contexts/ThreadContext';
@@ -74,6 +75,14 @@ const Note: Component<NoteProps> = (props) => {
 
   const threadContext = useThreadContext();
   const app = useAppContext();
+
+  const [translatedContent, setTranslatedContent] = createSignal<string>();
+  // ParsedNote parses on mount, so it is re-keyed (remounted) when the
+  // reader toggles between the original and the translated text.
+  const displayedNote = createMemo(() => {
+    const content = translatedContent();
+    return content === undefined ? props.note : { ...props.note, content };
+  });
   const navigate = useNavigate();
 
   createEffect(() => {
@@ -407,11 +416,14 @@ const Note: Component<NoteProps> = (props) => {
           <div class={styles.content}>
 
             <div class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}>
-              <ParsedNote
-                note={props.note}
-                width={Math.min(598, window.innerWidth)}
-                margins={isPhone() ? 42 : 1}
-              />
+              <Show when={displayedNote()} keyed>
+                {(note) => <ParsedNote
+                  note={note}
+                  width={Math.min(598, window.innerWidth)}
+                  margins={isPhone() ? 42 : 1}
+                />}
+              </Show>
+              <TranslateNote note={props.note} onTranslated={setTranslatedContent} />
             </div>
 
             <div class={styles.topZaps}>
@@ -549,12 +561,15 @@ const Note: Component<NoteProps> = (props) => {
             // href={!props.onClick ? noteLinkId() : ''}
             onClick={() => navToThread(props.note)}
           >
-            <ParsedNote
-              note={props.note}
-              shorten={props.shorten}
-              width={window.innerWidth}
-              margins={45}
-            />
+            <Show when={displayedNote()} keyed>
+              {(note) => <ParsedNote
+                note={note}
+                shorten={props.shorten}
+                width={window.innerWidth}
+                margins={45}
+              />}
+            </Show>
+            <TranslateNote note={props.note} onTranslated={setTranslatedContent} />
           </div>
 
           <NoteTopZapsCompact

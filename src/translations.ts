@@ -1075,6 +1075,31 @@ export const navBar = {
 };
 
 export const note = {
+  translate: {
+    id: 'note.translate',
+    defaultMessage: 'Translate',
+    description: 'Button that translates a note into the reader\'s language',
+  },
+  showOriginal: {
+    id: 'note.showOriginal',
+    defaultMessage: 'Show original',
+    description: 'Button that switches a translated note back to its original text',
+  },
+  translating: {
+    id: 'note.translating',
+    defaultMessage: 'Translating…',
+    description: 'Label shown while a note is being translated',
+  },
+  translatedFrom: {
+    id: 'note.translatedFrom',
+    defaultMessage: 'Translated from {language}',
+    description: 'Label above a translated note naming the detected source language',
+  },
+  translateFailed: {
+    id: 'note.translateFailed',
+    defaultMessage: 'Translation is not available right now',
+    description: 'Error shown when a note could not be translated',
+  },
   newPreview: {
     id: 'note.newPreview',
     defaultMessage: 'Note preview',
