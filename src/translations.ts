@@ -1095,6 +1095,11 @@ export const note = {
     defaultMessage: 'Translated from {language}',
     description: 'Label above a translated note naming the detected source language',
   },
+  alreadyInLanguage: {
+    id: 'note.alreadyInLanguage',
+    defaultMessage: 'Already in your language',
+    description: 'Shown when the translation service reports the note is already in the reader\'s language',
+  },
   translateFailed: {
     id: 'note.translateFailed',
     defaultMessage: 'Translation is not available right now',
@@ -2181,6 +2186,17 @@ export const settings = {
     id: 'settings.sections.blossom',
     defaultMessage: 'Media Uploads',
     description: 'Title of the blossom section on the settings page',
+  },
+  translation: {
+    title: { id: 'settings.translation.title', defaultMessage: 'Translation', description: 'Title of the note translation settings page' },
+    onDevice: { id: 'settings.translation.onDevice', defaultMessage: 'This browser translates notes on your device: nothing to set up, and note text never leaves your computer. Optionally add a LibreTranslate-compatible service below as a fallback for languages your device cannot translate.', description: 'Explains on-device translation' },
+    noOnDevice: { id: 'settings.translation.noOnDevice', defaultMessage: 'This browser has no built-in translator (for example Safari or Firefox). Add a LibreTranslate-compatible service below to enable Translate on notes.', description: 'Explains that a service is needed in this browser' },
+    url: { id: 'settings.translation.url', defaultMessage: 'Translation service URL (LibreTranslate-compatible, https)', description: 'Label for translation service URL' },
+    apiKey: { id: 'settings.translation.apiKey', defaultMessage: 'API key (optional)', description: 'Label for translation service API key' },
+    privacy: { id: 'settings.translation.privacy', defaultMessage: 'When you tap Translate, the note text (with links, mentions, invoices and addresses removed) is sent to this service. Settings are stored only in this browser.', description: 'Privacy note for remote translation' },
+    invalidUrl: { id: 'settings.translation.invalidUrl', defaultMessage: 'Please enter an https:// address.', description: 'Validation error for translation URL' },
+    save: { id: 'settings.translation.save', defaultMessage: 'Save', description: 'Save button' },
+    saved: { id: 'settings.translation.saved', defaultMessage: 'Saved', description: 'Saved confirmation' },
   },
   devTools: {
     id: 'settings.sections.devTools',

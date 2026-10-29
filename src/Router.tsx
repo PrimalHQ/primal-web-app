@@ -46,6 +46,7 @@ const Appearance = lazy(() => import('./pages/Settings/Appearance'));
 const HomeFeeds = lazy(() => import('./pages/Settings/HomeFeeds'));
 const ReadsFeeds = lazy(() => import('./pages/Settings/ReadsFeeds'));
 const DevTools = lazy(() => import('./pages/Settings/DevTools'));
+const TranslationSettings = lazy(() => import('./pages/Settings/Translation'));
 const ZapSettings = lazy(() => import('./pages/Settings/Zaps'));
 const Muted = lazy(() => import('./pages/Settings/Muted'));
 const Network = lazy(() => import('./pages/Settings/Network'));
@@ -165,6 +166,7 @@ const AppRouter: Component = () => {
             <Route path="/filters" component={Moderation} />
             <Route path="/nwc" component={NostrWalletConnect} />
             <Route path="/devtools" component={DevTools} />
+            <Route path="/translation" component={TranslationSettings} />
             <Route path="/uploads" component={Blossom} />
           </Route>
           <Route path="/bookmarks" component={Bookmarks} />

@@ -2,7 +2,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  protectEntities, restoreEntities, hasTranslatableText, translateNote, isTranslationSupported,
+  protectEntities, restoreEntities, hasTranslatableText, translateNote, isTranslationSupported, likelyForeign, saveRemote, normalizeUrl,
 } from './noteTranslation';
 
 const npub = 'nostr:npub1sg6plzptd64u62a878hep2kev88swjh3tw00gjsfl8f237lmu63q0uf63m';
@@ -30,6 +30,9 @@ test('skips notes with no prose', () => {
   assert.equal(hasTranslatableText('Bonjour tout le monde'), true);
 });
 
+const store = new Map<string, string>();
+(globalThis as any).localStorage = { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => store.set(k, v) };
+
 test('is a no-op when the browser has no on-device translator', () => {
   assert.equal(isTranslationSupported(), false);
 });
@@ -44,4 +47,24 @@ test('translates line by line on device, keeps entities, caches', async () => {
   const before = calls;
   await translateNote(note + '\n\nMira', 'en-GB');
   assert.equal(calls, before, 'second call served from cache');
+});
+
+test('protects payment strings: offers, lnurl, lightning: URIs, cashu', () => {
+  const s = 'paga lno1qcp4256ypqpq86q lnurl1dp68gurn8ghj7 lightning:lnbc1xyz cashuAeyJ0b2tlbiI6W3';
+  const { text, tokens } = protectEntities(s);
+  assert.equal(tokens.length, 4);
+  assert.ok(!/lno1|lnurl1|lightning:|cashuA/.test(text));
+  assert.equal(restoreEntities(text, tokens), s);
+});
+
+test('script/common-word heuristic for browsers without a detector', () => {
+  assert.equal(likelyForeign('こんにちは世界、今日はいい天気ですね', 'en'), true);
+  assert.equal(likelyForeign('Привет всем, как дела сегодня', 'en'), true);
+  assert.equal(likelyForeign('Hola amigos, mañana vamos al mercado temprano', 'en'), true);
+  assert.equal(likelyForeign('This is just my note and you are reading it', 'en'), false);
+  assert.equal(likelyForeign('Hello everyone', 'ja'), true);
+});
+
+test('normalizes service URLs', () => {
+  assert.equal(normalizeUrl(' https://lt.example.com/translate/ '), 'https://lt.example.com');
 });
