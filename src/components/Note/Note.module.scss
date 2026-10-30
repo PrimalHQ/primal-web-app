@@ -1370,3 +1370,28 @@
 .missingThumb {
   border:1px solid red;
 }
+
+.translateNote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-tertiary);
+
+  .translateButton {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: var(--accent-links);
+    cursor: pointer;
+
+    &:hover { text-decoration: underline; }
+    &:disabled { color: var(--text-tertiary); cursor: default; text-decoration: none; }
+  }
+
+  .translateError { margin-left: 8px; }
+}
