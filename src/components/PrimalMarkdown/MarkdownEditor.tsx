@@ -54,7 +54,7 @@ const MarkdownSlice: Component<{
       const cont = props.content.replace(regex, (e) => {
         const arr = e.split('@');
 
-        return `${arr[0]}&#8203;@${arr[1]}`;
+        return `${arr[0]}\u200B@${arr[1]}`;
       });
 
       insert(cont)(e.ctx);
