@@ -377,7 +377,7 @@ const ProfileTabs: Component<{
               <Match when={true}>
                 <TransitionGroup name="slide-fade">
                   <div>
-                    <Show when={profile && profile.isFetching && profile.articles.length === 0}>
+                    <Show when={profile && profile.isFetching && profile.articles.length === 0 && profile.sidebarArticles.notes.length === 0}>
                       <div>
                         <For each={new Array(10)}>
                           {() => <ArticlePreviewSkeleton />}
@@ -387,7 +387,7 @@ const ProfileTabs: Component<{
                   </div>
 
                   <div>
-                    <Show when={profile && profile.articles.length === 0 && !profile.isFetching}>
+                    <Show when={profile && profile.articles.length === 0 && profile.sidebarArticles.notes.length === 0 && !profile.isFetching}>
                       <div class={styles.mutedProfile}>
                         {intl.formatMessage(
                           t.noArticles,
@@ -397,9 +397,9 @@ const ProfileTabs: Component<{
                     </Show>
                   </div>
 
-                  <Show when={profile && profile.articles.length > 0}>
+                  <Show when={profile && (profile.articles.length > 0 || profile.sidebarArticles.notes.length > 0)}>
                     <div>
-                      <For each={profile?.articles}>
+                      <For each={profile.articles.length > 0 ? profile.articles : profile.sidebarArticles.notes}>
                         {article => (
                           <div class="animated">
                             <ArticlePreview
