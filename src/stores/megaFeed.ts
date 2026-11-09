@@ -4,7 +4,7 @@ import { hexToNpub } from "../lib/keys";
 import { PollVote, sanitize } from "../lib/notes";
 import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, NostrRelaySignedEvent, PrimalArticle, PrimalDraft, PrimalNote, PrimalUser, PrimalUserPoll, PrimalZap, TopZap, UserStats } from "../types/primal";
 import { convertToUser } from "./profile";
-import { now, parseBolt11, selectRelayTags } from "../utils";
+import { now, selectRelayTags, zapReceiptAmount } from "../utils";
 import { logError, logWarning } from "../lib/logger";
 import { StreamingData } from "../lib/streaming";
 
@@ -151,7 +151,7 @@ export const extractReplyTo = (tags: string[][]) => {
   return replyTo;
 }
 
-export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent, naddr = '') => {
+const extractMentionsUnchecked = (page: MegaFeedPage, note: NostrNoteContent, naddr = '') => {
 
   const mentionIds = Object.keys(page.mentions || {});
   const userMentionIds = note.tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
@@ -330,10 +330,10 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent, nadd
 
     if ([Kind.Zap].includes(mention.kind)) {
 
-      const bolt11 = (mention.tags.find(t => t[0] === 'bolt11') || [])[1];
       const zapEvent = JSON.parse((mention.tags.find(t => t[0] === 'description') || [])[1] || '{}');
+      if (!Array.isArray(zapEvent.tags)) zapEvent.tags = [];
       const senderPubkey = zapEvent.pubkey as string;
-      const receiverPubkey = zapEvent.tags.find((t: string[]) => t[0] === 'p')[1] as string;
+      const receiverPubkey = (zapEvent.tags.find((t: string[]) => t[0] === 'p') || [])[1] as string;
 
       let zappedId = '';
       let zappedKind: number = 0;
@@ -371,7 +371,7 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent, nadd
       mentionedZaps[mentionId] = {
         id: mention.id,
         message: mention.content || '',
-        amount: parseBolt11(bolt11) || 0,
+        amount: zapReceiptAmount(mention.tags, zapEvent.tags),
         sender,
         reciver,
         created_at: mention.created_at,
@@ -563,6 +563,28 @@ export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent, nadd
     mentionedUserPolls,
     mentionedZapPolls,
   };
+}
+
+// One malformed mentioned event must not stop a whole page from resolving
+// (the feed would never leave its loading state): show the note without its
+// embeds instead.
+export const extractMentions = (page: MegaFeedPage, note: NostrNoteContent, naddr = '') => {
+  try {
+    return extractMentionsUnchecked(page, note, naddr);
+  } catch (e) {
+    logError('ERROR extracting mentions of event: ', note.id, e);
+
+    return {
+      mentionedNotes: {},
+      mentionedArticles: {},
+      mentionedUsers: {},
+      mentionedHighlights: {},
+      mentionedZaps: {},
+      mentionedLiveEvents: {},
+      mentionedUserPolls: {},
+      mentionedZapPolls: {},
+    } as ReturnType<typeof extractMentionsUnchecked>;
+  }
 }
 
 export const convertToUsersMega = (page: MegaFeedPage) => {

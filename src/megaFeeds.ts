@@ -29,7 +29,7 @@ import {
   UserRelation,
   UserStats,
 } from "./types/primal";
-import { parseBolt11 } from "./utils";
+import { parseBolt11, zapReceiptAmount } from "./utils";
 import { convertToDraftsMega, convertToNotesMega, convertToPollVotesMega, convertToReadsMega, convertToUserPollsMega, convertToUsersMega, convertToZapPollsMega } from "./stores/megaFeed";
 import { getRecomendedArticleIds, getScoredUsers } from "./lib/search";
 import { fetchArticles } from "./handleNotes";
@@ -1278,10 +1278,10 @@ const convertToZapsMega = (page: MegaFeedPage) => {
   for (let i=0; i< pageZaps.length; i++) {
     const zapContent = pageZaps[i];
 
-    const bolt11 = (zapContent.tags.find(t => t[0] === 'bolt11') || [])[1];
     const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
+    if (!Array.isArray(zapEvent.tags)) zapEvent.tags = [];
     const senderPubkey = zapEvent.pubkey as string;
-    const receiverPubkey = zapEvent.tags.find((t: string[]) => t[0] === 'p')[1] as string;
+    const receiverPubkey = (zapEvent.tags.find((t: string[]) => t[0] === 'p') || [])[1] as string;
 
     let zappedId = '';
     let zappedKind: number = 0;
@@ -1316,7 +1316,7 @@ const convertToZapsMega = (page: MegaFeedPage) => {
     const zap: PrimalZap = {
       id: zapContent.id,
       message: zapEvent.content || '',
-      amount: parseBolt11(bolt11) || 0,
+      amount: zapReceiptAmount(zapContent.tags, zapEvent.tags),
       sender,
       reciver,
       created_at: zapContent.created_at,

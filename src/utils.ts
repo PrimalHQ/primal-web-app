@@ -61,8 +61,9 @@ export const titleCase = (text: string) => {
   return text[0].toUpperCase() + text.slice(1).toLowerCase();
 }
 
-export const parseBolt11 = (bolt11: string) => {
-  if (!bolt11.startsWith('lnbc')) return;
+export const parseBolt11 = (bolt11?: string) => {
+  // Some zap receipts (e.g. podcast boosts) carry no bolt11 tag
+  if (!bolt11 || !bolt11.startsWith('lnbc')) return;
 
   let digits: string[] = [];
   let unit: string = '';
@@ -102,6 +103,25 @@ export const parseBolt11 = (bolt11: string) => {
   }
 
   return amount;
+}
+
+// Amount of a zap receipt in sats: from its bolt11 invoice, else from the
+// `amount` tag (msats) of the zap request (NIP-57), else from an `amount` tag
+// on the receipt itself. Receipts without an invoice (e.g. podcast boosts)
+// rely on these fallbacks.
+export const zapReceiptAmount = (receiptTags: string[][], requestTags: string[][] = []) => {
+  const bolt11 = (receiptTags.find(t => t[0] === 'bolt11') || [])[1];
+  const fromInvoice = parseBolt11(bolt11);
+
+  if (fromInvoice) return fromInvoice;
+
+  for (const tags of [requestTags, receiptTags]) {
+    const msats = parseInt((tags.find(t => t[0] === 'amount') || [])[1] || '');
+
+    if (!isNaN(msats)) return Math.floor(msats / 1000);
+  }
+
+  return 0;
 }
 
 export const arrayMerge: <T, >(a: T[], b: T[], predicate?: (x: T, y: T) => boolean) => T[]  = (a, b, predicate = (a, b) => a === b) => {
