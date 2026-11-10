@@ -63,6 +63,7 @@ const Terms = lazy(() => import('./pages/About/Terms'));
 const Privacy = lazy(() => import('./pages/About/Privacy'));
 const Support = lazy(() => import('./pages/Support'));
 const Csae = lazy(() => import('./pages/Csae'));
+const OAuthAuthenticate = lazy(() => import('./pages/OAuth/OAuthAuthenticate'));
 
 const Feeds = lazy(() => import('./pages/FeedsTest'));
 const Feed = lazy(() => import('./pages/FeedQueryTest'));
@@ -138,6 +139,7 @@ const AppRouter: Component = () => {
           <Route path="/privacy" component={Privacy} />
         </Route>
         <Route path="/csae-policy" component={Csae} />
+        <Route path="/oauth/authenticate" component={OAuthAuthenticate} />
         <Route path="/support" component={Support} />
         <Route path="/" component={Layout} >
           <Route path="/" component={() => <Navigate href="/home" />} />

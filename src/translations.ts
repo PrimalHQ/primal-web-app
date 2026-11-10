@@ -3322,3 +3322,258 @@ export const readsMy = {
   },
 
 }
+
+export const oauth = {
+  pageTitle: {
+    id: 'oauth.pageTitle',
+    defaultMessage: 'Connect to Primal',
+    description: 'OAuth consent page browser tab title',
+  },
+  connectTitle: {
+    id: 'oauth.connectTitle',
+    defaultMessage: 'Connect to Primal',
+    description: 'OAuth sign in card title',
+  },
+  wantsAccess: {
+    id: 'oauth.wantsAccess',
+    defaultMessage: '{client} wants to access {resource} as you.',
+    description: 'OAuth: which app wants access to which resource',
+  },
+  signInToContinue: {
+    id: 'oauth.signInToContinue',
+    defaultMessage: 'Sign in to continue',
+    description: 'OAuth sign in prompt',
+  },
+  continueWithPasskey: {
+    id: 'oauth.continueWithPasskey',
+    defaultMessage: 'Continue with a passkey',
+    description: 'OAuth passkey sign in button',
+  },
+  continueWithGoogle: {
+    id: 'oauth.continueWithGoogle',
+    defaultMessage: 'Continue with Google',
+    description: 'OAuth Google sign in button',
+  },
+  continueWithApple: {
+    id: 'oauth.continueWithApple',
+    defaultMessage: 'Continue with Apple',
+    description: 'OAuth Apple sign in button',
+  },
+  continueWithNostr: {
+    id: 'oauth.continueWithNostr',
+    defaultMessage: 'Continue with Nostr',
+    description: 'OAuth Nostr sign in button and screen title',
+  },
+  chooseNostrMethod: {
+    id: 'oauth.chooseNostrMethod',
+    defaultMessage: 'Choose your preferred way to login:',
+    description: 'OAuth Nostr method prompt',
+  },
+  useExtension: {
+    id: 'oauth.useExtension',
+    defaultMessage: 'Use Browser Extension',
+    description: 'OAuth Nostr extension button',
+  },
+  useRemoteSigner: {
+    id: 'oauth.useRemoteSigner',
+    defaultMessage: 'Use Remote Signer',
+    description: 'OAuth Nostr remote signer button',
+  },
+  useNostrKey: {
+    id: 'oauth.useNostrKey',
+    defaultMessage: 'Use Nostr Key',
+    description: 'OAuth Nostr private key button',
+  },
+  remoteSignerTitle: {
+    id: 'oauth.remoteSignerTitle',
+    defaultMessage: 'Use Remote Signer',
+    description: 'OAuth remote signer screen title',
+  },
+  remoteSignerScan: {
+    id: 'oauth.remoteSignerScan',
+    defaultMessage: 'Scan this code with your remote signer app, or paste a bunker URL below.',
+    description: 'OAuth remote signer instructions',
+  },
+  bunkerPlaceholder: {
+    id: 'oauth.bunkerPlaceholder',
+    defaultMessage: 'bunker://...',
+    description: 'OAuth bunker url input placeholder',
+  },
+  connect: {
+    id: 'oauth.connect',
+    defaultMessage: 'Connect',
+    description: 'OAuth bunker connect button',
+  },
+  copyConnectionUrl: {
+    id: 'oauth.copyConnectionUrl',
+    defaultMessage: 'Copy connection URL',
+    description: 'OAuth copy nostrconnect url',
+  },
+  nostrKeyTitle: {
+    id: 'oauth.nostrKeyTitle',
+    defaultMessage: 'Use Nostr Key',
+    description: 'OAuth nsec screen title',
+  },
+  nostrKeyPrompt: {
+    id: 'oauth.nostrKeyPrompt',
+    defaultMessage: 'Enter your Nostr private key (nsec). It is only used in this tab to sign you in and is never sent to Primal.',
+    description: 'OAuth nsec screen prompt',
+  },
+  nostrKeyPlaceholder: {
+    id: 'oauth.nostrKeyPlaceholder',
+    defaultMessage: 'nsec1...',
+    description: 'OAuth nsec input placeholder',
+  },
+  continue: {
+    id: 'oauth.continue',
+    defaultMessage: 'Continue',
+    description: 'OAuth continue button',
+  },
+  chooseAccountTitle: {
+    id: 'oauth.chooseAccountTitle',
+    defaultMessage: 'Choose an account',
+    description: 'OAuth passport account picker title',
+  },
+  chooseAccountPrompt: {
+    id: 'oauth.chooseAccountPrompt',
+    defaultMessage: 'Your passkey holds more than one Nostr account. Which one do you want to use?',
+    description: 'OAuth passport account picker prompt',
+  },
+  authorizeTitle: {
+    id: 'oauth.authorizeTitle',
+    defaultMessage: 'Authorize {client}',
+    description: 'OAuth consent screen title',
+  },
+  signedInAs: {
+    id: 'oauth.signedInAs',
+    defaultMessage: 'Signed in as',
+    description: 'OAuth consent: signed in identity label',
+  },
+  signedInWithGoogle: {
+    id: 'oauth.signedInWithGoogle',
+    defaultMessage: 'Signed in with Google',
+    description: 'OAuth consent: signed in with Google',
+  },
+  signedInWithApple: {
+    id: 'oauth.signedInWithApple',
+    defaultMessage: 'Signed in with Apple',
+    description: 'OAuth consent: signed in with Apple',
+  },
+  returnTo: {
+    id: 'oauth.returnTo',
+    defaultMessage: 'You\'ll be sent back to {host}.',
+    description: 'OAuth consent: where the browser goes next',
+  },
+  approve: {
+    id: 'oauth.approve',
+    defaultMessage: 'Approve',
+    description: 'OAuth consent approve button',
+  },
+  deny: {
+    id: 'oauth.deny',
+    defaultMessage: 'Deny',
+    description: 'OAuth consent deny button',
+  },
+  cancel: {
+    id: 'oauth.cancel',
+    defaultMessage: 'Cancel',
+    description: 'OAuth cancel link',
+  },
+  back: {
+    id: 'oauth.back',
+    defaultMessage: 'Back',
+    description: 'OAuth back link',
+  },
+  redirecting: {
+    id: 'oauth.redirecting',
+    defaultMessage: 'Redirecting...',
+    description: 'OAuth redirecting message',
+  },
+  errorTitle: {
+    id: 'oauth.errorTitle',
+    defaultMessage: 'Unable to connect',
+    description: 'OAuth error card title',
+  },
+  retry: {
+    id: 'oauth.retry',
+    defaultMessage: 'Try again',
+    description: 'OAuth retry button',
+  },
+  errors: {
+    missingClient: {
+      id: 'oauth.errors.missingClient',
+      defaultMessage: 'This sign-in link is incomplete. Return to the app and try connecting again.',
+      description: 'OAuth error: missing client_id or redirect_uri',
+    },
+    unverifiedClient: {
+      id: 'oauth.errors.unverifiedClient',
+      defaultMessage: 'Primal can\'t verify the app that sent you here, so it can\'t connect.',
+      description: 'OAuth error: unverified client',
+    },
+    framed: {
+      id: 'oauth.errors.framed',
+      defaultMessage: 'For your security, this page can\'t be shown inside another site.',
+      description: 'OAuth error: page is framed',
+    },
+    unreachable: {
+      id: 'oauth.errors.unreachable',
+      defaultMessage: 'Couldn\'t reach Primal. Check your connection and try again.',
+      description: 'OAuth error: consent check failed',
+    },
+    rateLimited: {
+      id: 'oauth.errors.rateLimited',
+      defaultMessage: 'Too many attempts. Wait a moment and try again.',
+      description: 'OAuth error: rate limited',
+    },
+    generic: {
+      id: 'oauth.errors.generic',
+      defaultMessage: 'That sign-in could not be completed. Please try again.',
+      description: 'OAuth error: generic sign in failure',
+    },
+    cannotUnlock: {
+      id: 'oauth.errors.cannotUnlock',
+      defaultMessage: 'This passkey cannot unlock a Primal passport.',
+      description: 'OAuth error: passkey cannot unlock passport',
+    },
+    noNostrAccount: {
+      id: 'oauth.errors.noNostrAccount',
+      defaultMessage: 'Your passport holds no Nostr account.',
+      description: 'OAuth error: passport has no nostr key',
+    },
+    passkeyUnsupported: {
+      id: 'oauth.errors.passkeyUnsupported',
+      defaultMessage: 'This browser doesn\'t support passkeys.',
+      description: 'OAuth error: no WebAuthn',
+    },
+    noExtension: {
+      id: 'oauth.errors.noExtension',
+      defaultMessage: 'No Nostr browser extension found.',
+      description: 'OAuth error: no NIP-07 extension',
+    },
+    invalidKey: {
+      id: 'oauth.errors.invalidKey',
+      defaultMessage: 'That is not a Nostr private key.',
+      description: 'OAuth error: invalid nsec',
+    },
+    invalidBunker: {
+      id: 'oauth.errors.invalidBunker',
+      defaultMessage: 'That is not a valid bunker URL.',
+      description: 'OAuth error: invalid bunker url',
+    },
+    signerTimeout: {
+      id: 'oauth.errors.signerTimeout',
+      defaultMessage: 'Your signer didn\'t respond in time. Please try again.',
+      description: 'OAuth error: signer timed out',
+    },
+    providerUnavailable: {
+      id: 'oauth.errors.providerUnavailable',
+      defaultMessage: 'That sign-in provider couldn\'t be loaded. Please try again.',
+      description: 'OAuth error: google/apple script failed',
+    },
+    sessionExpired: {
+      id: 'oauth.errors.sessionExpired',
+      defaultMessage: 'Your sign-in expired. Please sign in again.',
+      description: 'OAuth error: approve returned 401',
+    },
+  },
+};
