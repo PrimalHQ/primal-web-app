@@ -1211,6 +1211,53 @@ export const note = {
       description: 'Continue editing the poll',
     },
   },
+  translation: {
+    translate: {
+      id: 'note.translation.translate',
+      defaultMessage: 'Translate',
+      description: 'Label for the button that translates a note',
+    },
+    translating: {
+      id: 'note.translation.translating',
+      defaultMessage: 'Translating...',
+      description: 'Label shown while a note is being translated',
+    },
+    translated: {
+      id: 'note.translation.translated',
+      defaultMessage: 'Translated',
+      description: 'Label shown on a translated note when the source language is unknown',
+    },
+    translatedFrom: {
+      id: 'note.translation.translatedFrom',
+      defaultMessage: 'Translated from {language}',
+      description: 'Label shown on a translated note, with the detected source language',
+    },
+    showOriginal: {
+      id: 'note.translation.showOriginal',
+      defaultMessage: 'Show original',
+      description: 'Label for the button that restores the original note text',
+    },
+    showTranslation: {
+      id: 'note.translation.showTranslation',
+      defaultMessage: 'Show translation',
+      description: 'Label for the button that shows the translated note text again',
+    },
+    alreadyInLanguage: {
+      id: 'note.translation.alreadyInLanguage',
+      defaultMessage: 'This note is already in {language}',
+      description: 'Label shown when a note is already written in the target language',
+    },
+    failed: {
+      id: 'note.translation.failed',
+      defaultMessage: 'Translation is unavailable right now',
+      description: 'Label shown when a note could not be translated',
+    },
+    retry: {
+      id: 'note.translation.retry',
+      defaultMessage: 'Try again',
+      description: 'Label for the button that retries a failed translation',
+    },
+  },
 };
 
 export const notificationTypeTranslations: Record<string, string> = {
@@ -2023,6 +2070,78 @@ export const settings = {
       id: 'settings.blossom.suggestedMirrors',
       defaultMessage: 'Suggested media mirror servers',
       description: 'Title of the suggested media mirror server list section of the Blossom settings sub-page',
+    },
+  },
+  translation: {
+    title: {
+      id: 'settings.translation.title',
+      defaultMessage: 'Translation',
+      description: 'Title of the translation settings sub-page',
+    },
+    caption: {
+      id: 'settings.translation.caption',
+      defaultMessage: 'Translate notes written in other languages',
+      description: 'Caption of the translation settings sub-page',
+    },
+    enable: {
+      id: 'settings.translation.enable',
+      defaultMessage: 'Show a Translate button on notes',
+      description: 'Label for the checkbox that enables note translation',
+    },
+    description: {
+      id: 'settings.translation.description',
+      defaultMessage: 'Nothing is sent anywhere until you click Translate on a note. The text of that note is then sent to the translation service below. Links, mentions, hashtags and invoices are never sent.',
+      description: 'Explanation of what is shared with the translation service',
+    },
+    language: {
+      id: 'settings.translation.language',
+      defaultMessage: 'Translate notes to',
+      description: 'Caption for the target language selection',
+    },
+    browserLanguage: {
+      id: 'settings.translation.browserLanguage',
+      defaultMessage: 'Browser language ({language})',
+      description: 'Option to translate notes to the language of the browser',
+    },
+    service: {
+      id: 'settings.translation.service',
+      defaultMessage: 'Translation service',
+      description: 'Caption for the translation service section',
+    },
+    serviceDescription: {
+      id: 'settings.translation.serviceDescription',
+      defaultMessage: 'Address of a LibreTranslate-compatible server. You can use a hosted service or run your own.',
+      description: 'Description of the translation service address input',
+    },
+    endpointPlaceholder: {
+      id: 'settings.translation.endpointPlaceholder',
+      defaultMessage: 'https://translate.example.com',
+      description: 'Placeholder for the translation service address input',
+    },
+    invalidEndpoint: {
+      id: 'settings.translation.invalidEndpoint',
+      defaultMessage: 'Enter a valid https address',
+      description: 'Error shown when the translation service address is not valid',
+    },
+    missingEndpoint: {
+      id: 'settings.translation.missingEndpoint',
+      defaultMessage: 'Add a translation service to start translating notes',
+      description: 'Hint shown when translation is enabled but no service is set',
+    },
+    apiKey: {
+      id: 'settings.translation.apiKey',
+      defaultMessage: 'API key',
+      description: 'Caption for the translation service API key input',
+    },
+    apiKeyDescription: {
+      id: 'settings.translation.apiKeyDescription',
+      defaultMessage: 'Only needed if your translation service requires one. It is stored in this browser only.',
+      description: 'Description of the translation service API key input',
+    },
+    apiKeyPlaceholder: {
+      id: 'settings.translation.apiKeyPlaceholder',
+      defaultMessage: 'optional',
+      description: 'Placeholder for the translation service API key input',
     },
   },
   network: {

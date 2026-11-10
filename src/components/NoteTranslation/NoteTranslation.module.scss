@@ -1,0 +1,47 @@
+.noteTranslation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: -6px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 16px;
+  color: var(--text-tertiary);
+
+  .action {
+    width: fit-content;
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    background: none;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
+    color: var(--accent-links);
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+
+  .label {
+    color: var(--text-tertiary);
+  }
+
+  .separator {
+    color: var(--text-tertiary);
+  }
+
+  .error {
+    color: var(--warning-bright);
+  }
+}
