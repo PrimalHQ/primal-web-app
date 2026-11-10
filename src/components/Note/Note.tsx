@@ -23,6 +23,7 @@ import { addrRegexG, imageRegexG, linebreakRegex, noteRegex, urlRegexG } from '.
 import { TranslatorProvider } from '../../contexts/TranslatorContext';
 import { accountStore } from '../../stores/accountStore';
 import { useNavigate } from '@solidjs/router';
+import NoteTranslation, { createNoteTranslation } from '../NoteTranslation/NoteTranslation';
 
 export type NoteReactionsState = {
   bookmarks?: number,
@@ -75,6 +76,8 @@ const Note: Component<NoteProps> = (props) => {
   const threadContext = useThreadContext();
   const app = useAppContext();
   const navigate = useNavigate();
+
+  const translation = createNoteTranslation(() => props.note);
 
   createEffect(() => {
     if (props.quoteCount) {
@@ -407,12 +410,18 @@ const Note: Component<NoteProps> = (props) => {
           <div class={styles.content}>
 
             <div class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}>
-              <ParsedNote
-                note={props.note}
-                width={Math.min(598, window.innerWidth)}
-                margins={isPhone() ? 42 : 1}
-              />
+              <Show when={translation.displayNote()} keyed>
+                {(note) => (
+                  <ParsedNote
+                    note={note}
+                    width={Math.min(598, window.innerWidth)}
+                    margins={isPhone() ? 42 : 1}
+                  />
+                )}
+              </Show>
             </div>
+
+            <NoteTranslation translation={translation} />
 
             <div class={styles.topZaps}>
               <NoteTopZaps
@@ -549,13 +558,19 @@ const Note: Component<NoteProps> = (props) => {
             // href={!props.onClick ? noteLinkId() : ''}
             onClick={() => navToThread(props.note)}
           >
-            <ParsedNote
-              note={props.note}
-              shorten={props.shorten}
-              width={window.innerWidth}
-              margins={45}
-            />
+            <Show when={translation.displayNote()} keyed>
+              {(note) => (
+                <ParsedNote
+                  note={note}
+                  shorten={props.shorten}
+                  width={window.innerWidth}
+                  margins={45}
+                />
+              )}
+            </Show>
           </div>
+
+          <NoteTranslation translation={translation} />
 
           <NoteTopZapsCompact
             note={props.note}
@@ -635,14 +650,20 @@ const Note: Component<NoteProps> = (props) => {
                   navToThread(props.note)
                 }}
               >
-                <ParsedNote
-                  note={props.note}
-                  shorten={props.shorten}
-                  width={Math.min(510, window.innerWidth - 72)}
-                  margins={1}
-                  footerSize="short"
-                />
+                <Show when={translation.displayNote()} keyed>
+                  {(note) => (
+                    <ParsedNote
+                      note={note}
+                      shorten={props.shorten}
+                      width={Math.min(510, window.innerWidth - 72)}
+                      margins={1}
+                      footerSize="short"
+                    />
+                  )}
+                </Show>
               </div>
+
+              <NoteTranslation translation={translation} />
 
               <NoteTopZapsCompact
                 note={props.note}
