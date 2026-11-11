@@ -1,5 +1,5 @@
-// import { A } from '@solidjs/router';
-import { batch, Component, createEffect, Match, on, onMount, Show, Switch } from 'solid-js';
+import { A } from '@solidjs/router';
+import { batch, Component, createEffect, createSignal, Match, on, onMount, Show, Switch } from 'solid-js';
 import { PrimalNote, PrimalUser, TopZap, ZapOption } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
 import NoteFooter from './NoteFooter/NoteFooter';
@@ -60,6 +60,7 @@ export type NoteProps = {
   onRemove?: (id: string, isRepost?: boolean) => void,
   hideContext?: boolean,
   hideFooter?: boolean,
+  onTranslate?: () => void,
 }
 
 export const renderNote = (props: NoteProps) => (
@@ -75,6 +76,54 @@ const Note: Component<NoteProps> = (props) => {
   const threadContext = useThreadContext();
   const app = useAppContext();
   const navigate = useNavigate();
+
+  const [translatedText, setTranslatedText] = createSignal<string | null>(null);
+  const [showTranslation, setShowTranslation] = createSignal<boolean>(false);
+  const [isTranslating, setIsTranslating] = createSignal<boolean>(false);
+
+  // Réinitialiser la traduction si l'ID de la note change
+  createEffect(on(() => props.note.post?.id, () => {
+    setTranslatedText(null);
+    setShowTranslation(false);
+    setIsTranslating(false);
+  }));
+
+  const handleTranslate = async () => {
+    // 1. Si déjà traduit, basculer simplement la visibilité
+    if (translatedText()) {
+      setShowTranslation(prev => !prev);
+      return;
+    }
+
+    if (isTranslating()) return;
+    setIsTranslating(true);
+
+    try {
+      if (props.onTranslate) {
+        props.onTranslate();
+      }
+
+      // Détection automatique de la langue cible préférée par l'utilisateur
+      const targetLang = (navigator.language || 'en').split('-')[0];
+      const contentToTranslate = props.note.post?.content || props.note.content || '';
+
+      const response = await fetch(
+        `https://api.mytory.com/translate?text=${encodeURIComponent(contentToTranslate)}&target=${targetLang}`
+      );
+      const data = await response.json();
+
+      if (data && data.translatedText) {
+        batch(() => {
+          setTranslatedText(data.translatedText);
+          setShowTranslation(true);
+        });
+      }
+    } catch (err) {
+      console.error("Erreur de traduction :", err);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   createEffect(() => {
     if (props.quoteCount) {
@@ -305,20 +354,15 @@ const Note: Component<NoteProps> = (props) => {
   const size = () => props.size ?? 'normal';
 
   const bigMessageFont = () => {
-    // const hasImage = imageRegexG.test(props.note.content);
-    // const hasNoteMention = noteRegex.test(props.note.content);
-    // const hasAddrMention = addrRegexG.test(props.note.content);
-    // const hasLinks = urlRegexG.test(props.note.content);
-
-    const lnCount = props.note.content.match(linebreakRegex)?.length || 0;
+    const noteContent = props.note.post?.content || props.note.content || '';
+    const lnCount = noteContent.match(linebreakRegex)?.length || 0;
 
     if (lnCount > 0) return false;
 
-    let strippedContent = props.note.content
+    let strippedContent = noteContent
       .replace(imageRegexG, '__PRIMAL_REPLACEMENT__')
       .replace(noteRegex, '__PRIMAL_REPLACEMENT__')
       .replace(addrRegexG, '__PRIMAL_REPLACEMENT__')
-      // .replace(profileRegexG, '__PRIMAL_REPLACEMENT__')
       .replace(urlRegexG, '__PRIMAL_REPLACEMENT__')
       .trim();
 
@@ -331,7 +375,6 @@ const Note: Component<NoteProps> = (props) => {
     const isShort = strippedContent.length < 42;
     const isReply = props.note.replyTo;
 
-    // return !hasImage && !hasLinks && !hasNoteMention && !hasAddrMention && isShort;
     return isShort && !isReply;
   }
 
@@ -363,6 +406,11 @@ const Note: Component<NoteProps> = (props) => {
                   note={props.note}
                   shorten={true}
                 />
+                <Show when={showTranslation() && translatedText()}>
+                  <div class={styles.translatedContent}>
+                    <p>{translatedText()}</p>
+                  </div>
+                </Show>
               </div>
 
               <Show when={!props.hideFooter}>
@@ -374,6 +422,7 @@ const Note: Component<NoteProps> = (props) => {
                     customZapInfo={customZapInfo()}
                     size="notif"
                     onDelete={props.onRemove}
+                    onTranslate={handleTranslate}
                   />
                 </div>
               </Show>
@@ -412,6 +461,11 @@ const Note: Component<NoteProps> = (props) => {
                 width={Math.min(598, window.innerWidth)}
                 margins={isPhone() ? 42 : 1}
               />
+              <Show when={showTranslation() && translatedText()}>
+                <div class={styles.translatedContent}>
+                  <p>{translatedText()}</p>
+                </div>
+              </Show>
             </div>
 
             <div class={styles.topZaps}>
@@ -419,7 +473,6 @@ const Note: Component<NoteProps> = (props) => {
                 topZaps={reactionsState.topZapsFeed}
                 zapCount={reactionsState.zapCount}
                 action={() => openReactionModal('zaps')}
-                // doZap={() => app?.actions.openCustomZapModal(customZapInfo())}
               />
             </div>
 
@@ -499,6 +552,7 @@ const Note: Component<NoteProps> = (props) => {
                   onZapAnim={addTopZap}
                   noteType="primary"
                   onDelete={props.onRemove}
+                  onTranslate={handleTranslate}
                 />
               </div>
             </Show>
@@ -523,9 +577,7 @@ const Note: Component<NoteProps> = (props) => {
             class={styles.userHeader}
             href={app?.actions.profileLink(props.note.user.npub) || ''}
           >
-            {/* <A href={app?.actions.profileLink(props.note.user.npub) || ''}> */}
-              <Avatar user={props.note.user} size="xs" />
-            {/* </A> */}
+            <Avatar user={props.note.user} size="xs" />
 
             <NoteAuthorInfo
               author={props.note.user}
@@ -546,7 +598,6 @@ const Note: Component<NoteProps> = (props) => {
 
           <div
             class={`${styles.message} ${bigMessageFont() ? styles.bigFont : ''}`}
-            // href={!props.onClick ? noteLinkId() : ''}
             onClick={() => navToThread(props.note)}
           >
             <ParsedNote
@@ -555,6 +606,11 @@ const Note: Component<NoteProps> = (props) => {
               width={window.innerWidth}
               margins={45}
             />
+            <Show when={showTranslation() && translatedText()}>
+              <div class={styles.translatedContent}>
+                <p>{translatedText()}</p>
+              </div>
+            </Show>
           </div>
 
           <NoteTopZapsCompact
@@ -573,6 +629,7 @@ const Note: Component<NoteProps> = (props) => {
               onZapAnim={addTopZapFeed}
               size={size()}
               onDelete={props.onRemove}
+              onTranslate={handleTranslate}
             />
           </Show>
         </div>
@@ -626,7 +683,6 @@ const Note: Component<NoteProps> = (props) => {
 
               <div
                 class={styles.message}
-                // href={!props.onClick ? noteLinkId() : ''}
                 onClick={(e) => {
                   if (app?.showNoteVideoContextMenu) {
                     e.preventDefault();
@@ -642,6 +698,11 @@ const Note: Component<NoteProps> = (props) => {
                   margins={1}
                   footerSize="short"
                 />
+                <Show when={showTranslation() && translatedText()}>
+                  <div class={styles.translatedContent}>
+                    <p>{translatedText()}</p>
+                  </div>
+                </Show>
               </div>
 
               <NoteTopZapsCompact
@@ -661,6 +722,7 @@ const Note: Component<NoteProps> = (props) => {
                     onZapAnim={addTopZapFeed}
                     size="short"
                     onDelete={props.onRemove}
+                    onTranslate={handleTranslate}
                   />
                 </div>
               </Show>
@@ -708,18 +770,21 @@ const Note: Component<NoteProps> = (props) => {
                   noLightbox={true}
                   altEmbeds={true}
                 />
+                <Show when={showTranslation() && translatedText()}>
+                  <div class={styles.translatedContent}>
+                    <p>{translatedText()}</p>
+                  </div>
+                </Show>
               </div>
             </div>
           </div>
         </a>
       </Match>
 
-
       <Match when={noteType() === 'suggestion'}>
         <div
           id={props.id}
           class={`${styles.noteSuggestion}`}
-          // href={!props.onClick ? noteLinkId() : ''}
           onClick={() => navToThread(props.note)}
           data-event={props.note.post.id}
           data-event-bech32={props.note.post.noteId}
@@ -732,9 +797,7 @@ const Note: Component<NoteProps> = (props) => {
           </div>
           <div class={styles.content}>
             <div class={styles.leftSide}>
-              {/* <A href={app?.actions.profileLink(props.note.user.npub) || ''}> */}
-                <Avatar user={props.note.user} size="vs" />
-              {/* </A> */}
+              <Avatar user={props.note.user} size="vs" />
               <Show
                 when={props.parent}
               >
@@ -758,6 +821,11 @@ const Note: Component<NoteProps> = (props) => {
                   margins={58}
                   footerSize="short"
                 />
+                <Show when={showTranslation() && translatedText()}>
+                  <div class={styles.translatedContent}>
+                    <p>{translatedText()}</p>
+                  </div>
+                </Show>
               </div>
             </div>
           </div>

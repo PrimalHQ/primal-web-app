@@ -9,7 +9,11 @@ import { useThreadContext } from '../../../contexts/ThreadContext';
 import { hookForDev } from '../../../lib/devTools';
 import { nip19 } from 'nostr-tools';
 
-const NotificationNote: Component<{ note: PrimalNote, id?: string }> = (props) => {
+const NotificationNote: Component<{ 
+  note: PrimalNote; 
+  id?: string;
+  onTranslate?: (props: any) => void;
+}> = (props) => {
 
   const threadContext = useThreadContext();
 
@@ -41,7 +45,10 @@ const NotificationNote: Component<{ note: PrimalNote, id?: string }> = (props) =
           </div>
 
           <div class={styles.footer}>
-            <NoteFooter note={props.note} />
+            <NoteFooter 
+              note={props.note} 
+              onTranslate={props.onTranslate} 
+            />
           </div>
         </div>
       </div>

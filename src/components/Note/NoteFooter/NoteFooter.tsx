@@ -48,6 +48,7 @@ const NoteFooter: Component<{
   large?: boolean,
   onZapAnim?: (zapOption: ZapOption) => void,
   onDelete?: (noteId: string, isRepost?: boolean) => void,
+  onTranslate?: (note: PrimalNote) => void,
   noteType?: 'primary',
 }> = (props) => {
 
@@ -109,7 +110,6 @@ const NoteFooter: Component<{
 
     let id: string | undefined = noteToDelete?.note.id;
 
-
     if (!id) {
       id = await getMyRepostOfEvent(props.note.id, pubkey);
     }
@@ -126,7 +126,6 @@ const NoteFooter: Component<{
 
     if (!success || !deleteEvent) return;
 
-    // id of the note to remove from UI
     let removeId = props.note.pubkey === accountStore.publicKey ?
       id :
       props.note.noteId;
@@ -216,7 +215,14 @@ const NoteFooter: Component<{
     e.preventDefault();
     e.stopPropagation();
     navigate(`/e/${props.note.noteId}`);
+  };
 
+  const doTranslate = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (props.onTranslate) {
+      props.onTranslate(props.note);
+    }
   };
 
   const doLike = async (e: MouseEvent) => {
@@ -314,7 +320,6 @@ const NoteFooter: Component<{
         return;
       }
     }
-
 
     if (!canUserReceiveZaps(props.note.user)) {
       return;
@@ -418,7 +423,7 @@ const NoteFooter: Component<{
       props.updateState && props.updateState('isZapping', () => false);
 
       if (success) {
-        props.customZapInfo &&props.customZapInfo.onSuccess({
+        props.customZapInfo && props.customZapInfo.onSuccess({
           emoji,
           amount,
           message,
@@ -431,7 +436,6 @@ const NoteFooter: Component<{
           description: lastZapError || "",
           confirmLabel: "ok",
           onConfirm: app.actions.closeConfirmModal,
-          // onAbort: app.actions.closeConfirmModal,
         })
       }
 
@@ -538,6 +542,16 @@ const NoteFooter: Component<{
           />
         </div>
       </button>
+
+      <NoteFooterActionButton
+        note={props.note}
+        onClick={doTranslate}
+        type="reply"
+        label="Translate"
+        title="Translate post"
+        large={props.large}
+        noteType={props.noteType}
+      />
 
       <div class={styles.bookmarkFoot}>
         <BookmarkNote
