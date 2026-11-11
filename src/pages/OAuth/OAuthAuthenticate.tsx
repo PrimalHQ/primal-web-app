@@ -15,7 +15,7 @@ import {
   OAuthParams,
   readOAuthParams,
 } from '../../lib/athos';
-import { isPasskeySupported, PassportAccount, PassportError, unlockPassport, wipeAccounts } from '../../lib/passport';
+import { isPasskeySupported, PassportAccount, PassportError, supportsPhonePasskeys, unlockPassport, wipeAccounts } from '../../lib/passport';
 import {
   APPLE_CLIENT_ID,
   appleIdToken,
@@ -57,6 +57,7 @@ type View =
   | 'remoteSigner'
   | 'nsec'
   | 'accountPicker'
+  | 'passkeyNotice'
   | 'consent'
   | 'redirecting';
 
@@ -68,6 +69,14 @@ type SignedInAs =
 type Signer = (template: NostrEventTemplate) => Promise<NostrVerifiedEvent>;
 
 const REMOTE_SIGNER_RELAYS = ['wss://nrs.primal.net'];
+
+/*
+ * `npm run dev:oauth` swaps the passkey/Google/Apple ceremonies for fakes
+ * (src/lib/oauthMocks.ts). The flag is a build-time constant, so production
+ * bundles drop the dynamic import entirely.
+ */
+const MOCK_PROVIDERS = import.meta.env.DEV && import.meta.env.PRIMAL_OAUTH_MOCK_PROVIDERS === 'true';
+const mocks = () => import('../../lib/oauthMocks');
 const BUNKER_CONNECT_TIMEOUT = 15_000;
 const REMOTE_SIGN_TIMEOUT = 60_000;
 const EXTENSION_SIGN_TIMEOUT = 120_000;
@@ -157,6 +166,7 @@ const OAuthAuthenticate: Component = () => {
   let remoteSigner: nip46.BunkerSigner | undefined;
 
   const closeRemoteSigner = () => {
+    setConnectUrl('');
     remoteAbort?.abort();
     remoteAbort = undefined;
     const signer = remoteSigner;
@@ -236,7 +246,7 @@ const OAuthAuthenticate: Component = () => {
       return;
     }
 
-    preloadProviders();
+    if (!MOCK_PROVIDERS) preloadProviders();
     loadConsent();
   });
 
@@ -258,6 +268,7 @@ const OAuthAuthenticate: Component = () => {
     if (e instanceof SignerTimeout) return intl.formatMessage(t.errors.signerTimeout);
     if (e instanceof AthosError && e.status === 429) return intl.formatMessage(t.errors.rateLimited);
     if (e instanceof Error && e.message === 'provider_unavailable') return intl.formatMessage(t.errors.providerUnavailable);
+    if (e instanceof Error && e.message === 'passkey_unsupported') return intl.formatMessage(t.errors.passkeyUnsupported);
     return intl.formatMessage(t.errors.generic);
   };
 
@@ -293,9 +304,26 @@ const OAuthAuthenticate: Component = () => {
   /* ---- ceremonies ---- */
 
   const onPasskey = () => run('passkey', async () => {
-    if (!isPasskeySupported()) throw new Error('passkey_unsupported');
+    if (!MOCK_PROVIDERS && !isPasskeySupported()) throw new Error('passkey_unsupported');
 
-    const unlocked = await unlockPassport();
+    // A browser that can't reach a phone passkey would open straight on "touch your
+    // security key"; explain that first and let the user pick.
+    const phonePasskeys = MOCK_PROVIDERS
+      ? await (await mocks()).mockSupportsPhonePasskeys()
+      : await supportsPhonePasskeys();
+    if (!phonePasskeys) {
+      go('passkeyNotice');
+      return;
+    }
+
+    await passkeyCeremony();
+  });
+
+  /** From the notice screen: the user has a security key and wants to use it. */
+  const onSecurityKey = () => run('securityKey', passkeyCeremony);
+
+  const passkeyCeremony = async () => {
+    const unlocked = MOCK_PROVIDERS ? await (await mocks()).mockUnlockPassport() : await unlockPassport();
 
     if (unlocked.accounts.length === 1) {
       const [account] = unlocked.accounts;
@@ -309,7 +337,7 @@ const OAuthAuthenticate: Component = () => {
 
     setPassportAccounts(unlocked);
     go('accountPicker');
-  });
+  };
 
   const onPickAccount = (account: PassportAccount) => run(`account-${account.pubkey}`, async () => {
     const unlocked = passportAccounts();
@@ -318,13 +346,13 @@ const OAuthAuthenticate: Component = () => {
   });
 
   const onGoogle = () => run('google', async () => {
-    const code = await googleAuthCode();
+    const code = MOCK_PROVIDERS ? await (await mocks()).mockGoogleAuthCode() : await googleAuthCode();
     const tokens = await loginWithGoogleCode(code);
     signedIn(tokens.accessToken, { kind: 'google' });
   });
 
   const onApple = () => run('apple', async () => {
-    const idToken = await appleIdToken();
+    const idToken = MOCK_PROVIDERS ? await (await mocks()).mockAppleIdToken() : await appleIdToken();
     const tokens = await loginWithApple(idToken);
     signedIn(tokens.accessToken, { kind: 'apple' });
   });
@@ -606,6 +634,20 @@ const OAuthAuthenticate: Component = () => {
             <ErrorText />
             <div class={styles.footer}>
               <BackLink to="nostr" />
+            </div>
+          </Card>
+        </Match>
+
+        <Match when={view() === 'passkeyNotice'}>
+          <Card title={intl.formatMessage(t.passkeyNoticeTitle)}>
+            <p class={styles.muted}>{intl.formatMessage(t.passkeyNoticeBody)}</p>
+            <div class={styles.options}>
+              <OptionButton id="remoteSigner" icon={remoteSignerIcon} mask label={intl.formatMessage(t.useRemoteSigner)} onClick={onRemoteSigner} />
+              <OptionButton id="securityKey" icon={passkeyIcon} mask label={intl.formatMessage(t.useSecurityKey)} onClick={onSecurityKey} />
+            </div>
+            <ErrorText />
+            <div class={styles.footer}>
+              <BackLink to="signIn" />
             </div>
           </Card>
         </Match>

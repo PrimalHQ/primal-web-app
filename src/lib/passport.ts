@@ -53,6 +53,34 @@ export const isPasskeySupported = () =>
   !!window.PublicKeyCredential &&
   !!navigator.credentials?.get;
 
+/**
+ * Whether the browser can use a passkey that lives on another device (the phone
+ * QR / "hybrid" sheet). Firefox on Linux can't: it only offers USB security keys.
+ *
+ * Asks `PublicKeyCredential.getClientCapabilities()` (WebAuthn L3) when the browser
+ * has it; otherwise falls back to recognising desktop Firefox on Linux, the one
+ * common browser known to lack it. Unknown means yes, so nobody is blocked by a
+ * wrong guess.
+ */
+export const supportsPhonePasskeys = async (): Promise<boolean> => {
+  const PKC = window.PublicKeyCredential as unknown as {
+    getClientCapabilities?: () => Promise<Record<string, boolean | undefined>>,
+  };
+
+  try {
+    const capabilities = await PKC?.getClientCapabilities?.();
+    if (capabilities && typeof capabilities.hybridTransport === 'boolean') {
+      return capabilities.hybridTransport;
+    }
+  } catch {
+    // fall through to the user-agent check
+  }
+
+  const ua = navigator.userAgent;
+  const linuxFirefox = /Firefox\//.test(ua) && /Linux/.test(ua) && !/Android/.test(ua);
+  return !linuxFirefox;
+};
+
 /* ---- encoding ---- */
 
 const b64urlToBytes = (value: string) => {
@@ -72,18 +100,48 @@ const bytesToB64url = (bytes: Uint8Array) => {
 
 /* ---- assertion ---- */
 
-const assert = async (challenge: string, allowCredential?: ArrayBuffer) => {
-  const credential = await navigator.credentials.get({
-    publicKey: {
-      challenge: b64urlToBytes(challenge),
-      // Spelled out: the browser default is this page's host, and a passkey bound to
-      // the registrable domain never matches a subdomain it was not asked for.
-      rpId: PASSKEY_RP_ID,
-      userVerification: 'required',
-      ...(allowCredential ? { allowCredentials: [{ type: 'public-key' as const, id: allowCredential }] } : {}),
-      extensions: { prf: { eval: { first: PRF_SALT } } } as AuthenticationExtensionsClientInputs,
-    },
-  });
+/*
+ * WebAuthn hints (Chrome 128+, ignored elsewhere): prefer a passkey on this device,
+ * then a phone via the browser's QR (hybrid) sheet. Without them Chrome may open on
+ * "insert/touch your security key" when the device has no platform passkey.
+ */
+const DISCOVERABLE_HINTS = ['client-device', 'hybrid'];
+
+type PinnedCredential = { id: ArrayBuffer, transports: AuthenticatorTransport[], hints: string[] };
+
+/**
+ * How to reach the credential that just answered, for the PRF replay. An
+ * allowCredentials entry with no transports makes Chrome fall back to the USB
+ * security-key prompt, so a phone that answered over hybrid must be named as such.
+ */
+const pinnedFrom = (assertion: PublicKeyCredential): PinnedCredential => {
+  const crossPlatform = assertion.authenticatorAttachment === 'cross-platform';
+  return {
+    id: assertion.rawId,
+    transports: crossPlatform ? ['hybrid', 'usb', 'nfc', 'ble'] : ['internal', 'hybrid'],
+    hints: crossPlatform ? ['hybrid', 'security-key'] : DISCOVERABLE_HINTS,
+  };
+};
+
+const assert = async (challenge: string, pinned?: PinnedCredential) => {
+  const publicKey = {
+    challenge: b64urlToBytes(challenge),
+    // Spelled out: the browser default is this page's host, and a passkey bound to
+    // the registrable domain never matches a subdomain it was not asked for.
+    rpId: PASSKEY_RP_ID,
+    timeout: 120_000,
+    userVerification: 'required' as const,
+    // Omitted when unpinned: that is what asks for the discoverable sheet, which is
+    // also where the browser offers its phone/QR option.
+    ...(pinned
+      ? { allowCredentials: [{ type: 'public-key' as const, id: pinned.id, transports: pinned.transports }] }
+      : {}),
+    hints: pinned ? pinned.hints : DISCOVERABLE_HINTS,
+    extensions: { prf: { eval: { first: PRF_SALT } } } as AuthenticationExtensionsClientInputs,
+  };
+
+  // `hints` is newer than this lib.dom; the cast keeps it in the request.
+  const credential = await navigator.credentials.get({ publicKey: publicKey as PublicKeyCredentialRequestOptions });
 
   if (!credential) throw new Error('no_credential');
   return credential as PublicKeyCredential;
@@ -101,7 +159,7 @@ const prfOf = async (assertion: PublicKeyCredential) => {
   let first = prfFirst(assertion);
 
   if (!first) {
-    const retried = await assert(await passportChallenge(), assertion.rawId);
+    const retried = await assert(await passportChallenge(), pinnedFrom(assertion));
     first = prfFirst(retried);
   }
 

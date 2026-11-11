@@ -71,6 +71,9 @@ const QrCode: Component<{
         color: 'white',
       },
     });
+    if (!qrSlot) return;
+    // The effect re-runs when the data changes: replace the previous code, don't stack another.
+    qrSlot.innerHTML = '';
     qrCode.append(qrSlot);
   });
 

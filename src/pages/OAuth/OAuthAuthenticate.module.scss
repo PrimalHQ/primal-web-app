@@ -241,46 +241,55 @@ $error: #fa3c3c;
   margin-top: 16px;
   display: flex;
   gap: 8px;
-  align-items: stretch;
+  align-items: center;
+
+  .primary {
+    height: 40px;
+    min-height: 40px;
+  }
 }
 
+// Same metrics as the app's inputs (LoginModal .input): 40px tall pill, 10px/20px
+// padding. The !important flags beat Pico's input height/padding/margin rules.
 input.input {
   width: 100%;
-  min-height: 44px;
-  margin: 0;
-  padding: 0 20px;
+  height: 40px !important;
+  min-height: 0;
+  margin: 0 !important;
+  padding: 10px 20px !important;
   box-sizing: border-box;
-  border: 1px solid $option-bg-hover;
+  border: none !important;
   border-radius: 999px;
   background-color: $option-bg;
   color: $text-primary;
   font-family: inherit;
   font-size: 16px;
+  line-height: 20px;
+
+  --icon-invalid: none;
+  --form-element-invalid-border-color: none;
 
   &::placeholder {
     color: #777;
   }
 
-  &:focus {
+  &:focus,
+  &:focus-visible {
     outline: none;
-    border-color: var(--accent, #2394EF);
-    box-shadow: none;
+    box-shadow: 0 0 0 1px var(--accent, #2394EF) !important;
   }
 }
 
+// Clips QrCode's fixed 280px frame down to the rendered 200px code, as LoginModal does.
 .qr {
   position: relative;
   align-self: center;
-  width: 216px;
-  height: 216px;
+  width: 200px;
+  height: 200px;
   margin-bottom: 8px;
-  padding: 8px;
-  box-sizing: border-box;
   border-radius: 12px;
+  overflow: hidden;
   background-color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .qrOverlay {

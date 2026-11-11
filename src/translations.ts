@@ -3429,6 +3429,21 @@ export const oauth = {
     defaultMessage: 'Continue',
     description: 'OAuth continue button',
   },
+  passkeyNoticeTitle: {
+    id: 'oauth.passkeyNoticeTitle',
+    defaultMessage: 'Phone passkeys aren\'t available',
+    description: 'OAuth: browser cannot use passkeys from another device (title)',
+  },
+  passkeyNoticeBody: {
+    id: 'oauth.passkeyNoticeBody',
+    defaultMessage: 'This browser can\'t sign in with a passkey stored on your phone. Open this page in Chrome to scan a QR code with your phone, or sign in with a remote signer instead. If your passkey is on a security key, you can use it here.',
+    description: 'OAuth: browser cannot use passkeys from another device (explanation)',
+  },
+  useSecurityKey: {
+    id: 'oauth.useSecurityKey',
+    defaultMessage: 'Use a Security Key',
+    description: 'OAuth: continue the passkey ceremony with a USB/NFC security key',
+  },
   chooseAccountTitle: {
     id: 'oauth.chooseAccountTitle',
     defaultMessage: 'Choose an account',
