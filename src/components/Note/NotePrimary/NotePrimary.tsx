@@ -1,7 +1,7 @@
 import { Component } from 'solid-js';
 import { hookForDev } from '../../../lib/devTools';
 import { PrimalNote } from '../../../types/primal';
-import ParsedNote from '../../ParsedNote/ParsedNote';
+import NoteTranslation from '../NoteTranslation/NoteTranslation';
 import NoteFooter from '../NoteFooter/NoteFooter';
 import NoteHeader from '../NoteHeader/NoteHeader';
 
@@ -22,7 +22,7 @@ const NotePrimary: Component<{ note: PrimalNote, id?: string }> = (props) => {
       <div class={styles.content}>
 
         <div class={styles.message}>
-          <ParsedNote note={props.note} width={Math.min(574, window.innerWidth)} />
+          <NoteTranslation note={props.note} width={Math.min(574, window.innerWidth)} />
         </div>
 
         <NoteFooter note={props.note} wide={true} />
