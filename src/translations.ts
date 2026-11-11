@@ -594,6 +594,48 @@ export const actions = {
       description: 'Label for quoting note from context menu',
     },
   },
+  noteTranslation: {
+    translate: {
+      id: 'actions.noteTranslation.translate',
+      defaultMessage: 'Translate',
+      description: 'Label for the button that translates a note',
+    },
+    translating: {
+      id: 'actions.noteTranslation.translating',
+      defaultMessage: 'Translating…',
+      description: 'Status shown while a note is being translated',
+    },
+    showOriginal: {
+      id: 'actions.noteTranslation.showOriginal',
+      defaultMessage: 'Show original',
+      description: 'Label for the button that shows the original note text',
+    },
+    showTranslation: {
+      id: 'actions.noteTranslation.showTranslation',
+      defaultMessage: 'Show translation',
+      description: 'Label for the button that shows the translated note text',
+    },
+    translatedFrom: {
+      id: 'actions.noteTranslation.translatedFrom',
+      defaultMessage: 'Translated from {language}',
+      description: 'Label showing the detected source language of a translation',
+    },
+    alreadyInLanguage: {
+      id: 'actions.noteTranslation.alreadyInLanguage',
+      defaultMessage: 'Already in {language}',
+      description: 'Label shown when a note is already in the target language',
+    },
+    failed: {
+      id: 'actions.noteTranslation.failed',
+      defaultMessage: 'Translation failed.',
+      description: 'Message shown when a note translation fails',
+    },
+    retry: {
+      id: 'actions.noteTranslation.retry',
+      defaultMessage: 'Retry',
+      description: 'Label for the button that retries a failed translation',
+    },
+  },
   pollContext: {
     reactions: {
       id: 'actions.noteContext.reactions',
@@ -1832,6 +1874,58 @@ export const settings = {
       id: 'settings.appearance.caption',
       defaultMessage: 'Select a theme',
       description: 'Caption for theme selection',
+    },
+  },
+  translation: {
+    title: {
+      id: 'settings.translation.title',
+      defaultMessage: 'Translation',
+      description: 'Title of the translation settings sub-page',
+    },
+    description: {
+      id: 'settings.translation.description',
+      defaultMessage: 'Notes can be translated into your language from the note itself. Translations are provided by a LibreTranslate-compatible service; only the text of the note you choose to translate is sent to it.',
+      description: 'Description of the translation settings sub-page',
+    },
+    targetLanguage: {
+      id: 'settings.translation.targetLanguage',
+      defaultMessage: 'Translate notes into',
+      description: 'Caption for the translation target language selection',
+    },
+    followAppLanguage: {
+      id: 'settings.translation.followAppLanguage',
+      defaultMessage: 'App language',
+      description: 'Option to translate notes into the app language',
+    },
+    endpoint: {
+      id: 'settings.translation.endpoint',
+      defaultMessage: 'Translation service URL',
+      description: 'Caption for the translation service endpoint field',
+    },
+    apiKey: {
+      id: 'settings.translation.apiKey',
+      defaultMessage: 'API key (optional)',
+      description: 'Caption for the translation service API key field',
+    },
+    apiKeyDesc: {
+      id: 'settings.translation.apiKeyDesc',
+      defaultMessage: 'Only needed if your translation service requires one. The key is stored only in this browser.',
+      description: 'Description of the translation service API key field',
+    },
+    reset: {
+      id: 'settings.translation.reset',
+      defaultMessage: 'Reset to defaults',
+      description: 'Label for the button that resets translation settings',
+    },
+    save: {
+      id: 'settings.translation.save',
+      defaultMessage: 'Save',
+      description: 'Label for the button that saves translation settings',
+    },
+    saved: {
+      id: 'settings.translation.saved',
+      defaultMessage: 'Translation settings saved',
+      description: 'Feedback after translation settings have been saved',
     },
   },
   homeFeeds: {
