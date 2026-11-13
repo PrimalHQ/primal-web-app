@@ -55,6 +55,7 @@ const Menu = lazy(() => import('./pages/Settings/Menu'));
 const BlossomSettings = lazy(() => import('./pages/Settings/Blossom'));
 // const Landing = lazy(() => import('./pages/Landing'));
 const AppDownloadQr = lazy(() => import('./pages/appDownloadQr'));
+const NewsRedirect = lazy(() => import('./pages/NewsRedirect'));
 const EventQueuePage = lazy(() => import('./pages/EventQueue'));
 
 const MiniSiteLayout = lazy(() => import('./pages/About/MiniSiteLayout'));
@@ -133,6 +134,7 @@ const AppRouter: Component = () => {
   return (
       <Router>
         <Route path="/app-download-qr" component={AppDownloadQr} />
+        <Route path="/news/:id" component={NewsRedirect} />
         <Route path="/" component={MiniSiteLayout}>
           <Route path="/about" component={About} />
           <Route path="/terms" component={Terms} />

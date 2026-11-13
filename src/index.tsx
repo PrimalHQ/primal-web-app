@@ -21,4 +21,12 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-render(() => <App />, document.getElementById('root') as HTMLElement);
+const newsMatch = window.location.pathname.match(/^\/news\/([^/]+)\/?$/);
+
+if (newsMatch) {
+  window.location.replace(
+    `https://tsunami.primal.net/news/${newsMatch[1]}${window.location.search}${window.location.hash}`,
+  );
+} else {
+  render(() => <App />, document.getElementById('root') as HTMLElement);
+}
