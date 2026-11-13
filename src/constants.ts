@@ -356,6 +356,10 @@ export const rumbleRegex = /(?:https?:\/\/)?(?:www\.)?rumble\.com\/embed\/([a-zA
 export const youtubeRegex = /(?:https?:\/\/)?(?:www|m\.)?(?:youtu\.be\/|youtube\.com\/(?:live\/|shorts\/|embed\/|v\/|watch\?v=|watch\?.+&v=))((\w|-){11})/;
 export const urlRegex = /https?:\/\/(www\.)?[-a-zA-Z0-9\u00F0-\u02AF@:%._\+~#=]{1,256}\.[a-zA-Z0-9\u00F0-\u02AF()]{1,8}\b([-a-zA-Z0-9\u00F0-\u02AF()@:%_\+.~#?&//=]*)/i;
 export const urlRegexG = /https?:\/\/(www\.)?[-a-zA-Z0-9\u00F0-\u02AF@:%._\+~#=]{1,256}\.[a-zA-Z0-9\u00F0-\u02AF()]{1,8}\b([-a-zA-Z0-9\u00F0-\u02AF()@:%_\+.~#?&//=]*)/ig;
+// urlExtractRegex / lnUnifiedRegex / youtubeRegex are unanchored and take
+// quadratic time on long crafted tokens (seconds for a few hundred KB), which
+// blocks the main thread while a note renders. Skip embed detection above this.
+export const MAX_EMBED_TOKEN_LENGTH = 4096;
 export const urlExtractRegex = /https?:\/\/\S+\.[^()]+(?:\([^)]*\))*/;
 export const interpunctionRegex = /^(\.|,|;|\?|\!)$/;
 export const emojiRegex = /(?:\s|^)\:\w+\:/;

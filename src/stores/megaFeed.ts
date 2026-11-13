@@ -3,11 +3,18 @@ import { Kind } from "../constants";
 import { hexToNpub } from "../lib/keys";
 import { PollVote, sanitize } from "../lib/notes";
 import { MegaFeedPage, MegaRepostInfo, NostrEvent, NostrNoteContent, NostrRelaySignedEvent, PrimalArticle, PrimalDraft, PrimalNote, PrimalUser, PrimalUserPoll, PrimalZap, TopZap, UserStats } from "../types/primal";
-import { convertToUser } from "./profile";
+import { convertToUser, parseUserMetadata } from "./profile";
 import { now, selectRelayTags, zapReceiptAmount } from "../utils";
 import { logError, logWarning } from "../lib/logger";
 import { StreamingData } from "../lib/streaming";
 
+
+// parseInt of an attacker-supplied tag can yield NaN or Infinity, which
+// later throws in date formatting (Intl.RelativeTimeFormat).
+const finiteInt = (value: unknown, fallback: number) => {
+  const n = parseInt(`${value}`);
+  return Number.isFinite(n) ? n : fallback;
+};
 
 export const noActions = (id: string) => ({
   event_id: id,
@@ -17,9 +24,27 @@ export const noActions = (id: string) => ({
   zapped: false,
 });
 
+const HEX64 = /^[0-9a-f]{64}$/i;
+
+// The reposted event embedded in a kind 6 is unsigned JSON controlled by the
+// reposter, so only accept it if it is shaped like a real event.
+const isEventLike = (e: any): e is NostrNoteContent =>
+  !!e &&
+  typeof e === 'object' &&
+  typeof e.id === 'string' && HEX64.test(e.id) &&
+  typeof e.pubkey === 'string' && HEX64.test(e.pubkey) &&
+  typeof e.kind === 'number' &&
+  Array.isArray(e.tags) && e.tags.every((t: unknown) => Array.isArray(t)) &&
+  (e.content === undefined || typeof e.content === 'string') &&
+  (e.created_at === undefined || Number.isFinite(e.created_at));
+
 export const parseRepost = (message: NostrNoteContent, defaultKind = 1) => {
   try {
-    return JSON.parse(message.content) as NostrNoteContent;
+    const parsed = JSON.parse(message.content);
+
+    if (!isEventLike(parsed)) throw new Error('Malformed reposted event');
+
+    return parsed;
   } catch (e) {
     return {
       kind: defaultKind,
@@ -38,7 +63,7 @@ export const encodeCoordinate = (event: NostrNoteContent, forceKind?: Kind) => {
   const identifier = (event.tags.find(t => t[0] === 'd') || [])[1];
   const pubkey = event.pubkey;
   const kind = forceKind || event.kind;
-  const relays = event.tags.reduce<string[]>((acc, t) => t[0] === 'r' && acc.length < 2 ? [...acc, t[1]] : acc, []);
+  const relays = selectRelayTags(event.tags, 2, false);
 
   const coordinate =  `${kind}:${pubkey}:${identifier}`;
   const naddr = nip19.naddrEncode({ kind, pubkey, identifier, relays });
@@ -48,13 +73,7 @@ export const encodeCoordinate = (event: NostrNoteContent, forceKind?: Kind) => {
 
 export const extractRepostInfo: MegaRepostInfo = (page, message) => {
   const user = page?.users[message.pubkey];
-  let userMeta: any = {};
-  try {
-    userMeta = JSON.parse(user?.content || '{}');
-
-  } catch (e) {
-    logWarning('Bad user metadata: ', e);
-  }
+  const userMeta = parseUserMetadata(user?.content);
   const stat = page?.noteStats[message.id];
 
   const eventPointer: nip19.EventPointer ={
@@ -73,16 +92,16 @@ export const extractRepostInfo: MegaRepostInfo = (page, message) => {
       id: user?.id || '',
       pubkey: user?.pubkey || message.pubkey,
       npub: hexToNpub(user?.pubkey || message.pubkey),
-      name: (userMeta.name || user?.pubkey) as string,
-      about: (userMeta.about || '') as string,
-      picture: (userMeta.picture || '') as string,
-      nip05: (userMeta.nip05 || '') as string,
-      banner: (userMeta.banner || '') as string,
-      displayName: (userMeta.display_name || '') as string,
-      location: (userMeta.location || '') as string,
-      lud06: (userMeta.lud06 || '') as string,
-      lud16: (userMeta.lud16 || '') as string,
-      website: (userMeta.website || '') as string,
+      name: userMeta.name || user?.pubkey || '',
+      about: userMeta.about,
+      picture: userMeta.picture,
+      nip05: userMeta.nip05,
+      banner: userMeta.banner,
+      displayName: userMeta.display_name,
+      location: userMeta.location,
+      lud06: userMeta.lud06,
+      lud16: userMeta.lud16,
+      website: userMeta.website,
       tags: user?.tags || [],
       msg: {...user},
     },
@@ -200,7 +219,7 @@ const extractMentionsUnchecked = (page: MegaFeedPage, note: NostrNoteContent, na
         id: mention.id,
         author: mention.pubkey,
         kind: mention.kind,
-        relays: mention.tags.reduce((acc, t, i) => (t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://'))) ? [ ...acc, t[1]] : acc, []).slice(0,3),
+        relays: selectRelayTags(mention.tags, 3, false),
       }
 
       const eventPointerShort: nip19.EventPointer ={
@@ -257,7 +276,7 @@ const extractMentionsUnchecked = (page: MegaFeedPage, note: NostrNoteContent, na
       const published = mention.tags.reduce<number>((acc, t) => {
         if (t[0] !== 'published_at') return acc;
 
-        const time = parseInt(t[1]);
+        const time = finiteInt(t[1], 0);
         return time > acc ? time : acc;
       }, 0);
 
@@ -308,7 +327,7 @@ const extractMentionsUnchecked = (page: MegaFeedPage, note: NostrNoteContent, na
             article.image = tag[1];
             break;
           case 'published':
-            article.published = parseInt(tag[1]);
+            article.published = finiteInt(tag[1], article.published);
             break;
           case 'client':
             article.client = tag[1];
@@ -410,7 +429,7 @@ const extractMentionsUnchecked = (page: MegaFeedPage, note: NostrNoteContent, na
         id: mention.id,
         author: mention.pubkey,
         kind: mention.kind,
-        relays: mention.tags.reduce((acc, t, i) => (t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://'))) ? [ ...acc, t[1]] : acc, []).slice(0,3),
+        relays: selectRelayTags(mention.tags, 3, false),
       }
 
       const eventPointerShort: nip19.EventPointer ={
@@ -437,7 +456,7 @@ const extractMentionsUnchecked = (page: MegaFeedPage, note: NostrNoteContent, na
       );
       const results = page.pollResults[mention.id];
 
-      const endsAt = parseInt((mention.tags.find(t => t[0] === 'endsAt') || ['endsAt', `${now()}`])[1]);
+      const endsAt = finiteInt((mention.tags.find(t => t[0] === 'endsAt') || [])[1], now());
       const stats = page.noteStats[mention.id];
 
       mentionedUserPolls[mentionId] = {
@@ -471,7 +490,7 @@ const extractMentionsUnchecked = (page: MegaFeedPage, note: NostrNoteContent, na
         id: mention.id,
         author: mention.pubkey,
         kind: mention.kind,
-        relays: mention.tags.reduce((acc, t, i) => (t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://'))) ? [ ...acc, t[1]] : acc, []).slice(0,3),
+        relays: selectRelayTags(mention.tags, 3, false),
       }
 
       const eventPointerShort: nip19.EventPointer ={
@@ -498,11 +517,11 @@ const extractMentionsUnchecked = (page: MegaFeedPage, note: NostrNoteContent, na
       );
       const results = page.pollResults[mention.id];
 
-      const endsAt = parseInt((mention.tags.find(t => t[0] === 'closed_at') || ['closed_at', `${now()}`])[1]);
+      const endsAt = finiteInt((mention.tags.find(t => t[0] === 'closed_at') || [])[1], now());
       const stats = page.noteStats[mention.id];
 
-      const min = parseInt((mention.tags.find(t => t[0] === 'value_minimum') || ['value_minimum', `0`])[1]);
-      const max = parseInt((mention.tags.find(t => t[0] === 'value_maximum') || ['value_maximum', `0`])[1]);
+      const min = finiteInt((mention.tags.find(t => t[0] === 'value_minimum') || [])[1], 0);
+      const max = finiteInt((mention.tags.find(t => t[0] === 'value_maximum') || [])[1], 0);
 
 
       mentionedZapPolls[mentionId] = {
@@ -645,7 +664,14 @@ export const convertToUsersMega = (page: MegaFeedPage) => {
     })
   }
 
-  return Object.values(page.users).map(u => convertToUser(u, u.pubkey, stats));
+  return Object.values(page.users).reduce<PrimalUser[]>((acc, u) => {
+    try {
+      return [...acc, convertToUser(u, u.pubkey, stats)];
+    } catch (e) {
+      logError('ERROR converting user: ', u?.pubkey, e);
+      return acc;
+    }
+  }, []);
 };
 
 export const convertSingleNoteMega = (pageNote: NostrNoteContent, page: MegaFeedPage) => {
@@ -678,7 +704,7 @@ export const convertSingleNoteMega = (pageNote: NostrNoteContent, page: MegaFeed
       id: note.id,
       author: note.pubkey,
       kind: note.kind,
-      relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 2),
+      relays: selectRelayTags(tags, 2, false),
     };
 
     const eventPointerShort: nip19.EventPointer = {
@@ -738,95 +764,18 @@ export const convertToNotesMega = (page: MegaFeedPage) => {
     return [];
   }
 
-  let i = 0;
-
   let notes: PrimalNote[] = [];
 
-  for (i=0;i<page.notes.length;i++) {
-    const pageNote = page.notes[i];
-
-    // If this is a repost, parse it for the originsl note.
-    const note = pageNote.kind === Kind.Repost ? parseRepost(pageNote) : pageNote;
-
-    // if this is a repost extract repost info
-    const repost = pageNote.kind === Kind.Repost ? extractRepostInfo(page, pageNote) : undefined;
-
-    const author = convertToUser(page.users[note.pubkey], note.pubkey);
-    const stat = page.noteStats[note.id];
-    const topZaps = page.topZaps[note.id] || [];
-
-    const tags = note.tags || [];
-    const replyTo = extractReplyTo(tags);
-
-    // Parse mentions
-    let {
-      mentionedNotes,
-      mentionedArticles,
-      mentionedUsers,
-      mentionedHighlights,
-      mentionedZaps,
-      mentionedLiveEvents,
-      mentionedUserPolls,
-      mentionedZapPolls,
-    } = extractMentions(page, note);
-
-    const eventPointer: nip19.EventPointer = {
-      id: note.id,
-      author: note.pubkey,
-      kind: note.kind,
-      relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 2),
-    };
-
-    const eventPointerShort: nip19.EventPointer = {
-      id: note.id,
-    };
-
-    const newNote: PrimalNote = {
-      user: author,
-      post: {
-        id: note.id,
-        pubkey: note.pubkey,
-        created_at: note.created_at || 0,
-        tags: note.tags,
-        content: sanitize(note.content),
-        kind: note.kind,
-        sig: note.sig,
-        likes: stat?.likes || 0,
-        mentions: stat?.mentions || 0,
-        reposts: stat?.reposts || 0,
-        replies: stat?.replies || 0,
-        zaps: stat?.zaps || 0,
-        score: stat?.score || 0,
-        score24h: stat?.score24h || 0,
-        satszapped: stat?.satszapped || 0,
-        noteId: nip19.neventEncode(eventPointer),
-        noteIdShort: nip19.neventEncode(eventPointerShort),
-        noteActions: (page.noteActions && page.noteActions[note.id]) ?? noActions(note.id),
-        relayHints: page.relayHints,
-      },
-      repost,
-      msg: note,
-      mentionedNotes,
-      mentionedUsers,
-      mentionedHighlights,
-      mentionedArticles,
-      mentionedZaps,
-      mentionedLiveEvents,
-      mentionedUserPolls,
-      mentionedZapPolls,
-      replyTo: replyTo && replyTo[1],
-      tags: note.tags,
-      id: note.id,
-      noteId: nip19.neventEncode(eventPointer),
-      noteIdShort: nip19.neventEncode(eventPointerShort),
-      pubkey: note.pubkey,
-      topZaps,
-      content: sanitize(note.content),
-      relayHints: page.relayHints,
-    };
-
-    notes.push(newNote);
+  for (let i=0;i<page.notes.length;i++) {
+    // One malformed event must not stop the whole page from resolving
+    // (the feed would never leave its loading state): skip it instead.
+    try {
+      notes.push(convertSingleNoteMega(page.notes[i], page));
+    } catch (e) {
+      logError('ERROR converting note: ', page.notes[i]?.id, e);
+    }
   }
+
   return notes;
 };
 
@@ -853,7 +802,7 @@ export const buildPostedNote = (
     id: event.id,
     author: event.pubkey,
     kind: event.kind,
-    relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 2),
+    relays: selectRelayTags(tags, 2, false),
   };
 
   const eventPointerShort: nip19.EventPointer = {
@@ -940,7 +889,7 @@ export const convertSingleReadMega = (read: NostrNoteContent, page: MegaFeedPage
   const published = read.tags.reduce<number>((acc, t) => {
     if (t[0] !== 'published_at') return acc;
 
-    const time = parseInt(t[1]);
+    const time = finiteInt(t[1], 0);
     return time > acc ? time : acc;
   }, 0);
 
@@ -1000,7 +949,7 @@ export const convertSingleReadMega = (read: NostrNoteContent, page: MegaFeedPage
         newRead.image = tag[1];
         break;
       case 'published':
-        newRead.published = parseInt(tag[1]);
+        newRead.published = finiteInt(tag[1], newRead.published);
         break;
       case 'client':
         newRead.client = tag[1];
@@ -1024,111 +973,116 @@ export const convertToReadsMega = (page: MegaFeedPage) => {
 
   for (i=0;i<page.reads.length;i++) {
     const read = page.reads[i];
-    const { coordinate, naddr } = encodeCoordinate(read, Kind.LongForm);
-    const [kind, pubkey, identifier] = coordinate.split(':');
-    const naddrShort = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
-    const author = convertToUser(page.users[read.pubkey], read.pubkey);
-    const stat = page.noteStats[read.id];
-    const topZaps = page.topZaps[naddrShort] || page.topZaps[read.id] || [];
-    const wordCount = (page.wordCount || {})[read.id] || 0;
 
-    const repost = read.kind === Kind.Repost ? extractRepostInfo(page, read) : undefined;
-    const tags = read.tags || [];
-    const userMentionIds = tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
-    const replyTo = extractReplyTo(tags);
+    try {
+      const { coordinate, naddr } = encodeCoordinate(read, Kind.LongForm);
+      const [kind, pubkey, identifier] = coordinate.split(':');
+      const naddrShort = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
+      const author = convertToUser(page.users[read.pubkey], read.pubkey);
+      const stat = page.noteStats[read.id];
+      const topZaps = page.topZaps[naddrShort] || page.topZaps[read.id] || [];
+      const wordCount = (page.wordCount || {})[read.id] || 0;
 
-    // include senders of top zaps into mentioned users
-    for(let i=0; i<topZaps.length; i++) {
-      if (userMentionIds.includes(topZaps[i].pubkey)) continue;
-      userMentionIds.push(topZaps[i].pubkey);
-    }
+      const repost = read.kind === Kind.Repost ? extractRepostInfo(page, read) : undefined;
+      const tags = read.tags || [];
+      const userMentionIds = tags.reduce((acc, t) => t[0] === 'p' ? [...acc, t[1]] : acc, []);
+      const replyTo = extractReplyTo(tags);
 
-    // Parse mentions
-    const {
-      mentionedNotes,
-      mentionedArticles,
-      mentionedUsers,
-      mentionedHighlights,
-      mentionedZaps,
-      mentionedLiveEvents,
-      mentionedUserPolls,
-      mentionedZapPolls,
-    } = extractMentions(page, read, naddrShort);
-
-    const published = read.tags.reduce<number>((acc, t) => {
-      if (t[0] !== 'published_at') return acc;
-
-      const time = parseInt(t[1]);
-      return time > acc ? time : acc;
-    }, 0);
-
-    let newRead: PrimalArticle = {
-      id: read.id,
-      pubkey: read.pubkey,
-      title: '',
-      summary: '',
-      image: '',
-      tags: [],
-      published: published || read.created_at || 0,
-      content: sanitize(read.content || ''),
-      user: author,
-      topZaps,
-      naddr,
-      noteId: naddr,
-      noteIdShort: naddrShort,
-      coordinate,
-      msg: {
-        ...read,
-        kind: Kind.LongForm,
-      },
-      mentionedNotes,
-      mentionedUsers,
-      mentionedHighlights,
-      mentionedArticles,
-      mentionedZaps,
-      mentionedLiveEvents,
-      mentionedUserPolls,
-      mentionedZapPolls,
-      wordCount,
-      noteActions: (page.noteActions && page.noteActions[read.id]) ?? noActions(read.id),
-      bookmarks: stat?.bookmarks || 0,
-      likes: stat?.likes || 0,
-      mentions: stat?.mentions || 0,
-      reposts: stat?.reposts || 0,
-      replies: stat?.replies || 0,
-      zaps: stat?.zaps || 0,
-      score: stat?.score || 0,
-      score24h: stat?.score24h || 0,
-      satszapped: stat?.satszapped || 0,
-      relayHints: page.relayHints,
-    };
-
-    tags.forEach(tag => {
-      switch (tag[0]) {
-        case 't':
-          newRead.tags.push(tag[1]);
-          break;
-        case 'title':
-          newRead.title = tag[1];
-          break;
-        case 'summary':
-          newRead.summary = tag[1];
-          break;
-        case 'image':
-          newRead.image = tag[1];
-          break;
-        case 'published':
-          newRead.published = parseInt(tag[1]);
-          break;
-        case 'client':
-          newRead.client = tag[1];
-          break;
-        default:
-          break;
+      // include senders of top zaps into mentioned users
+      for(let i=0; i<topZaps.length; i++) {
+        if (userMentionIds.includes(topZaps[i].pubkey)) continue;
+        userMentionIds.push(topZaps[i].pubkey);
       }
-    });
 
-    reads.push(newRead);
+      // Parse mentions
+      const {
+        mentionedNotes,
+        mentionedArticles,
+        mentionedUsers,
+        mentionedHighlights,
+        mentionedZaps,
+        mentionedLiveEvents,
+        mentionedUserPolls,
+        mentionedZapPolls,
+      } = extractMentions(page, read, naddrShort);
+
+      const published = read.tags.reduce<number>((acc, t) => {
+        if (t[0] !== 'published_at') return acc;
+
+        const time = finiteInt(t[1], 0);
+        return time > acc ? time : acc;
+      }, 0);
+
+      let newRead: PrimalArticle = {
+        id: read.id,
+        pubkey: read.pubkey,
+        title: '',
+        summary: '',
+        image: '',
+        tags: [],
+        published: published || read.created_at || 0,
+        content: sanitize(read.content || ''),
+        user: author,
+        topZaps,
+        naddr,
+        noteId: naddr,
+        noteIdShort: naddrShort,
+        coordinate,
+        msg: {
+          ...read,
+          kind: Kind.LongForm,
+        },
+        mentionedNotes,
+        mentionedUsers,
+        mentionedHighlights,
+        mentionedArticles,
+        mentionedZaps,
+        mentionedLiveEvents,
+        mentionedUserPolls,
+        mentionedZapPolls,
+        wordCount,
+        noteActions: (page.noteActions && page.noteActions[read.id]) ?? noActions(read.id),
+        bookmarks: stat?.bookmarks || 0,
+        likes: stat?.likes || 0,
+        mentions: stat?.mentions || 0,
+        reposts: stat?.reposts || 0,
+        replies: stat?.replies || 0,
+        zaps: stat?.zaps || 0,
+        score: stat?.score || 0,
+        score24h: stat?.score24h || 0,
+        satszapped: stat?.satszapped || 0,
+        relayHints: page.relayHints,
+      };
+
+      tags.forEach(tag => {
+        switch (tag[0]) {
+          case 't':
+            newRead.tags.push(tag[1]);
+            break;
+          case 'title':
+            newRead.title = tag[1];
+            break;
+          case 'summary':
+            newRead.summary = tag[1];
+            break;
+          case 'image':
+            newRead.image = tag[1];
+            break;
+          case 'published':
+            newRead.published = finiteInt(tag[1], newRead.published);
+            break;
+          case 'client':
+            newRead.client = tag[1];
+            break;
+          default:
+            break;
+        }
+      });
+
+      reads.push(newRead);
+    } catch (e) {
+      logError('ERROR converting read: ', read?.id, e);
+    }
   }
 
   return reads;
@@ -1146,19 +1100,23 @@ export const convertToDraftsMega = (page: MegaFeedPage) => {
   for (i=0;i<page.drafts.length;i++) {
     const draft = page.drafts[i];
 
-    const newDraft: PrimalDraft = {
-      id: draft.id,
-      kind: draft.kind,
-      content: draft.content,
-      plain: '',
-      client: (draft.tags.find(t => t[0] === 'client') || ['cilent', 'unknown'])[1],
-      pubkey: draft.pubkey,
-      created_at: draft.created_at || 0,
-      msg: { ...draft },
-      noteId: `ndraft1${draft.id}`,
-    }
+    try {
+      const newDraft: PrimalDraft = {
+        id: draft.id,
+        kind: draft.kind,
+        content: draft.content,
+        plain: '',
+        client: (draft.tags.find(t => t[0] === 'client') || ['cilent', 'unknown'])[1],
+        pubkey: draft.pubkey,
+        created_at: draft.created_at || 0,
+        msg: { ...draft },
+        noteId: `ndraft1${draft.id}`,
+      }
 
-    drafts.push(newDraft);
+      drafts.push(newDraft);
+    } catch (e) {
+      logError('ERROR converting draft: ', draft?.id, e);
+    }
   }
 
   return drafts;
@@ -1178,82 +1136,86 @@ export const convertToUserPollsMega = (page: MegaFeedPage) => {
   for (i=0;i<page.userPolls.length;i++) {
     const pagePoll = page.userPolls[i];
 
-    // If this is a repost, parse it for the originsl note.
-    const poll = pagePoll.kind === Kind.Repost ? parseRepost(pagePoll, Kind.UserPoll) : pagePoll;
+    try {
+      // If this is a repost, parse it for the originsl note.
+      const poll = pagePoll.kind === Kind.Repost ? parseRepost(pagePoll, Kind.UserPoll) : pagePoll;
 
-    // if this is a repost extract repost info
-    const repost = pagePoll.kind === Kind.Repost ? extractRepostInfo(page, pagePoll) : undefined;
+      // if this is a repost extract repost info
+      const repost = pagePoll.kind === Kind.Repost ? extractRepostInfo(page, pagePoll) : undefined;
 
-    const author = convertToUser(page.users[poll.pubkey], poll.pubkey);
-    const results = page.pollResults[poll.id];
-    const topZaps = page.topZaps[poll.id] || [];
-    const stats = page.noteStats[poll.id];
+      const author = convertToUser(page.users[poll.pubkey], poll.pubkey);
+      const results = page.pollResults[poll.id];
+      const topZaps = page.topZaps[poll.id] || [];
+      const stats = page.noteStats[poll.id];
 
 
-    const tags = poll.tags || [];
-    const replyTo = extractReplyTo(tags);
-    const endsAt = parseInt((tags.find(t => t[0] === 'endsAt') || ['endsAt', `${now()}`])[1]);
+      const tags = poll.tags || [];
+      const replyTo = extractReplyTo(tags);
+      const endsAt = finiteInt((tags.find(t => t[0] === 'endsAt') || [])[1], now());
 
-    const choices = poll.tags.reduce<{ id: string, label: string, index: number }[]>(
-      (acc, t, index) => {
-        if (t[0] !== 'option') return acc;
-        return [...acc, { id: t[1], label: t[2], index }];
-      },
-      [],
-    );
+      const choices = tags.reduce<{ id: string, label: string, index: number }[]>(
+        (acc, t, index) => {
+          if (t[0] !== 'option') return acc;
+          return [...acc, { id: t[1], label: t[2], index }];
+        },
+        [],
+      );
 
-    // Parse mentions
-    let {
-      mentionedNotes,
-      mentionedArticles,
-      mentionedUsers,
-      mentionedHighlights,
-      mentionedZaps,
-      mentionedLiveEvents,
-      mentionedUserPolls,
-      mentionedZapPolls,
-    } = extractMentions(page, poll);
+      // Parse mentions
+      let {
+        mentionedNotes,
+        mentionedArticles,
+        mentionedUsers,
+        mentionedHighlights,
+        mentionedZaps,
+        mentionedLiveEvents,
+        mentionedUserPolls,
+        mentionedZapPolls,
+      } = extractMentions(page, poll);
 
-    const eventPointer: nip19.EventPointer = {
-      id: poll.id,
-      author: poll.pubkey,
-      kind: poll.kind,
-      relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 2),
-    };
+      const eventPointer: nip19.EventPointer = {
+        id: poll.id,
+        author: poll.pubkey,
+        kind: poll.kind,
+        relays: selectRelayTags(tags, 2, false),
+      };
 
-    const eventPointerShort: nip19.EventPointer = {
-      id: poll.id,
-    };
+      const eventPointerShort: nip19.EventPointer = {
+        id: poll.id,
+      };
 
-    const newPoll: PrimalUserPoll = {
-      user: author,
-      msg: poll,
-      mentionedNotes,
-      mentionedUsers,
-      mentionedHighlights,
-      mentionedArticles,
-      mentionedZaps,
-      mentionedLiveEvents,
-      mentionedUserPolls,
-      mentionedZapPolls,
-      replyTo: replyTo && replyTo[1],
-      tags: poll.tags,
-      id: poll.id,
-      noteId: nip19.neventEncode(eventPointer),
-      noteIdShort: nip19.neventEncode(eventPointerShort),
-      pubkey: poll.pubkey,
-      question: sanitize(poll.content),
-      choices,
-      results,
-      relayHints: page.relayHints,
-      noteActions: (page.noteActions && page.noteActions[poll.id]) ?? noActions(poll.id),
-      endsAt,
-      topZaps,
-      stats,
-      repost,
-    };
+      const newPoll: PrimalUserPoll = {
+        user: author,
+        msg: poll,
+        mentionedNotes,
+        mentionedUsers,
+        mentionedHighlights,
+        mentionedArticles,
+        mentionedZaps,
+        mentionedLiveEvents,
+        mentionedUserPolls,
+        mentionedZapPolls,
+        replyTo: replyTo && replyTo[1],
+        tags: poll.tags,
+        id: poll.id,
+        noteId: nip19.neventEncode(eventPointer),
+        noteIdShort: nip19.neventEncode(eventPointerShort),
+        pubkey: poll.pubkey,
+        question: sanitize(poll.content),
+        choices,
+        results,
+        relayHints: page.relayHints,
+        noteActions: (page.noteActions && page.noteActions[poll.id]) ?? noActions(poll.id),
+        endsAt,
+        topZaps,
+        stats,
+        repost,
+      };
 
-    userPolls.push(newPoll);
+      userPolls.push(newPoll);
+    } catch (e) {
+      logError('ERROR converting poll: ', pagePoll?.id, e);
+    }
   }
   return userPolls;
 };
@@ -1272,85 +1234,89 @@ export const convertToZapPollsMega = (page: MegaFeedPage) => {
   for (i=0;i<page.zapPolls.length;i++) {
     const pagePoll = page.zapPolls[i];
 
-    // If this is a repost, parse it for the originsl note.
-    const poll = pagePoll.kind === Kind.Repost ? parseRepost(pagePoll, Kind.ZapPoll) : pagePoll;
+    try {
+      // If this is a repost, parse it for the originsl note.
+      const poll = pagePoll.kind === Kind.Repost ? parseRepost(pagePoll, Kind.ZapPoll) : pagePoll;
 
-    // if this is a repost extract repost info
-    const repost = pagePoll.kind === Kind.Repost ? extractRepostInfo(page, pagePoll) : undefined;
+      // if this is a repost extract repost info
+      const repost = pagePoll.kind === Kind.Repost ? extractRepostInfo(page, pagePoll) : undefined;
 
-    const author = convertToUser(page.users[poll.pubkey], poll.pubkey);
-    const results = page.pollResults[poll.id];
-    const topZaps = page.topZaps[poll.id] || [];
-    const stats = page.noteStats[poll.id];
+      const author = convertToUser(page.users[poll.pubkey], poll.pubkey);
+      const results = page.pollResults[poll.id];
+      const topZaps = page.topZaps[poll.id] || [];
+      const stats = page.noteStats[poll.id];
 
 
-    const tags = poll.tags || [];
-    const replyTo = extractReplyTo(tags);
-    const endsAt = parseInt((tags.find(t => t[0] === 'closed_at') || ['closed_at', `${now()}`])[1]);
-    const min = parseInt((tags.find(t => t[0] === 'value_minimum') || ['value_minimum', `0`])[1]);
-    const max = parseInt((tags.find(t => t[0] === 'value_maximum') || ['value_maximum', `0`])[1]);
+      const tags = poll.tags || [];
+      const replyTo = extractReplyTo(tags);
+      const endsAt = finiteInt((tags.find(t => t[0] === 'closed_at') || [])[1], now());
+      const min = finiteInt((tags.find(t => t[0] === 'value_minimum') || [])[1], 0);
+      const max = finiteInt((tags.find(t => t[0] === 'value_maximum') || [])[1], 0);
 
-    const choices = poll.tags.reduce<{ id: string, label: string, index: number }[]>(
-      (acc, t, index) => {
-        if (t[0] !== 'poll_option') return acc;
-        return [...acc, { id: t[1], label: t[2], index }];
-      },
-      [],
-    );
+      const choices = tags.reduce<{ id: string, label: string, index: number }[]>(
+        (acc, t, index) => {
+          if (t[0] !== 'poll_option') return acc;
+          return [...acc, { id: t[1], label: t[2], index }];
+        },
+        [],
+      );
 
-    // Parse mentions
-    let {
-      mentionedNotes,
-      mentionedArticles,
-      mentionedUsers,
-      mentionedHighlights,
-      mentionedZaps,
-      mentionedLiveEvents,
-      mentionedUserPolls,
-      mentionedZapPolls,
-    } = extractMentions(page, poll);
+      // Parse mentions
+      let {
+        mentionedNotes,
+        mentionedArticles,
+        mentionedUsers,
+        mentionedHighlights,
+        mentionedZaps,
+        mentionedLiveEvents,
+        mentionedUserPolls,
+        mentionedZapPolls,
+      } = extractMentions(page, poll);
 
-    const eventPointer: nip19.EventPointer = {
-      id: poll.id,
-      author: poll.pubkey,
-      kind: poll.kind,
-      relays: tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0, 2),
-    };
+      const eventPointer: nip19.EventPointer = {
+        id: poll.id,
+        author: poll.pubkey,
+        kind: poll.kind,
+        relays: selectRelayTags(tags, 2, false),
+      };
 
-    const eventPointerShort: nip19.EventPointer = {
-      id: poll.id,
-    };
+      const eventPointerShort: nip19.EventPointer = {
+        id: poll.id,
+      };
 
-    const newPoll: PrimalUserPoll = {
-      user: author,
-      msg: poll,
-      mentionedNotes,
-      mentionedUsers,
-      mentionedHighlights,
-      mentionedArticles,
-      mentionedZaps,
-      mentionedLiveEvents,
-      mentionedUserPolls,
-      mentionedZapPolls,
-      replyTo: replyTo && replyTo[1],
-      tags: poll.tags,
-      id: poll.id,
-      noteId: nip19.neventEncode(eventPointer),
-      noteIdShort: nip19.neventEncode(eventPointerShort),
-      pubkey: poll.pubkey,
-      question: sanitize(poll.content),
-      choices,
-      results,
-      relayHints: page.relayHints,
-      noteActions: (page.noteActions && page.noteActions[poll.id]) ?? noActions(poll.id),
-      endsAt,
-      topZaps,
-      stats,
-      repost,
-      zapLimits: { min, max },
-    };
+      const newPoll: PrimalUserPoll = {
+        user: author,
+        msg: poll,
+        mentionedNotes,
+        mentionedUsers,
+        mentionedHighlights,
+        mentionedArticles,
+        mentionedZaps,
+        mentionedLiveEvents,
+        mentionedUserPolls,
+        mentionedZapPolls,
+        replyTo: replyTo && replyTo[1],
+        tags: poll.tags,
+        id: poll.id,
+        noteId: nip19.neventEncode(eventPointer),
+        noteIdShort: nip19.neventEncode(eventPointerShort),
+        pubkey: poll.pubkey,
+        question: sanitize(poll.content),
+        choices,
+        results,
+        relayHints: page.relayHints,
+        noteActions: (page.noteActions && page.noteActions[poll.id]) ?? noActions(poll.id),
+        endsAt,
+        topZaps,
+        stats,
+        repost,
+        zapLimits: { min, max },
+      };
 
-    zapPolls.push(newPoll);
+      zapPolls.push(newPoll);
+    } catch (e) {
+      logError('ERROR converting zap poll: ', pagePoll?.id, e);
+    }
   }
   return zapPolls;
 };

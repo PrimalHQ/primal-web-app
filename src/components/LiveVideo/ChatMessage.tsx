@@ -10,7 +10,7 @@ import { A } from '@solidjs/router';
 import { useAppContext } from '../../contexts/AppContext';
 import { decodeIdentifier, hexToNpub } from '../../lib/keys';
 import { isDev, urlEncode } from '../../utils';
-import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, specialCharsRegex, urlExtractRegex } from '../../constants';
+import { hashtagCharsRegex, Kind, linebreakRegex, lnUnifiedRegex, noteRegex, specialCharsRegex, urlExtractRegex, MAX_EMBED_TOKEN_LENGTH } from '../../constants';
 import { createStore } from 'solid-js/store';
 import { NoteContent } from '../ParsedNote/ParsedNote';
 import { isInterpunction, isUrl, isImage, isMp4Video, isOggVideo, isWebmVideo, isYouTube, isSpotify, isTwitch, isMixCloud, isSoundCloud, isAppleMusic, isWavelake, getLinkPreview, isNoteMention, isUserMention, isAddrMention, isTagMention, isHashtag, isCustomEmoji, isUnitifedLnAddress, isLnbc, is3gppVideo } from '../../lib/notes';
@@ -128,7 +128,7 @@ const ChatMessage: Component<{
       if (index > 0) {
         const prefix = token.slice(0, index);
 
-        const matched = (token.match(urlExtractRegex) || [])[0];
+        const matched = (token.length <= MAX_EMBED_TOKEN_LENGTH && token.match(urlExtractRegex) || [])[0];
 
         if (matched) {
           const suffix = token.substring(matched.length + index, token.length);
@@ -312,7 +312,7 @@ const ChatMessage: Component<{
     if (isUnitifedLnAddress(token)) {
       lastSignificantContent = 'lnbc';
 
-      const match = token.match(lnUnifiedRegex);
+      const match = token.length <= MAX_EMBED_TOKEN_LENGTH ? token.match(lnUnifiedRegex) : null;
 
       let lnbcToken = match?.find(m => m.startsWith('lnbc'));
 

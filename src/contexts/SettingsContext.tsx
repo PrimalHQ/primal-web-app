@@ -432,7 +432,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   }
 
   const restoreHomeFeeds = () => {
-    const subId = `restore_feeds_${APP_ID}`;
+    const subId = `restore_home_feeds_${APP_ID}`;
 
     let feeds: PrimalArticleFeed[] = []
 
@@ -452,7 +452,7 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
   }
 
   const restoreReadsFeeds = () => {
-    const subId = `restore_feeds_${APP_ID}`;
+    const subId = `restore_reads_feeds_${APP_ID}`;
 
     let feeds: PrimalArticleFeed[] = []
 
@@ -486,9 +486,9 @@ export const SettingsProvider = (props: { children: ContextChildren }) => {
 
   const updateReadsFeeds = (feeds: PrimalArticleFeed[]) => {
     updateStore('readsFeeds', () => [...feeds]);
-    saveHomeFeeds(accountStore.publicKey, feeds);
+    saveReadsFeeds(accountStore.publicKey, feeds);
 
-    const subId = `set_home_feeds_${APP_ID}`;
+    const subId = `set_reads_feeds_${APP_ID}`;
 
     const unsub = subsTo(subId, {
       onEose: () => { unsub(); }

@@ -8,7 +8,7 @@ import { RepostInfo, NostrNoteContent, FeedPage, PrimalNote, PrimalRepost, Nostr
 import { convertToUser, emptyUser } from "./profile";
 import { StreamingData } from "../lib/streaming";
 import { encodeCoordinate } from "./megaFeed";
-import { now } from "../utils";
+import { now, selectRelayTags } from "../utils";
 
 
 export const getRepostInfo: RepostInfo = (page, message) => {
@@ -20,7 +20,7 @@ export const getRepostInfo: RepostInfo = (page, message) => {
     id: message.id,
     author: message.pubkey,
     kind: message.kind,
-    relays: message.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0,3),
+    relays: selectRelayTags(message.tags, 3, false),
   };
 
   return {
@@ -260,7 +260,7 @@ export const generateNote = (
     id: msg.id,
     author: msg.pubkey,
     kind: msg.kind,
-    relays: msg.tags.reduce((acc, t, i) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0,3),
+    relays: selectRelayTags(msg.tags, 3, false),
   };
 
   return {
@@ -419,7 +419,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             id: m.id,
             author: m.pubkey,
             kind: m.kind,
-            relays: m.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [ ...acc, t[1]] : acc, []).slice(0,3),
+            relays: selectRelayTags(m.tags, 3, false),
           }
 
           const eventPointerShort: nip19.EventPointer ={
@@ -584,7 +584,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             id: m.id,
             author: m.pubkey,
             kind: m.kind,
-            relays: m.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [ ...acc, t[1]] : acc, []).slice(0,3),
+            relays: selectRelayTags(m.tags, 3, false),
           }
 
           const eventPointerShort: nip19.EventPointer ={
@@ -645,7 +645,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
             id: m.id,
             author: m.pubkey,
             kind: m.kind,
-            relays: m.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [ ...acc, t[1]] : acc, []).slice(0,3),
+            relays: selectRelayTags(m.tags, 3, false),
           }
 
           const eventPointerShort: nip19.EventPointer = {
@@ -714,7 +714,7 @@ export const convertToNotes: ConvertToNotes = (page, topZaps) => {
       id: msg.id,
       author: msg.pubkey,
       kind: msg.kind,
-      relays: msg.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [ ...acc, t[1]] : acc, []).slice(0,3),
+      relays: selectRelayTags(msg.tags, 3, false),
     }
 
     const eventPointerShort: nip19.EventPointer ={
@@ -863,7 +863,7 @@ export const convertToArticles: ConvertToArticles = (page, topZaps) => {
             id: m.id,
             author: m.pubkey,
             kind: m.kind,
-            relays: m.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [ ...acc, t[1]] : acc, []).slice(0,3),
+            relays: selectRelayTags(m.tags, 3, false),
           }
 
           const eventPointerShort: nip19.EventPointer ={
@@ -1165,7 +1165,7 @@ export const convertToPolls: ConvertToPolls = (page, topZaps) => {
             id: m.id,
             author: m.pubkey,
             kind: m.kind,
-            relays: m.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [ ...acc, t[1]] : acc, []).slice(0,3),
+            relays: selectRelayTags(m.tags, 3, false),
           }
 
           const eventPointerShort: nip19.EventPointer ={
@@ -1346,7 +1346,7 @@ export const convertToPolls: ConvertToPolls = (page, topZaps) => {
       id: msg.id,
       author: msg.pubkey,
       kind: msg.kind,
-      relays: msg.tags.reduce((acc, t, i) => (t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://'))) ? [ ...acc, t[1]] : acc, []).slice(0,3),
+      relays: selectRelayTags(msg.tags, 3, false),
     }
 
     const eventPointerShort: nip19.EventPointer ={

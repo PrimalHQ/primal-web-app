@@ -13,6 +13,7 @@ import { fetchKnownProfiles } from '../lib/profile';
 import { useAppContext } from '../contexts/AppContext';
 import { getStreamingEvent } from '../lib/streaming';
 import { accountStore } from '../stores/accountStore';
+import { selectRelayTags } from '../utils';
 
 const EventPage: Component = () => {
 
@@ -52,7 +53,7 @@ const EventPage: Component = () => {
             id: content.id,
             author: content.pubkey,
             kind: content.kind,
-            relays: content.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [ ...acc, t[1]] : acc, []).slice(0,3),
+            relays: selectRelayTags(content.tags, 3, false),
           }
           try {
             setEvId(() => nip19.neventEncode(eventPointer));

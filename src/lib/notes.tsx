@@ -1,7 +1,7 @@
 import { Relay } from "../lib/nTools";
 import { createStore, unwrap } from "solid-js/store";
 import LinkPreview from "../components/LinkPreview/LinkPreview";
-import { addrRegex, appleMusicRegex, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegexLocal, profileRegex, rumbleRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, tidalEmbedRegex, twitchPlayerRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex, zapStreamEmbedRegex } from "../constants";
+import { addrRegex, appleMusicRegex, MAX_EMBED_TOKEN_LENGTH, emojiRegex, hashtagRegex, interpunctionRegex, Kind, linebreakRegex, lnRegex, lnUnifiedRegex, mixCloudRegex, nostrNestsRegex, noteRegexLocal, profileRegex, rumbleRegex, soundCloudRegex, spotifyRegex, tagMentionRegex, tidalEmbedRegex, twitchPlayerRegex, twitchRegex, urlRegex, urlRegexG, wavlakeRegex, youtubeRegex, zapStreamEmbedRegex } from "../constants";
 import { sendMessage, subsTo } from "../sockets";
 import { EventCoordinate, MediaSize, MegaFeedPage, NostrNoteContent, NostrRelays, NostrRelaySignedEvent, PrimalArticle, PrimalDVM, PrimalNote, PrimalPollChoice, PrimalUser, PrimalUserPoll, SendNoteResult } from "../types/primal";
 import { decodeIdentifier, hexToNpub, npubToHex } from "./keys";
@@ -92,7 +92,7 @@ export const isAddrMention = (url: string) => addrRegex.test(url);
 export const isInterpunction = (url: string) => interpunctionRegex.test(url);
 export const isCustomEmoji = (url: string) => emojiRegex.test(url);
 export const isLnbc = (url: string) => lnRegex.test(url);
-export const isUnitifedLnAddress = (url: string) => lnUnifiedRegex.test(url);
+export const isUnitifedLnAddress = (url: string) => url.length <= MAX_EMBED_TOKEN_LENGTH && lnUnifiedRegex.test(url);
 
 export const isImage = (url: string) => ['.jpg', '.jpeg', '.webp', '.png', '.gif', '.format=png'].some(x => url.includes(x));
 export const isMp4Video = (url: string) => ['.mp4', '.mov'].some(x => url.includes(x));
@@ -102,7 +102,7 @@ export const is3gppVideo = (url: string) => ['.3gp'].some(x => url.includes(x));
 
 export const isAudio = (url: string) => ['.mp3', '.wav'].some(x => url.includes(x));
 
-export const isYouTube = (url: string) => youtubeRegex.test(url);
+export const isYouTube = (url: string) => url.length <= MAX_EMBED_TOKEN_LENGTH && youtubeRegex.test(url);
 export const isSpotify = (url: string) => spotifyRegex.test(url);
 export const isTwitch = (url: string) => twitchRegex.test(url);
 export const isTwitchPlayer = (url: string) => twitchPlayerRegex.test(url);
@@ -162,7 +162,7 @@ export const urlify = (
       }
 
       if (isYouTube(url)) {
-        const youtubeId = youtubeRegex.test(url) && RegExp.$1;
+        const youtubeId = url.length <= MAX_EMBED_TOKEN_LENGTH && youtubeRegex.test(url) && RegExp.$1;
 
         return `<iframe
           class="w-max"

@@ -70,6 +70,7 @@ import {
   shortNoteWords,
   specialCharsRegex,
   urlExtractRegex,
+  MAX_EMBED_TOKEN_LENGTH,
 } from '../../constants';
 import { useIntl } from '@cookbook/solid-intl';
 import { actions } from '../../translations';
@@ -83,7 +84,7 @@ import { APP_ID } from '../../App';
 import { getEvents } from '../../lib/feed';
 import { subsTo } from '../../sockets';
 import ProfileNoteZap from '../ProfileNoteZap/ProfileNoteZap';
-import { parseBolt11 } from '../../utils';
+import { parseBolt11, selectRelayTags } from '../../utils';
 import SimpleArticlePreview from '../ArticlePreview/SimpleArticlePreview';
 import NostrImage from '../NostrImage/NostrImage';
 import { StreamingData } from '../../lib/streaming';
@@ -326,7 +327,7 @@ const ParsedNote: Component<{
       if (index > 0) {
         const prefix = token.slice(0, index);
 
-        const matched = (token.match(urlExtractRegex) || [])[0];
+        const matched = (token.length <= MAX_EMBED_TOKEN_LENGTH && token.match(urlExtractRegex) || [])[0];
 
         if (matched) {
           const suffix = token.substring(matched.length + index, token.length);
@@ -562,7 +563,7 @@ const ParsedNote: Component<{
     if (isUnitifedLnAddress(token)) {
       lastSignificantContent = 'lnbc';
 
-      const match = token.match(lnUnifiedRegex);
+      const match = token.length <= MAX_EMBED_TOKEN_LENGTH ? token.match(lnUnifiedRegex) : null;
 
       let lnbcToken = match?.find(m => m.startsWith('lnbc'));
 
@@ -1953,7 +1954,7 @@ const ParsedNote: Component<{
             id: mention.id,
             author: mention.pubkey,
             kind: mention.msg.kind,
-            relays: mention.msg.tags.reduce((acc, t) => t[0] === 'r' && (t[1].startsWith('wss://' ) || t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []).slice(0,3),
+            relays: selectRelayTags(mention.msg.tags, 3, false),
           };
 
           const noteId = `nostr:${nip19.neventEncode(eventPointer)}`;
@@ -1994,8 +1995,11 @@ const ParsedNote: Component<{
           mentionedArticles[tag[1]]
         ) {
 
-          const [kind, pubkey, identifier] = tag[1].split(':');
-          const naddr = nip19.naddrEncode({ kind: parseInt(kind), pubkey, identifier });
+          // mentionedArticles is keyed by naddr, so take pubkey/identifier from
+          // the article itself (splitting the naddr as a coordinate throws).
+          const naddr = tag[1];
+          const pubkey = mentionedArticles[naddr].pubkey;
+          const identifier = (mentionedArticles[naddr].coordinate || '').split(':').slice(2).join(':');
           const noteId = `nostr:${naddr}`;
           let path = `/a/${naddr}`;
 

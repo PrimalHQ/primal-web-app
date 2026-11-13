@@ -2,6 +2,7 @@ import {
   Component,
   createEffect,
   createSignal,
+  ErrorBoundary,
   For,
   Match,
   onCleanup,
@@ -22,7 +23,7 @@ import { useHomeContext } from '../contexts/HomeContext';
 import { useIntl } from '@cookbook/solid-intl';
 import { createStore } from 'solid-js/store';
 import { PrimalUser } from '../types/primal';
-import { branding } from '../translations';
+import { branding, feedEmpty } from '../translations';
 import Search from '../components/Search/Search';
 import { setIsHome } from '../components/Layout/Layout';
 import PageTitle from '../components/PageTitle/PageTitle';
@@ -36,6 +37,8 @@ import { userName } from '../stores/profile';
 import { date } from '../lib/dates';
 import UserPoll from '../components/UserPoll/UserPoll';
 import ZapPoll from '../components/UserPoll/ZapPoll';
+import { logError } from '../lib/logger';
+import ButtonLink from '../components/Buttons/ButtonLink';
 
 
 const Home: Component = () => {
@@ -162,49 +165,73 @@ const Home: Component = () => {
           <Show
             when={context?.notes && context.notes.length > 0}
             fallback={
-              <div>
-                <For each={new Array(5)}>
-                  {() => <FeedNoteSkeleton />}
-                </For>
-              </div>
+              // Skeletons only while a load is actually pending; a settled
+              // empty/failed/timed-out fetch must not look like loading forever.
+              <Show
+                when={context?.hasFetched && !context?.isFetching}
+                fallback={
+                  <div>
+                    <For each={new Array(5)}>
+                      {() => <FeedNoteSkeleton />}
+                    </For>
+                  </div>
+                }
+              >
+                <div class={styles.noContent}>
+                  <div>{intl.formatMessage(feedEmpty.message)}</div>
+                  <ButtonLink onClick={() => context?.actions.refetchSelectedFeed()}>
+                    {intl.formatMessage(feedEmpty.retry)}
+                  </ButtonLink>
+                </div>
+              </Show>
             }
           >
             <div class={isPhone() ? styles.readsFeed : ''}>
               <For each={context?.notes} >
                 {note => (
-                  <Switch>
-                    <Match when={note.msg.kind === Kind.Text}>
-                      <div class="animated">
-                        <Note
-                          note={note}
-                          shorten={true}
-                          onRemove={(id: string) => {
-                            context?.actions.removeEvent(id, 'notes');
-                          }}
-                        />
-                      </div>
-                    </Match>
-                    <Match when={note.msg.kind === Kind.UserPoll}>
-                      <div class="animated">
-                        <UserPoll
-                          poll={note}
-                          onRemove={(id: string) => {
-                            context?.actions.removeEvent(id, 'notes');
-                          }}
-                        />
-                      </div>
-                    </Match>
-                    <Match when={note.msg.kind === Kind.ZapPoll}>
-                      <div class="animated">
-                        <ZapPoll
-                          poll={note}
-                          onRemove={(id: string) => {
-                            context?.actions.removeEvent(id, 'notes');
-                          }}
-                        />
-                      </div>
-                    </Match>
-                  </Switch>
+                  // Isolate each item: without a boundary, a render error in one
+                  // malformed event stalls Solid's update queue and leaves the
+                  // whole feed stuck on the skeleton.
+                  <ErrorBoundary
+                    fallback={(err) => {
+                      logError('ERROR rendering feed item: ', note.id, err);
+                      return <></>;
+                    }}
+                  >
+                    <Switch>
+                      <Match when={note.msg.kind === Kind.Text}>
+                        <div class="animated">
+                          <Note
+                            note={note}
+                            shorten={true}
+                            onRemove={(id: string) => {
+                              context?.actions.removeEvent(id, 'notes');
+                            }}
+                          />
+                        </div>
+                      </Match>
+                      <Match when={note.msg.kind === Kind.UserPoll}>
+                        <div class="animated">
+                          <UserPoll
+                            poll={note}
+                            onRemove={(id: string) => {
+                              context?.actions.removeEvent(id, 'notes');
+                            }}
+                          />
+                        </div>
+                      </Match>
+                      <Match when={note.msg.kind === Kind.ZapPoll}>
+                        <div class="animated">
+                          <ZapPoll
+                            poll={note}
+                            onRemove={(id: string) => {
+                              context?.actions.removeEvent(id, 'notes');
+                            }}
+                          />
+                        </div>
+                      </Match>
+                    </Switch>
+                  </ErrorBoundary>
                 )}
               </For>
             </div>

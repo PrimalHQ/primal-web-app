@@ -3,7 +3,7 @@ import { nip19 } from '../../lib/nTools';
 import { Component, createEffect, For, JSXElement, on, Show } from 'solid-js';
 import { createStore, reconcile } from 'solid-js/store';
 import { APP_ID } from '../../App';
-import { linebreakRegex, urlExtractRegex, specialCharsRegex, hashtagCharsRegex, profileRegexG, Kind } from '../../constants';
+import { linebreakRegex, urlExtractRegex, specialCharsRegex, hashtagCharsRegex, profileRegexG, Kind, MAX_EMBED_TOKEN_LENGTH } from '../../constants';
 import { hexToNpub, npubToHex } from '../../lib/keys';
 import { isInterpunction, isUrl, isUserMention, isHashtag } from '../../lib/notes';
 import { getUserProfiles } from '../../lib/profile';
@@ -80,7 +80,7 @@ const ProfileAbout: Component<{about: string | undefined, onParseComplete?: () =
       if (index > 0) {
         const prefix = token.slice(0, index);
 
-        const matched = (token.match(urlExtractRegex) || [])[0];
+        const matched = (token.length <= MAX_EMBED_TOKEN_LENGTH && token.match(urlExtractRegex) || [])[0];
 
         if (matched) {
           const suffix = token.substring(matched.length + index, token.length);

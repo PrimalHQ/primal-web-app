@@ -31,6 +31,10 @@ export const veryLongDate = (timestamp: number | undefined, noTime = false) => {
 };
 
 export const date = (postTimestamp: number, style: Intl.RelativeTimeFormatStyle = 'short', since?: number) => {
+  // Timestamps come from untrusted events; Intl.RelativeTimeFormat throws on
+  // non-finite values, which would break rendering of the whole feed.
+  if (!Number.isFinite(postTimestamp)) postTimestamp = 0;
+
   const today = since ?? Math.floor((new Date()).getTime() / 1000);
   const date = new Date(postTimestamp * 1000);
 
@@ -79,6 +83,10 @@ export const date = (postTimestamp: number, style: Intl.RelativeTimeFormatStyle 
 };
 
 export const dateFuture = (postTimestamp: number, style: Intl.RelativeTimeFormatStyle = 'short', since?: number) => {
+  // Timestamps come from untrusted events; Intl.RelativeTimeFormat throws on
+  // non-finite values, which would break rendering of the whole feed.
+  if (!Number.isFinite(postTimestamp)) postTimestamp = 0;
+
   const today = since ?? Math.floor((new Date()).getTime() / 1000);
   const date = new Date(postTimestamp * 1000);
 

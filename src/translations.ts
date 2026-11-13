@@ -962,6 +962,19 @@ export const feedNewPosts = {
   description: 'Label for a button to load new notes',
 };
 
+export const feedEmpty = {
+  message: {
+    id: 'feed.empty.message',
+    defaultMessage: 'No notes could be loaded for this feed.',
+    description: 'Shown when a feed request finished without any notes (empty, failed or timed out)',
+  },
+  retry: {
+    id: 'feed.empty.retry',
+    defaultMessage: 'Try again',
+    description: 'Label for a button that re-fetches the current feed',
+  },
+};
+
 export const feedback = {
   dropzone: {
     id: 'feedback.dropzone',

@@ -43,6 +43,7 @@ import { LeaderboardSort } from "./pages/Premium/PremiumLegendLeaderboard";
 import { LegendCustomizationConfig, fetchLeaderboard } from "./lib/premium";
 import { CohortInfo } from "./contexts/AppContext";
 import { nip19 } from './lib/nTools';
+import { logError, logWarning } from "./lib/logger";
 
 export type PaginationInfo = {
   since: number,
@@ -161,6 +162,95 @@ export const parseEmptyReposts = (page: MegaFeedPage) => {
   return reposts;
 };
 
+// A page fetch must always settle: a malformed event, a converter throw,
+// a NOTICE instead of EOSE, or a response that never arrives (e.g. socket
+// dropped mid-request) would otherwise leave the caller (and its loading
+// skeleton) waiting forever.
+export const PAGE_FETCH_TIMEOUT = 20_000;
+
+const safeResolvePage = (
+  subId: string,
+  page: MegaFeedPage,
+  resolver: (page: MegaFeedPage) => MegaFeedResults,
+): MegaFeedResults => {
+  try {
+    return resolver(page);
+  } catch (e) {
+    logError('ERROR resolving page for: ', subId, e);
+    return { ...emptyMegaFeedResults() };
+  }
+};
+
+export const subscribePage = (
+  subId: string,
+  send: () => void,
+  resolver: (page: MegaFeedPage) => MegaFeedResults = pageResolve,
+  timeout = PAGE_FETCH_TIMEOUT,
+) => {
+  return new Promise<MegaFeedResults>((resolve) => {
+    let page: MegaFeedPage = { ...emptyMegaFeedPage() };
+    let done = false;
+    let timer = 0;
+
+    const finish = (results: () => MegaFeedResults) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      unsub();
+      resolve(results());
+    };
+
+    const unsub = subsTo(subId, {
+      onEvent: (_, content) => {
+        if (done || !content) return;
+
+        try {
+          updateFeedPage(page, content);
+        } catch (e) {
+          logWarning('Skipping malformed event in: ', subId, content?.id, e);
+        }
+      },
+      onEose: () => {
+        finish(() => safeResolvePage(subId, page, resolver));
+      },
+      onNotice: (_, reason) => {
+        logWarning('NOTICE received for: ', subId, reason);
+        finish(() => ({ ...emptyMegaFeedResults() }));
+      },
+    });
+
+    timer = window.setTimeout(() => {
+      logWarning('Request timed out: ', subId);
+      finish(() => safeResolvePage(subId, page, resolver));
+    }, timeout);
+
+    send();
+  });
+};
+
+const pagingParams = (paging?: FeedPaging) => {
+  const until = paging?.until || 0;
+  const since = paging?.since || 0;
+  const limit = paging?.limit || 0;
+
+  let offset = 0;
+
+  if (typeof paging?.offset === 'number') {
+    offset = paging.offset;
+  }
+  else if (Array.isArray(paging?.offset)) {
+    if (until > 0) {
+      offset = (paging?.offset || []).filter(v => v === until).length;
+    }
+
+    if (since > 0) {
+      offset = (paging?.offset || []).filter(v => v === since).length;
+    }
+  }
+
+  return { until, since, limit, offset };
+};
+
 export const fetchMultiThread = (
   pubkey: string | undefined,
   noteId: string,
@@ -169,23 +259,11 @@ export const fetchMultiThread = (
 ) => {
   const subId = `multi_thread_${noteId}_${APP_ID}`;
 
-  return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {...emptyMegaFeedPage()};
-
-    const unsub = subsTo(subId, {
-      onEose: () => {
-        unsub();
-        resolve(pageMultiFeedResolve(page));
-      },
-      onEvent: (s, content) => {
-        updateFeedPage(page, content);
-      }
-    });
-
-
-    getMultiThread(pubkey, noteId, subId, until, limit);
-
-  });
+  return subscribePage(
+    subId,
+    () => getMultiThread(pubkey, noteId, subId, until, limit),
+    pageMultiFeedResolve,
+  );
 };
 
 export const fetchMegaMultiFeed = (
@@ -195,41 +273,13 @@ export const fetchMegaMultiFeed = (
   kinds: number[],
   paging?: FeedPaging,
 ) => {
-    return new Promise<MegaFeedResults>((resolve) => {
-      let page: MegaFeedPage = {...emptyMegaFeedPage()};
+  const { until, since, limit, offset } = pagingParams(paging);
 
-      const unsub = subsTo(subId, {
-        onEose: () => {
-          unsub();
-          resolve(pageMultiFeedResolve(page));
-        },
-        onEvent: (s, content) => {
-          updateFeedPage(page, content);
-        }
-      });
-
-      const until = paging?.until || 0;
-      const since = paging?.since || 0;
-      const limit = paging?.limit || 0;
-
-      let offset = 0;
-
-      if (typeof paging?.offset === 'number') {
-        offset = paging.offset;
-      }
-      else if (Array.isArray(paging?.offset)) {
-        if (until > 0) {
-          offset = (paging?.offset || []).filter(v => v === until).length;
-        }
-
-        if (since > 0) {
-          offset = (paging?.offset || []).filter(v => v === since).length;
-        }
-      }
-
-      getMultiFeed(pubkey, specification, subId, kinds, until, limit, since, offset);
-
-    });
+  return subscribePage(
+    subId,
+    () => getMultiFeed(pubkey, specification, subId, kinds, until, limit, since, offset),
+    pageMultiFeedResolve,
+  );
 };
 
 export const fetchMegaFeed = (
@@ -238,41 +288,12 @@ export const fetchMegaFeed = (
   subId: string,
   paging?: FeedPaging,
 ) => {
-    return new Promise<MegaFeedResults>((resolve) => {
-      let page: MegaFeedPage = {...emptyMegaFeedPage()};
+  const { until, since, limit, offset } = pagingParams(paging);
 
-      const unsub = subsTo(subId, {
-        onEose: () => {
-          unsub();
-          resolve(pageResolve(page));
-        },
-        onEvent: (s, content) => {
-          updateFeedPage(page, content);
-        }
-      });
-
-      const until = paging?.until || 0;
-      const since = paging?.since || 0;
-      const limit = paging?.limit || 0;
-
-      let offset = 0;
-
-      if (typeof paging?.offset === 'number') {
-        offset = paging.offset;
-      }
-      else if (Array.isArray(paging?.offset)) {
-        if (until > 0) {
-          offset = (paging?.offset || []).filter(v => v === until).length;
-        }
-
-        if (since > 0) {
-          offset = (paging?.offset || []).filter(v => v === since).length;
-        }
-      }
-
-      getMegaFeed(pubkey, specification, subId, until, limit, since, offset);
-
-    });
+  return subscribePage(
+    subId,
+    () => getMegaFeed(pubkey, specification, subId, until, limit, since, offset),
+  );
 };
 
 export const fetchScoredContent = (
@@ -280,21 +301,10 @@ export const fetchScoredContent = (
   selector: string,
   subId: string,
 ) => {
-  return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {...emptyMegaFeedPage()};
-
-    const unsub = subsTo(subId, {
-      onEose: () => {
-        unsub();
-        resolve(pageResolve(page));
-      },
-      onEvent: (_, content) => {
-        updateFeedPage(page, content);
-      }
-    });
-
-    getScoredUsers(pubkey, selector, 10, subId);
-  });
+  return subscribePage(
+    subId,
+    () => getScoredUsers(pubkey, selector, 10, subId),
+  );
 }
 
 export const fetchRecomendedReads = (
@@ -313,9 +323,17 @@ export const fetchRecomendedReads = (
 
       },
       onEvent: (_, content) => {
-        const recomended = JSON.parse(content?.content || '{}');
-        ids = recomended.reads.reduce((acc: string[], r: string[]) => r[0] ? [ ...acc, r[0] ] : acc, []);
-      }
+        try {
+          const recomended = JSON.parse(content?.content || '{}');
+          ids = (recomended.reads || []).reduce((acc: string[], r: string[]) => r[0] ? [ ...acc, r[0] ] : acc, []);
+        } catch (e) {
+          logWarning('Malformed recomended reads: ', e);
+        }
+      },
+      onNotice: () => {
+        unsub();
+        resolve([]);
+      },
     });
 
     getRecomendedArticleIds(subId);
@@ -327,30 +345,15 @@ export const fetchReadThread = (
   naddr: string,
   subId: string,
 ) => {
-  return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+  const decoded = decodeIdentifier(naddr);
 
-    const decoded = decodeIdentifier(naddr);
+  // @ts-ignore
+  const { pubkey, identifier, kind } = decoded.data;
 
-    // @ts-ignore
-    const { pubkey, identifier, kind } = decoded.data;
-
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        content && updateFeedPage(page, content);
-      },
-      onEose: () => {
-        unsub();
-        resolve(pageResolve(page));
-      },
-      onNotice: (_, reason) => {
-        unsub();
-        resolve({ ...emptyMegaFeedResults()});
-      }
-    });
-
-    getArticleThread(userPubkey, pubkey, identifier, kind, subId);
-  });
+  return subscribePage(
+    subId,
+    () => getArticleThread(userPubkey, pubkey, identifier, kind, subId),
+  );
 }
 
 export const fetchExplorePeople = (
@@ -358,44 +361,12 @@ export const fetchExplorePeople = (
   subId: string,
   paging?: FeedPaging,
 ) => {
-  return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+  const { until, since, limit, offset } = pagingParams(paging);
 
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        content && updateFeedPage(page, content);
-      },
-      onEose: () => {
-        unsub();
-        resolve(pageResolve(page));
-      },
-      onNotice: (_, reason) => {
-        unsub();
-        resolve({ ...emptyMegaFeedResults() });
-      }
-    });
-
-    const until = paging?.until || 0;
-    const since = paging?.since || 0;
-    const limit = paging?.limit || 0;
-
-    let offset = 0;
-
-    if (typeof paging?.offset === 'number') {
-      offset = paging.offset;
-    }
-    else if (Array.isArray(paging?.offset)) {
-      if (until > 0) {
-        offset = (paging?.offset || []).filter(v => v === until).length;
-      }
-
-      if (since > 0) {
-        offset = (paging?.offset || []).filter(v => v === since).length;
-      }
-    }
-
-    getExplorePeople(subId, user_pubkey, until, limit, since, offset);
-  });
+  return subscribePage(
+    subId,
+    () => getExplorePeople(subId, user_pubkey, until, limit, since, offset),
+  );
 }
 
 export const fetchExploreZaps = (
@@ -403,44 +374,12 @@ export const fetchExploreZaps = (
   subId: string,
   paging?: FeedPaging,
 ) => {
-  return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+  const { until, since, limit, offset } = pagingParams(paging);
 
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        content && updateFeedPage(page, content);
-      },
-      onEose: () => {
-        unsub();
-        resolve(pageResolve(page));
-      },
-      onNotice: (_, reason) => {
-        unsub();
-        resolve({ ...emptyMegaFeedResults() });
-      }
-    });
-
-    const until = paging?.until || 0;
-    const since = paging?.since || 0;
-    const limit = paging?.limit || 0;
-
-    let offset = 0;
-
-    if (typeof paging?.offset === 'number') {
-      offset = paging.offset;
-    }
-    else if (Array.isArray(paging?.offset)) {
-      if (until > 0) {
-        offset = (paging?.offset || []).filter(v => v === until).length;
-      }
-
-      if (since > 0) {
-        offset = (paging?.offset || []).filter(v => v === since).length;
-      }
-    }
-
-    getExploreZaps(subId, user_pubkey, until, limit, since, offset);
-  });
+  return subscribePage(
+    subId,
+    () => getExploreZaps(subId, user_pubkey, until, limit, since, offset),
+  );
 }
 
 export const fetchExploreMedia = (
@@ -448,69 +387,22 @@ export const fetchExploreMedia = (
   subId: string,
   paging?: FeedPaging,
 ) => {
-  return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = { ...emptyMegaFeedPage() };
+  const { until, since, limit, offset } = pagingParams(paging);
 
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        content && updateFeedPage(page, content);
-      },
-      onEose: () => {
-        unsub();
-        resolve(pageResolve(page));
-      },
-      onNotice: (_, reason) => {
-        unsub();
-        resolve({ ...emptyMegaFeedResults() });
-      }
-    });
-
-    const until = paging?.until || 0;
-    const since = paging?.since || 0;
-    const limit = paging?.limit || 0;
-
-    let offset = 0;
-
-    if (typeof paging?.offset === 'number') {
-      offset = paging.offset;
-    }
-    else if (Array.isArray(paging?.offset)) {
-      if (until > 0) {
-        offset = (paging?.offset || []).filter(v => v === until).length;
-      }
-
-      if (since > 0) {
-        offset = (paging?.offset || []).filter(v => v === since).length;
-      }
-    }
-
-    getExploreMedia(subId, user_pubkey, until, limit, since, offset);
-  });
+  return subscribePage(
+    subId,
+    () => getExploreMedia(subId, user_pubkey, until, limit, since, offset),
+  );
 }
 
 export const fetchExploreTopics = (
   user_pubkey: string | undefined,
   subId: string,
 ) => {
-  return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {...emptyMegaFeedPage()};
-
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        content && updateFeedPage(page, content);
-      },
-      onEose: () => {
-        unsub();
-        resolve(pageResolve(page));
-      },
-      onNotice: (_, reason) => {
-        unsub();
-        resolve({ ...emptyMegaFeedResults() });
-      }
-    });
-
-    getExploreTopics(subId, user_pubkey);
-  });
+  return subscribePage(
+    subId,
+    () => getExploreTopics(subId, user_pubkey),
+  );
 }
 
 export const fetchDMContacts = (
@@ -519,44 +411,12 @@ export const fetchDMContacts = (
   subId: string,
   paging?: FeedPaging,
 ) => {
-  return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+  const { since, limit, offset } = pagingParams(paging);
 
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        content && updateFeedPage(page, content);
-      },
-      onEose: () => {
-        unsub();
-        resolve(pageResolve(page));
-      },
-      onNotice: (_, reason) => {
-        unsub();
-        resolve({ ...emptyMegaFeedResults() });
-      }
-    });
-
-    const until = paging?.until || 0;
-    const since = paging?.since || 0;
-    const limit = paging?.limit || 0;
-
-    let offset = 0;
-
-    if (typeof paging?.offset === 'number') {
-      offset = paging.offset;
-    }
-    else if (Array.isArray(paging?.offset)) {
-      if (until > 0) {
-        offset = (paging?.offset || []).filter(v => v === until).length;
-      }
-
-      if (since > 0) {
-        offset = (paging?.offset || []).filter(v => v === since).length;
-      }
-    }
-
-    getMessageCounts(user_pubkey, relation, subId, limit, since, offset);
-  });
+  return subscribePage(
+    subId,
+    () => getMessageCounts(user_pubkey, relation, subId, limit, since, offset),
+  );
 }
 
 export const fetchDMConversation = (
@@ -565,44 +425,12 @@ export const fetchDMConversation = (
   subId: string,
   paging?: FeedPaging,
 ) => {
-  return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+  const { since, limit, offset } = pagingParams(paging);
 
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        content && updateFeedPage(page, content);
-      },
-      onEose: () => {
-        unsub();
-        resolve(pageResolve(page));
-      },
-      onNotice: (_, reason) => {
-        unsub();
-        resolve({ ...emptyMegaFeedResults() });
-      }
-    });
-
-    const until = paging?.until || 0;
-    const since = paging?.since || 0;
-    const limit = paging?.limit || 0;
-
-    let offset = 0;
-
-    if (typeof paging?.offset === 'number') {
-      offset = paging.offset;
-    }
-    else if (Array.isArray(paging?.offset)) {
-      if (until > 0) {
-        offset = (paging?.offset || []).filter(v => v === until).length;
-      }
-
-      if (since > 0) {
-        offset = (paging?.offset || []).filter(v => v === since).length;
-      }
-    }
-
-    getOldMessages(reciever, sender, subId, since, limit, offset);
-  });
+  return subscribePage(
+    subId,
+    () => getOldMessages(reciever, sender, subId, since, limit, offset),
+  );
 }
 
 export const fetchDMConversationNew = (
@@ -611,49 +439,16 @@ export const fetchDMConversationNew = (
   subId: string,
   paging?: FeedPaging,
 ) => {
-  return new Promise<MegaFeedResults>((resolve) => {
-    if (!reciever || !sender) {
-      resolve({ ...emptyMegaFeedResults() });
-      return;
-    }
+  if (!reciever || !sender) {
+    return Promise.resolve<MegaFeedResults>({ ...emptyMegaFeedResults() });
+  }
 
-    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+  const { since, limit, offset } = pagingParams(paging);
 
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        content && updateFeedPage(page, content);
-      },
-      onEose: () => {
-        unsub();
-        resolve(pageResolve(page));
-      },
-      onNotice: (_, reason) => {
-        unsub();
-        resolve({ ...emptyMegaFeedResults() });
-      }
-    });
-
-    const until = paging?.until || 0;
-    const since = paging?.since || 0;
-    const limit = paging?.limit || 0;
-
-    let offset = 0;
-
-    if (typeof paging?.offset === 'number') {
-      offset = paging.offset;
-    }
-    else if (Array.isArray(paging?.offset)) {
-      if (until > 0) {
-        offset = (paging?.offset || []).filter(v => v === until).length;
-      }
-
-      if (since > 0) {
-        offset = (paging?.offset || []).filter(v => v === since).length;
-      }
-    }
-
-    getNewMessages(reciever, sender, subId, since, limit, offset);
-  });
+  return subscribePage(
+    subId,
+    () => getNewMessages(reciever, sender, subId, since, limit, offset),
+  );
 }
 
 export const fetchLeaderboardThread = (
@@ -662,60 +457,24 @@ export const fetchLeaderboardThread = (
   type: 'legend' | 'premium',
   paging?: FeedPaging,
 ) => {
-  return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {...emptyMegaFeedPage()};
+  const since = paging?.since || 0;
+  const limit = paging?.limit || 0;
+  const offset = typeof paging?.offset === 'number' ? paging.offset : 0;
 
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        content && updateFeedPage(page, content);
-      },
-      onEose: () => {
-        unsub();
-        resolve(pageResolve(page));
-      },
-      onNotice: (_, reason) => {
-        unsub();
-        resolve({ ...emptyMegaFeedResults()});
-      }
-    });
-
-    const until = paging?.until || 0;
-    const since = paging?.since || 0;
-    const limit = paging?.limit || 0;
-
-    let offset = 0;
-
-    if (typeof paging?.offset === 'number') {
-      offset = paging.offset;
-    }
-
-    fetchLeaderboard(subId, type, order, since, limit, offset);
-  });
+  return subscribePage(
+    subId,
+    () => fetchLeaderboard(subId, type, order, since, limit, offset),
+  );
 }
 
 export const fetchPeople = (
   pubkeys: string[],
   subId: string,
 ) => {
-  return new Promise<MegaFeedResults>((resolve) => {
-    let page: MegaFeedPage = {...emptyMegaFeedPage()};
-
-    const unsub = subsTo(subId, {
-      onEvent: (_, content) => {
-        content && updateFeedPage(page, content);
-      },
-      onEose: () => {
-        unsub();
-        resolve(pageResolve(page));
-      },
-      onNotice: (_, reason) => {
-        unsub();
-        resolve({ ...emptyMegaFeedResults() });
-      }
-    });
-
-    getUserProfiles(pubkeys, subId);
-  });
+  return subscribePage(
+    subId,
+    () => getUserProfiles(pubkeys, subId),
+  );
 }
 
 export type MultiFeedPage = {
@@ -742,7 +501,7 @@ export const pageMultiFeedResolve = (page: MegaFeedPage) => {
 
       if (repostedNote) {
         const i = page.notes.findIndex(n => n.id === reposts[id]);
-        page.notes[i].content = JSON.stringify(repostedNote);
+        if (i > -1) page.notes[i].content = JSON.stringify(repostedNote);
       }
     })
   }
@@ -858,7 +617,7 @@ export const pageResolve = (page: MegaFeedPage) => {
 
       if (repostedNote) {
         const i = page.notes.findIndex(n => n.id === reposts[id]);
-        page.notes[i].content = JSON.stringify(repostedNote);
+        if (i > -1) page.notes[i].content = JSON.stringify(repostedNote);
       }
     })
   }
@@ -911,7 +670,7 @@ export const updateFeedPage = (page: MegaFeedPage, content: NostrEventContent) =
     page.since = feedRange.since;
     page.until = feedRange.until;
     page.sortBy = feedRange.order_by;
-    page.elements = [...feedRange.elements];
+    page.elements = Array.isArray(feedRange.elements) ? [...feedRange.elements] : [];
     return;
   }
 
@@ -1174,7 +933,7 @@ export type FeedEvent = { id: string, repost?: any, msg: NostrNoteContent }
 
 export const filterAndSortEvents = (events: FeedEvent[], paging: PaginationInfo) => {
   let processedIds: string[] = [];
-  return paging.elements.reduce<FeedEvent[]>(
+  return (paging.elements || []).reduce<FeedEvent[]>(
     (acc, id) => {
       let event = events.find(n => [n.id, n.repost?.note.id].includes(id));
 
@@ -1189,7 +948,7 @@ export const filterAndSortEvents = (events: FeedEvent[], paging: PaginationInfo)
 }
 export const filterAndSortNotes = (notes: PrimalNote[], paging: PaginationInfo) => {
   let processedIds: string[] = [];
-  return paging.elements.reduce<PrimalNote[]>(
+  return (paging.elements || []).reduce<PrimalNote[]>(
     (acc, id) => {
       let note = notes.find(n => [n.id, n.repost?.note.id].includes(id));
 
@@ -1204,7 +963,7 @@ export const filterAndSortNotes = (notes: PrimalNote[], paging: PaginationInfo) 
 }
 
 export const filterAndSortReads = (reads: PrimalArticle[], paging: PaginationInfo) => {
-  return paging.elements.reduce<PrimalArticle[]>(
+  return (paging.elements || []).reduce<PrimalArticle[]>(
     (acc, id) => {
       const read = reads.find(n => n.id === id);
 
@@ -1215,7 +974,7 @@ export const filterAndSortReads = (reads: PrimalArticle[], paging: PaginationInf
 }
 
 export const filterAndSortDrafts = (drafts: PrimalDraft[], paging: PaginationInfo) => {
-  return paging.elements.reduce<PrimalDraft[]>(
+  return (paging.elements || []).reduce<PrimalDraft[]>(
     (acc, id) => {
       const read = drafts.find(n => n.id === id);
 
@@ -1226,7 +985,7 @@ export const filterAndSortDrafts = (drafts: PrimalDraft[], paging: PaginationInf
 }
 
 export const filterAndSortZaps = (zaps: PrimalZap[], paging: PaginationInfo) => {
-  return paging.elements.reduce<PrimalZap[]>(
+  return (paging.elements || []).reduce<PrimalZap[]>(
     (acc, id) => {
       const zap = zaps.find(n => n.id === id);
 
@@ -1237,7 +996,7 @@ export const filterAndSortZaps = (zaps: PrimalZap[], paging: PaginationInfo) => 
 }
 
 export const filterAndSortUsers = (users: PrimalUser[], paging: PaginationInfo, page: MegaFeedPage) => {
-  return paging.elements.reduce<PrimalUser[]>((acc, pk) => {
+  return (paging.elements || []).reduce<PrimalUser[]>((acc, pk) => {
 
     let f: PrimalUser | undefined = users.find(u => u.pubkey === pk);
 
@@ -1260,7 +1019,7 @@ export const filterAndSortUsers = (users: PrimalUser[], paging: PaginationInfo, 
 
 
 export const filterAndSortLeaderboard = (lb: LeaderboardInfo[], paging: PaginationInfo) => {
-  return paging.elements.reduce<LeaderboardInfo[]>(
+  return (paging.elements || []).reduce<LeaderboardInfo[]>(
     (acc, id) => {
       let leader = lb.find(n => n.pubkey === id);
 
@@ -1278,54 +1037,59 @@ const convertToZapsMega = (page: MegaFeedPage) => {
   for (let i=0; i< pageZaps.length; i++) {
     const zapContent = pageZaps[i];
 
-    const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
-    if (!Array.isArray(zapEvent.tags)) zapEvent.tags = [];
-    const senderPubkey = zapEvent.pubkey as string;
-    const receiverPubkey = (zapEvent.tags.find((t: string[]) => t[0] === 'p') || [])[1] as string;
+    // A single malformed zap receipt must not fail the whole page
+    try {
+      const zapEvent = JSON.parse((zapContent.tags.find(t => t[0] === 'description') || [])[1] || '{}');
+      if (!Array.isArray(zapEvent.tags)) zapEvent.tags = [];
+      const senderPubkey = zapEvent.pubkey as string;
+      const receiverPubkey = (zapEvent.tags.find((t: string[]) => t[0] === 'p') || [])[1] as string;
 
-    let zappedId = '';
-    let zappedKind: number = 0;
+      let zappedId = '';
+      let zappedKind: number = 0;
 
-    const zapTagA = zapEvent.tags.find((t: string[]) => t[0] === 'a');
-    const zapTagE = zapEvent.tags.find((t: string[]) => t[0] === 'e');
+      const zapTagA = zapEvent.tags.find((t: string[]) => t[0] === 'a');
+      const zapTagE = zapEvent.tags.find((t: string[]) => t[0] === 'e');
 
-    if (zapTagA) {
-      const [kind, pubkey, identifier] = zapTagA[1].split(':');
+      if (zapTagA) {
+        const [kind, pubkey, identifier] = zapTagA[1].split(':');
 
-      zappedId = nip19.naddrEncode({ kind, pubkey, identifier });
+        zappedId = nip19.naddrEncode({ kind, pubkey, identifier });
 
-      const article = page.reads.find(a => a.id === zappedId);
-      zappedKind = article?.kind || 0;
-    }
-    else if (zapTagE) {
-      zappedId = zapTagE[1];
+        const article = page.reads.find(a => a.id === zappedId);
+        zappedKind = article?.kind || 0;
+      }
+      else if (zapTagE) {
+        zappedId = zapTagE[1];
 
-      const article = page.reads.find(a => a.id === zappedId);
-      const note = page.notes.find(n => n.id === zappedId);
-      const zapPolls = page.zapPolls.find(n => n.id === zappedId);
-      const userPolls = page.userPolls.find(n => n.id === zappedId);
+        const article = page.reads.find(a => a.id === zappedId);
+        const note = page.notes.find(n => n.id === zappedId);
+        const zapPolls = page.zapPolls.find(n => n.id === zappedId);
+        const userPolls = page.userPolls.find(n => n.id === zappedId);
 
-      zappedKind = article?.kind || note?.kind || zapPolls?.kind  || userPolls?.kind || 0;
-    }
+        zappedKind = article?.kind || note?.kind || zapPolls?.kind  || userPolls?.kind || 0;
+      }
 
-    if (![Kind.Text, Kind.LongForm, Kind.UserPoll, Kind.ZapPoll].includes(zappedKind)) continue;
+      if (![Kind.Text, Kind.LongForm, Kind.UserPoll, Kind.ZapPoll].includes(zappedKind)) continue;
 
-    const sender = page.users[senderPubkey] ? convertToUser(page.users[senderPubkey], senderPubkey) : senderPubkey;
-    const reciver = page.users[receiverPubkey] ? convertToUser(page.users[receiverPubkey], receiverPubkey) : receiverPubkey;
+      const sender = page.users[senderPubkey] ? convertToUser(page.users[senderPubkey], senderPubkey) : senderPubkey;
+      const reciver = page.users[receiverPubkey] ? convertToUser(page.users[receiverPubkey], receiverPubkey) : receiverPubkey;
 
-    const zap: PrimalZap = {
-      id: zapContent.id,
-      message: zapEvent.content || '',
-      amount: zapReceiptAmount(zapContent.tags, zapEvent.tags),
-      sender,
-      reciver,
-      created_at: zapContent.created_at,
-      zappedId,
-      zappedKind,
-    };
+      const zap: PrimalZap = {
+        id: zapContent.id,
+        message: zapEvent.content || '',
+        amount: zapReceiptAmount(zapContent.tags, zapEvent.tags),
+        sender,
+        reciver,
+        created_at: zapContent.created_at,
+        zappedId,
+        zappedKind,
+      };
 
-    if (!zaps.find(z => z.id === zap.id)) {
-      zaps.push(zap);
+      if (!zaps.find(z => z.id === zap.id)) {
+        zaps.push(zap);
+      }
+    } catch (e) {
+      logWarning('Skipping malformed zap: ', zapContent?.id, e);
     }
   }
 

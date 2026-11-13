@@ -76,8 +76,16 @@ const Lnbc: Component< {
   const amount = () =>
     `${humanizeNumber(parseInt(invoice.sections.find(s => s.name === 'amount')?.value || '0') / 1_000)} sats`;
 
-  const description = () =>
-    decodeURI(invoice.sections.find(s => s.name === 'description')?.value) || '';
+  const description = () => {
+    const value = invoice.sections.find(s => s.name === 'description')?.value || '';
+
+    // Invoice descriptions are free text: a lone `%` makes decodeURI throw.
+    try {
+      return decodeURI(value);
+    } catch {
+      return value;
+    }
+  };
 
   const confirmPayment = () => app?.actions.openConfirmModal({
     title: intl.formatMessage(lnInvoice.confirm.title),

@@ -10,10 +10,18 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
 
   const media = useMediaContext();
 
-  const encodedUrl = encodeURI(new URL(props.preview.url.toLowerCase()).origin);
+  // Preview data may be incomplete (missing url) or hold an unparsable URL;
+  // `new URL` throws on those and would break rendering of the parent note.
+  const encodedUrl = (() => {
+    try {
+      return encodeURI(new URL(`${props.preview.url || ''}`.toLowerCase()).origin);
+    } catch {
+      return '';
+    }
+  })();
 
   const image = () => {
-    const i = media?.actions.getMedia(props.preview.images[0] || '', 'm');
+    const i = media?.actions.getMedia((props.preview.images || [])[0] || '', 'm');
 
     return i;
   };
@@ -62,7 +70,7 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
     setErrorCount(v => v + 1);
     const image = event.target;
     image.onerror = '';
-    image.src = props.preview.images[0];
+    image.src = (props.preview.images || [])[0];
     return true;
   };
 
@@ -79,7 +87,7 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
 
   }));
 
-  const hasImage = () => errorCount() < errorCountLimit && (image() || props.preview.images[0]);
+  const hasImage = () => errorCount() < errorCountLimit && (image() || (props.preview.images || [])[0]);
 
   return (
     <a
@@ -91,7 +99,7 @@ const LinkPreview: Component<{ preview: any, id?: string, bordered?: boolean, is
       <Show when={hasImage()}>
         <img
           class={styles.previewImage}
-          src={image()?.media_url || props.preview.images[0]}
+          src={image()?.media_url || (props.preview.images || [])[0]}
           style={`width: 180px; height: 120px`}
           onerror={onError}
         />

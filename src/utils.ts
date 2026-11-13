@@ -503,13 +503,35 @@ export const isPhone = () => {
   return isIOS() || isAndroid() || window.innerWidth <= 720;
 }
 
-export const selectRelayTags = (tags: string[][], limit = 2, onlyWritable = true) =>
-  tags.reduce((acc, t) =>
-    t[0] === 'r' &&
-    (onlyWritable ? t[3] !== 'read' : true) &&
-    (t[1].startsWith('wss://') ||
-    t[1].startsWith('ws://')) ? [...acc, t[1]] : acc, []
-  ).slice(0, limit);
+// nip19 TLV entries store their length in a single byte, and the whole bech32
+// string is capped at 5000 chars, so longer relay hints would corrupt or
+// break nevent/naddr encoding.
+export const MAX_RELAY_HINT_LENGTH = 255;
+
+// Tags come from untrusted events: an `r` tag may lack a value (`["r"]`, valid
+// per NIP-01), or carry a non-string / oversized one.
+export const selectRelayTags = (tags: string[][] | undefined, limit = 2, onlyWritable = true) => {
+  if (!Array.isArray(tags)) return [];
+
+  const relays: string[] = [];
+
+  for (let i = 0; i < tags.length && relays.length < limit; i++) {
+    const t = tags[i];
+
+    if (!Array.isArray(t) || t[0] !== 'r') continue;
+    if (onlyWritable && t[3] === 'read') continue;
+
+    const url = t[1];
+
+    if (typeof url !== 'string' || url.length > MAX_RELAY_HINT_LENGTH) continue;
+
+    if (url.startsWith('wss://') || url.startsWith('ws://')) {
+      relays.push(url);
+    }
+  }
+
+  return relays;
+};
 
 
 

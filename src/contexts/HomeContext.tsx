@@ -17,6 +17,7 @@ import { fetchStoredFeed, saveStoredFeed } from "../lib/localStore";
 import { calculateEventsOffset, calculateNotesOffset } from "../utils";
 import { accountStore } from "../stores/accountStore";
 import { useSettingsContext } from "./SettingsContext";
+import { logError } from "../lib/logger";
 
 type HomeContextStore = {
   notes: (PrimalNote | PrimalUserPoll)[],
@@ -24,6 +25,8 @@ type HomeContextStore = {
   sidebarNotes: PrimalNote[],
   paging: Record<string, PaginationInfo>,
   isFetching: boolean,
+  // A fetch of the current feed has settled (successfully, empty, or failed)
+  hasFetched: boolean,
   isFetchingSidebar: boolean,
   sidebarQuery: SelectionOption | undefined,
   scrollTop: number,
@@ -68,6 +71,7 @@ const initialHomeData = {
   futureNotes: [],
   sidebarNotes: [],
   isFetching: false,
+  hasFetched: false,
   isFetchingSidebar: false,
   scrollTop: 0,
   selectedFeed: undefined,
@@ -125,6 +129,11 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
 // ACTIONS --------------------------------------
 
+  // Bumped whenever the notes list is reset, so responses to requests made
+  // for a previous feed (or a previous first page) are discarded.
+  let feedGeneration = 0;
+  let requestCounter = 0;
+
   const removeEvent = (id: string, kind: 'notes') => {
     updateStore(kind, (drs) => drs.filter(d => d.noteId !== id));
   }
@@ -174,10 +183,12 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
         store.paging.future : store.paging.notes,
     );
 
+    const generation = feedGeneration;
+
     const { notes, paging } = await fetchMegaMultiFeed(
       accountStore.publicKey,
       spec,
-      `home_future_${APP_ID}`,
+      `home_future_${APP_ID}_${++requestCounter}`,
       [Kind.Text, Kind.Repost, Kind.UserPoll, Kind.ZapPoll],
       {
         since,
@@ -186,6 +197,9 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
       }
     );
     // const sortedNotes = filterAndSortNotes(notes, paging);
+
+    // The feed was switched or reset while this request was in flight
+    if (generation !== feedGeneration) return;
 
     // Filter out duplicates
     const ids = lastPageNotes.map(n => n.id);
@@ -205,6 +219,7 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
   };
 
   const fetchNotes = async (spec: string, until = 0, includeIsFetching = true) => {
+    const generation = feedGeneration;
 
     updateStore('isFetching' , () => includeIsFetching);
 
@@ -212,27 +227,42 @@ export const HomeProvider = (props: { children: ContextChildren }) => {
 
     const offset = calculateEventsOffset(store.notes, store.paging.notes);
 
-    const { notes, userPolls, zapPolls, paging } = await fetchMegaMultiFeed(
-      pubkey,
-      spec,
-      `home_feed_${APP_ID}`,
-      [Kind.Text, Kind.Repost, Kind.UserPoll, Kind.ZapPoll],
-      {
-        until,
-        limit: 20,
-        offset,
-      },
-    );
+    try {
+      // Unique per request: overlapping requests sharing one subId would
+      // resolve on each other's EOSE and mix their events.
+      const { notes, userPolls, zapPolls, paging } = await fetchMegaMultiFeed(
+        pubkey,
+        spec,
+        `home_feed_${APP_ID}_${++requestCounter}`,
+        [Kind.Text, Kind.Repost, Kind.UserPoll, Kind.ZapPoll],
+        {
+          until,
+          limit: 20,
+          offset,
+        },
+      );
 
-    const sortedEvents = filterAndSortEvents([...notes, ...userPolls, ...zapPolls], paging);
+      if (generation !== feedGeneration) return;
 
-    updateStore('paging', 'notes', () => ({ ...paging }));
-    updateStore('notes', (ns) => [ ...ns, ...(sortedEvents as (PrimalNote | PrimalUserPoll)[])]);
-    updateStore('isFetching', () => false);
+      const sortedEvents = filterAndSortEvents([...notes, ...userPolls, ...zapPolls], paging);
 
+      updateStore('paging', 'notes', () => ({ ...paging }));
+      updateStore('notes', (ns) => [ ...ns, ...(sortedEvents as (PrimalNote | PrimalUserPoll)[])]);
+    } catch (e) {
+      logError('ERROR fetching home feed: ', e);
+    } finally {
+      // Always leave the loading state, otherwise pagination stays blocked and
+      // the feed shows skeletons forever.
+      if (generation === feedGeneration) {
+        updateStore('isFetching', () => false);
+        updateStore('hasFetched', () => true);
+      }
+    }
   };
 
   const clearNotes = () => {
+    feedGeneration++;
+    updateStore('hasFetched', () => false);
     updateStore('scrollTop', () => 0);
     window.scrollTo({ top: 0 });
 
