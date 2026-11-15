@@ -750,6 +750,71 @@ export const actions = {
   },
 };
 
+export const noteTranslation = {
+  translate: {
+    id: 'noteTranslation.translate',
+    defaultMessage: 'Translate',
+    description: 'Label for the note translation action',
+  },
+  translating: {
+    id: 'noteTranslation.translating',
+    defaultMessage: 'Translating...',
+    description: 'Label shown while a note translation is in progress',
+  },
+  showOriginal: {
+    id: 'noteTranslation.showOriginal',
+    defaultMessage: 'Show original',
+    description: 'Label for toggling back to the original note text',
+  },
+  showTranslation: {
+    id: 'noteTranslation.showTranslation',
+    defaultMessage: 'Show translation',
+    description: 'Label for toggling to the translated note text',
+  },
+  translatedFrom: {
+    id: 'noteTranslation.translatedFrom',
+    defaultMessage: 'Translated from {language}',
+    description: 'Label indicating the detected source language of a translation',
+  },
+  alreadyInLanguage: {
+    id: 'noteTranslation.alreadyInLanguage',
+    defaultMessage: 'Already in your language',
+    description: 'Message shown when a note is already in the user language',
+  },
+  cancel: {
+    id: 'noteTranslation.cancel',
+    defaultMessage: 'Cancel',
+    description: 'Label for cancelling an in-progress translation',
+  },
+  retry: {
+    id: 'noteTranslation.retry',
+    defaultMessage: 'Retry',
+    description: 'Label for retrying a failed translation',
+  },
+  errors: {
+    notConfigured: {
+      id: 'noteTranslation.errors.notConfigured',
+      defaultMessage: 'Translation is not set up yet. Add a translation server in Settings.',
+      description: 'Error shown when no translation endpoint is configured',
+    },
+    disabled: {
+      id: 'noteTranslation.errors.disabled',
+      defaultMessage: 'Note translation is turned off. You can enable it in Settings.',
+      description: 'Error shown when note translation is disabled',
+    },
+    unreachable: {
+      id: 'noteTranslation.errors.unreachable',
+      defaultMessage: 'Could not reach the translation server. Check the endpoint in Settings.',
+      description: 'Error shown when the translation endpoint cannot be reached',
+    },
+    failed: {
+      id: 'noteTranslation.errors.failed',
+      defaultMessage: 'Translation failed. Please try again later.',
+      description: 'Generic translation failure message',
+    },
+  },
+};
+
 export const branding = {
   id: 'branding',
   defaultMessage: 'Primal',
@@ -1984,6 +2049,103 @@ export const settings = {
       id: 'settings.muted.emptyOther',
       defaultMessage: 'This user didn\'t mute anyone or they use a non-standard mute list',
       description: 'Caption indicating that there are no muted users on someone else\'s list',
+    },
+  },
+  translation: {
+    title: {
+      id: 'settings.translation.title',
+      defaultMessage: 'Note Translation',
+      description: 'Title of the note translation settings sub-page',
+    },
+    caption: {
+      id: 'settings.translation.caption',
+      defaultMessage: 'Translate notes inline, into your language',
+      description: 'Caption for the note translation settings sub-page',
+    },
+    description: {
+      id: 'settings.translation.description',
+      defaultMessage: 'When you tap "Translate" on a note, its text is sent to the translation server below and the result is shown in place of the original. Nostr references, links, hashtags, Lightning invoices and other tokens are removed before sending and restored afterwards, so the server only ever sees the note text itself. Nothing is sent automatically.',
+      description: 'Description of how note translation works',
+    },
+    enable: {
+      id: 'settings.translation.enable',
+      defaultMessage: 'Enable note translation',
+      description: 'Label for the note translation enable toggle',
+    },
+    endpoint: {
+      id: 'settings.translation.endpoint',
+      defaultMessage: 'Translation server (LibreTranslate-compatible)',
+      description: 'Label for the translation server endpoint field',
+    },
+    endpointPlaceholder: {
+      id: 'settings.translation.endpointPlaceholder',
+      defaultMessage: 'https://translate.example.com',
+      description: 'Placeholder for the translation server endpoint field',
+    },
+    endpointDescription: {
+      id: 'settings.translation.endpointDescription',
+      defaultMessage: 'Base URL of a LibreTranslate server. You can use a public instance or self-host your own. Leave empty to disable requests.',
+      description: 'Help text for the translation server endpoint field',
+    },
+    invalidEndpoint: {
+      id: 'settings.translation.invalidEndpoint',
+      defaultMessage: 'That does not look like a valid http(s) URL.',
+      description: 'Error shown for an invalid translation endpoint',
+    },
+    apiKey: {
+      id: 'settings.translation.apiKey',
+      defaultMessage: 'API key (optional)',
+      description: 'Label for the translation server API key field',
+    },
+    apiKeyDescription: {
+      id: 'settings.translation.apiKeyDescription',
+      defaultMessage: 'Some public LibreTranslate instances require an API key. Self-hosted instances usually do not.',
+      description: 'Help text for the translation server API key field',
+    },
+    targetLanguage: {
+      id: 'settings.translation.targetLanguage',
+      defaultMessage: 'Translate into',
+      description: 'Label for the target language selector',
+    },
+    browserDefault: {
+      id: 'settings.translation.browserDefault',
+      defaultMessage: 'Browser language',
+      description: 'Option label for following the browser language',
+    },
+    targetLanguageDescription: {
+      id: 'settings.translation.targetLanguageDescription',
+      defaultMessage: 'The language notes are translated into. Defaults to your browser language.',
+      description: 'Help text for the target language selector',
+    },
+    testConnection: {
+      id: 'settings.translation.testConnection',
+      defaultMessage: 'Test connection',
+      description: 'Label for the test connection button',
+    },
+    testing: {
+      id: 'settings.translation.testing',
+      defaultMessage: 'Testing...',
+      description: 'Label shown while testing the translation server connection',
+    },
+    testSuccess: {
+      id: 'settings.translation.testSuccess',
+      defaultMessage: 'Connection OK. The server offers {count} languages.',
+      description: 'Message shown when the translation server connection test succeeds',
+    },
+    testFailed: {
+      id: 'settings.translation.testFailed',
+      defaultMessage: 'Could not reach the translation server. Check the URL and try again.',
+      description: 'Message shown when the translation server connection test fails',
+    },
+    cache: {
+      id: 'settings.translation.cache',
+      defaultMessage: 'Translations are cached on this device ({count} stored) so repeat views do not call the server again.',
+      description: 'Description of the local translation cache',
+    },
+    clearCache: {
+      id: 'settings.translation.clearCache',
+      defaultMessage: 'Clear translation cache',
+      description: 'Label for the clear translation cache button',
     },
   },
   nwcSettings: {
