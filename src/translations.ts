@@ -1211,6 +1211,43 @@ export const note = {
       description: 'Continue editing the poll',
     },
   },
+  translate: {
+    action: {
+      id: 'note.translate.action',
+      defaultMessage: 'Translate',
+      description: 'Button label for translating a note into the user language',
+    },
+    translating: {
+      id: 'note.translate.translating',
+      defaultMessage: 'Translating...',
+      description: 'Button label while a note translation is being fetched',
+    },
+    showTranslation: {
+      id: 'note.translate.showTranslation',
+      defaultMessage: 'Show translation',
+      description: 'Button label for showing a previously fetched note translation',
+    },
+    hideTranslation: {
+      id: 'note.translate.hideTranslation',
+      defaultMessage: 'Hide translation',
+      description: 'Button label for hiding the note translation and showing only the original',
+    },
+    translatedFrom: {
+      id: 'note.translate.translatedFrom',
+      defaultMessage: 'Translated from {language}',
+      description: 'Label shown above a translated note, indicating the detected original language',
+    },
+    failed: {
+      id: 'note.translate.failed',
+      defaultMessage: 'Could not translate this note',
+      description: 'Message shown when the note translation service is unavailable',
+    },
+    sameLanguage: {
+      id: 'note.translate.sameLanguage',
+      defaultMessage: 'This note is already in your language',
+      description: 'Message shown when a note is already written in the user language',
+    },
+  },
 };
 
 export const notificationTypeTranslations: Record<string, string> = {

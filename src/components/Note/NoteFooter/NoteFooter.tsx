@@ -1,4 +1,4 @@
-import { batch, Component, createEffect, Show } from 'solid-js';
+import { batch, Component, createEffect, createSignal, Show } from 'solid-js';
 import { MenuItem, PrimalNote, ZapOption } from '../../../types/primal';
 import { getMyRepostOfEvent, sendDeleteEvent, sendRepost } from '../../../lib/notes';
 
@@ -9,9 +9,11 @@ import { useIntl } from '@cookbook/solid-intl';
 import { truncateNumber } from '../../../lib/notifications';
 import { canUserReceiveZaps, lastZapError, zapNote } from '../../../lib/zap';
 import { useSettingsContext } from '../../../contexts/SettingsContext';
+import { useTranslatorContext } from '../../../contexts/TranslatorContext';
+import { getCachedTranslation, languageName, normalizeLanguageCode, translateText, NoteTranslation } from '../../../lib/translate';
 
 import zapMD from '../../../assets/lottie/zap_md_2.json';
-import { toast as t } from '../../../translations';
+import { note as noteTranslations, toast as t } from '../../../translations';
 import PrimalMenu from '../../PrimalMenu/PrimalMenu';
 import { hookForDev } from '../../../lib/devTools';
 import { determineOrient, isPhone } from '../../../utils';
@@ -56,6 +58,78 @@ const NoteFooter: Component<{
   const settings = useSettingsContext();
   const app = useAppContext();
   const navigate = useNavigate();
+  const translator = useTranslatorContext();
+
+  // Note translation -------------------------------------
+
+  const targetLanguage = () => {
+    // 'en-us' is the app's built-in locale default rather than a user
+    // choice, so in that case fall back to the browser language.
+    const appLocale = settings?.locale || translator?.locale || '';
+    const locale = appLocale && appLocale.toLowerCase() !== 'en-us' ?
+      appLocale :
+      (navigator.language || appLocale);
+
+    return normalizeLanguageCode(locale);
+  };
+
+  const cachedTranslation = () => {
+    const cached = getCachedTranslation(props.note.content, targetLanguage());
+    return cached && cached.detectedLanguage !== cached.targetLanguage ? cached : undefined;
+  };
+
+  const [translation, setTranslation] = createSignal<NoteTranslation | undefined>(cachedTranslation());
+  const [showTranslation, setShowTranslation] = createSignal(false);
+  const [isTranslating, setIsTranslating] = createSignal(false);
+  const [translationFailed, setTranslationFailed] = createSignal(false);
+  const [isSameLanguage, setIsSameLanguage] = createSignal(false);
+
+  const canTranslate = () =>
+    props.note.post?.kind === Kind.Text &&
+    props.note.content.trim().length > 0;
+
+  const translateLabel = () => {
+    if (isTranslating()) return intl.formatMessage(noteTranslations.translate.translating);
+    if (!translation()) return intl.formatMessage(noteTranslations.translate.action);
+    return showTranslation() ?
+      intl.formatMessage(noteTranslations.translate.hideTranslation) :
+      intl.formatMessage(noteTranslations.translate.showTranslation);
+  };
+
+  const doTranslate = async (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Translation already fetched, just toggle its visibility.
+    if (translation()) {
+      setShowTranslation((visible) => !visible);
+      return;
+    }
+
+    if (isTranslating()) return;
+
+    setIsTranslating(true);
+    setTranslationFailed(false);
+    setIsSameLanguage(false);
+
+    try {
+      const result = await translateText(props.note.content, targetLanguage());
+
+      if (result.detectedLanguage === result.targetLanguage) {
+        setIsSameLanguage(true);
+        return;
+      }
+
+      batch(() => {
+        setTranslation(result);
+        setShowTranslation(true);
+      });
+    } catch (err) {
+      setTranslationFailed(true);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
 
   let medZapAnimation: HTMLElement | undefined;
 
@@ -458,7 +532,24 @@ const NoteFooter: Component<{
   });
 
   return (
-    <div
+    <>
+      <Show when={showTranslation() && translation()}>
+        <div class={styles.translation}>
+          <div class={styles.translationHeader}>
+            <div class={styles.translateIcon}></div>
+            <span>
+              {intl.formatMessage(noteTranslations.translate.translatedFrom, {
+                language: languageName(translation()?.detectedLanguage || '', translator?.locale),
+              })}
+            </span>
+          </div>
+          <div class={styles.translationText}>
+            {translation()?.text}
+          </div>
+        </div>
+      </Show>
+
+      <div
       id={props.id}
       class={`${styles.footer} ${styles[size()]}`}
       ref={footerDiv}
@@ -546,8 +637,33 @@ const NoteFooter: Component<{
           right={true}
         />
       </div>
+      </div>
 
-    </div>
+      <Show when={canTranslate()}>
+        <div class={styles.translateRow}>
+          <button
+            class={styles.translateButton}
+            onClick={doTranslate}
+            disabled={isTranslating()}
+          >
+            <div class={styles.translateIcon}></div>
+            <span>{translateLabel()}</span>
+          </button>
+
+          <Show when={translationFailed()}>
+            <span class={styles.translationInfo}>
+              {intl.formatMessage(noteTranslations.translate.failed)}
+            </span>
+          </Show>
+
+          <Show when={isSameLanguage()}>
+            <span class={styles.translationInfo}>
+              {intl.formatMessage(noteTranslations.translate.sameLanguage)}
+            </span>
+          </Show>
+        </div>
+      </Show>
+    </>
   )
 }
 
