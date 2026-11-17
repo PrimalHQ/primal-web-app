@@ -33,11 +33,27 @@
       })();
     </script>
 
-    <link rel="icon" type="image/ico" href="/src/assets/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/src/assets/favicon_32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/src/assets/favicon_16x16.png" />
-    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/src/assets/apple-touch-icon.png" />
-    <link rel="mask-icon" href="/src/assets/safari-pinned-tab.svg" color="#000000" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Primal" />
+
+    <!-- Icons and manifest mirror tsunami-ssr (same files, same URLs) so the
+         switch to tsunami doesn't change icons or PWA installs. The .ico
+         carries 16/32/48; the 192 PNG is the high-res choice. Bump ?v= with
+         any icon change. /favicon.ico and /apple-touch-icon.png also exist at
+         the root (public/) for clients that probe those paths. -->
+    <link rel="icon" sizes="32x32" href="/public/favicon.ico?v=4" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/public/favicon_192x192.png?v=4" />
+    <link
+      rel="apple-touch-icon"
+      type="image/png"
+      sizes="180x180"
+      href="/public/apple-touch-icon.png?v=4"
+    />
+    <link rel="mask-icon" href="/public/safari-pinned-tab.svg?v=4" color="#000000" />
+
+    <!-- Hand-written PWA manifest, served from public/. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
     <title>Primal</title>
   </head>
   <body>
