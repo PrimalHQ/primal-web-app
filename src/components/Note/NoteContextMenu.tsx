@@ -13,6 +13,7 @@ import { NoteContextMenuInfo, useAppContext } from '../../contexts/AppContext';
 import ConfirmModal from '../ConfirmModal/ConfirmModal';
 import { nip19 } from 'nostr-tools';
 import { readSecFromStorage } from '../../lib/localStore';
+import { translatePost } from '../../lib/translatePost';
 import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
 import { urlEncode } from '../../utils';
@@ -292,6 +293,22 @@ const NoteContextMenu: Component<{
       //   action: broadcastNote,
       //   icon: 'broadcast',
       // },
+      {
+        label: `Translate to ${intl.locale.toUpperCase()}`,
+        action: () => {
+          const n = note();
+          if (!n) return;
+          translatePost(String(n.content || ''), intl.locale).then((r) => {
+            if (r.ok && r.translatedText) {
+              toaster?.sendSuccess(r.translatedText.slice(0, 300));
+            } else {
+              toaster?.sendWarning('Translation unavailable right now');
+            }
+          });
+          props.onClose();
+        },
+        icon: 'translate',
+      },
       {
         label: intl.formatMessage(tActions.noteContext.copyPubkey),
         action: copyUserNpub,
