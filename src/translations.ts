@@ -3321,4 +3321,102 @@ export const readsMy = {
     description: 'No published articles label',
   },
 
-}
+};
+
+export const noteTranslation = {
+  translate: {
+    id: 'note.translation.translate',
+    defaultMessage: 'Translate',
+    description: 'Button label to translate a note inline',
+  },
+  translating: {
+    id: 'note.translation.translating',
+    defaultMessage: 'Translating...',
+    description: 'Status label while a note translation request is in progress',
+  },
+  showOriginal: {
+    id: 'note.translation.showOriginal',
+    defaultMessage: 'Show original',
+    description: 'Button label to hide the translation and view original note text',
+  },
+  translatedFrom: {
+    id: 'note.translation.translatedFrom',
+    defaultMessage: 'Translated from {language}',
+    description: 'Header showing detected source language of a translated note',
+  },
+  translatedGeneric: {
+    id: 'note.translation.translatedGeneric',
+    defaultMessage: 'Translated',
+    description: 'Header shown when note translation succeeds without a detected source language',
+  },
+  unavailable: {
+    id: 'note.translation.unavailable',
+    defaultMessage: 'Translation service is currently unavailable.',
+    description: 'Error message when translation request fails',
+  },
+  notConfigured: {
+    id: 'note.translation.notConfigured',
+    defaultMessage: 'Configure a translation endpoint to translate notes.',
+    description: 'Error message when no translation service endpoint is configured',
+  },
+  invalidEndpoint: {
+    id: 'note.translation.invalidEndpoint',
+    defaultMessage: 'Please enter a valid https:// (or http://localhost) LibreTranslate endpoint.',
+    description: 'Validation error for an invalid translation endpoint URL',
+  },
+  configureInSettings: {
+    id: 'note.translation.configureInSettings',
+    defaultMessage: 'Open settings',
+    description: 'Link text navigating to translation preferences in Appearance settings',
+  },
+  settingsTitle: {
+    id: 'settings.appearance.translation.title',
+    defaultMessage: 'Note Translation',
+    description: 'Heading for note translation settings section',
+  },
+  settingsDescription: {
+    id: 'settings.appearance.translation.description',
+    defaultMessage: 'Choose your preferred target language and a LibreTranslate-compatible endpoint for inline note translation.',
+    description: 'Description for note translation settings section',
+  },
+  targetLanguageLabel: {
+    id: 'settings.appearance.translation.targetLanguage',
+    defaultMessage: 'Preferred Language',
+    description: 'Label for preferred target language selector',
+  },
+  endpointLabel: {
+    id: 'settings.appearance.translation.endpoint',
+    defaultMessage: 'Translation Endpoint (LibreTranslate-compatible)',
+    description: 'Label for translation endpoint URL input',
+  },
+  apiKeyLabel: {
+    id: 'settings.appearance.translation.apiKey',
+    defaultMessage: 'API Key (optional)',
+    description: 'Label for optional translation API key input',
+  },
+  apiKeyPlaceholder: {
+    id: 'settings.appearance.translation.apiKeyPlaceholder',
+    defaultMessage: 'Optional API key',
+    description: 'Placeholder for optional translation API key input',
+  },
+  saveSettings: {
+    id: 'settings.appearance.translation.save',
+    defaultMessage: 'Save',
+    description: 'Button label to save note translation preferences',
+  },
+  clearSettings: {
+    id: 'settings.appearance.translation.clear',
+    defaultMessage: 'Reset',
+    description: 'Button label to reset note translation preferences',
+  },
+  settingsSaved: {
+    id: 'settings.appearance.translation.saved',
+    defaultMessage: 'Translation preferences saved.',
+    description: 'Confirmation message after saving translation preferences',
+  },
+  settingsCleared: {
+    id: 'settings.appearance.translation.cleared',
+    defaultMessage: 'Translation preferences reset.',
+    description: 'Confirmation message after resetting translation preferences',
+  },
+};

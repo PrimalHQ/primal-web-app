@@ -9,6 +9,7 @@ import { A } from '@solidjs/router';
 import PageTitle from '../../components/PageTitle/PageTitle';
 import CheckBox from '../../components/Checkbox/CheckBox';
 import { useSettingsContext } from '../../contexts/SettingsContext';
+import TranslationSettings from './TranslationSettings';
 
 const Appearance: Component = () => {
 
@@ -51,6 +52,8 @@ const Appearance: Component = () => {
           </CheckBox>
         </div>
       </div>
+
+      <TranslationSettings />
     </div>
   )
 }
