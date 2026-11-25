@@ -593,6 +593,21 @@ export const actions = {
       defaultMessage: 'Quote',
       description: 'Label for quoting note from context menu',
     },
+    translate: {
+      id: 'actions.noteContext.translate',
+      defaultMessage: 'Translate',
+      description: 'Label for translating note from context menu',
+    },
+    hideTranslation: {
+      id: 'actions.noteContext.hideTranslation',
+      defaultMessage: 'Hide Translation',
+      description: 'Label for hiding translation from context menu',
+    },
+    translating: {
+      id: 'actions.noteContext.translating',
+      defaultMessage: 'Translating...',
+      description: 'Label shown while translation is in progress',
+    },
   },
   pollContext: {
     reactions: {
@@ -1832,6 +1847,33 @@ export const settings = {
       id: 'settings.appearance.caption',
       defaultMessage: 'Select a theme',
       description: 'Caption for theme selection',
+    },
+  },
+  translation: {
+    title: {
+      id: 'settings.translation.title',
+      defaultMessage: 'Translation',
+      description: 'Title of the translation settings sub-page',
+    },
+    caption: {
+      id: 'settings.translation.caption',
+      defaultMessage: 'Configure note translation settings',
+      description: 'Caption for translation settings',
+    },
+    enableTranslation: {
+      id: 'settings.translation.enableTranslation',
+      defaultMessage: 'Enable note translation',
+      description: 'Checkbox label for enabling translation',
+    },
+    targetLanguageLabel: {
+      id: 'settings.translation.targetLanguageLabel',
+      defaultMessage: 'Translate notes to:',
+      description: 'Label for target language selection',
+    },
+    description: {
+      id: 'settings.translation.description',
+      defaultMessage: 'Translation is powered by LibreTranslate, a free and open-source machine translation service. Click "Translate" in the note context menu to translate individual notes.',
+      description: 'Description of the translation feature',
     },
   },
   homeFeeds: {

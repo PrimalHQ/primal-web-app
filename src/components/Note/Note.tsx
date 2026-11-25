@@ -23,6 +23,7 @@ import { addrRegexG, imageRegexG, linebreakRegex, noteRegex, urlRegexG } from '.
 import { TranslatorProvider } from '../../contexts/TranslatorContext';
 import { accountStore } from '../../stores/accountStore';
 import { useNavigate } from '@solidjs/router';
+import NoteTranslation from '../NoteTranslation/NoteTranslation';
 
 export type NoteReactionsState = {
   bookmarks?: number,
@@ -414,6 +415,8 @@ const Note: Component<NoteProps> = (props) => {
               />
             </div>
 
+            <NoteTranslation noteId={props.note.post.id} />
+
             <div class={styles.topZaps}>
               <NoteTopZaps
                 topZaps={reactionsState.topZapsFeed}
@@ -557,6 +560,8 @@ const Note: Component<NoteProps> = (props) => {
             />
           </div>
 
+          <NoteTranslation noteId={props.note.post.id} />
+
           <NoteTopZapsCompact
             note={props.note}
             action={() => openReactionModal('zaps')}
@@ -643,6 +648,8 @@ const Note: Component<NoteProps> = (props) => {
                   footerSize="short"
                 />
               </div>
+
+              <NoteTranslation noteId={props.note.post.id} />
 
               <NoteTopZapsCompact
                 note={props.note}

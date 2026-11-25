@@ -17,6 +17,7 @@ import { useNavigate } from '@solidjs/router';
 import { Kind } from '../../constants';
 import { urlEncode } from '../../utils';
 import { accountStore, addToMuteList, hasPublicKey, removeFromMuteList, setShowPin, showGetStarted } from '../../stores/accountStore';
+import { useTranslationContext } from '../../contexts/TranslationContext';
 
 const NoteContextMenu: Component<{
   data: NoteContextMenuInfo,
@@ -28,6 +29,7 @@ const NoteContextMenu: Component<{
   const intl = useIntl();
   const app = useAppContext();
   const navigate = useNavigate();
+  const translation = useTranslationContext();
 
   const [confirmMuteUser, setConfirmMuteUser] = createSignal(false);
   const [confirmMuteThread, setConfirmMuteThread] = createSignal(false);
@@ -287,6 +289,24 @@ const NoteContextMenu: Component<{
         action: copyRawData,
         icon: 'copy_raw_data',
       },
+      // Translation option
+      ...(translation?.translationEnabled ? [{
+        label: translation?.actions.hasTranslation(note()?.id) 
+          ? intl.formatMessage(tActions.noteContext.hideTranslation)
+          : (translation?.actions.getTranslation(note()?.id)?.isLoading
+            ? intl.formatMessage(tActions.noteContext.translating)
+            : intl.formatMessage(tActions.noteContext.translate)),
+        action: () => {
+          if (translation?.actions.hasTranslation(note()?.id)) {
+            translation?.actions.clearTranslation(note()?.id);
+          } else if (!translation?.actions.getTranslation(note()?.id)?.isLoading) {
+            const content = note()?.content || '';
+            translation?.actions.translateNote(note()?.id, content);
+          }
+          props.onClose();
+        },
+        icon: 'translate',
+      }] : []),
       // {
       //   label: intl.formatMessage(tActions.noteContext.breadcast),
       //   action: broadcastNote,
