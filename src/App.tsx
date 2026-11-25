@@ -8,6 +8,7 @@ import AppRouter from './Router';
 import { ProfileProvider } from './contexts/ProfileContext';
 import { SettingsProvider } from './contexts/SettingsContext';
 import { TranslatorProvider } from './contexts/TranslatorContext';
+import { TranslationProvider } from './contexts/TranslationContext';
 import { NotificationsProvider } from './contexts/NotificationsContext';
 import { SearchProvider } from './contexts/SearchContext';
 import { MediaProvider } from './contexts/MediaContext';
@@ -109,21 +110,23 @@ const App: Component = () => {
               <SearchProvider>
                 <AdvancedSearchProvider>
                   <SettingsProvider>
-                    <ProfileProvider>
-                      <DMProvider>
-                        <NotificationsProvider>
-                          <ReadsProvider>
-                            <HomeProvider>
-                              <ExploreProvider>
-                                <ThreadProvider>
-                                  <AppRouter />
-                                </ThreadProvider>
-                              </ExploreProvider>
-                            </HomeProvider>
-                          </ReadsProvider>
-                        </NotificationsProvider>
-                      </DMProvider>
-                    </ProfileProvider>
+                    <TranslationProvider>
+                      <ProfileProvider>
+                        <DMProvider>
+                          <NotificationsProvider>
+                            <ReadsProvider>
+                              <HomeProvider>
+                                <ExploreProvider>
+                                  <ThreadProvider>
+                                    <AppRouter />
+                                  </ThreadProvider>
+                                </ExploreProvider>
+                              </HomeProvider>
+                            </ReadsProvider>
+                          </NotificationsProvider>
+                        </DMProvider>
+                      </ProfileProvider>
+                    </TranslationProvider>
                   </SettingsProvider>
                 </AdvancedSearchProvider>
               </SearchProvider>
