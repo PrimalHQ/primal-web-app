@@ -156,10 +156,7 @@ const restoreContent = (content: string, tokens: ProtectedToken[]) => {
 };
 
 export const hasTranslatableNoteText = (content: string) => {
-  const protectedText = protectContent(content).text;
-  const textOnly = protectedText.replace(/PRIMALTRANSLATIONTOKEN\d+END/g, '').trim();
-
-  return /[A-Za-zÀ-ž]/.test(textOnly);
+  return /\p{L}/u.test(content.replace(protectedPattern, ''));
 };
 
 const detectedLanguage = (data: Record<string, any>) => {
