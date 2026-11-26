@@ -1,0 +1,127 @@
+.noteTranslate {
+  margin-top: -6px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.actionRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.translateButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  padding: 2px 0;
+  margin: 0;
+  width: auto;
+  color: var(--accent-links);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.secondaryButton {
+  background: none;
+  border: none;
+  padding: 2px 0;
+  margin: 0;
+  width: auto;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 16px;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--text-secondary);
+    text-decoration: underline;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.globeIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.75;
+}
+
+.statusText {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.errorText {
+  color: var(--warning-bright);
+  font-size: 13px;
+  line-height: 16px;
+}
+
+.settingsLink {
+  color: var(--accent-links);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 16px;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.translatedCard {
+  margin-top: 4px;
+  padding: 10px 12px;
+  border-left: 2px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  background-color: var(--background-sheet);
+}
+
+.translatedHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.translatedMeta {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
+.translatedBody {
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 20px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: text;
+}
