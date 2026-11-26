@@ -2,6 +2,7 @@
 import { batch, Component, createEffect, Match, on, onMount, Show, Switch } from 'solid-js';
 import { PrimalNote, PrimalUser, TopZap, ZapOption } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
+import TranslateButton from '../TranslateButton/TranslateButton';
 import NoteFooter from './NoteFooter/NoteFooter';
 
 import styles from './Note.module.scss';
@@ -412,6 +413,7 @@ const Note: Component<NoteProps> = (props) => {
                 width={Math.min(598, window.innerWidth)}
                 margins={isPhone() ? 42 : 1}
               />
+<TranslateButton text={props.note.post.content} />
             </div>
 
             <div class={styles.topZaps}>
