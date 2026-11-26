@@ -413,6 +413,7 @@ const Note: Component<NoteProps> = (props) => {
                 width={Math.min(598, window.innerWidth)}
                 margins={isPhone() ? 42 : 1}
               />
+<TranslateButton text={props.note.post.content} />
             </div>
 
             <div class={styles.topZaps}>
