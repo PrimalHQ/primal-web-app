@@ -122,6 +122,21 @@
   }
 }
 
+.translatedContent {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: var(--subtle-bg, rgba(255, 255, 255, 0.05));
+  border-left: 3px solid var(--accent-color, #8a2be2);
+  border-radius: 4px;
+  font-size: 0.95em;
+  color: var(--text-secondary, #cccccc);
+  line-height: 1.4;
+
+  p {
+    margin: 0;
+  }
+}
+
 .upRightFloater {
   position: absolute;
   top: 0px;
@@ -397,7 +412,6 @@
   justify-content: flex-start;
   overflow: hidden;
   align-items: center;
-  justify-content: flex-start;
   width: 524px;
   position: relative;
 
@@ -409,14 +423,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-    // max-width: 226px;
-
-    // overflow: hidden;
-    // display: -webkit-box;
-    // -webkit-line-clamp: 1;
-    // line-clamp: 1;
-    // -webkit-box-orient: vertical;
-
     color: var(--text-primary);
 
     font-size: 16px;
@@ -445,16 +451,9 @@
   }
   .verification {
     flex-shrink: 1;
-    // max-width: 216px;
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
-
-    // overflow: hidden;
-    // display: -webkit-box;
-    // -webkit-line-clamp: 1;
-    // line-clamp: 1;
-    // -webkit-box-orient: vertical;
 
     color: var(--text-tertiary);
 
@@ -565,7 +564,6 @@
     margin-left: 2px;
     margin-top: 2px;
     cursor: text;
-
 
     .message {
       position: relative;
@@ -703,7 +701,6 @@
     right: 0px;
   }
 }
-
 
 .zapHighlights {
   display: flex;
@@ -849,7 +846,6 @@
     height: 0;
   }
 
-
   .zapWrap{
     width: fit-content;
     margin-left: -18px;
@@ -883,7 +879,6 @@
 
     &.compact {
       padding: 0px;
-      // margin-left: -18px;
     }
 
     .amount {
@@ -948,11 +943,6 @@
   .zapWrap{
     width: fit-content;
     margin-left: -8px;
-    // transition: all 0.6s;
-
-    // &.noAnimation {
-    //   transition: all 0s;
-    // }
   }
 
   .topZap {
@@ -974,7 +964,6 @@
 
     &.compact {
       padding-right: 2px;
-      // margin-left: -18px;
     }
 
     .amount {
@@ -1044,12 +1033,10 @@
   color: unset;
   margin: 0px;
   padding: 0px;
-  // background: var(--brand-gradient-vertical);
   background-color: var(--background-card);
   border-radius: 6px;
   display: block;
   transition: 0.2s padding;
-  /* margin-top: 6px; */
 
   .noteNotifications {
     background-color: var(--background-site);
@@ -1086,16 +1073,6 @@
       }
     }
   }
-
-  // &:hover {
-  //   padding-left: 4px;
-  //   transition: 0.2s padding;
-  //   border-radius: 4px;
-  //   >div {
-  //     border-radius: 0px 4px 4px 0px;
-  //     transition: 0.2s border-radius ease-out;
-  //   }
-  // }
 }
 
 .context {
@@ -1196,7 +1173,6 @@
     height: 26px;
     margin: 0;
     border-radius: 12px;
-    // background: var(--devider);
     text-decoration: none;
     border: none;
     outline: none;
@@ -1220,14 +1196,12 @@
       overflow-x: scroll;
       overflow-y: hidden;
 
-      /* Hide scrollbar for Chrome, Safari and Opera */
       &::-webkit-scrollbar {
         display: none !important;
       }
 
-      /* Hide scrollbar for IE, Edge and Firefox */
-      -ms-overflow-style: none !important;  /* IE and Edge */
-      scrollbar-width: none !important;  /* Firefox */
+      -ms-overflow-style: none !important;
+      scrollbar-width: none !important;
 
       .topZap {
         display: flex;
@@ -1235,7 +1209,6 @@
         gap: 6px;
         margin: 0;
         border-radius: 12px;
-        // background: var(--devider);
         width: 70px;
         height: 26px;
         text-decoration: none;
