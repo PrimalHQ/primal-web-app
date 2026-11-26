@@ -2,6 +2,7 @@
 import { batch, Component, createEffect, Match, on, onMount, Show, Switch } from 'solid-js';
 import { PrimalNote, PrimalUser, TopZap, ZapOption } from '../../types/primal';
 import ParsedNote from '../ParsedNote/ParsedNote';
+import NoteTranslate from '../NoteTranslate/NoteTranslate';
 import NoteFooter from './NoteFooter/NoteFooter';
 
 import styles from './Note.module.scss';
@@ -414,6 +415,8 @@ const Note: Component<NoteProps> = (props) => {
               />
             </div>
 
+            <NoteTranslate note={props.note} />
+
             <div class={styles.topZaps}>
               <NoteTopZaps
                 topZaps={reactionsState.topZapsFeed}
@@ -557,6 +560,8 @@ const Note: Component<NoteProps> = (props) => {
             />
           </div>
 
+          <NoteTranslate note={props.note} />
+
           <NoteTopZapsCompact
             note={props.note}
             action={() => openReactionModal('zaps')}
@@ -643,6 +648,8 @@ const Note: Component<NoteProps> = (props) => {
                   footerSize="short"
                 />
               </div>
+
+              <NoteTranslate note={props.note} />
 
               <NoteTopZapsCompact
                 note={props.note}

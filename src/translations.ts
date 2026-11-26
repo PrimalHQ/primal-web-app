@@ -2162,6 +2162,176 @@ export const settings = {
     defaultMessage: 'Dev Tools',
     description: 'Title of the dev tools section on the settings page',
   },
+  translation: {
+    title: {
+      id: 'settings.translation.title',
+      defaultMessage: 'Translation',
+      description: 'Title of the translation settings sub-page',
+    },
+    description: {
+      id: 'settings.translation.description',
+      defaultMessage: 'Translate notes inline to your preferred language on demand. Note text is only sent when you click Translate.',
+      description: 'Description of the translation settings sub-page',
+    },
+    browserDefault: {
+      id: 'settings.translation.browserDefault',
+      defaultMessage: 'Browser default',
+      description: 'Label for browser default target language option',
+    },
+    targetLanguageLabel: {
+      id: 'settings.translation.targetLanguageLabel',
+      defaultMessage: 'Preferred language',
+      description: 'Label for preferred target language selector',
+    },
+    targetLanguageHelp: {
+      id: 'settings.translation.targetLanguageHelp',
+      defaultMessage: 'Notes will be translated into this language when you click Translate post.',
+      description: 'Help text for preferred target language selector',
+    },
+    providerLabel: {
+      id: 'settings.translation.providerLabel',
+      defaultMessage: 'Translation provider',
+      description: 'Label for translation provider selector',
+    },
+    providerNoneTitle: {
+      id: 'settings.translation.providerNoneTitle',
+      defaultMessage: 'Disabled (Off)',
+      description: 'Label for disabled translation provider',
+    },
+    providerNoneDesc: {
+      id: 'settings.translation.providerNoneDesc',
+      defaultMessage: 'No note text is sent to any translation service.',
+      description: 'Description for disabled translation provider',
+    },
+    providerBrowserTitle: {
+      id: 'settings.translation.providerBrowserTitle',
+      defaultMessage: 'Browser (On-device)',
+      description: 'Label for on-device browser translation provider',
+    },
+    providerBrowserDesc: {
+      id: 'settings.translation.providerBrowserDesc',
+      defaultMessage: 'Uses your browser’s built-in on-device Translator API. Private and free with no external server.',
+      description: 'Description for on-device browser translation provider',
+    },
+    browserAvailable: {
+      id: 'settings.translation.browserAvailable',
+      defaultMessage: 'Available',
+      description: 'Badge indicating on-device browser translator is available',
+    },
+    browserUnavailable: {
+      id: 'settings.translation.browserUnavailable',
+      defaultMessage: 'Not supported',
+      description: 'Badge indicating on-device browser translator is unavailable',
+    },
+    providerLibreTitle: {
+      id: 'settings.translation.providerLibreTitle',
+      defaultMessage: 'LibreTranslate (Self-hosted / Custom)',
+      description: 'Label for LibreTranslate provider',
+    },
+    providerLibreDesc: {
+      id: 'settings.translation.providerLibreDesc',
+      defaultMessage: 'Connect to your own self-hosted or chosen LibreTranslate-compatible endpoint.',
+      description: 'Description for LibreTranslate provider',
+    },
+    providerGoogleTitle: {
+      id: 'settings.translation.providerGoogleTitle',
+      defaultMessage: 'Google Cloud Translation (API key)',
+      description: 'Label for Google Cloud Translation provider',
+    },
+    providerGoogleDesc: {
+      id: 'settings.translation.providerGoogleDesc',
+      defaultMessage: 'Uses the official Google Cloud Translation API v2 with your own API key.',
+      description: 'Description for Google Cloud Translation provider',
+    },
+    libreUrlLabel: {
+      id: 'settings.translation.libreUrlLabel',
+      defaultMessage: 'LibreTranslate endpoint URL',
+      description: 'Label for LibreTranslate base URL input',
+    },
+    libreUrlHelp: {
+      id: 'settings.translation.libreUrlHelp',
+      defaultMessage: 'Use an HTTPS endpoint (HTTP is permitted only for localhost). Trailing /translate is handled automatically.',
+      description: 'Help text for LibreTranslate base URL input',
+    },
+    libreApiKeyLabel: {
+      id: 'settings.translation.libreApiKeyLabel',
+      defaultMessage: 'API key (optional)',
+      description: 'Label for optional LibreTranslate API key input',
+    },
+    apiKeyOptionalPlaceholder: {
+      id: 'settings.translation.apiKeyOptionalPlaceholder',
+      defaultMessage: 'Optional API key',
+      description: 'Placeholder for optional API key input',
+    },
+    googleApiKeyLabel: {
+      id: 'settings.translation.googleApiKeyLabel',
+      defaultMessage: 'Google Cloud Translation API key',
+      description: 'Label for Google Cloud Translation API key input',
+    },
+    googleApiKeyPlaceholder: {
+      id: 'settings.translation.googleApiKeyPlaceholder',
+      defaultMessage: 'Enter your API key',
+      description: 'Placeholder for Google Cloud Translation API key input',
+    },
+    apiKeyLocalOnlyHelp: {
+      id: 'settings.translation.apiKeyLocalOnlyHelp',
+      defaultMessage: 'Stored only in this browser’s local storage and sent only when you translate a note.',
+      description: 'Privacy note for locally stored translation API keys',
+    },
+    invalidEndpoint: {
+      id: 'settings.translation.invalidEndpoint',
+      defaultMessage: 'Please enter a valid endpoint URL.',
+      description: 'Error when endpoint URL is invalid',
+    },
+    missingGoogleKey: {
+      id: 'settings.translation.missingGoogleKey',
+      defaultMessage: 'Please enter your Google Cloud Translation API key.',
+      description: 'Error when Google Cloud API key is missing',
+    },
+    save: {
+      id: 'settings.translation.save',
+      defaultMessage: 'Save',
+      description: 'Save translation settings button label',
+    },
+    reset: {
+      id: 'settings.translation.reset',
+      defaultMessage: 'Reset',
+      description: 'Reset translation settings button label',
+    },
+    savedToast: {
+      id: 'settings.translation.savedToast',
+      defaultMessage: 'Translation settings saved',
+      description: 'Toast message when translation settings are saved',
+    },
+    resetToast: {
+      id: 'settings.translation.resetToast',
+      defaultMessage: 'Translation settings reset',
+      description: 'Toast message when translation settings are reset',
+    },
+    cacheTitle: {
+      id: 'settings.translation.cacheTitle',
+      defaultMessage: 'Translation cache',
+      description: 'Title for local translation cache section',
+    },
+    cacheCount: {
+      id: 'settings.translation.cacheCount',
+      defaultMessage: `{count, plural,
+        =0 {No cached translations}
+        one {# cached translation}
+        other {# cached translations}}`,
+      description: 'Count of locally cached translations',
+    },
+    clearCache: {
+      id: 'settings.translation.clearCache',
+      defaultMessage: 'Clear cache',
+      description: 'Button label to clear local translation cache',
+    },
+    cacheClearedToast: {
+      id: 'settings.translation.cacheClearedToast',
+      defaultMessage: 'Translation cache cleared',
+      description: 'Toast message when translation cache is cleared',
+    },
+  },
   notifications: {
     title: {
       id: 'pages.settings.sections.notifications',
@@ -3322,3 +3492,71 @@ export const readsMy = {
   },
 
 }
+
+export const noteTranslate = {
+  translatePost: {
+    id: 'note.translate.translatePost',
+    defaultMessage: 'Translate post',
+    description: 'Action link below a note to translate it inline',
+  },
+  translating: {
+    id: 'note.translate.translating',
+    defaultMessage: 'Translating...',
+    description: 'Status shown while a note translation is in progress',
+  },
+  cancel: {
+    id: 'note.translate.cancel',
+    defaultMessage: 'Cancel',
+    description: 'Action to cancel an in-flight note translation',
+  },
+  showOriginal: {
+    id: 'note.translate.showOriginal',
+    defaultMessage: 'Show original',
+    description: 'Toggle button to hide the inline translation and view only original note',
+  },
+  showTranslation: {
+    id: 'note.translate.showTranslation',
+    defaultMessage: 'Show translation',
+    description: 'Toggle button to re-display a cached inline translation',
+  },
+  translatedFrom: {
+    id: 'note.translate.translatedFrom',
+    defaultMessage: 'Translated from {language}',
+    description: 'Header above translated note showing detected source language',
+  },
+  translatedGeneric: {
+    id: 'note.translate.translatedGeneric',
+    defaultMessage: 'Translated',
+    description: 'Header above translated note when source language is unknown',
+  },
+  alreadyInLanguage: {
+    id: 'note.translate.alreadyInLanguage',
+    defaultMessage: 'Already in {language}',
+    description: 'Notice when detected note language matches user preferred language',
+  },
+  dismiss: {
+    id: 'note.translate.dismiss',
+    defaultMessage: 'Dismiss',
+    description: 'Action to dismiss a translation status notice',
+  },
+  notConfigured: {
+    id: 'note.translate.notConfigured',
+    defaultMessage: 'Translation is not configured yet.',
+    description: 'Notice shown when user clicks translate without configuring a provider',
+  },
+  openSettings: {
+    id: 'note.translate.openSettings',
+    defaultMessage: 'Translation settings',
+    description: 'Link to open the translation settings page',
+  },
+  retry: {
+    id: 'note.translate.retry',
+    defaultMessage: 'Retry',
+    description: 'Button to retry a failed note translation',
+  },
+  genericError: {
+    id: 'note.translate.genericError',
+    defaultMessage: 'Could not translate this post.',
+    description: 'Fallback error message when note translation fails',
+  },
+};
