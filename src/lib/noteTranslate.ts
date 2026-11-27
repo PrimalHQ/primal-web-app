@@ -5,6 +5,7 @@ import {
   shouldOfferTranslate,
 } from './noteTranslateProtect';
 import {
+  hasIntactTranslationSlots,
   restoreNoteTextForTranslation,
   shieldNoteTextForTranslation,
   stripTranslationPlaceholders,
@@ -33,6 +34,7 @@ export type TranslateProgress = {
 export type TranslateFailure = {
   reason:
     | 'disabled'
+    | 'invalid_provider'
     | 'missing_url'
     | 'invalid_url'
     | 'missing_key'
@@ -140,9 +142,10 @@ let sharedDetector: Promise<Detector | undefined> | undefined;
 const getSharedDetector = (): Promise<Detector | undefined> => {
   if (!sharedDetector) {
     const Detector = getLanguageDetectorCtor();
-    sharedDetector = Detector?.create
+    const pending: Promise<Detector | undefined> = Detector?.create
       ? Detector.create().catch(() => undefined)
       : Promise.resolve(undefined);
+    sharedDetector = pending;
   }
   return sharedDetector;
 };
@@ -233,6 +236,16 @@ const translateOnDevice = async (
   throw new NoteTranslateError({ reason: 'on_device_unavailable' });
 };
 
+// LibreTranslate returns { language, confidence }; compatible servers may return a string.
+const libreTranslateDetectedLanguage = (value: unknown): string | undefined => {
+  const language = typeof value === 'string'
+    ? value
+    : value && typeof value === 'object' && 'language' in value
+      ? value.language
+      : undefined;
+  return typeof language === 'string' ? languageBase(language) || undefined : undefined;
+};
+
 const translateLibreTranslate = async (
   text: string,
   targetLanguage: string,
@@ -275,7 +288,7 @@ const translateLibreTranslate = async (
   }
   return {
     text: translated,
-    sourceLanguage: languageBase(data.detectedLanguage || data.detected_language || '') || undefined,
+    sourceLanguage: libreTranslateDetectedLanguage(data.detectedLanguage ?? data.detected_language),
   };
 };
 
@@ -394,11 +407,20 @@ export const translateNoteText = async (
     result = await translateLibreTranslate(shielded.payload, targetLanguage, prefs, options?.signal);
   } else if (prefs.provider === 'deepl') {
     result = await translateDeepL(shielded.payload, targetLanguage, prefs, options?.signal);
-  } else {
+  } else if (prefs.provider === 'google') {
     result = await translateGoogle(shielded.payload, targetLanguage, prefs, options?.signal);
+  } else {
+    throw new NoteTranslateError({ reason: 'invalid_provider' });
   }
 
   throwIfAborted(options?.signal);
+
+  if (typeof result.text !== 'string' || !result.text.trim()) {
+    throw new NoteTranslateError({ reason: 'provider', detail: 'empty_translation' });
+  }
+  if (!hasIntactTranslationSlots(result.text, shielded.slots, shielded.namespace)) {
+    throw new NoteTranslateError({ reason: 'provider', detail: 'invalid_translation_slots' });
+  }
 
   const restored = restoreNoteTextForTranslation(
     result.text,

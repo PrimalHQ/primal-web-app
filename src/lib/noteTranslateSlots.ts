@@ -37,6 +37,25 @@ export const shieldNoteTextForTranslation = (source: string): TranslationShield 
   return { payload: base.payload, slots: base.slots, namespace };
 };
 
+// Validate the response before restoring or caching it. Each generated slot must
+// occur exactly once; an unknown or unrecognized marker is also a failure.
+export const hasIntactTranslationSlots = (
+  translated: string,
+  slots: string[],
+  namespace: string,
+): boolean => {
+  const seen = new Set<number>();
+  for (const match of translated.matchAll(slotPattern(namespace))) {
+    const index = Number.parseInt(match[1] ?? match[2] ?? match[3], 10);
+    if (!Number.isInteger(index) || index < 0 || index >= slots.length || seen.has(index)) {
+      return false;
+    }
+    seen.add(index);
+  }
+  return seen.size === slots.length &&
+    !sourceContainsNamespace(translated.replace(slotPattern(namespace), ''), namespace);
+};
+
 export const restoreNoteTextForTranslation = (
   translated: string,
   slots: string[],

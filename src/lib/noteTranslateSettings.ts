@@ -128,7 +128,7 @@ export const writeNoteTranslatePrefs = (patch: Partial<NoteTranslatePrefs>): Not
 
 export type ProviderReadiness =
   | { ok: true }
-  | { ok: false; reason: 'disabled' | 'missing_url' | 'invalid_url' | 'missing_key' | 'on_device_unavailable' };
+  | { ok: false; reason: 'disabled' | 'invalid_provider' | 'missing_url' | 'invalid_url' | 'missing_key' | 'on_device_unavailable' };
 
 export const onDeviceTranslatorAvailable = (): boolean => {
   const g = globalThis as typeof globalThis & {
@@ -166,6 +166,10 @@ export const providerReadiness = (prefs: NoteTranslatePrefs): ProviderReadiness 
     return { ok: true };
   }
 
-  if (!(prefs.googleKey || '').trim()) return { ok: false, reason: 'missing_key' };
-  return { ok: true };
+  if (prefs.provider === 'google') {
+    if (!(prefs.googleKey || '').trim()) return { ok: false, reason: 'missing_key' };
+    return { ok: true };
+  }
+
+  return { ok: false, reason: 'invalid_provider' };
 };

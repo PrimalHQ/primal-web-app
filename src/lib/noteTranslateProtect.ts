@@ -136,7 +136,7 @@ export const isHttpUrl = (value: string): boolean => {
   }
 };
 
-export const normalizeOwnedLibreTranslateUrl = (raw: string): string | { error: string } => {
+export const normalizeOwnedLibreTranslateUrl = (raw: string): string | { error: 'missing_url' | 'invalid_url' } => {
   const trimmed = (raw || '').trim();
   if (!trimmed) return { error: 'missing_url' };
 
