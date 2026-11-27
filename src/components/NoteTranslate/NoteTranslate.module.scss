@@ -1,0 +1,58 @@
+.chrome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.action {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 18px;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+
+  &:hover:not(:disabled) {
+    text-decoration: underline;
+  }
+}
+
+.meta {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.error {
+  color: var(--warning-tint, #e34);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.setup {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 17px;
+}
+
+.setupLink {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

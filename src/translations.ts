@@ -573,6 +573,11 @@ export const actions = {
       defaultMessage: 'Report Content',
       description: 'Label for reporting user from context menu',
     },
+    translate: {
+      id: 'actions.noteContext.translate',
+      defaultMessage: 'Translate Note',
+      description: 'Label for translating a note from the context menu',
+    },
     repostNote: {
       id: 'actions.noteContext.repostNote',
       defaultMessage: 'Repost',
@@ -669,6 +674,11 @@ export const actions = {
       id: 'actions.noteContext.reportContent',
       defaultMessage: 'Report Content',
       description: 'Label for reporting user from context menu',
+    },
+    translate: {
+      id: 'actions.noteContext.translate',
+      defaultMessage: 'Translate Note',
+      description: 'Label for translating a note from the context menu',
     },
     repostNote: {
       id: 'actions.noteContext.repostNote',
@@ -1991,6 +2001,118 @@ export const settings = {
       id: 'settings.nwcSettings.title',
       defaultMessage: 'Connected Wallets',
       description: 'Title of the nwc settings sub-page',
+    },
+  },
+  noteTranslate: {
+    title: {
+      id: 'settings.noteTranslate.title',
+      defaultMessage: 'Note Translation',
+      description: 'Title of the note translation settings page',
+    },
+    privacy: {
+      id: 'settings.noteTranslate.privacy',
+      defaultMessage: 'Primal does not run a translation service and does not ship a default public endpoint. Notes are translated only after you tap Translate, using the on-device browser API when available or a provider you own (LibreTranslate URL, DeepL key, or Google Cloud key). Keys stay in this browser and are never uploaded to Primal.',
+      description: 'Privacy explanation for fail-closed note translation',
+    },
+    enable: {
+      id: 'settings.noteTranslate.enable',
+      defaultMessage: 'Show Translate on notes',
+      description: 'Toggle to show the inline Translate control',
+    },
+    language: {
+      id: 'settings.noteTranslate.language',
+      defaultMessage: 'Preferred language',
+      description: 'Caption for target language',
+    },
+    languageHelp: {
+      id: 'settings.noteTranslate.languageHelp',
+      defaultMessage: 'Notes written in this language stay untranslated. Browser language follows your system locale.',
+      description: 'Help for the target language selector',
+    },
+    provider: {
+      id: 'settings.noteTranslate.provider',
+      defaultMessage: 'Translation provider',
+      description: 'Caption for provider choice',
+    },
+    providerOnDevice: {
+      id: 'settings.noteTranslate.providerOnDevice',
+      defaultMessage: 'On-device (Chrome / Edge Translator API)',
+      description: 'On-device provider label',
+    },
+    providerLibre: {
+      id: 'settings.noteTranslate.providerLibre',
+      defaultMessage: 'LibreTranslate (your instance)',
+      description: 'LibreTranslate provider label',
+    },
+    providerDeepL: {
+      id: 'settings.noteTranslate.providerDeepL',
+      defaultMessage: 'DeepL (your API key)',
+      description: 'DeepL provider label',
+    },
+    providerGoogle: {
+      id: 'settings.noteTranslate.providerGoogle',
+      defaultMessage: 'Google Cloud Translation (your API key)',
+      description: 'Google Cloud provider label',
+    },
+    onDeviceReady: {
+      id: 'settings.noteTranslate.onDeviceReady',
+      defaultMessage: 'This browser can translate on-device. No API key and no Primal-hosted endpoint is used.',
+      description: 'Shown when the browser Translator API is present',
+    },
+    onDeviceMissing: {
+      id: 'settings.noteTranslate.onDeviceMissing',
+      defaultMessage: 'This browser does not expose an on-device Translator API. Choose a provider you own below, or use Chrome / Edge 138+.',
+      description: 'Shown when the browser Translator API is missing',
+    },
+    libreUrl: {
+      id: 'settings.noteTranslate.libreUrl',
+      defaultMessage: 'LibreTranslate URL',
+      description: 'Caption for the user-owned LibreTranslate URL',
+    },
+    libreUrlPlaceholder: {
+      id: 'settings.noteTranslate.libreUrlPlaceholder',
+      defaultMessage: 'https://translate.example.com',
+      description: 'Placeholder that must not be a public billed default',
+    },
+    libreUrlHelp: {
+      id: 'settings.noteTranslate.libreUrlHelp',
+      defaultMessage: 'Required. Use a host you operate. A base URL or a full /translate path both work. There is no fallback to libretranslate.com or Google.',
+      description: 'Help for the user-owned LibreTranslate URL',
+    },
+    libreKey: {
+      id: 'settings.noteTranslate.libreKey',
+      defaultMessage: 'LibreTranslate API key (optional)',
+      description: 'Caption for optional LibreTranslate key',
+    },
+    optionalKey: {
+      id: 'settings.noteTranslate.optionalKey',
+      defaultMessage: 'optional',
+      description: 'Placeholder for optional API key',
+    },
+    deeplKey: {
+      id: 'settings.noteTranslate.deeplKey',
+      defaultMessage: 'DeepL API key',
+      description: 'Caption for DeepL key',
+    },
+    deeplHelp: {
+      id: 'settings.noteTranslate.deeplHelp',
+      defaultMessage: 'Free keys ending in :fx are sent to api-free.deepl.com. Pro keys use api.deepl.com. Primal never sees this key.',
+      description: 'Help for DeepL key routing',
+    },
+    googleKey: {
+      id: 'settings.noteTranslate.googleKey',
+      defaultMessage: 'Google Cloud Translation API key',
+      description: 'Caption for Google Cloud key',
+    },
+    googleHelp: {
+      id: 'settings.noteTranslate.googleHelp',
+      defaultMessage: 'Calls translation.googleapis.com with your key only. Undocumented translate.google.com endpoints are not used.',
+      description: 'Help for official Google Cloud Translation',
+    },
+    keyPlaceholder: {
+      id: 'settings.noteTranslate.keyPlaceholder',
+      defaultMessage: 'your key',
+      description: 'Placeholder for required provider keys',
     },
   },
   blossomPage: {
@@ -3322,3 +3444,91 @@ export const readsMy = {
   },
 
 }
+
+export const noteTranslate = {
+  translateTo: {
+    id: 'noteTranslate.translateTo',
+    defaultMessage: 'Translate to {language}',
+    description: 'Inline control to translate a note',
+  },
+  showOriginal: {
+    id: 'noteTranslate.showOriginal',
+    defaultMessage: 'Show original',
+    description: 'Toggle back to the original note text',
+  },
+  translatedFrom: {
+    id: 'noteTranslate.translatedFrom',
+    defaultMessage: 'Translated from {language}',
+    description: 'Detected source language after translation',
+  },
+  unknownLanguage: {
+    id: 'noteTranslate.unknownLanguage',
+    defaultMessage: 'unknown language',
+    description: 'Fallback when the provider does not return a source language',
+  },
+  working: {
+    id: 'noteTranslate.working',
+    defaultMessage: 'Translating…',
+    description: 'Busy state for note translation',
+  },
+  detecting: {
+    id: 'noteTranslate.detecting',
+    defaultMessage: 'Detecting language…',
+    description: 'On-device language detection progress',
+  },
+  downloading: {
+    id: 'noteTranslate.downloading',
+    defaultMessage: 'Downloading language model… {percent}%',
+    description: 'On-device model download progress',
+  },
+  openSettings: {
+    id: 'noteTranslate.openSettings',
+    defaultMessage: 'Translation settings',
+    description: 'Link to the translation settings page',
+  },
+  needsProvider: {
+    id: 'noteTranslate.needsProvider',
+    defaultMessage: 'On-device translation is unavailable in this browser.',
+    description: 'Hint when the default on-device provider cannot run',
+  },
+  errorDisabled: {
+    id: 'noteTranslate.errorDisabled',
+    defaultMessage: 'Note translation is turned off.',
+    description: 'Error when translation is disabled',
+  },
+  errorMissingUrl: {
+    id: 'noteTranslate.errorMissingUrl',
+    defaultMessage: 'Add your LibreTranslate URL in settings. Primal does not provide a default host.',
+    description: 'Error when the LibreTranslate URL is empty',
+  },
+  errorInvalidUrl: {
+    id: 'noteTranslate.errorInvalidUrl',
+    defaultMessage: 'That LibreTranslate URL is not a valid http(s) address.',
+    description: 'Error when the LibreTranslate URL cannot be parsed',
+  },
+  errorMissingKey: {
+    id: 'noteTranslate.errorMissingKey',
+    defaultMessage: 'This provider needs your own API key.',
+    description: 'Error when a paid provider key is missing',
+  },
+  errorOnDevice: {
+    id: 'noteTranslate.errorOnDevice',
+    defaultMessage: 'On-device translation is not available. Configure a provider you own.',
+    description: 'Error when the browser Translator API is missing',
+  },
+  errorEmpty: {
+    id: 'noteTranslate.errorEmpty',
+    defaultMessage: 'Nothing to translate in this note.',
+    description: 'Error when the note has no translatable prose',
+  },
+  errorSameLanguage: {
+    id: 'noteTranslate.errorSameLanguage',
+    defaultMessage: 'This note is already in your language.',
+    description: 'Error when source and target languages match',
+  },
+  errorProvider: {
+    id: 'noteTranslate.errorProvider',
+    defaultMessage: 'Translation failed. Check your provider settings and try again.',
+    description: 'Generic provider failure',
+  },
+};
